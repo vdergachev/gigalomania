@@ -47,7 +47,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\mark\Documents\Programming\APIs\SDL_image\include;C:\Users\mark\Documents\Programming\APIs\SDL_mixer\include;C:\Users\mark\Documents\Programming\APIs\SDL\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\mark\Documents\Programming\APIs\SDL_image\include;C:\Users\mark\Documents\Programming\APIs\SDL_mixer\include;C:\Users\mark\Documents\Programming\APIs\SDL\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
       <TypeLibraryName>.\Debug/gigalomania.tlb</TypeLibraryName>

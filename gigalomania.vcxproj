@@ -48,10 +48,10 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>c:\users\mark\Documents\Programming\APIs\SDL2\include;c:\users\mark\Documents\Programming\APIs\SDL2_image\include;c:\users\mark\Documents\Programming\APIs\SDL2_mixer\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>c:\users\mark\Documents\Programming\APIs\SDL2\include;c:\users\mark\Documents\Programming\APIs\SDL2_image\include;c:\users\mark\Documents\Programming\APIs\SDL2_mixer\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>

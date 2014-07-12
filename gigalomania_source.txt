@@ -58,7 +58,7 @@ SDL2_mixer: sdl_mixer2.lib . See http://www.libsdl.org/projects/SDL_mixer/ .
 
 When built on Visual Studio in Release mode, you can use the makewindowsarchive.bat script to create the binary folder (in c:\temp\ ).
 
-Note that the "VC++ Directories" section of the Gigalomania projects is set to refer to the location of the SDL 2 headers on my system, so you should update this for your setup. Gigalomania can also be compiled with SDL 1.2, though SDL 2 is preferred.
+Gigalomania can also be compiled with SDL 1.2, though SDL 2 is preferred.
 
 OS X
 ====
@@ -228,4 +228,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 27 April 2014
+Mark Harman 12 July 2014
