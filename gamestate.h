@@ -211,9 +211,6 @@ public:
 
 	void fadeScreen(bool out, int delay, void (*func_finish)());
 	void whiteFlash();
-	/*void addEffect(TimedEffect *effect) {
-		this->effects->push_back(effect);
-	}*/
 	virtual void addTextEffect(TextEffect *effect) {
 		// only implemented for PlayingGameState
 	}
@@ -373,9 +370,6 @@ public:
 	void refreshSoldiers(bool flash);
 	void deathEffect(int xpos,int ypos);
 	void explosionEffect(int xpos,int ypos);
-	void addEffect(TimedEffect *effect) {
-		this->effects.push_back(effect);
-	}
 	virtual void addTextEffect(TextEffect *effect) {
 		if( text_effect != NULL ) {
 			delete text_effect;
