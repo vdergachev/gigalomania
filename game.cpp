@@ -2970,6 +2970,7 @@ bool createMaps() {
 	readMap("moon.map");
 	readMap("ninth.map");
 	readMap("oxygen.map");
+	readMap("polar.map");
 	readMap("quart.map");
 	readMap("rare.map");
 	readMap("semi.map");
