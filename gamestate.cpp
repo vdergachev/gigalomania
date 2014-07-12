@@ -240,8 +240,6 @@ bool TextEffect::render() const {
 GameState::GameState(int client_player) : client_player(client_player) {
 	this->fade = NULL;
 	this->whitefade = NULL;
-	//this->effects = new Vector();
-	//this->effects = new vector<TimedEffect *>();
 	this->screen_page = new PanelPage(0, 0);
 	this->screen_page->setTolerance(0);
 	this->mobile_ui_display_mouse = false;
@@ -256,13 +254,6 @@ GameState::GameState(int client_player) : client_player(client_player) {
 
 GameState::~GameState() {
 	LOG("~GameState()\n");
-	/*for(int i=0;i<effects->size();i++) {
-		//TimedEffect *effect = (TimedEffect *)effects->get(i);
-		TimedEffect *effect = effects->at(i);
-		delete effect;
-	}
-	delete effects;*/
-
 	if( fade != NULL )
 		delete fade;
 	if( whitefade != NULL )
@@ -1211,11 +1202,8 @@ void PlayingGameState::addBuilding(Building *building) {
 }
 
 void PlayingGameState::setFlashingSquare(int xpos,int ypos) {
-	//this->flashingSquare.set(xpos, ypos);
 	if( this->player_asking_alliance == -1 && map_display == MAPDISPLAY_MAP ) {
 		FlashingSquare *square = new FlashingSquare(xpos, ypos);
-		//square->set(xpos, ypos);
-		//this->effects->add(square);
 		this->effects.push_back(square);
 	}
 };
@@ -1689,7 +1677,6 @@ void PlayingGameState::update() {
 					if( fire_random <= fire_prob ) {
 						// fire!
 						AmmoEffect *ammoeffect = new AmmoEffect( this, soldier->epoch, ATTACKER_AMMO_BOMB, soldier->xpos + 4, soldier->ypos + 8 );
-						//this->ammo_effects->add(ammoeffect);
 						this->ammo_effects.push_back(ammoeffect);
 					}
 				}
@@ -1757,7 +1744,6 @@ void PlayingGameState::update() {
 						// fire!
 						Image *image = attackers_walking[soldier->player][soldier->epoch][soldier->dir][0];
 						AmmoEffect *ammoeffect = new AmmoEffect( this, soldier->epoch, soldier->dir, soldier->xpos + image->getScaledWidth()/2, soldier->ypos );
-						//this->ammo_effects->add(ammoeffect);
 						this->ammo_effects.push_back(ammoeffect);
 					}
 				}
@@ -1832,6 +1818,11 @@ void PlayingGameState::moveTo(int map_x,int map_y) {
 	current_sector = map->getSector(map_x, map_y);
 	this->getGamePanel()->setPage( GamePanel::STATE_SECTORCONTROL );
 	this->reset();
+	for(size_t i=0;i<effects.size();i++) {
+		TimedEffect *effect = effects.at(i);
+		delete effect;
+	}
+	effects.clear();
 	for(size_t i=0;i<ammo_effects.size();i++) {
 		TimedEffect *effect = ammo_effects.at(i);
 		delete effect;
