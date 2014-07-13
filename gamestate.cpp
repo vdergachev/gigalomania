@@ -472,29 +472,30 @@ void ChoosePlayerGameState::reset() {
 	int ypos = 48;
 	const int ydiff = 48;
 	const int xindent = 8;
-	const int ysmalldiff = 10;
+	const int ylargediff = letters_large[0]->getScaledHeight();
+	const int ysmalldiff = letters_small[0]->getScaledHeight();
 
-	button_red = new Button(xpos, ypos, 3*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ysmalldiff, "SPECIAL SKILL STRENGTH", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+2*ysmalldiff, "UNARMED MEN ARE STRONGER IN COMBAT", letters_small));
+	button_red = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL STRENGTH", letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "UNARMED MEN ARE STRONGER IN COMBAT", letters_small));
 	ypos += ydiff;
 	screen_page->add(button_red);
 
-	button_yellow = new Button(xpos, ypos, 3*ysmalldiff, "CONTROLLER OF THE YELLOW PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ysmalldiff, "SPECIAL SKILL DIPLOMACY", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+2*ysmalldiff, "EASIER TO FORM ALLIANCES", letters_small));
+	button_yellow = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE YELLOW PEOPLE", letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DIPLOMACY", letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "EASIER TO FORM ALLIANCES", letters_small));
 	ypos += ydiff;
 	screen_page->add(button_yellow);
 
-	button_green = new Button(xpos, ypos, 3*ysmalldiff, "CONTROLLER OF THE GREEN PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ysmalldiff, "SPECIAL SKILL CONSTRUCTION", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+2*ysmalldiff, "FASTER AT BUILDING NEW TOWERS", letters_small));
+	button_green = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE GREEN PEOPLE", letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL CONSTRUCTION", letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "FASTER AT BUILDING NEW TOWERS", letters_small));
 	ypos += ydiff;
 	screen_page->add(button_green);
 
-	button_blue = new Button(xpos, ypos, 3*ysmalldiff, "CONTROLLER OF THE BLUE PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ysmalldiff, "SPECIAL SKILL DEFENCE", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+2*ysmalldiff, "BUILDINGS STRONGER AGAINST ATTACK", letters_small));
+	button_blue = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE BLUE PEOPLE", letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DEFENCE", letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "BUILDINGS STRONGER AGAINST ATTACK", letters_small));
 	ypos += ydiff;
 	screen_page->add(button_blue);
 }
