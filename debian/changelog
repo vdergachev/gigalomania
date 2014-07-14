@@ -1,3 +1,52 @@
+gigalomania (0.27) tahr; urgency=low
+
+  * Fixed crash when trying to shutdown the sector, if not all buildings have
+    been built.
+  * If moving army in another sector directly to the player's tower, if
+    retreating, some soldiers weren't being killed.
+  * If moving army in another sector directly to the player's tower, land
+    soldiers should not have been able to cross sea.
+  * Layout of shield and defences meant that the 4th shield or defence
+    couldn't easily be selected to deploy if you also had men in the
+    sector.
+  * Fixed problem with accuracy of game time, could vary slightly depending on
+    frame rate due to rounding problem.
+  * Animation of soldiers walking wasn't quite right.
+  * Animation now speeds up when on faster time rate.
+  * Fixed crash on Linux if unable to create data folder in user space.
+  * If game is already paused, the game going to background shouldn't
+    have unpaused it.
+  * Quitting game now works when screen is fading in.
+  * No longer displays "nuke sector" popup text for sectors already nuked.
+  * Each player now has a special skill.
+  * New in-game music.
+  * Speech samples! (Thanks to Rob Hunter.)
+  * Sound effects for biplanes, bombers and spaceships.
+  * Explosion animations for bombs from biplanes, bombers and spaceships.
+  * Full support for Windows 8 touchscreens/tablets.
+  * New option "Disallow Nukes" - play without nukes or nuclear defences if
+    you prefer!
+  * New button to return to choosing island screen, after clicking to play
+    an island.
+  * Now supports SDL 2: window can be resized in windowed mode; faster startup
+    due to not having to prescale graphics; no longer have to change PC's
+    resolution when running in fullscreen mode.
+  * Now runs fullscreen by default on most platforms (use "windowed"
+    command line argument to run in windowed mode).
+  * Improved graphics: unarmed man, caveman, bombs, and minor changes to
+    some of the defenders.
+  * Faster startup time.
+  * Max frame rate of 62.5fps now allowed (rather than 40fps).
+  * Options (sound/music and one mouse button mode) now saved.
+  * Message displayed when game paused; mouse pointer no longer frozen when
+    paused.
+  * Pressing quit (Escape or close button) on game win/lose/quit screen goes
+    back to main menu.
+  * Pressing quit (Escape or close button) when choosing number of people
+    now returns to the age/island selection mode.
+
+ -- Mark Harman <mark.harman@ntlworld.com>  Mon, 14 Jul 2014 21:51:00 +0100
+
 gigalomania (0.26) precise; urgency=low
 
   * Ports for MorphOS and AmigaOS 4.

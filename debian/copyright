@@ -3,21 +3,37 @@ on Fri, 29 Jul 2011 00:29:43 +0100
 
 The source is available from https://launchpad.net/gigalomania
 
+Speech samples - by Rob Hunter, under CC0 (see https://github.com/rhunter/gigalomania/commit/02214e2181258151f03a9a03830bbf22f37afceb for more details.
+
 bomb.wav - from Bomb-SoundBible.com-891110113.wav, by Mike Koenig, under Creative Commons Attribution 3.0.
 
 pain1.wav - from http://opengameart.org/content/vocal-grunts, by Matthew Newman, under GPL v2 or later, or Creative Commons Attribution-ShareAlike 3.0.
 
 misc_menu_3.wav - from http://opengameart.org/content/gui-sound-effects, by Lokif, under CC0.
 
-woodbrk.wav - modified from FreeCiv, under the GPL.
+woodbrk.wav - modified from FreeCiv, under the GPL v2.
+
+biplane.ogg - from http://opengameart.org/content/airplane-0, by jobromedia, under CC BY 3.0, GPL v2 or GPL v3.
+
+jetplane.ogg - from airplane.ogg - from http://opengameart.org/content/war-on-water-sndfx, by various, under CC0.
+
+spaceship.ogg - from space_ship_floating_sound_1.mp3 - from http://opengameart.org/content/space-ship-floating-sounds2, by Paulius Jurgelevičius under CC0.
+
+gamemusic.ogg - from http://ccmixter.org/files/_ghost/37481, by _ghost, under CC BY 3.0.
+
+attacker_ammo.png, "Bomb" icon - from http://opengameart.org/content/war-on-water-gfx, by yd, under CC0.
 
 attacker_walking_0_*.png, attacker_walking_1_*.png, attacker_walking_2_*.png, attacker_walking_3_*.png, attacker_walking_10_*.png, "Crossbow" defender, 10000BC, 2000BC, 1AD, 900AD, 1400AD, 1944AD, 2100AD and unarmed people icons - from http://opengameart.org/content/lpc-medieval-fantasy-character-sprites, by wulax, under CC BY-SA 3.0 or later, or the GPL v3 or later.
 
-attacker_walking_4.png, attacker_walking_5.png, "Factory" icon, "Stick", "Spear", "Shortbow", "Cauldron of Oil", "Crossbow", "Rifle", "Machine Gun", "Rocket" defenders, 1850AD, 1914AD, 1980AD people icons - from FreeCiv, under the GPL.
+attacker_walking_5.png, "Factory" icon, "Stick", "Spear", "Shortbow", "Cauldron of Oil", "Crossbow", "Rifle", "Machine Gun", "Rocket" defenders, 1850AD, 1914AD, 1980AD people icons - from FreeCiv, under the GPL.
+
+attacker_walking_4_*.png - from http://opengameart.org/content/catapult, by yd, under CC0.
 
 Spaceship - from http://opengameart.org/content/spaceship, by yd, under CC0.
 
 deadtree1_00.png - modified from http://opengameart.org/content/widelands-dead-trees, taken from Widelands, under the GPL v2.
+
+explosions_test4.png - from http://opengameart.org/content/more-explosions, by StumpyStrust. under CC0.
 
 tree*_*.png and "wood" element icon - modified from http://opengameart.org/content/widelands-trees-greenland, taken from Widelands, under the GPL v2.
 
@@ -83,5 +99,9 @@ The rendered building graphics use texture maps from:
     * bricks2.jpg - from http://opengameart.org/content/brick-texture, by Bart K, under the GPL v2, GPL v3, and Creative Commons Attribution Share Alike 3.0.
     * brick_seier.jpg - from http://www.flickr.com/photos/seier/4340689010/ by "seier+seier" under Creative Commons Attribution 2.0.
     * Shingle.png - from http://opengameart.org/content/dims-enviromental-and-architectural-textures, by Dim, under Creative Commons Attribution 3.0.
+
+starfield.jpg - from http://opengameart.org/content/solar-system, by ac3raven, under CC BY-SA 3.0.
+
+sunrise.jpg - from http://en.wikipedia.org/wiki/File:Florida_Sunrise_099.JPG, public domain.
 
 All source files, along with graphics and other files not listed above, are Copyright 2003-2013 Mark Harman, Fredrik Sörensson, Stephen Fish, Andreas Herzig, released under the GPL v2 or later.  See /usr/share/common-licenses/GPL-2 .
