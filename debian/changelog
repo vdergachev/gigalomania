@@ -1,4 +1,4 @@
-gigalomania (0.27) tahr; urgency=low
+gigalomania (0.27) trusty; urgency=low
 
   * Fixed crash when trying to shutdown the sector, if not all buildings have
     been built.
