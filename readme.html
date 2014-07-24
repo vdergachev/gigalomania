@@ -73,7 +73,7 @@ to nuclear weapons and spaceships. You can advance through ten different ages, f
 <p><b>Download</b></p>
 <ul>
 <li><p>For <b>Windows</b>,
-<a href="http://launchpad.net/gigalomania/trunk/0.25/+download/gigalomania.msi">download the
+<a href="http://launchpad.net/gigalomania/trunk/0.27/+download/gigalomania.msi">download the
 installer</a>. <b>If you get an error when trying to run, you may need to install the
 <a href="http://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe">Visual Studio 2012 Update 4 x86 Redistributable</a>
 and/or the <a href="http://www.microsoft.com/en-gb/download/details.aspx?id=5582">Visual C++ 2008 SP1 x86 Redistributable</a><!--seems to be needed for SDL2, for Windows XP at least, due to dependentAssembly in manifest embedded in the binary-->
@@ -88,7 +88,7 @@ For more details, see the <a href="http://www.herzig-net.de/prog/?page=prog-macg
 <li><p>For <b>Ubuntu/Debian</b>, download the relevant binary installation from the
 <a href="https://launchpad.net/~mark-harman/+archive/gigalomania/+packages">Ubuntu packages page</a>. For other <b>Linux distributions</b>, you have to compile from the source (see below).</p></li>
 
-<li><p>For <b>AROS x86</b>, download the <a href="http://launchpad.net/gigalomania/trunk/0.26/+download/gigalomania.i386-aros.lha">AROS archive</a>. For other AROS platforms, you have to compile from the source. The AROS x86 archive is also available on <a href="http://archives.aros-exec.org/index.php?function=showfile&file=game/strategy/gigalomania.i386-aros.lha">The AROS Archives</a> and
+<li><p>For <b>AROS x86</b>, download the <a href="http://launchpad.net/gigalomania/trunk/0.27/+download/gigalomania.i386-aros.lha">AROS archive</a>. For other AROS platforms, you have to compile from the source. The AROS x86 archive is also available on <a href="http://archives.aros-exec.org/index.php?function=showfile&file=game/strategy/gigalomania.i386-aros.lha">The AROS Archives</a> and
 <a href="http://aminet.net/package/game/strat/gigalomania.i386-aros">Aminet</a>.</p></li>
 
 <li><p>For <b>MorphOS</b>, you must currently compile from source (see below).</p></li>
@@ -98,7 +98,7 @@ For more details, see the <a href="http://www.herzig-net.de/prog/?page=prog-macg
 <li><p>For <b>Android smartphones/tablets</b>,
 <!--download from
 <a href="https://play.google.com/store/apps/details?id=net.sourceforge.gigalomania">Google Play</a>.-->
-install the <a href="https://launchpad.net/gigalomania/trunk/0.25/+download/Gigalomania-release-aligned.apk">Android APK</a>
+install the <a href="https://launchpad.net/gigalomania/trunk/0.27/+download/Gigalomania-release-aligned.apk">Android APK</a>
 on your Android device. For this to work, you must enable the installation of non-Google Play apps (from
 Settings->Security, tick "Unknown sources" to "Allow installation of apps from sources other than the Play
 Store"). <!--Note that this game requires the
@@ -126,7 +126,7 @@ please ensure you have enough storage space (the libraries can take up to around
 <a href="http://repo.openpandora.org/?page=detail&app=gigalomania_ptitseb">binary package</a>.
 You can also compile from source (same instructions as for Linux).</p></li>
 
-<li><p>The <a href="http://launchpad.net/gigalomania/trunk/0.26/+download/gigalomaniasrc.zip">source code is
+<li><p>The <a href="http://launchpad.net/gigalomania/trunk/0.27/+download/gigalomaniasrc.zip">source code is
 available</a>, released under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v2 or
 later</a>. Please see the file gigalomania_source.txt (in the source archive) for details on how to
 compile.</p></li>
@@ -527,7 +527,7 @@ licence, e.g., <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA
 <p><a name="history"><b>History</b></p>
 
 <pre>
-Version 0.27 (Work In Progress)
+Version 0.27 (2014/07/14)
 
 FIXED   Crash when trying to shutdown the sector, if not all buildings have
         been built.
@@ -539,7 +539,7 @@ FIXED   Layout of shield and defences meant that the 4th shield or defence
         couldn't easily be selected to deploy if you also had men in the
         sector.
 FIXED   Problem with accuracy of game time, could vary slightly depending on
-        frame due to rounding problem.
+        frame rate due to rounding problem.
 FIXED   Animation of soldiers walking wasn't quite right.
 FIXED   Animation now speeds up when on faster time rate.
 FIXED   User account paths with unicode characters now supported on Windows.
