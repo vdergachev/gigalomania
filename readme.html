@@ -6,6 +6,10 @@
 <title>Gigalomania
 </title>
 
+<!-- viewport recommended by Google for mobile design, also required for Google's mobile-friendly test at https://www.google.co.uk/webmasters/tools/mobile-friendly/ -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Google Analytics -->
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -533,7 +537,8 @@ licence, e.g., <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA
 
 <p><a name="history"><b>History</b></p>
 
-<pre>
+<!-- we use a textarea rather than pre, so that we don't have problems on mobile devices where the width is too wide for the screen - having a horizontal scrollbar seems nicer than having wordwrapping. -->
+<textarea readonly style="width:100%; height:50%; white-space: pre; word-wrap: normal; overflow-x: scroll">
 Version 0.27 (2014/07/14)
 
 FIXED   Crash when trying to shutdown the sector, if not all buildings have
@@ -999,13 +1004,16 @@ FIXED   Assertion failure if more than 1,000 soldiers in a sector (for now you
 Version 0.1 (2004/11/15)
 
 First public release.
-</pre>
+</textarea>
 
 <p><a name="licences"><b>Licences</b></p>
 
 <p>Gigalomania is released under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v2 or later</a>, except the following files:<ul>
 
-<li>Speech samples - by <a href="http://about.me/rjhunter">Rob Hunter</a>, under <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a> (see <a href="https://github.com/rhunter/gigalomania/commit/02214e2181258151f03a9a03830bbf22f37afceb">https://github.com/rhunter/gigalomania/commit/02214e2181258151f03a9a03830bbf22f37afceb</a> for more details.</li>
+<!-- use &#8203; to limit widths on continuous text to 30 characters, to avoid messing up view on mobile devices -->
+<!-- also use small to further reduce chance of problem on mobile devices, and reduce amount of space taken up -->
+<small>
+<li>Speech samples - by <a href="http://about.me/rjhunter">Rob Hunter</a>, under <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a> (see <a href="https://github.com/rhunter/gigalomania/commit/02214e2181258151f03a9a03830bbf22f37afceb">https://github.com/rhunter/&#8203;gigalomania/commit/&#8203;02214e2181258151f03a9a03830bbf22f37afceb</a> for more details.</li>
 <li>bomb.wav - from <a href="http://soundbible.com/1234-Bomb.html">Bomb-SoundBible.com-891110113.wav</a>, by Mike Koenig, under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
 <li>pain1.wav - from <a href="http://opengameart.org/content/11-male-human-paindeath-sounds">http://opengameart.org/content/11-male-human-paindeath-sounds</a>, by Michel Baradari, under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
 <li>misc_menu_3.wav - from <a href="http://opengameart.org/content/gui-sound-effects">http://opengameart.org/content/gui-sound-effects</a>, by Lokif, under <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.</li>
@@ -1060,6 +1068,7 @@ First public release.
 <li>starfield.jpg - from <a href="http://opengameart.org/content/solar-system">http://opengameart.org/content/solar-system</a>, by ac3raven, under <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>.</li>
 <li>sunrise.jpg - from <a href="http://en.wikipedia.org/wiki/File:Florida_Sunrise_099.JPG">http://en.wikipedia.org/wiki/File:Florida_Sunrise_099.JPG</a>, public domain.</li>
 <li><a href="http://www.libsdl.org/">SDL</a>, <a href="http://www.libsdl.org/projects/SDL_image/">SDL_image</a> and <a href="http://www.libsdl.org/projects/SDL_mixer/">SDL_mixer</a>, all under the LGPL.</li>
+<small>
 </ul></p>
 
 <p>In short, this means you are free to distribute the archive as a whole, including commercial
