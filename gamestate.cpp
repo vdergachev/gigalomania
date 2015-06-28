@@ -474,26 +474,27 @@ void ChoosePlayerGameState::reset() {
 	const int xindent = 8;
 	const int ylargediff = letters_large[0]->getScaledHeight();
 	const int ysmalldiff = letters_small[0]->getScaledHeight();
+	const int draw_offset_x = 32;
 
-	button_red = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", letters_large);
+	button_red = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", letters_large);
 	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL STRENGTH", letters_small));
 	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "UNARMED MEN ARE STRONGER IN COMBAT", letters_small));
 	ypos += ydiff;
 	screen_page->add(button_red);
 
-	button_yellow = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE YELLOW PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DIPLOMACY", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "EASIER TO FORM ALLIANCES", letters_small));
-	ypos += ydiff;
-	screen_page->add(button_yellow);
-
-	button_green = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE GREEN PEOPLE", letters_large);
+	button_green = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE GREEN PEOPLE", letters_large);
 	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL CONSTRUCTION", letters_small));
 	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "FASTER AT BUILDING NEW TOWERS", letters_small));
 	ypos += ydiff;
 	screen_page->add(button_green);
 
-	button_blue = new Button(xpos, ypos, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE BLUE PEOPLE", letters_large);
+	button_yellow = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE YELLOW PEOPLE", letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DIPLOMACY", letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "EASIER TO FORM ALLIANCES", letters_small));
+	ypos += ydiff;
+	screen_page->add(button_yellow);
+
+	button_blue = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE BLUE PEOPLE", letters_large);
 	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DEFENCE", letters_small));
 	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "BUILDINGS STRONGER AGAINST ATTACK", letters_small));
 	ypos += ydiff;
@@ -508,10 +509,46 @@ void ChoosePlayerGameState::draw() {
 	background->draw(0, 0);
     Image::writeMixedCase(160, 16, letters_large, letters_small, NULL, "Select a Player", Image::JUSTIFY_CENTRE);
 
+	const int y_offset = 2; // must be even, otherwise we have graphical problems when running at 1280x1024 mode
+	if( player_heads_select[0] != NULL )
+		player_heads_select[0]->draw(button_red->getLeft(), button_red->getTop()+y_offset);
+	if( player_heads_select[1] != NULL )
+		player_heads_select[1]->draw(button_green->getLeft(), button_green->getTop()+y_offset);
+	if( player_heads_select[2] != NULL )
+		player_heads_select[2]->draw(button_yellow->getLeft(), button_yellow->getTop()+y_offset);
+	if( player_heads_select[3] != NULL )
+		player_heads_select[3]->draw(button_blue->getLeft(), button_blue->getTop()+y_offset);
+
 	this->screen_page->draw();
 
 	GameState::setDefaultMouseImage();
 	GameState::draw();
+}
+
+void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
+	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
+
+	int player = -1;
+    if( m_left && click && button_red->mouseOver(m_x, m_y) ) {
+		player = 0;
+	}
+    else if( m_left && click && button_yellow->mouseOver(m_x, m_y) ) {
+		player = 2;
+	}
+    else if( m_left && click && button_green->mouseOver(m_x, m_y) ) {
+		player = 1;
+	}
+    else if( m_left && click && button_blue->mouseOver(m_x, m_y) ) {
+		player = 3;
+	}
+
+	if( player != -1 ) {
+		//human_player = player;
+		//human_player = PLAYER_DEMO; // force demo mode
+		::setClientPlayer(player);
+		setGameStateID(GAMESTATEID_PLACEMEN);
+		newGame();
+	}
 }
 
 PlaceMenGameState::PlaceMenGameState(int client_player) : GameState(client_player), start_map_x(-1), start_map_y(-1) {
@@ -1011,10 +1048,10 @@ void PlayingGameState::setupMapGUI() {
 		}
 	}
 	if( this->player_asking_alliance != -1 ) {
-		alliance_yes = new Button(16, 64, "YES", letters_small);
+		alliance_yes = new Button(24, 80, "YES", letters_small);
 		alliance_yes->setInfoLMB("join the alliance");
 		screen_page->add(alliance_yes);
-		alliance_no = new Button(48, 64, "NO", letters_small);
+		alliance_no = new Button(56, 80, "NO", letters_small);
 		alliance_no->setInfoLMB("refuse the alliance");
 		screen_page->add(alliance_no);
 	}
@@ -1253,13 +1290,16 @@ void PlayingGameState::draw() {
 
 	if( this->player_asking_alliance != -1 ) {
 		// ask alliance
+		if( player_heads_alliance[player_asking_alliance] != NULL ) {
+			player_heads_alliance[player_asking_alliance]->draw(offset_map_x_c + 24, offset_map_y_c + 24);
+		}
 		stringstream str;
 		str << PlayerType::getName((PlayerType::PlayerTypeID)player_asking_alliance);
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 8, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Image::write(offset_map_x_c + 8, offset_map_y_c + 0, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
 		str.str("asks for an");
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 16, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Image::write(offset_map_x_c + 8, offset_map_y_c + 8, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
 		str.str("alliance");
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 24, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Image::write(offset_map_x_c + 8, offset_map_y_c + 16, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
 	}
 	else if( this->map_display == MAPDISPLAY_MAP ) {
 		// map
@@ -1829,32 +1869,6 @@ void PlayingGameState::moveTo(int map_x,int map_y) {
 		delete effect;
 	}
 	ammo_effects.clear();
-}
-
-void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
-	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
-
-	int player = -1;
-    if( m_left && click && button_red->mouseOver(m_x, m_y) ) {
-		player = 0;
-	}
-    else if( m_left && click && button_yellow->mouseOver(m_x, m_y) ) {
-		player = 2;
-	}
-    else if( m_left && click && button_green->mouseOver(m_x, m_y) ) {
-		player = 1;
-	}
-    else if( m_left && click && button_blue->mouseOver(m_x, m_y) ) {
-		player = 3;
-	}
-
-	if( player != -1 ) {
-		//human_player = player;
-		//human_player = PLAYER_DEMO; // force demo mode
-		::setClientPlayer(player);
-		setGameStateID(GAMESTATEID_PLACEMEN);
-		newGame();
-	}
 }
 
 void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {

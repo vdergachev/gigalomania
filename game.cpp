@@ -83,6 +83,8 @@ DifficultyLevel difficulty_level = DIFFICULTY_EASY;
 
 //Image *player_select = NULL;
 Image *background = NULL;
+Image *player_heads_select[n_players_c];
+Image *player_heads_alliance[n_players_c];
 Image *land[MAP_N_COLOURS];
 Image *fortress[n_epochs_c];
 Image *mine[n_epochs_c];
@@ -1190,6 +1192,11 @@ bool loadOldImages() {
 	// nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	processImage(background);
 
+	for(int i=0;i<n_players_c;i++) {
+		player_heads_select[i] = NULL;
+		player_heads_alliance[i] = NULL;
+	}
+
 	Image *image_slabs = Image::loadImage("data/mlm_slabs");
 	if( image_slabs == NULL )
 		return false;
@@ -1790,6 +1797,24 @@ bool loadImages() {
 	land[MAP_GREY]->brighten(94.0f/255.0f, 94.0f/255.0f, 94.0f/255.0f);
 	delete image_slabs;
 	image_slabs = NULL;
+
+	Image *player_heads_select_all = Image::loadImage(gfx_dir + "player_heads_select.png");
+	if( player_heads_select_all == NULL )
+		return false;
+	processImage(player_heads_select_all);
+	for(int i=0;i<n_players_c;i++) {
+		player_heads_select[i] = player_heads_select_all->copy(32*i, 0, 32, 25);
+	}
+	delete player_heads_select_all;
+
+	Image *player_heads_alliance_all = Image::loadImage(gfx_dir + "player_heads_alliance.png");
+	processImage(player_heads_alliance_all);
+	if( player_heads_alliance_all == NULL )
+		return false;
+	for(int i=0;i<n_players_c;i++) {
+		player_heads_alliance[i] = player_heads_alliance_all->copy(32*i, 0, 32, 41);
+	}
+	delete player_heads_alliance_all;
 
 	/*Image *buildings = Image::loadImage(gfx_dir + "buildings.png");
 	if( buildings != NULL ) {
@@ -3075,7 +3100,7 @@ void setGameStateID(GameStateID state) {
 	/*if( state == GAMESTATE_PLACEMEN ) {
 	placeMenInfo.init();
 	}*/
-	// test:
+	// cheat/test:
 	/*if( gameStateID == GAMESTATEID_PLAYING ) {
 		int map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
 		int map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();

@@ -127,10 +127,12 @@ namespace Gigalomania {
 	class Button : public PanelPage {
 		Image **font;
 		string text;
+		int draw_offset_x;
 	public:
 
 		Button(int x,int y,const char *text,Image *font[]);
 		Button(int x,int y,int h,const char *text,Image *font[]);
+		Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[]);
 		virtual ~Button();
 
 		virtual const char *getClass() const { return "CLASS_BUTTON"; }

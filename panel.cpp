@@ -349,6 +349,7 @@ Button::Button(int x,int y,const char *text,Image *font[]) : PanelPage(x, y) {
 	this->font = font;
 	this->w = font[0]->getScaledWidth() * this->text.length();
 	this->h = font[0]->getScaledHeight();
+	this->draw_offset_x = 0;
 	if( mobile_ui ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
@@ -360,6 +361,19 @@ Button::Button(int x,int y,int h,const char *text,Image *font[]) : PanelPage(x, 
 	this->font = font;
 	this->w = font[0]->getScaledWidth() * this->text.length();
 	this->h = h;
+	this->draw_offset_x = 0;
+	if( mobile_ui ) {
+		this->tolerance += 4;
+		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
+	}
+}
+
+Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[]) : PanelPage(x, y) {
+	this->text = text;
+	this->font = font;
+	this->w = draw_offset_x + font[0]->getScaledWidth() * this->text.length();
+	this->h = h;
+	this->draw_offset_x = draw_offset_x;
 	if( mobile_ui ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
@@ -392,7 +406,7 @@ void Button::draw() {
             int sy = (int)((owner->getTop() + offset_y - tolerance) * scale_height);
             screen->fillRect(sx, sy, (this->w+2*tolerance)*scale_width, (this->h+2*tolerance)*scale_height, 255, 0, 255);
         }*/
-        Image::writeMixedCase(owner->getLeft() + offset_x, owner->getTop() + offset_y, this->font, this->font, numbers_yellow, this->text.c_str(), Image::JUSTIFY_LEFT);
+		Image::writeMixedCase(owner->getLeft() + offset_x  + draw_offset_x, owner->getTop() + offset_y, this->font, this->font, numbers_yellow, this->text.c_str(), Image::JUSTIFY_LEFT);
 	}
 	PanelPage::draw();
 }
