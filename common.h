@@ -1,7 +1,7 @@
 #pragma once
 
 const int majorVersion = 0;
-const int minorVersion = 27;
+const int minorVersion = 28;
 
 extern bool debugwindow;
 
