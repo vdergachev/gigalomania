@@ -541,29 +541,25 @@ void Map::draw(int offset_x, int offset_y) const {
 				int coast_map_y = offset_y - map_sq_coast_offset + 16 * y;
                 //LOG("draw at: %d, %d : %d, %d\n", x, y, map_sq[colour][icon]->getWidth(), map_sq[colour][icon]->getHeight());
                 map_sq[colour][icon]->draw(map_x, map_y);
-				/*int coast = 15 - icon;
-				if( coast > 0 && coast_icons[coast-1] != NULL ) {
-				coast_icons[coast-1]->draw(map_x, map_y, true);
-				}*/
 				//LOG(">>> %d %d %d\n", icon, icon & 1, 4 & 1);
 				if( (icon & 1) == 0 && coast_icons[0] != NULL )
 					coast_icons[0]->draw(coast_map_x, coast_map_y);
 				if( (icon & 2) == 0 && coast_icons[1] != NULL )
 					coast_icons[1]->draw(coast_map_x, coast_map_y);
-				if( (icon & 4) == 0 && coast_icons[3] != NULL )
+				if( (icon & 4) == 0 && coast_icons[2] != NULL )
+					coast_icons[2]->draw(coast_map_x, coast_map_y);
+				if( (icon & 8) == 0 && coast_icons[3] != NULL )
 					coast_icons[3]->draw(coast_map_x, coast_map_y);
-				if( (icon & 8) == 0 && coast_icons[7] != NULL )
-					coast_icons[7]->draw(coast_map_x, coast_map_y);
 
 				// now do corners
-				if( x > 0 && y > 0 && map->sector_at[x-1][y] && map->sector_at[x][y-1] && !map->sector_at[x-1][y-1] && coast_icons[8] != NULL )
-					coast_icons[8]->draw(coast_map_x, coast_map_y);
-				if( x < map_width_c-1 && y > 0 && map->sector_at[x+1][y] && map->sector_at[x][y-1] && !map->sector_at[x+1][y-1] && coast_icons[9] != NULL )
-					coast_icons[9]->draw(coast_map_x, coast_map_y);
-				if( x > 0 && y < map_height_c-1 && map->sector_at[x-1][y] && map->sector_at[x][y+1] && !map->sector_at[x-1][y+1] && coast_icons[10] != NULL )
-					coast_icons[10]->draw(coast_map_x, coast_map_y);
-				if( x < map_width_c-1 && y < map_height_c-1 && map->sector_at[x+1][y] && map->sector_at[x][y+1] && !map->sector_at[x+1][y+1] && coast_icons[11] != NULL )
-					coast_icons[11]->draw(coast_map_x, coast_map_y);
+				if( x > 0 && y > 0 && map->sector_at[x-1][y] && map->sector_at[x][y-1] && !map->sector_at[x-1][y-1] && coast_icons[4] != NULL )
+					coast_icons[4]->draw(coast_map_x, coast_map_y);
+				if( x < map_width_c-1 && y > 0 && map->sector_at[x+1][y] && map->sector_at[x][y-1] && !map->sector_at[x+1][y-1] && coast_icons[5] != NULL )
+					coast_icons[5]->draw(coast_map_x, coast_map_y);
+				if( x > 0 && y < map_height_c-1 && map->sector_at[x-1][y] && map->sector_at[x][y+1] && !map->sector_at[x-1][y+1] && coast_icons[6] != NULL )
+					coast_icons[6]->draw(coast_map_x, coast_map_y);
+				if( x < map_width_c-1 && y < map_height_c-1 && map->sector_at[x+1][y] && map->sector_at[x][y+1] && !map->sector_at[x+1][y+1] && coast_icons[7] != NULL )
+					coast_icons[7]->draw(coast_map_x, coast_map_y);
 			}
 		}
 	}
@@ -2174,29 +2170,29 @@ bool loadImages() {
 	coast_icons[1] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[1]->fadeAlpha(true, true);
 	processImage(coast_icons[1]);
+	coast_icons[2] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[2]->fadeAlpha(false, true);
+	processImage(coast_icons[2]);
 	coast_icons[3] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
-	coast_icons[3]->fadeAlpha(false, true);
+	coast_icons[3]->fadeAlpha(true, false);
 	processImage(coast_icons[3]);
-	coast_icons[7] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
-	coast_icons[7]->fadeAlpha(true, false);
-	processImage(coast_icons[7]);
 
-	coast_icons[8] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
-	coast_icons[8]->fadeAlpha(true, false);
-	coast_icons[8]->fadeAlpha(false, false);
-	processImage(coast_icons[8]);
-	coast_icons[9] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
-	coast_icons[9]->fadeAlpha(true, true);
-	coast_icons[9]->fadeAlpha(false, false);
-	processImage(coast_icons[9]);
-	coast_icons[10] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
-	coast_icons[10]->fadeAlpha(true, false);
-	coast_icons[10]->fadeAlpha(false, true);
-	processImage(coast_icons[10]);
-	coast_icons[11] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
-	coast_icons[11]->fadeAlpha(true, true);
-	coast_icons[11]->fadeAlpha(false, true);
-	processImage(coast_icons[11]);
+	coast_icons[4] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[4]->fadeAlpha(true, false);
+	coast_icons[4]->fadeAlpha(false, false);
+	processImage(coast_icons[4]);
+	coast_icons[5] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[5]->fadeAlpha(true, true);
+	coast_icons[5]->fadeAlpha(false, false);
+	processImage(coast_icons[5]);
+	coast_icons[6] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[6]->fadeAlpha(true, false);
+	coast_icons[6]->fadeAlpha(false, true);
+	processImage(coast_icons[6]);
+	coast_icons[7] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[7]->fadeAlpha(true, true);
+	coast_icons[7]->fadeAlpha(false, true);
+	processImage(coast_icons[7]);
 
 	drawProgress(55);
 

@@ -109,7 +109,7 @@ const int n_saucer_frames_c = 4;
 const int n_death_flashes_c = 3;
 const int n_blue_flashes_c = 7;
 const int n_explosions_c = 59;
-const int n_coast_c = 15;
+const int n_coast_c = 8;
 const int n_map_sq_c = 16;
 
 //extern Image *player_select;
@@ -180,7 +180,7 @@ extern Image *mine_gatherable_small;
 extern Image *mine_gatherable_large;
 extern Image *icon_ergo;
 extern Image *icon_trash;
-extern Image *coast_icons[n_coast_c];
+//extern Image *coast_icons[n_coast_c];
 extern Image *map_sq[MAP_N_COLOURS][n_map_sq_c];
 extern Image *defenders[n_players_c][n_epochs_c][n_defender_frames_c];
 extern Image *nuke_defences[]; // epoch 8
