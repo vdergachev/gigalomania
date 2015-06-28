@@ -157,7 +157,6 @@ bool Image::setPixelIndex(int x,int y,unsigned char c) {
 	if( !isPaletted() )
 		return false;
 
-
 	SDL_LockSurface(this->surface);
 	((unsigned char *)this->surface->pixels)[ y * this->surface->pitch + x ] = c;
 	SDL_UnlockSurface(this->surface);
@@ -678,6 +677,55 @@ void Image::brighten(float sr, float sg, float sb) {
 	static int total = 0;
 	total += time_taken;
 	LOG("    image brighten total %d\n", total);
+#endif
+}
+
+void Image::fadeAlpha(bool x_dir, bool fwd) {
+	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
+		return;
+	}
+#ifdef TIMING
+	int time_s = clock();
+#endif
+	SDL_LockSurface(this->surface);
+	int w = getWidth();
+	int h = getHeight();
+	// faster to read in x direction! (caching?)
+	for(int y=0;y<h;y++) {
+		for(int x=0;x<w;x++) {
+			Uint32 pixel = getpixel(this->surface, x, y);
+			Uint8 rgba[] = {0, 0, 0, 0};
+			SDL_GetRGBA(pixel, this->surface->format, &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
+			float frac = 0.0f;
+			float perp_frac = 0.0f;
+			if( x_dir ) {
+				frac = ((float)x)/(float)(w-1.0f);
+				perp_frac = ((float)y)/(float)(h-1.0f);
+			}
+			else {
+				frac = ((float)y)/(float)(h-1.0f);
+				perp_frac = ((float)x)/(float)(w-1.0f);
+			}
+			if( !fwd ) {
+				frac = 1.0f - frac;
+			}
+			float cutoff = 0.75f;
+			float alpha = 0.0f;
+			if( frac >= cutoff ) {
+				alpha = (frac-cutoff) / (1.0f-cutoff);
+			}
+			rgba[3] = (Uint8)(rgba[3] * alpha);
+			pixel = SDL_MapRGBA(surface->format, rgba[0], rgba[1], rgba[2], rgba[3]);
+			putpixel(this->surface, x, y, pixel);
+		}
+	}
+	SDL_UnlockSurface(this->surface);
+#ifdef TIMING
+	int time_taken = clock() - time_s;
+	LOG("    image linearFade time %d\n", time_taken);
+	static int total = 0;
+	total += time_taken;
+	LOG("    image linearFade total %d\n", total);
 #endif
 }
 
