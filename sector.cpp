@@ -584,7 +584,7 @@ void Building::setTurretMan(int turret, int epoch) {
 }
 
 Sector::Sector(PlayingGameState *gamestate, int epoch, int xpos, int ypos, MapColour map_colour) :
-xpos(xpos), ypos(ypos), epoch(epoch), player(PLAYER_NONE), is_shutdown(false), nuked(false), trees_nuked(false),
+xpos(xpos), ypos(ypos), epoch(epoch), player(PLAYER_NONE), is_shutdown(false), nuked(false),
 nuke_by_player(-1), nuke_time(-1),
 population(0), n_designers(0), n_workers(0), n_famount(0),
 current_design(NULL), current_manufacture(NULL),
@@ -603,13 +603,13 @@ gamestate(gamestate)
 	}
 
 	// rocks etc
-	int n_clutter = icon_clutter[0] != NULL ? (1 + rand() % 4) : 0;
+	int n_clutter = icon_clutter.size() > 0 ? (1 + rand() % 4) : 0;
 	for(int i=0;i<n_clutter;i++) {
 		int land_width = land[(int)map_colour]->getScaledWidth() - 32;
 		int land_height = land[(int)map_colour]->getScaledHeight() - 32;
 		int xpos = offset_land_x_c + rand() % land_width;
 		int ypos = offset_land_y_c + rand() % land_height;
-		Image **image_ptr = &icon_clutter[rand() % n_clutter_c];
+		Image **image_ptr = &icon_clutter[rand() % icon_clutter.size()];
 		Feature *feature = new Feature(image_ptr, 1, xpos, ypos);
 		this->features.push_back(feature);
 	}
@@ -1802,15 +1802,14 @@ void Sector::update(int client_player) {
 			if( this->nuked ) {
 				playSample(s_explosion, SOUND_CHANNEL_FX);
 				s_explosion->setVolume(0.25f); // needed so we can hear speech sample over the explosion
-				this->trees_nuked = this->nuked;
 				if( this->getActivePlayer() != -1 ) {
 					this->destroyTower(true, client_player);
 				}
 				for(int i=0;i<n_players_c;i++) {
 					this->armies[i]->empty();
 				}
-				// replace tree icons with burnt tree
-				for(vector<Feature *>::iterator iter = this->features.begin(); iter != this->features.end(); ++iter) {
+				// replace tree icons with burnt tree, and delete other features
+				for(vector<Feature *>::iterator iter = this->features.begin(); iter != this->features.end();) {
 					Feature *feature = *iter;
 					const Image *image = feature->getImage(0);
 					// bit of a hacky way of finding trees...
@@ -1822,7 +1821,22 @@ void Sector::update(int client_player) {
 					}
 					if( is_tree ) {
 						feature->setImage(icon_trees[2], 1);
+						 ++iter;
 					}
+					else {
+						iter = features.erase(iter);
+					}
+				}
+				// now add some new features
+				int n_clutter = icon_clutter_nuked.size() > 0 ? (1 + rand() % 4) : 0;
+				for(int i=0;i<n_clutter;i++) {
+					int land_width = land[0]->getScaledWidth() - 32;
+					int land_height = land[0]->getScaledHeight() - 32;
+					int xpos = offset_land_x_c + rand() % land_width;
+					int ypos = offset_land_y_c + rand() % land_height;
+					Image **image_ptr = &icon_clutter_nuked[rand() % icon_clutter_nuked.size()];
+					Feature *feature = new Feature(image_ptr, 1, xpos, ypos);
+					this->features.push_back(feature);
 				}
 				if( this == gamestate->getCurrentSector() ) {
 					//((PlayingGameState *)gamestate)->refreshSoldiers(true);

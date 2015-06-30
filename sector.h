@@ -312,7 +312,6 @@ class Sector {
 	//int shutdown_player;
 
 	bool nuked;
-	bool trees_nuked; // separate flag, as if a sector is "shutdown", we don't ever set the nuked flag to true
 	int nuke_by_player;
 	int nuke_time;
 
@@ -446,9 +445,6 @@ public:
 	}
 	bool isNuked() const {
 		return this->nuked;
-	}
-	bool isTreesNuked() const {
-		return this->trees_nuked;
 	}
 
 	void setElements(Id id,int n_elements);

@@ -12,6 +12,8 @@ namespace Gigalomania {
 
 using namespace Gigalomania;
 
+using std::vector;
+
 class Invention;
 class Weapon;
 class Element;
@@ -102,7 +104,6 @@ const int n_defender_frames_c = 8;
 const int n_attacker_directions_c = 4;
 const int max_attacker_frames_c = 9;
 const int n_trees_c = 4;
-const int n_clutter_c = 3;
 const int n_tree_frames_c = 4;
 const int n_nuke_frames_c = 2;
 const int n_saucer_frames_c = 4;
@@ -193,7 +194,8 @@ extern Image *saucers[n_players_c][n_saucer_frames_c]; // epoch 9
 extern Image *attackers_ammo[n_epochs_c][N_ATTACKER_AMMO_DIRS];
 extern Image *icon_openpitmine;
 extern Image *icon_trees[n_trees_c][n_tree_frames_c];
-extern Image *icon_clutter[n_clutter_c];
+extern vector<Image *> icon_clutter;
+extern vector<Image *> icon_clutter_nuked;
 extern Image *flashingmapsquare;
 extern Image *mapsquare;
 extern Image *arrow_left;

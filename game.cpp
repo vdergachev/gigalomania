@@ -163,7 +163,8 @@ Image *saucers[n_players_c][n_saucer_frames_c];
 Image *attackers_ammo[n_epochs_c][N_ATTACKER_AMMO_DIRS];
 Image *icon_openpitmine = NULL;
 Image *icon_trees[n_trees_c][n_tree_frames_c];
-Image *icon_clutter[n_clutter_c];
+vector<Image *> icon_clutter;
+vector<Image *> icon_clutter_nuked;
 Image *flashingmapsquare = NULL;
 Image *mapsquare = NULL;
 Image *arrow_left = NULL;
@@ -1741,13 +1742,9 @@ bool loadOldImages() {
 	delete features;
 	features = NULL;
 
-	for(int i=0;i<n_clutter_c;i++) {
-		icon_clutter[i] = NULL;
-	}
-
 	drawProgress(70);
 
-		background_islands = Image::loadImage("data/mlm_sunrise");
+	background_islands = Image::loadImage("data/mlm_sunrise");
 	if( background_islands == NULL )
 		return false;
 	processImage(background_islands);
@@ -2382,13 +2379,33 @@ bool loadImages() {
 		}
 	}
 
-	icon_clutter[0] = Image::loadImage(gfx_dir + "rock0.png");
-	icon_clutter[1] = Image::loadImage(gfx_dir + "rock1.png");
-	icon_clutter[2] = Image::loadImage(gfx_dir + "log0.png");
-	for(int i=0;i<n_clutter_c;i++) {
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "boulders.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "boulders2.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "bigboulder.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "rocks.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "plant.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "grass.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses01.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses02.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses04.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses05.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "shrub2-01.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "swirl01.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed01.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed02.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed03.png"));
+	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed04.png"));
+	for(int i=0;i<icon_clutter.size();i++) {
 		if( icon_clutter[i] == NULL )
 			return false;
 		processImage(icon_clutter[i]);
+	}
+	icon_clutter_nuked.push_back(Image::loadImage(gfx_dir + "bones.png"));
+	icon_clutter_nuked.push_back(Image::loadImage(gfx_dir + "skulls.png"));
+	for(int i=0;i<icon_clutter_nuked.size();i++) {
+		if( icon_clutter_nuked[i] == NULL )
+			return false;
+		processImage(icon_clutter_nuked[i]);
 	}
 	drawProgress(70);
 
