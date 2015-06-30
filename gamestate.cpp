@@ -21,7 +21,7 @@ using std::stringstream;
 //---------------------------------------------------------------------------
 
 const int defenders_frames_per_update_c = (int)(2.0 * ticks_per_frame_c * time_ratio_c); // consider a turn every this number of frames
-const int soldier_move_rate_c = (int)(1.2 * ticks_per_frame_c * time_ratio_c); // ticks per pixel
+const int soldier_move_rate_c = (int)(1.9 * ticks_per_frame_c * time_ratio_c); // ticks per pixel - needs to be in sync with the animation!
 const int air_move_rate_c = (int)(0.2 * ticks_per_frame_c * time_ratio_c); // ticks per pixel
 const int soldier_turn_rate_c = (int)(20.0 * ticks_per_frame_c * time_ratio_c); // mean ticks per turn
 
