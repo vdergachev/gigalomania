@@ -85,6 +85,7 @@ DifficultyLevel difficulty_level = DIFFICULTY_EASY;
 Image *background = NULL;
 Image *player_heads_select[n_players_c];
 Image *player_heads_alliance[n_players_c];
+Image *grave = NULL;
 Image *land[MAP_N_COLOURS];
 Image *fortress[n_epochs_c];
 Image *mine[n_epochs_c];
@@ -1203,6 +1204,7 @@ bool loadOldImages() {
 		player_heads_select[i] = NULL;
 		player_heads_alliance[i] = NULL;
 	}
+	grave = NULL;
 
 	Image *image_slabs = Image::loadImage("data/mlm_slabs");
 	if( image_slabs == NULL )
@@ -1818,6 +1820,11 @@ bool loadImages() {
 		player_heads_alliance[i] = player_heads_alliance_all->copy(32*i, 0, 32, 41);
 	}
 	delete player_heads_alliance_all;
+
+	grave = Image::loadImage(gfx_dir + "grave1.png");
+	if( grave == NULL )
+		return false;
+	processImage(grave);
 
 	/*Image *buildings = Image::loadImage(gfx_dir + "buildings.png");
 	if( buildings != NULL ) {

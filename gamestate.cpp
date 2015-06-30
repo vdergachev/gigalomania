@@ -2879,6 +2879,27 @@ void EndIslandGameState::draw() {
 	if( start_epoch >= 6 && gameResult == GAMERESULT_WON )
 		suspend = true;
 
+	if( !isDemo() ) {
+		if( player_heads_select[client_player] != NULL ) {
+			player_heads_select[client_player]->draw(40, 96);
+			if( gameResult == GAMERESULT_LOST ) {
+				grave->draw(42, 64);
+			}
+		}
+	}
+	const int xstep = 40;
+	for(int i=0,xpos=96;i<n_players_c;i++) {
+		if( i == client_player || players[i] == NULL )
+			continue;
+		if( player_heads_select[i] != NULL ) {
+			player_heads_select[i]->draw(xpos, 96);
+			if( gameResult == GAMERESULT_WON || players[i]->getFinalMen() == 0 ) {
+				grave->draw(xpos+2, 64);
+			}
+		}
+		xpos += xstep;
+	}
+
 	Image::write(40, 140, letters_small, "PLAYER", Image::JUSTIFY_LEFT);
 	Image::write(100, 140, letters_small, "START", Image::JUSTIFY_LEFT);
 	Image::write(140, 140, letters_small, "BIRTHS", Image::JUSTIFY_LEFT);

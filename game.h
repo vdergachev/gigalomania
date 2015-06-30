@@ -117,6 +117,7 @@ const int n_map_sq_c = 16;
 extern Image *background;
 extern Image *player_heads_select[];
 extern Image *player_heads_alliance[];
+extern Image *grave;
 extern Image *land[];
 extern Image *fortress[];
 extern Image *mine[];
