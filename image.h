@@ -45,6 +45,7 @@ namespace Gigalomania {
 		virtual const char *getClass() const { return "CLASS_IMAGE"; }
 
 		void draw(int x, int y) const;
+		void draw(int x, int y, float scale_w, float scale_h) const;
 		void drawWithAlpha(int x, int y, unsigned char alpha) const;
 		int getWidth() const;
 		int getHeight() const;

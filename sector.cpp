@@ -58,12 +58,12 @@ Particle::Particle() : xpos(0.0f), ypos(0.0f), birth_time(0) {
 
 void ParticleSystem::draw(int xpos, int ypos) const {
 	for(vector<Particle>::const_iterator iter = particles.begin(); iter != particles.end(); ++iter) {
-		this->image->draw(xpos + (int)iter->getX(), ypos + (int)iter->getY());
+		this->image->draw(xpos + (int)iter->getX(), ypos + (int)iter->getY(), size, size);
 	}
 }
 
 SmokeParticleSystem::SmokeParticleSystem(const Image *image) : ParticleSystem(image),
-birth_rate(0.0f), life_exp(1500), last_emit_time(0) {
+birth_rate(0.0f), life_exp(1500), last_emit_time(0), move_x(0.0f), move_y(-1.0f) {
 	this->last_emit_time = getRealTime();
 }
 
@@ -93,12 +93,16 @@ void SmokeParticleSystem::update() {
 		float xpos = particles.at(i).getX();
 		float ypos = particles.at(i).getY();
 		float ydiff = real_loop_time * yspeed;
-		ypos -= ydiff;
 		float xdiff = real_loop_time * xspeed;
 		if( rand() % 2 == 0 ) {
 			xdiff = - xdiff;
 		}
-		xpos += xdiff;
+		//xpos += xdiff;
+		//ypos -= ydiff;
+		float real_xdiff = ydiff * move_x - xdiff * move_y;
+		float real_ydiff = ydiff * move_y + xdiff * move_x;
+		xpos += real_xdiff;
+		ypos += real_ydiff;
 		/*if( ypos < 0 ) {
 			// kill
 			// for performance, we reorder and reduce the length by 1 (as the order of the particles shouldn't matter)
@@ -589,7 +593,7 @@ nuke_by_player(-1), nuke_time(-1),
 population(0), n_designers(0), n_workers(0), n_famount(0),
 current_design(NULL), current_manufacture(NULL),
 researched(0), researched_lasttime(-1), manufactured(0), manufactured_lasttime(-1), growth_lasttime(-1), mined_lasttime(-1), built_lasttime(-1),
-assembled_army(NULL), stored_army(NULL), smokeParticleSystem(NULL),
+assembled_army(NULL), stored_army(NULL), smokeParticleSystem(NULL), jetParticleSystem(NULL),
 gamestate(gamestate)
 {
     //LOG("Sector::Sector(%d,%d,%d)\n",epoch,xpos,ypos);
@@ -650,6 +654,12 @@ gamestate(gamestate)
 
 	if( smoke_image != NULL ) {
 		this->smokeParticleSystem = new SmokeParticleSystem(smoke_image);
+
+		this->jetParticleSystem = new SmokeParticleSystem(smoke_image);
+		this->jetParticleSystem->setMove(1.5f, 1.5f);
+		this->jetParticleSystem->setBirthRate(0.25f);
+		this->jetParticleSystem->setLifeExp(600);
+		this->jetParticleSystem->setSize(0.5f);
 	}
 
 	initTowerStuff();
@@ -726,6 +736,9 @@ Sector::~Sector() {
 
 	if( smokeParticleSystem != NULL ) {
 		delete smokeParticleSystem;
+	}
+	if( jetParticleSystem != NULL ) {
+		delete jetParticleSystem;
 	}
 }
 
@@ -1560,8 +1573,11 @@ void Sector::doPlayer(int client_player) {
 	//LOG("Sector::doPlayer()\n");
 	// stuff for sectors owned by a player
 
-	if( this->getParticleSystem() != NULL ) {
-		this->getParticleSystem()->update();
+	if( this->smokeParticleSystem != NULL ) {
+		this->smokeParticleSystem->update();
+	}
+	if( this->jetParticleSystem != NULL ) {
+		this->jetParticleSystem->update();
 	}
 
 	if( gameMode == GAMEMODE_MULTIPLAYER_CLIENT ) {

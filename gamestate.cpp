@@ -1515,6 +1515,11 @@ void PlayingGameState::draw() {
 			}
 			ASSERT(image != NULL);
 			image->draw(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
+			if( soldier->epoch == 7 ) {
+				if( current_sector->getJetParticleSystem() != NULL ) {
+					current_sector->getJetParticleSystem()->draw(offset_land_x_c + soldier->xpos + 17, offset_land_y_c + soldier->ypos + 17);
+				}
+			}
 		}
 	}
 	delete [] soldier_list;
@@ -1581,11 +1586,11 @@ void PlayingGameState::draw() {
 			ps->draw(offset_land_x_c + building_factory->getX() + 17, offset_land_y_c + building_factory->getY() + 2);
 		}
 	}*/
-	if( current_sector->getParticleSystem() != NULL ) {
+	if( current_sector->getSmokeParticleSystem() != NULL ) {
 		const Building *building_factory = current_sector->getBuilding(BUILDING_FACTORY);
 		//const Building *building_factory = current_sector->getBuilding(BUILDING_TOWER);
 		if( building_factory != NULL ) {
-			current_sector->getParticleSystem()->draw(offset_land_x_c + building_factory->getX() + 17, offset_land_y_c + building_factory->getY() + 2);
+			current_sector->getSmokeParticleSystem()->draw(offset_land_x_c + building_factory->getX() + 17, offset_land_y_c + building_factory->getY() + 2);
 		}
 	}
 
@@ -1708,7 +1713,7 @@ void PlayingGameState::update() {
 				if( move_air_step > 0 ) {
 					soldier->xpos -= move_air_step;
 					soldier->ypos -= move_air_step;
-					if( soldier->xpos < -32 )
+					if( soldier->xpos < -64 )
 						soldier->xpos = land_width_c + 64;
 					if( soldier->ypos < - offset_land_y_c - 32 )
 						soldier->ypos = land_height_c + 64;

@@ -58,11 +58,16 @@ class ParticleSystem {
 protected:
 	vector<Particle> particles;
 	const Image *image;
+	float size;
 
 public:
-	ParticleSystem(const Image *image) : image(image) {
+	ParticleSystem(const Image *image) : image(image), size(1.0f) {
 	}
 	virtual ~ParticleSystem() {
+	}
+
+	void setSize(float size) {
+		this->size = size;
 	}
 
 	void draw(int xpos, int ypos) const;
@@ -73,12 +78,20 @@ class SmokeParticleSystem : public ParticleSystem {
 	float birth_rate;
 	int life_exp;
 	int last_emit_time;
+	float move_x, move_y;
 public:
 	SmokeParticleSystem(const Image *image);
 	virtual ~SmokeParticleSystem() {
 	}
 
 	void setBirthRate(float birth_rate);
+	void setMove(float move_x, float move_y) {
+		this->move_x = move_x;
+		this->move_y = move_y;
+	}
+	void setLifeExp(int life_exp) {
+		this->life_exp = life_exp;
+	}
 
 	virtual void update();
 };
@@ -360,6 +373,7 @@ class Sector {
 	int stored_defenders[n_epochs_c];
 	int stored_shields[4];
 	SmokeParticleSystem *smokeParticleSystem;
+	SmokeParticleSystem *jetParticleSystem;
 
 	PlayingGameState *gamestate;
 public:
@@ -406,11 +420,17 @@ public:
 	const Feature *getFeature(int i) const {
 		return this->features.at(i);
 	}
-	const ParticleSystem *getParticleSystem() const {
+	const ParticleSystem *getSmokeParticleSystem() const {
 		return this->smokeParticleSystem;
 	}
-	ParticleSystem *getParticleSystem() {
+	ParticleSystem *getSmokeParticleSystem() {
 		return this->smokeParticleSystem;
+	}
+	const ParticleSystem *getJetParticleSystem() const {
+		return this->jetParticleSystem;
+	}
+	ParticleSystem *getJetParticleSystem() {
+		return this->jetParticleSystem;
 	}
 	void setEpoch(int epoch);
 	int getEpoch() const;

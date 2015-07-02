@@ -112,6 +112,34 @@ void Image::draw(int x, int y) const {
 #endif
 }
 
+void Image::draw(int x, int y, float scale_w, float scale_h) const {
+	x = (int)(x * scale_x);
+	y = (int)(y * scale_y);
+#if SDL_MAJOR_VERSION == 1
+	// scaling only supported for SDL 2
+	if( scale_w == 1.0f & scale_h == 1.0f ) {
+	SDL_Rect srcrect;
+	srcrect.x = 0;
+	srcrect.y = 0;
+	srcrect.w = (short)this->getWidth();
+	srcrect.h = (short)this->getHeight();
+	SDL_Rect dstrect;
+	dstrect.x = (short)x;
+	dstrect.y = (short)y;
+	dstrect.w = 0;
+	dstrect.h = 0;
+	SDL_BlitSurface(surface, &srcrect, dest_surf, &dstrect);
+	}
+#else
+	SDL_Rect dstrect;
+	dstrect.x = (short)x;
+	dstrect.y = (short)y;
+	dstrect.w = (short)(this->getWidth()*scale_w);
+	dstrect.h = (short)(this->getHeight()*scale_h);
+	SDL_RenderCopy(sdlRenderer, texture, NULL, &dstrect);
+#endif
+}
+
 void Image::drawWithAlpha(int x, int y, unsigned char alpha) const {
 	// n.b., only works if the image doesn't have per-pixel alpha channel
 #if SDL_MAJOR_VERSION == 1
