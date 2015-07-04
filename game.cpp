@@ -214,7 +214,7 @@ Sample *s_spaceship = NULL;
 
 const unsigned char shadow_alpha_c = (unsigned char)160;
 
-const int epoch_dates[n_epochs_c] = {-10000, -2000, 1, 900, 1400, 1850, 1914, 1944, 1980, 2100};
+const int epoch_dates[n_epochs_c] = {-10000, -2000, 1, 900, 1400, 1850, 1914, 1950, 1980, 2100};
 const char *epoch_names[n_epochs_c] = { "FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH" };
 
 Invention *invention_shields[n_epochs_c];
