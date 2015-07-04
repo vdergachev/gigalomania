@@ -593,7 +593,7 @@ nuke_by_player(-1), nuke_time(-1),
 population(0), n_designers(0), n_workers(0), n_famount(0),
 current_design(NULL), current_manufacture(NULL),
 researched(0), researched_lasttime(-1), manufactured(0), manufactured_lasttime(-1), growth_lasttime(-1), mined_lasttime(-1), built_lasttime(-1),
-assembled_army(NULL), stored_army(NULL), smokeParticleSystem(NULL), jetParticleSystem(NULL),
+assembled_army(NULL), stored_army(NULL), smokeParticleSystem(NULL), jetParticleSystem(NULL), nukeParticleSystem(NULL),
 gamestate(gamestate)
 {
     //LOG("Sector::Sector(%d,%d,%d)\n",epoch,xpos,ypos);
@@ -660,6 +660,12 @@ gamestate(gamestate)
 		this->jetParticleSystem->setBirthRate(0.25f);
 		this->jetParticleSystem->setLifeExp(600);
 		this->jetParticleSystem->setSize(0.5f);
+
+		this->nukeParticleSystem = new SmokeParticleSystem(smoke_image);
+		this->nukeParticleSystem->setMove(1.5f, -1.5f);
+		this->nukeParticleSystem->setBirthRate(0.25f);
+		this->nukeParticleSystem->setLifeExp(600);
+		this->nukeParticleSystem->setSize(0.5f);
 	}
 
 	initTowerStuff();
@@ -739,6 +745,9 @@ Sector::~Sector() {
 	}
 	if( jetParticleSystem != NULL ) {
 		delete jetParticleSystem;
+	}
+	if( nukeParticleSystem != NULL ) {
+		delete nukeParticleSystem;
 	}
 }
 
@@ -1573,11 +1582,9 @@ void Sector::doPlayer(int client_player) {
 	//LOG("Sector::doPlayer()\n");
 	// stuff for sectors owned by a player
 
+	// n.b., only update the particle systems that are specific to sectors owned by a player
 	if( this->smokeParticleSystem != NULL ) {
 		this->smokeParticleSystem->update();
-	}
-	if( this->jetParticleSystem != NULL ) {
-		this->jetParticleSystem->update();
 	}
 
 	if( gameMode == GAMEMODE_MULTIPLAYER_CLIENT ) {
@@ -1745,6 +1752,14 @@ void Sector::update(int client_player) {
 	//LOG("Sector::update()\n");
 	if( gameMode != GAMEMODE_MULTIPLAYER_CLIENT ) {
 		this->doCombat(client_player);
+	}
+
+	// update particle systems (that aren't done in doPlayer())
+	if( this->jetParticleSystem != NULL ) {
+		this->jetParticleSystem->update();
+	}
+	if( this->nukeParticleSystem != NULL ) {
+		this->nukeParticleSystem->update();
 	}
 
 	if( this->player != -1 ) {

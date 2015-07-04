@@ -374,6 +374,7 @@ class Sector {
 	int stored_shields[4];
 	SmokeParticleSystem *smokeParticleSystem;
 	SmokeParticleSystem *jetParticleSystem;
+	SmokeParticleSystem *nukeParticleSystem;
 
 	PlayingGameState *gamestate;
 public:
@@ -431,6 +432,12 @@ public:
 	}
 	ParticleSystem *getJetParticleSystem() {
 		return this->jetParticleSystem;
+	}
+	const ParticleSystem *getNukeParticleSystem() const {
+		return this->nukeParticleSystem;
+	}
+	ParticleSystem *getNukeParticleSystem() {
+		return this->nukeParticleSystem;
 	}
 	void setEpoch(int epoch);
 	int getEpoch() const;

@@ -1707,7 +1707,7 @@ bool loadOldImages() {
 	attackers_ammo[9][ATTACKER_AMMO_BOMB] = attackers_ammo[6][ATTACKER_AMMO_BOMB];
 
     for(int i=0;i<n_saucer_frames_c;i++) {
-        for(int k=0;k<4;k++) {
+        for(int k=0;k<n_players_c;k++) {
             int r = 0, g = 0, b = 0;
             PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
             saucers[k][i]->remap(240, 0, 0, r, g, b);
@@ -1717,7 +1717,7 @@ bool loadOldImages() {
         if( defenders[0][i][0] == NULL )
             continue;
         for(int j=0;j<n_defender_frames_c;j++) {
-            for(int k=0;k<4;k++) {
+            for(int k=0;k<n_players_c;k++) {
                 int r = 0, g = 0, b = 0;
                 PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
                 defenders[k][i][j]->remap(240, 0, 0, r, g, b);
@@ -2268,17 +2268,26 @@ bool loadImages() {
                 processImage(saucers[i][j]);
             }
         }
+        // do remapping before scaling
+		for(int i=0;i<n_players_c;i++) {
+			//nukes[i][0] = gfx_planes->copy(64*i, 32, 32, 32);
+			//nukes[i][1] = gfx_planes->copy(64*i+32, 32, 32, 32);
+			nukes[i][0] = gfx_planes->copy(0, 32, 32, 32);
+			nukes[i][1] = gfx_planes->copy(32, 32, 32, 32);
+			int r = 0, g = 0, b = 0;
+			PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)i);
+			for(int j=0;j<2;j++) {
+				nukes[i][j]->remap(240, 0, 0, r, g, b);
+                processImage(nukes[i][j]);
+			}
+		}
+		// now remap
         processImage(gfx_planes);
 		for(int i=0;i<n_players_c;i++) {
 			for(int j=0;j<n_epochs_c;j++)
 				planes[i][j] = NULL;
 			planes[i][6] = gfx_planes->copy(32*i, 0, 32, 32);
 			planes[i][7] = gfx_planes->copy(128+32*i, 0, 32, 32);
-		}
-
-		for(int i=0;i<n_players_c;i++) {
-			nukes[i][0] = gfx_planes->copy(64*i, 32, 32, 32);
-			nukes[i][1] = gfx_planes->copy(64*i+32, 32, 32, 32);
 		}
 
 		Image *gfx_ammo = Image::loadImage(gfx_dir + "attacker_ammo.png");
@@ -2329,7 +2338,7 @@ bool loadImages() {
 			}
         }
         for(int i=0;i<n_saucer_frames_c;i++) {
-            for(int k=0;k<4;k++) {
+            for(int k=0;k<n_players_c;k++) {
                 int r = 0, g = 0, b = 0;
                 PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
                 saucers[k][i]->remap(240, 0, 0, r, g, b);
@@ -2339,7 +2348,7 @@ bool loadImages() {
             if( defenders[0][i][0] == NULL )
                 continue;
             for(int j=0;j<n_defender_frames_c;j++) {
-                for(int k=0;k<4;k++) {
+                for(int k=0;k<n_players_c;k++) {
                     int r = 0, g = 0, b = 0;
                     PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
                     defenders[k][i][j]->remap(240, 0, 0, r, g, b);
@@ -3174,6 +3183,11 @@ void setGameStateID(GameStateID state) {
 		}
 		for(int i=0;i<n_epochs_c;i++) {
 			Design *design = start_sector->canResearch(Invention::WEAPON, i);
+			if( design != NULL ) {
+				static_cast<PlayingGameState *>(gamestate)->setCurrentDesign(map_x, map_y, design);
+				start_sector->invent(human_player);
+			}
+			design = start_sector->canResearch(Invention::DEFENCE, i);
 			if( design != NULL ) {
 				static_cast<PlayingGameState *>(gamestate)->setCurrentDesign(map_x, map_y, design);
 				start_sector->invent(human_player);
