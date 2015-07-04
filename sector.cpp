@@ -590,10 +590,11 @@ void Building::setTurretMan(int turret, int epoch) {
 Sector::Sector(PlayingGameState *gamestate, int epoch, int xpos, int ypos, MapColour map_colour) :
 xpos(xpos), ypos(ypos), epoch(epoch), player(PLAYER_NONE), is_shutdown(false), nuked(false),
 nuke_by_player(-1), nuke_time(-1),
+nuke_defence_animation(false), nuke_defence_time(-1), nuke_defence_x(0), nuke_defence_y(0),
 population(0), n_designers(0), n_workers(0), n_famount(0),
 current_design(NULL), current_manufacture(NULL),
 researched(0), researched_lasttime(-1), manufactured(0), manufactured_lasttime(-1), growth_lasttime(-1), mined_lasttime(-1), built_lasttime(-1),
-assembled_army(NULL), stored_army(NULL), smokeParticleSystem(NULL), jetParticleSystem(NULL), nukeParticleSystem(NULL),
+assembled_army(NULL), stored_army(NULL), smokeParticleSystem(NULL), jetParticleSystem(NULL), nukeParticleSystem(NULL), nukeDefenceParticleSystem(NULL),
 gamestate(gamestate)
 {
     //LOG("Sector::Sector(%d,%d,%d)\n",epoch,xpos,ypos);
@@ -666,6 +667,12 @@ gamestate(gamestate)
 		this->nukeParticleSystem->setBirthRate(0.25f);
 		this->nukeParticleSystem->setLifeExp(600);
 		this->nukeParticleSystem->setSize(0.5f);
+
+		this->nukeDefenceParticleSystem = new SmokeParticleSystem(smoke_image);
+		this->nukeDefenceParticleSystem->setMove(0.0f, 1.5f);
+		this->nukeDefenceParticleSystem->setBirthRate(0.25f);
+		this->nukeDefenceParticleSystem->setLifeExp(600);
+		this->nukeDefenceParticleSystem->setSize(0.5f);
 	}
 
 	initTowerStuff();
@@ -748,6 +755,9 @@ Sector::~Sector() {
 	}
 	if( nukeParticleSystem != NULL ) {
 		delete nukeParticleSystem;
+	}
+	if( nukeDefenceParticleSystem != NULL ) {
+		delete nukeDefenceParticleSystem;
 	}
 }
 
@@ -1247,6 +1257,11 @@ bool Sector::nukeSector(Sector *source) {
 			if( this->buildings[i] != NULL ) {
 				for(int j=0;j<this->buildings[i]->getNTurrets() && !done;j++) {
 					if( this->buildings[i]->getTurretMan(j) == nuclear_epoch_c ) {
+						ASSERT( !this->nuke_defence_animation );
+						this->nuke_defence_animation = true;
+						this->nuke_defence_time = getGameTime();
+						this->nuke_defence_x = this->buildings[i]->getTurretButton(j)->getLeft();
+						this->nuke_defence_y = this->buildings[i]->getTurretButton(j)->getTop();
 						this->buildings[i]->clearTurretMan(j);
 						source->nukeSector(this);
 						done = true;
@@ -1761,6 +1776,9 @@ void Sector::update(int client_player) {
 	if( this->nukeParticleSystem != NULL ) {
 		this->nukeParticleSystem->update();
 	}
+	if( this->nukeDefenceParticleSystem != NULL ) {
+		this->nukeDefenceParticleSystem->update();
+	}
 
 	if( this->player != -1 ) {
 		if( !this->is_shutdown )
@@ -1883,6 +1901,7 @@ void Sector::update(int client_player) {
 
 			this->nuke_by_player = -1;
 			this->nuke_time = -1;
+			this->nuke_defence_animation = false;
 		}
 	}
 }

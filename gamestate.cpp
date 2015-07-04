@@ -1542,6 +1542,23 @@ void PlayingGameState::draw() {
 			current_sector->getNukeParticleSystem()->draw(xpos + 23 - 4, ypos + 2 - 4);
 		}
 	}
+	// nuke defence
+	int nuke_defence_time = -1;
+	int nuke_defence_x = 0;
+	int nuke_defence_y = 0;
+	if( current_sector->hasNuclearDefenceAnimation(&nuke_defence_time, &nuke_defence_x, &nuke_defence_y) ) {
+		ASSERT( nuke_defence_time != -1 );
+		float alpha = ((float)( getGameTime() - nuke_defence_time )) / (float)nuke_delay_c;
+		ASSERT( alpha >= 0.0 );
+		if( alpha > 1.0 )
+			alpha = 1.0;
+		int ey = nuke_defence_y - 200;
+		int ypos = (int)(alpha * ey + (1.0 - alpha) * nuke_defence_y);
+		nukes[current_sector->getPlayer()][0]->draw(nuke_defence_x, ypos);
+		if( current_sector->getNukeDefenceParticleSystem() != NULL ) {
+			current_sector->getNukeDefenceParticleSystem()->draw(nuke_defence_x + 4 - 4, ypos + 31 - 4);
+		}
+	}
 
 	// playershields etc
 	for(int i=0;i<n_players_c;i++) {

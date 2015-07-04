@@ -327,6 +327,10 @@ class Sector {
 	bool nuked;
 	int nuke_by_player;
 	int nuke_time;
+	bool nuke_defence_animation;
+	int nuke_defence_time;
+	int nuke_defence_x;
+	int nuke_defence_y;
 
 	int population;
 	int n_designers;
@@ -375,6 +379,7 @@ class Sector {
 	SmokeParticleSystem *smokeParticleSystem;
 	SmokeParticleSystem *jetParticleSystem;
 	SmokeParticleSystem *nukeParticleSystem;
+	SmokeParticleSystem *nukeDefenceParticleSystem;
 
 	PlayingGameState *gamestate;
 public:
@@ -439,6 +444,12 @@ public:
 	ParticleSystem *getNukeParticleSystem() {
 		return this->nukeParticleSystem;
 	}
+	const ParticleSystem *getNukeDefenceParticleSystem() const {
+		return this->nukeDefenceParticleSystem;
+	}
+	ParticleSystem *getNukeDefenceParticleSystem() {
+		return this->nukeDefenceParticleSystem;
+	}
 	void setEpoch(int epoch);
 	int getEpoch() const;
 	int getBuildingEpoch() const;
@@ -472,6 +483,12 @@ public:
 	}
 	bool isNuked() const {
 		return this->nuked;
+	}
+	bool hasNuclearDefenceAnimation(int *nuke_defence_time, int *nuke_defence_x, int *nuke_defence_y) const {
+		*nuke_defence_time = this->nuke_defence_time;
+		*nuke_defence_x = this->nuke_defence_x;
+		*nuke_defence_y = this->nuke_defence_y;
+		return nuke_defence_animation;
 	}
 
 	void setElements(Id id,int n_elements);
