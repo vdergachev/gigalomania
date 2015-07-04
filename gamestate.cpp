@@ -1430,7 +1430,7 @@ void PlayingGameState::draw() {
 			float health = (scale_width*health_width-2) * ((float)building->getHealth()) / (float)building->getMaxHealth();
 			screen->fillRect((short)(scale_width*health_xpos), (short)(scale_height*health_ypos), (short)(scale_width*health_width), (short)(scale_height*health_height), 255, 255, 255);
 			screen->fillRect((short)(scale_width*health_xpos+1), (short)(scale_height*health_ypos+1), (short)(scale_width*health_width-2), (short)(scale_height*health_height-2), 0, 0, 0);
-			screen->fillRect((short)(scale_width*health_xpos+1), (short)(scale_height*health_ypos+1), (short)health, (short)(scale_height*health_height-2), 255, 0, 0);
+			screen->fillRect((short)(scale_width*health_xpos+1), (short)(scale_height*health_ypos+1), (short)health, (short)(scale_height*health_height-2), 244, 67, 54);
 		}
 	}
 	else if( current_sector->getPlayer() != -1 ) {

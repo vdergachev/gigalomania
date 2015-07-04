@@ -608,7 +608,7 @@ void drawProgress(int percentage) {
     screen->clear(); // n.b., needed for Qt/Symbian, where background defaults to white
 	screen->fillRect(xpos, ypos, width+1, height+1, 255, 255, 255);
 	int progress_width = (int)(((width-1) * percentage) / 100.0f);
-	screen->fillRect(xpos+1, ypos+1, progress_width, height-1, 127, 0, 0);
+	screen->fillRect(xpos+1, ypos+1, progress_width, height-1, 183, 28, 28);
 	
 	screen->refresh();
 }

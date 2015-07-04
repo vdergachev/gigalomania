@@ -30,19 +30,24 @@ const char *PlayerType::getName(PlayerTypeID id) {
 void PlayerType::getColour(int *r,int *g,int *b,PlayerTypeID id) {
 	*r = *g = *b = 0;
 	if( id == PLAYER_RED ) {
-		*r = 240;
+		*r = 229;
+		*g = 57;
+		*b = 53;
 	}
 	else if( id == PLAYER_GREEN ) {
-		*g = 192;
+		*r = 67;
+		*g = 160;
+		*b = 71;
 	}
 	else if( id == PLAYER_YELLOW ) {
-		*r = 240;
-		*g = 240;
+		*r = 255;
+		*g = 235;
+		*b = 59;
 	}
 	else if( id == PLAYER_BLUE ) {
-		*r = 64;
-		*g = 64;
-		*b = 240;
+		*r = 63;
+		*g = 81;
+		*b = 181;
 	}
 	else {
 		ASSERT(false);
