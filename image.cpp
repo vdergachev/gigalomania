@@ -63,6 +63,8 @@ Image::Image() {
 #endif
 	this->scale_x = 1;
 	this->scale_y = 1;
+	this->offset_x = 0;
+	this->offset_y = 0;
 }
 
 Image::~Image() {
@@ -88,6 +90,8 @@ void Image::free() {
 }
 
 void Image::draw(int x, int y) const {
+	x += offset_x;
+	y += offset_y;
 	x = (int)(x * scale_x);
 	y = (int)(y * scale_y);
 #if SDL_MAJOR_VERSION == 1

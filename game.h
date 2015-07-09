@@ -99,8 +99,7 @@ const int laser_epoch_c = 9;
 const int n_shields_c = 4;
 const int n_playershields_c = 16;
 const int n_flag_frames_c = 4;
-const int n_defender_frames_c = 8;
-//const int n_attacker_frames_c = 16;
+const int max_defender_frames_c = 11;
 const int n_attacker_directions_c = 4;
 const int max_attacker_frames_c = 9;
 const int n_trees_c = 4;
@@ -184,7 +183,8 @@ extern Image *icon_ergo;
 extern Image *icon_trash;
 //extern Image *coast_icons[n_coast_c];
 extern Image *map_sq[MAP_N_COLOURS][n_map_sq_c];
-extern Image *defenders[n_players_c][n_epochs_c][n_defender_frames_c];
+extern int n_defender_frames[n_epochs_c];
+extern Image *defenders[n_players_c][n_epochs_c][max_defender_frames_c];
 extern Image *nuke_defences[]; // epoch 8
 //extern Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_frames_c]; // epochs 6-9 are special case!
 extern int n_attacker_frames[n_epochs_c+1][n_attacker_directions_c];

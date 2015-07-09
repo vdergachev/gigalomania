@@ -35,6 +35,7 @@ namespace Gigalomania {
 		static SDL_Renderer *sdlRenderer;
 #endif
 		float scale_x, scale_y;
+		int offset_x, offset_y;
 
 		Image();
 
@@ -66,6 +67,10 @@ namespace Gigalomania {
 		void setScale(float scale_x,float scale_y);
 		bool scaleTo(int n_w);
 		void scale(float sx,float sy);
+		void setOffset(int offset_x, int offset_y) {
+			this->offset_x = offset_x;
+			this->offset_y = offset_y;
+		}
 		void remap(unsigned char sr,unsigned char sg,unsigned char sb,unsigned char rr,unsigned char rg,unsigned char rb);
 		void reshadeRGB(int from, bool to_r, bool to_g, bool to_b);
 		void brighten(float sr, float sg, float sb);

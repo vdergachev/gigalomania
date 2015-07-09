@@ -31,10 +31,10 @@ const int offset_factory_y_c = 96;
 const int offset_lab_x_c = 150;
 const int offset_lab_y_c = 96;
 
-const int DEFENDER_DIR_S = 0;
+/*const int DEFENDER_DIR_S = 0;
 const int DEFENDER_DIR_N = 1;
 const int DEFENDER_DIR_E = 2;
-const int DEFENDER_DIR_W = 3;
+const int DEFENDER_DIR_W = 3;*/
 
 bool isAirUnit(int epoch) {
 	ASSERT_S_EPOCH(epoch);
@@ -412,7 +412,7 @@ type(type), sector(sector), health(0), max_health(0), pos_x(0), pos_y(0), n_turr
 	this->n_turrets = 0;
 	for(int i=0;i<max_building_turrets_c;i++) {
 		this->turret_man[i] = -1;
-		this->turret_mandir[i] = 0;
+		this->turret_man_frame[i] = 0;
 	}
 
 	if( this->type == BUILDING_TOWER ) {
@@ -491,7 +491,10 @@ Image **Building::getImages() {
 }
 
 void Building::rotateDefenders() {
-	if( this->type == BUILDING_TOWER ) {
+	for(int i=0;i<this->n_turrets;i++) {
+		this->turret_man_frame[i] = rand();
+	}
+	/*if( this->type == BUILDING_TOWER ) {
 		this->turret_mandir[0] = ( rand() % 2 ) == 0 ? DEFENDER_DIR_W : DEFENDER_DIR_N;
 		this->turret_mandir[1] = ( rand() % 2 ) == 0 ? DEFENDER_DIR_E : DEFENDER_DIR_N;
 		this->turret_mandir[2] = ( rand() % 2 ) == 0 ? DEFENDER_DIR_W : DEFENDER_DIR_S;
@@ -525,7 +528,7 @@ void Building::rotateDefenders() {
 	}
 	else {
 		ASSERT(false);
-	}
+	}*/
 }
 
 int Building::getDefenderStrength() const {
@@ -566,10 +569,10 @@ int Building::getTurretMan(int turret) const {
 	return this->turret_man[turret];
 }
 
-int Building::getTurretManDir(int turret) const {
+int Building::getTurretManFrame(int turret) const {
 	ASSERT( turret >= 0 && turret < this->n_turrets );
 	ASSERT( this->turret_man[turret] != -1 );
-	return this->turret_mandir[turret];
+	return this->turret_man_frame[turret];
 }
 
 PanelPage *Building::getTurretButton(int turret) const {

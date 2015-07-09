@@ -1405,11 +1405,12 @@ void PlayingGameState::draw() {
 			for(int j=0;j<building->getNTurrets();j++) {
 				if( building->getTurretMan(j) != -1 ) {
 					Image *image = NULL;
-					if( building->getTurretMan(j) == nuclear_epoch_c ) {
+					int defender_epoch = building->getTurretMan(j);
+					if( defender_epoch == nuclear_epoch_c ) {
 						image = nuke_defences[current_sector->getPlayer()];
 					}
 					else {
-						image = defenders[current_sector->getPlayer()][ building->getTurretMan(j) ][ building->getTurretManDir(j) ];
+						image = defenders[current_sector->getPlayer()][defender_epoch][ building->getTurretManFrame(j) % n_defender_frames[defender_epoch] ];
 					}
 					image->draw(building->getTurretButton(j)->getLeft(), building->getTurretButton(j)->getTop() - 4);
 				}

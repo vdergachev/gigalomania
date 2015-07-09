@@ -253,7 +253,7 @@ private:
 	int pos_x, pos_y;
 	int n_turrets;
 	int turret_man[max_building_turrets_c];
-	int turret_mandir[max_building_turrets_c];
+	int turret_man_frame[max_building_turrets_c];
 	PanelPage *building_button;
 	PanelPage *turret_buttons[max_building_turrets_c];
 	PlayingGameState *gamestate;
@@ -310,7 +310,7 @@ public:
 		return this->n_turrets;
 	}
 	int getTurretMan(int turret) const;
-	int getTurretManDir(int turret) const;
+	int getTurretManFrame(int turret) const;
 	PanelPage *getTurretButton(int turret) const;
 	void clearTurretMan(int turret);
 	void setTurretMan(int turret, int epoch);

@@ -153,7 +153,8 @@ Image *icon_trash = NULL;
 Image *coast_icons[n_coast_c];
 int map_sq_offset = 0, map_sq_coast_offset = 0;
 Image *map_sq[MAP_N_COLOURS][n_map_sq_c];
-Image *defenders[n_players_c][n_epochs_c][n_defender_frames_c];
+int n_defender_frames[n_epochs_c];
+Image *defenders[n_players_c][n_epochs_c][max_defender_frames_c];
 Image *nuke_defences[n_players_c];
 //Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_frames_c];
 int n_attacker_frames[n_epochs_c+1][n_attacker_directions_c];
@@ -1563,6 +1564,11 @@ bool loadOldImages() {
 	armies->setColor(0, 255, 0, 255);
 	processImage(armies, false); // don't smooth, as it messes up the colour remapping!
 
+	const int n_defender_frames_c = 8;
+	ASSERT( n_defender_frames_c <= max_defender_frames_c );
+	for(int i=0;i<n_epochs_c;i++) {
+		n_defender_frames[i] = n_defender_frames_c;
+	}
 	for(int i=0;i<=5;i++) {
 		for(int j=0;j<n_defender_frames_c;j++) {
 			for(int k=0;k<n_players_c;k++)
@@ -2224,21 +2230,40 @@ bool loadImages() {
 		if( gfx_def_image == NULL )
 			return false;
 		drawProgress(58);
-		/*if( !gfx_def_image->scaleTo(scale_width*default_width_c) )
-		return false;*/
-        //processImage(gfx_def_image);
         gfx_def_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h); // so the copying will work at the right scale for the input image
         for(int k=0;k<n_players_c;k++) {
             int r = 0, g = 0, b = 0;
             PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
-            for(int i=0;i<n_epochs_c;i++) {
-				for(int j=0;j<n_defender_frames_c;j++) {
+            for(int i=0;i<9;i++) {
+				n_defender_frames[i] = 8;
+				ASSERT( n_defender_frames[i] <= max_defender_frames_c );
+				for(int j=0;j<n_defender_frames[i];j++) {
 					defenders[k][i][j] = gfx_def_image->copy(16*i, 0, 16, 16);
                     defenders[k][i][j]->remap(240, 0, 0, r, g, b);
                     processImage(defenders[k][i][j]);
                 }
 			}
 		}
+		delete gfx_def_image;
+
+		gfx_def_image = Image::loadImage(gfx_dir + "defender_9.png");
+		if( gfx_def_image == NULL )
+			return false;
+        gfx_def_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h); // so the copying will work at the right scale for the input image
+        for(int k=0;k<n_players_c;k++) {
+            int r = 0, g = 0, b = 0;
+            PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
+			n_defender_frames[9] = 11;
+			ASSERT( n_defender_frames[9] <= max_defender_frames_c );
+			for(int j=0;j<n_defender_frames[9];j++) {
+				//defenders[k][9][j] = gfx_def_image->copy(16*j, 0, 16, 16);
+				defenders[k][9][j] = gfx_def_image->copy(32*j+8, 9, 16, 18);
+                defenders[k][9][j]->remap(240, 0, 0, r, g, b);
+                processImage(defenders[k][9][j]);
+				defenders[k][9][j]->setOffset(0, -4);
+            }
+		}
+		delete gfx_def_image;
 
 		for(int i=0;i<=5;i++) {
 			if( !loadAttackersWalkingImages(gfx_dir, i) ) {
@@ -2289,6 +2314,7 @@ bool loadImages() {
 			planes[i][6] = gfx_planes->copy(32*i, 0, 32, 32);
 			planes[i][7] = gfx_planes->copy(128+32*i, 0, 32, 32);
 		}
+		delete gfx_planes;
 
 		Image *gfx_ammo = Image::loadImage(gfx_dir + "attacker_ammo.png");
 		if( gfx_ammo == NULL )
@@ -2305,9 +2331,6 @@ bool loadImages() {
 		}
 		// bombs
 		attackers_ammo[6][ATTACKER_AMMO_BOMB] = gfx_ammo->copy(0, 96, 8, 16);
-
-		delete gfx_def_image;
-		delete gfx_planes;
 		delete gfx_ammo;
 
 		/*nuke_defences[0] = armies->copy(192, 256, 16, 16);
@@ -2347,7 +2370,7 @@ bool loadImages() {
         for(int i=0;i<n_epochs_c;i++) {
             if( defenders[0][i][0] == NULL )
                 continue;
-            for(int j=0;j<n_defender_frames_c;j++) {
+            for(int j=0;j<n_defender_frames[i];j++) {
                 for(int k=0;k<n_players_c;k++) {
                     int r = 0, g = 0, b = 0;
                     PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)k);
