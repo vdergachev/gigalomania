@@ -2241,6 +2241,9 @@ bool loadImages() {
 					defenders[k][i][j] = gfx_def_image->copy(16*i, 0, 16, 16);
                     defenders[k][i][j]->remap(240, 0, 0, r, g, b);
                     processImage(defenders[k][i][j]);
+					if( i == 8 ) {
+						defenders[k][i][j]->setOffset(-1, 0);
+					}
                 }
 			}
 		}

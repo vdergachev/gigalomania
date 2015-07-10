@@ -419,31 +419,57 @@ type(type), sector(sector), health(0), max_health(0), pos_x(0), pos_y(0), n_turr
 		this->pos_x = offset_fortress_x_c;
 		this->pos_y = offset_fortress_y_c;
 		this->n_turrets = 4;
-		turret_pos[0].set(0, 0, 15, 12);
-		turret_pos[1].set(27, 0, 15, 12);
-		turret_pos[2].set(0, 24, 15, 12);
-		turret_pos[3].set(27, 24, 15, 12);
+		if( using_old_gfx ) {
+			turret_pos[0].set(0, 0, 15, 12);
+			turret_pos[1].set(27, 0, 15, 12);
+			turret_pos[2].set(0, 24, 15, 12);
+			turret_pos[3].set(27, 24, 15, 12);
+		}
+		else {
+			turret_pos[0].set(1, -2, 15, 14);
+			turret_pos[1].set(28, -2, 15, 14);
+			turret_pos[2].set(1, 22, 15, 15);
+			turret_pos[3].set(28, 22, 15, 15);
+		}
 	}
 	else if( this->type == BUILDING_MINE ) {
 		this->pos_x = offset_mine_x_c;
 		this->pos_y = offset_mine_y_c;
 		this->n_turrets = 2;
-		turret_pos[0].set(0, 17, 15, 12);
-		turret_pos[1].set(27, 17, 15, 12);
+		if( using_old_gfx ) {
+			turret_pos[0].set(0, 17, 15, 12);
+			turret_pos[1].set(27, 17, 15, 12);
+		}
+		else {
+			turret_pos[0].set(2, 17, 16, 16);
+			turret_pos[1].set(25, 17, 16, 16);
+		}
 	}
 	else if( this->type == BUILDING_FACTORY ) {
 		this->pos_x = offset_factory_x_c;
 		this->pos_y = offset_factory_y_c;
 		this->n_turrets = 3;
-		turret_pos[0].set(1, 9, 15, 12);
-		turret_pos[1].set(33, 9, 15, 12);
-		turret_pos[2].set(16, 26, 15, 12);
+		if( using_old_gfx ) {
+			turret_pos[0].set(1, 9, 15, 12);
+			turret_pos[1].set(33, 9, 15, 12);
+			turret_pos[2].set(16, 26, 15, 12);
+		}
+		else {
+			turret_pos[0].set(0, 7, 16, 15);
+			turret_pos[1].set(31, 7, 16, 15);
+			turret_pos[2].set(15, 29, 16, 15);
+		}
 	}
 	else if( this->type == BUILDING_LAB ) {
 		this->pos_x = offset_lab_x_c;
 		this->pos_y = offset_lab_y_c;
 		this->n_turrets = 1;
-		turret_pos[0].set(10, 4, 15, 12);
+		if( using_old_gfx ) {
+			turret_pos[0].set(10, 4, 15, 12);
+		}
+		else {
+			turret_pos[0].set(10, 6, 16, 16);
+		}
 	}
 	ASSERT(this->n_turrets != 0);
 
