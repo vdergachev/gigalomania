@@ -1403,6 +1403,12 @@ void PlayingGameState::draw() {
 
 			// draw defenders
 			for(int j=0;j<building->getNTurrets();j++) {
+				// uncomment to draw turrent button regions:
+				/*{
+					PanelPage *button = building->getTurretButton(j);
+					screen->fillRectWithAlpha(scale_width*button->getLeft(), scale_height*button->getTop(), scale_width*button->getWidth(), scale_height*button->getHeight(), 255, 0, 0, 127);
+				}*/
+
 				if( building->getTurretMan(j) != -1 ) {
 					Image *image = NULL;
 					int defender_epoch = building->getTurretMan(j);
