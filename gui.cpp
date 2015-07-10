@@ -757,11 +757,11 @@ void GamePanel::setup() {
 	//this->button_nbuilders[BUILDING_LAB] = new PanelPage(48, 134, 16, 12);
 	this->button_nbuilders[BUILDING_LAB] = new PanelPage(xpos, ypos+16, 16, 12);
 	if( onemousebutton ) {
-		this->button_nbuilders[BUILDING_LAB]->setInfoLMB("change the number of builders\nbuilding a lab");
+		this->button_nbuilders[BUILDING_LAB]->setInfoLMB("change the number of builders\nbuilding a research centre");
 	}
 	else {
-		this->button_nbuilders[BUILDING_LAB]->setInfoLMB("decrease the number of builders\nbuilding a lab");
-		this->button_nbuilders[BUILDING_LAB]->setInfoRMB("increase the number of builders\nbuilding a lab");
+		this->button_nbuilders[BUILDING_LAB]->setInfoLMB("decrease the number of builders\nbuilding a research centre");
+		this->button_nbuilders[BUILDING_LAB]->setInfoRMB("increase the number of builders\nbuilding a research centre");
 	}
 	this->addToPanel(STATE_SECTORCONTROL, button_nbuilders[BUILDING_LAB]);
 	xpos += step_x;
@@ -887,11 +887,11 @@ void GamePanel::setup() {
     //this->button_nbuilders2[BUILDING_LAB] = new ImageButton(40, 20 + 2*build_step_y_c, 19, 28, panel_build[BUILDING_LAB]);
     this->button_nbuilders2[BUILDING_LAB] = new ImageButton(40, 20 + 2*build_step_y_c, 19, build_step_y_c, panel_build[BUILDING_LAB]);
     if( onemousebutton ) {
-		this->button_nbuilders2[BUILDING_LAB]->setInfoLMB("change the number of builders\nbuilding a lab");
+		this->button_nbuilders2[BUILDING_LAB]->setInfoLMB("change the number of builders\nbuilding a research centre");
 	}
 	else {
-		this->button_nbuilders2[BUILDING_LAB]->setInfoLMB("decrease the number of builders\nbuilding a lab");
-		this->button_nbuilders2[BUILDING_LAB]->setInfoRMB("increase the number of builders\nbuilding a lab");
+		this->button_nbuilders2[BUILDING_LAB]->setInfoLMB("decrease the number of builders\nbuilding a research centre");
+		this->button_nbuilders2[BUILDING_LAB]->setInfoRMB("increase the number of builders\nbuilding a research centre");
 	}
 	this->addToPanel(STATE_BUILD, button_nbuilders2[BUILDING_LAB]);
 
