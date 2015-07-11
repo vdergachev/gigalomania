@@ -1948,8 +1948,8 @@ bool loadImages() {
 	//panel_build[BUILDING_TOWER] = icons->copy(224, 63, 16, 16); // different size // not yet used
 	//panel_build[BUILDING_MINE] = icons->copy(256, 63, 16, 16); // different size
 	panel_build[BUILDING_MINE] = mine_gatherable_small;
-	panel_build[BUILDING_FACTORY] = icons->copy(288, 63, 16, 16); // different size
-	panel_build[BUILDING_LAB] = icons->copy(192, 63, 16, 16); // different size
+	panel_build[BUILDING_FACTORY] = icons->copy(288, 64, 16, 16); // different size
+	panel_build[BUILDING_LAB] = icons->copy(192, 64, 16, 16); // different size
 	//panel_build[BUILDING_LAB] = panel_lab;
 
 	panel_building[BUILDING_TOWER] = icons->copy(0, 33, 16, 16); // different size
