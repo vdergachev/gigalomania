@@ -307,7 +307,7 @@ class PlayingGameState : public GameState {
 	Button *confirm_yes_button;
     Button *confirm_no_button;*/
 	int flag_frame_step;
-	int defenders_last_frame_update;
+	int defenders_last_time_update;
 	int soldiers_last_time_moved_x;
 	int soldiers_last_time_moved_y;
 	int soldiers_last_time_turned;

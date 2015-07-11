@@ -20,7 +20,7 @@ using std::stringstream;
 
 //---------------------------------------------------------------------------
 
-const int defenders_frames_per_update_c = (int)(2.0 * ticks_per_frame_c * time_ratio_c); // consider a turn every this number of frames
+const int defenders_ticks_per_update_c = (int)(60.0 * ticks_per_frame_c * time_ratio_c); // consider a turn every this number of ticks
 const int soldier_move_rate_c = (int)(1.9 * ticks_per_frame_c * time_ratio_c); // ticks per pixel - needs to be in sync with the animation!
 const int air_move_rate_c = (int)(0.2 * ticks_per_frame_c * time_ratio_c); // ticks per pixel
 const int soldier_turn_rate_c = (int)(20.0 * ticks_per_frame_c * time_ratio_c); // mean ticks per turn
@@ -742,7 +742,7 @@ void PlaceMenGameState::requestQuit() {
 PlayingGameState::PlayingGameState(int client_player) : GameState(client_player) {
 	this->current_sector = NULL;
 	this->flag_frame_step = 0;
-	this->defenders_last_frame_update = 0;
+	this->defenders_last_time_update = 0;
 	this->soldiers_last_time_moved_x = 0;
 	this->soldiers_last_time_moved_y = 0;
 	this->soldiers_last_time_turned = 0;
@@ -1384,9 +1384,9 @@ void PlayingGameState::draw() {
 			icon_openpitmine->draw(offset_land_x_c + offset_openpitmine_x_c, offset_land_y_c + offset_openpitmine_y_c);
 
 		bool rotate_defenders = false;
-		if( frame_counter - defenders_last_frame_update > defenders_frames_per_update_c ) {
+		if( getGameTime() - defenders_last_time_update > defenders_ticks_per_update_c ) {
 			rotate_defenders = true;
-			defenders_last_frame_update = frame_counter;
+			defenders_last_time_update = getGameTime();
 		}
 
 		for(int i=0;i<N_BUILDINGS;i++) {
