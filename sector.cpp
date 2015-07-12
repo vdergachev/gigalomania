@@ -53,7 +53,7 @@ bool defenceNeedsMan(int epoch) {
 }
 
 Particle::Particle() : xpos(0.0f), ypos(0.0f), birth_time(0) {
-	this->birth_time = getRealTime();
+	this->birth_time = getGameTime();
 }
 
 void ParticleSystem::draw(int xpos, int ypos) const {
@@ -63,8 +63,8 @@ void ParticleSystem::draw(int xpos, int ypos) const {
 }
 
 SmokeParticleSystem::SmokeParticleSystem(const Image *image) : ParticleSystem(image),
-birth_rate(0.0f), life_exp(1500), last_emit_time(0), move_x(0.0f), move_y(-1.0f) {
-	this->last_emit_time = getRealTime();
+birth_rate(0.0f), life_exp(225), last_emit_time(0), move_x(0.0f), move_y(-6.667f) {
+	this->last_emit_time = getGameTime();
 }
 
 void SmokeParticleSystem::setBirthRate(float birth_rate) {
@@ -73,7 +73,7 @@ void SmokeParticleSystem::setBirthRate(float birth_rate) {
 
 void SmokeParticleSystem::update() {
 	// expire old particles
-	int time_now = getRealTime();
+	int time_now = getGameTime();
 	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
 		if( time_now >= particles.at(i).getBirthTime() + life_exp ) {
 			// for performance, we reorder and reduce the length by 1 (as the order of the particles shouldn't matter)
@@ -82,7 +82,7 @@ void SmokeParticleSystem::update() {
 		}
 	}
 
-	int real_loop_time = getRealLoopTime();
+	int real_loop_time = getLoopTime();
 	//LOG("%d\n", real_loop_time);
 	// update particles
 	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
@@ -116,7 +116,7 @@ void SmokeParticleSystem::update() {
 	}
 
 	// emit new particles
-	int accumulated_time = getRealTime() - this->last_emit_time;
+	int accumulated_time = getGameTime() - this->last_emit_time;
 	int new_particles = (int)(this->birth_rate * accumulated_time);
 	new_particles = min(1, new_particles); // helps make rate more steady
 	this->last_emit_time += (int)(1.0f/birth_rate * new_particles);
@@ -686,21 +686,21 @@ gamestate(gamestate)
 		this->smokeParticleSystem = new SmokeParticleSystem(smoke_image);
 
 		this->jetParticleSystem = new SmokeParticleSystem(smoke_image);
-		this->jetParticleSystem->setMove(1.5f, 1.5f);
-		this->jetParticleSystem->setBirthRate(0.25f);
-		this->jetParticleSystem->setLifeExp(600);
+		this->jetParticleSystem->setMove(10.0f, 10.0f);
+		this->jetParticleSystem->setBirthRate(1.667f);
+		this->jetParticleSystem->setLifeExp(90);
 		this->jetParticleSystem->setSize(0.5f);
 
 		this->nukeParticleSystem = new SmokeParticleSystem(smoke_image);
-		this->nukeParticleSystem->setMove(1.5f, -1.5f);
-		this->nukeParticleSystem->setBirthRate(0.25f);
-		this->nukeParticleSystem->setLifeExp(600);
+		this->nukeParticleSystem->setMove(10.0f, -10.0f);
+		this->nukeParticleSystem->setBirthRate(1.667f);
+		this->nukeParticleSystem->setLifeExp(90);
 		this->nukeParticleSystem->setSize(0.5f);
 
 		this->nukeDefenceParticleSystem = new SmokeParticleSystem(smoke_image);
-		this->nukeDefenceParticleSystem->setMove(0.0f, 1.5f);
-		this->nukeDefenceParticleSystem->setBirthRate(0.25f);
-		this->nukeDefenceParticleSystem->setLifeExp(600);
+		this->nukeDefenceParticleSystem->setMove(0.0f, 10.0f);
+		this->nukeDefenceParticleSystem->setBirthRate(1.667f);
+		this->nukeDefenceParticleSystem->setLifeExp(90);
 		this->nukeDefenceParticleSystem->setSize(0.5f);
 	}
 
@@ -2328,10 +2328,10 @@ void Sector::setWorkers(int n_workers) {
 			this->smokeParticleSystem->setBirthRate(0.0f);
 		}
 		else if( this->n_workers > 0 ) {
-			this->smokeParticleSystem->setBirthRate(0.008f);
+			this->smokeParticleSystem->setBirthRate(0.05333f);
 		}
 		else {
-			this->smokeParticleSystem->setBirthRate(0.002f);
+			this->smokeParticleSystem->setBirthRate(0.01333f);
 		}
 	}
 }
