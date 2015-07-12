@@ -95,6 +95,10 @@ int PanelPage::getXCentre() const {
 	return owner->getLeft() + offset_x + w/2;
 }
 
+int PanelPage::getYCentre() const {
+	return owner->getTop() + offset_y + h/2;
+}
+
 int PanelPage::getBottom() const {
 	return owner->getTop() + offset_y + h;
 }

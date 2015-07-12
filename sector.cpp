@@ -1792,6 +1792,23 @@ void Sector::doPlayer(int client_player) {
 	}
 }
 
+void Sector::getNukePos(int *nuke_x, int *nuke_y) const {
+	ASSERT( this->isBeingNuked() );
+	*nuke_x = -1;
+	*nuke_y = -1;
+	if( this->isBeingNuked() ) {
+		ASSERT( nuke_time != -1 );
+		float alpha = ((float)( getGameTime() - nuke_time )) / (float)nuke_delay_c;
+		ASSERT( alpha >= 0.0 );
+		if( alpha > 1.0 )
+			alpha = 1.0;
+		int sx = offset_land_x_c+176, sy = offset_land_y_c-18;
+		int ex = offset_land_x_c+64, ey = offset_land_y_c+94;
+		*nuke_x = (int)(alpha * ex + (1.0 - alpha) * sx);
+		*nuke_y = (int)(alpha * ey + (1.0 - alpha) * sy);
+	}
+}
+
 void Sector::update(int client_player) {
 	//LOG("Sector::update()\n");
 	if( gameMode != GAMEMODE_MULTIPLAYER_CLIENT ) {
@@ -1871,6 +1888,17 @@ void Sector::update(int client_player) {
 								//this->buildings[i]->turret_man[j] = -1;
 								this->buildings[i]->killIthDefender(j);
 								this->nuked = false;
+								if( this == gamestate->getCurrentSector() ) {
+									if( explosions[0] != NULL ) {
+										int w = explosions[0]->getScaledWidth();
+										int h = explosions[0]->getScaledHeight();
+										gamestate->explosionEffect( buildings[i]->getTurretButton(j)->getXCentre() - w/2, buildings[i]->getTurretButton(j)->getYCentre() - h/2);
+										int nuke_x = -1, nuke_y = -1;
+										this->getNukePos(&nuke_x, &nuke_y);
+										Image *nuke_image = nukes[this->nuke_by_player][1];
+										gamestate->explosionEffect( nuke_x + nuke_image->getScaledWidth()/2 - w/2, nuke_y + nuke_image->getScaledHeight()/2 - h/2);
+									}
+								}
 							}
 						}
 					}

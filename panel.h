@@ -107,6 +107,7 @@ namespace Gigalomania {
 		virtual int getTop() const;
 		virtual int getRight() const;
 		virtual int getXCentre() const;
+		virtual int getYCentre() const;
 		virtual int getBottom() const;
 		int getWidth() const {
 			return this->w;

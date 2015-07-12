@@ -1535,15 +1535,8 @@ void PlayingGameState::draw() {
 	int nuke_time = -1;
 	int nuke_by_player = current_sector->beingNuked(&nuke_time);
 	if( nuke_by_player != -1 ) {
-		ASSERT( nuke_time != -1 );
-		float alpha = ((float)( getGameTime() - nuke_time )) / (float)nuke_delay_c;
-		ASSERT( alpha >= 0.0 );
-		if( alpha > 1.0 )
-			alpha = 1.0;
-		int sx = offset_land_x_c+176, sy = offset_land_y_c-18;
-		int ex = offset_land_x_c+64, ey = offset_land_y_c+94;
-		int xpos = (int)(alpha * ex + (1.0 - alpha) * sx);
-		int ypos = (int)(alpha * ey + (1.0 - alpha) * sy);
+		int xpos = -1, ypos = -1;
+		current_sector->getNukePos(&xpos, &ypos);
 		nukes[nuke_by_player][1]->draw(xpos, ypos);
 		if( current_sector->getNukeParticleSystem() != NULL ) {
 			current_sector->getNukeParticleSystem()->draw(xpos + 23 - 4, ypos + 2 - 4);

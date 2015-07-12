@@ -484,6 +484,7 @@ public:
 	bool isNuked() const {
 		return this->nuked;
 	}
+	void getNukePos(int *nuke_x, int *nuke_y) const;
 	bool hasNuclearDefenceAnimation(int *nuke_defence_time, int *nuke_defence_x, int *nuke_defence_y) const {
 		*nuke_defence_time = this->nuke_defence_time;
 		*nuke_defence_x = this->nuke_defence_x;
