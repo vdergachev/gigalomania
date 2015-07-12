@@ -1940,7 +1940,7 @@ bool loadImages() {
 	panel_defence = icons->copy(256, 0, 16, 16);
 	panel_attack = icons->copy(272, 0, 16, 16);
 	panel_knowndesigns = icons->copy(240, 16, 16, 16);
-	panel_factory = icons->copy(48, 33, 16, 16);
+	panel_factory = icons->copy(48, 32, 16, 16);
 	panel_bloody_attack = icons->copy(240, 32, 16, 16);
 
 	mine_gatherable_small = icons->copy(160, 0, 16, 16);
