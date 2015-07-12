@@ -2,7 +2,6 @@ rd /S /Q c:\temp\gigalomania\
 
 mkdir c:\temp\gigalomania\
 
-REM set src="c:\documents and settings\mark.DESKTOP\work\programming\megalomania"
 set src="."
 set dst="c:\temp\gigalomania"
 
