@@ -2451,10 +2451,7 @@ bool loadImages() {
 	}
 	drawProgress(70);
 
-    background_islands = Image::loadImage(gfx_dir + "sunrise.jpg");
-	if( background_islands == NULL )
-		return false;
-	processImage(background_islands);
+	background_islands = background;
 
 	// finished loading/extracting images
 
