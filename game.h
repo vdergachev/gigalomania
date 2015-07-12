@@ -190,7 +190,7 @@ extern Image *nuke_defences[]; // epoch 8
 extern int n_attacker_frames[n_epochs_c+1][n_attacker_directions_c];
 extern Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_directions_c][max_attacker_frames_c]; // epochs 6-9 are special case!
 extern Image *planes[n_players_c][n_epochs_c]; // epochs 6,7 only
-extern Image *nukes[n_players_c][n_nuke_frames_c]; // epoch 8
+extern Image *nukes[n_players_c][n_nuke_frames_c]; // epoch 8 (frame 0 is launched defence, frame 1 is launched weapon)
 extern Image *saucers[n_players_c][n_saucer_frames_c]; // epoch 9
 extern Image *attackers_ammo[n_epochs_c][N_ATTACKER_AMMO_DIRS];
 extern Image *icon_openpitmine;
