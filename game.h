@@ -284,7 +284,6 @@ enum PlayerMode {
 };
 bool isDemo();
 //extern int human_player;
-extern int end_game_time;
 extern bool pref_sound_on;
 extern bool pref_music_on;
 extern bool pref_disallow_nukes;
