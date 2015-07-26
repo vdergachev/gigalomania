@@ -496,12 +496,14 @@ void Application::runMainLoop() {
 			case SDL_WINDOWEVENT:
 				if( event.window.event == SDL_WINDOWEVENT_SHOWN || event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ) {
 					// activate
+					deleteState();
 				}
 				else if( event.window.event == SDL_WINDOWEVENT_HIDDEN || event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ) {
 					// inactive
 					if( !isPaused() ) {
 						togglePause(); // automatically pause when application goes inactive
 					}
+					saveState();
 				}
 				break;
 #endif

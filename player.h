@@ -2,11 +2,15 @@
 
 #include "common.h"
 
+#include "TinyXML/tinyxml.h"
+
 /** Handles the players, including all the AI.
 */
 
 class Sector;
 class PlayingGameState;
+
+using std::stringstream;
 
 class PlayerType {
 public:
@@ -21,15 +25,13 @@ public:
 };
 
 class Player {
-	//char name[256];
-	int index;
-	bool dead;
-	//int personality;
+	int index; // saved
+	bool dead; // saved
 
-	int n_births;
-	int n_deaths;
-	int n_men_for_this_island;
-	int n_suspended;
+	int n_births; // saved
+	int n_deaths; // saved
+	int n_men_for_this_island; // saved
+	int n_suspended; // saved
 
 	bool is_human;
 
@@ -37,7 +39,7 @@ class Player {
 	static bool alliances[n_players_c][n_players_c];
 	static int alliance_last_asked[n_players_c][n_players_c];
 
-	int alliance_last_asked_human; // time we last asked human player, to avoid continually asking
+	int alliance_last_asked_human; // time we last asked human player, to avoid continually asking // aved
 
 	static void setAllianceLastAsked(int a, int b,int time);
 	static int allianceLastAsked(int a, int b);
@@ -95,6 +97,11 @@ public:
 	void addNSuspended(int n) {
 		this->n_suspended += n;
 	}
+
+	void saveState(stringstream &stream) const;
+	void loadStateParseXMLNode(const TiXmlNode *parent);
+	static void saveStateAlliances(stringstream &stream);
+	static void loadStateParseXMLNodeAlliances(const TiXmlNode *parent);
 
 	static void setAlliance(int a, int b, bool alliance);
 	static bool isAlliance(int a, int b);

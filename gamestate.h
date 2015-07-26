@@ -3,8 +3,11 @@
 /** Classes to manage the various gamestates.
 */
 
+#include "TinyXML/tinyxml.h"
+
 using std::vector;
 using std::string;
+using std::stringstream;
 
 //#include "game.h"
 #include "common.h"
@@ -218,6 +221,9 @@ public:
     bool hasConfirmWindow() const {
         return confirm_window != NULL;
     }
+
+	virtual void saveState(stringstream &stream) const {
+	}
 };
 
 class ChooseGameTypeGameState : public GameState {
@@ -294,7 +300,7 @@ public:
 };
 
 class PlayingGameState : public GameState {
-	const Sector *current_sector;
+	const Sector *current_sector; // saved
 	GamePanel *gamePanel;
 	ImageButton *speed_button;
 	ImageButton *shield_buttons[n_players_c];
@@ -327,11 +333,11 @@ class PlayingGameState : public GameState {
 		MAPDISPLAY_UNITS = 1
 	};
 	MapDisplay map_display;
-	int player_asking_alliance;
+	int player_asking_alliance; // saved
 	PanelPage *map_panels[map_width_c][map_height_c];
 	Button *alliance_yes;
 	Button *alliance_no;
-	int n_deaths[n_players_c][n_epochs_c+1];
+	int n_deaths[n_players_c][n_epochs_c+1]; // saved
 
 	bool openPitMine();
 	bool validSoldierLocation(int epoch,int xpos,int ypos);
@@ -342,6 +348,7 @@ class PlayingGameState : public GameState {
 	void setupMapGUI();
 	bool readSectorsProcessLine(Map *map, char *line, bool *done_header, int *sec_x, int *sec_y);
 	bool readSectors(Map *map);
+	void loadStateParseXMLMapXY(int *map_x, int *map_y, const TiXmlAttribute *attribute);
 
 	//static void buttonSpeedClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
 public:
@@ -423,6 +430,9 @@ public:
 
 	void shutdown(int sector_x, int sector_y);
 	//current_sector->shutdown();
+
+	virtual void saveState(stringstream &stream) const;
+	void loadStateParseXMLNode(const TiXmlNode *parent);
 };
 
 class EndIslandGameState : public GameState {

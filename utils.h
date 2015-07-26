@@ -107,8 +107,10 @@ extern const int ticks_per_frame_c;
 extern const float time_ratio_c;
 extern int time_rate;
 
+void setRealTime(int real_time);
 int getRealTime();
 int getRealLoopTime();
+void setGameTime(int game_time);
 int getGameTime();
 int getLoopTime();
 void updateTime(int time);

@@ -91,6 +91,12 @@ copy %src%\utils.h %dst%
 copy %src%\common.h %dst%
 copy %src%\stdafx.h %dst%
 
+mkdir %dst%\TinyXML
+copy %src%\TinyXML\tinyxml.cpp %dst%\TinyXML
+copy %src%\TinyXML\tinyxmlerror.cpp %dst%\TinyXML
+copy %src%\TinyXML\tinyxmlparser.cpp %dst%\TinyXML
+copy %src%\TinyXML\tinyxml.h %dst%\TinyXML
+
 REM copy %src%\SDL_main.c %dst%
 
 REM Qt specific files:

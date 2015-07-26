@@ -18,6 +18,9 @@ class Invention;
 
 using std::vector;
 using std::string;
+using std::stringstream;
+
+#include "TinyXML/tinyxml.h"
 
 #include "common.h"
 
@@ -97,9 +100,9 @@ public:
 };
 
 class Army {
-	int soldiers[n_epochs_c+1]; // unarmed men are soldiers[n_epochs_c];
-	int player;
-	Sector *sector;
+	int soldiers[n_epochs_c+1]; // unarmed men are soldiers[n_epochs_c]; // saved
+	int player; // no need to save, saved by caller
+	Sector *sector; // no need to save
 	PlayingGameState *gamestate;
 
 public:
@@ -135,6 +138,9 @@ public:
 	int getIndividualStrength(int i) const;
 	static int getIndividualStrength(int player, int i);
 	static int getIndividualBombardStrength(int i);
+
+	void saveState(stringstream &stream) const;
+	void loadStateParseXMLNode(const TiXmlNode *parent);
 };
 
 class Element {
@@ -166,6 +172,7 @@ class Design {
 	Invention *invention;
 	bool ergonomically_terrific;
 	int cost[N_ID];
+	int save_id;
 
 public:
 	Design(Invention *invention,bool ergonomically_terrific);
@@ -182,6 +189,12 @@ public:
 	Invention *getInvention() const {
 		return this->invention;
 	}
+	void setSaveId(int save_id) {
+		this->save_id = save_id;
+	}
+	int getSaveId() const {
+		return this->save_id;
+	}
 
 	static bool setupDesigns();
 };
@@ -191,9 +204,11 @@ protected:
 	string name;
 public:
 	enum Type {
+		UNKNOWN_TYPE = -1,
 		SHIELD = 0,
 		DEFENCE = 1,
-		WEAPON = 2
+		WEAPON = 2,
+		N_TYPES = 3
 	};
 
 protected:
@@ -207,7 +222,6 @@ public:
 
 	//int getRelativeEpoch();
 	Image *getImage() const;
-	//void addDesign(Design *design);
 	const char *getName() const {
 		return this->name.c_str();
 	}
@@ -217,15 +231,14 @@ public:
 	int getEpoch() const {
 		return this->epoch;
 	}
-	void addDesign(Design *design) {
-		this->designs.push_back(design);
-	}
+	void addDesign(Design *design);
 	size_t getNDesigns() const {
 		return this->designs.size();
 	}
 	Design *getDesign(size_t i) const {
 		return this->designs.at(i);
 	}
+	Design *findDesign(int save_id) const;
 
 	static Invention *getInvention(Invention::Type type,int epoch);
 };
@@ -247,12 +260,13 @@ const int max_building_turrets_c = 4;
 
 class Building {
 private:
-	Type type;
+	Type type; // saved
 	Sector *sector;
-	int health, max_health;
+	int health; // saved
+	int max_health;
 	int pos_x, pos_y;
 	int n_turrets;
-	int turret_man[max_building_turrets_c];
+	int turret_man[max_building_turrets_c]; // saved
 	int turret_man_frame[max_building_turrets_c];
 	PanelPage *building_button;
 	PanelPage *turret_buttons[max_building_turrets_c];
@@ -314,53 +328,56 @@ public:
 	PanelPage *getTurretButton(int turret) const;
 	void clearTurretMan(int turret);
 	void setTurretMan(int turret, int epoch);
+
+	void saveState(stringstream &stream) const;
+	void loadStateParseXMLNode(const TiXmlNode *parent);
 };
 
 class Sector {
 	vector<Feature *> features;
-	int xpos, ypos;
-	int epoch;
-	int player;
-	bool is_shutdown;
+	int xpos, ypos; // saved
+	int epoch; // saved
+	int player; // saved
+	bool is_shutdown; // saved
 	//int shutdown_player;
 
-	bool nuked;
-	int nuke_by_player;
-	int nuke_time;
-	bool nuke_defence_animation;
-	int nuke_defence_time;
-	int nuke_defence_x;
-	int nuke_defence_y;
+	bool nuked; // saved
+	int nuke_by_player; // saved
+	int nuke_time; // saved
+	bool nuke_defence_animation; // saved
+	int nuke_defence_time; // saved
+	int nuke_defence_x; // saved
+	int nuke_defence_y; // saved
 
-	int population;
-	int n_designers;
-	int n_miners[N_ID];
-	int n_builders[N_BUILDINGS];
-	int n_workers;
-	int n_famount;
-	Design *current_design;
-	Design *current_manufacture;
-	int researched;
-	int researched_lasttime;
-	int manufactured;
-	int manufactured_lasttime;
-	int growth_lasttime;
-	int mined_lasttime;
-	int built_towers[n_players_c]; // for neutral sectors
-	int built[N_BUILDINGS]; // NB: built[BUILDING_TOWER] should never be used
-	int built_lasttime;
+	int population; // saved
+	int n_designers; // saved
+	int n_miners[N_ID]; // saved
+	int n_builders[N_BUILDINGS]; // saved
+	int n_workers; // saved
+	int n_famount; // saved
+	Design *current_design; // saved
+	Design *current_manufacture; // saved
+	int researched; // saved
+	int researched_lasttime; // saved
+	int manufactured; // saved
+	int manufactured_lasttime; // saved
+	int growth_lasttime; // saved
+	int mined_lasttime; // saved
+	int built_towers[n_players_c]; // for neutral sectors // saved
+	int built[N_BUILDINGS]; // NB: built[BUILDING_TOWER] should never be used // saved
+	int built_lasttime; // saved
 
-	int elements[N_ID]; // elements remaining
-	int elementstocks[N_ID]; // elements mined
-	int partial_elementstocks[N_ID];
+	int elements[N_ID]; // elements remaining // saved
+	int elementstocks[N_ID]; // elements mined // saved
+	int partial_elementstocks[N_ID]; // saved
 
 	void initTowerStuff();
 	void consumeStocks(Design *design);
 
 	int getInventionCost() const;
 	int getManufactureCost() const;
-	bool inventions_known[3][n_epochs_c];
-	vector<Design *> designs;
+	bool inventions_known[3][n_epochs_c]; // not saved, inferred fom designs
+	vector<Design *> designs; // saved
 
 	static int getBuildingCost(Type type, int building_player);
 	void destroyBuilding(Type building_type,int client_player);
@@ -370,12 +387,14 @@ class Sector {
 	void doCombat(int client_player);
 	void doPlayer(int client_player);
 
-	Building *buildings[N_BUILDINGS];
+	Design *loadStateParseXMLDesign(const TiXmlAttribute *attribute);
+
+	Building *buildings[N_BUILDINGS]; // saved
 	Army *assembled_army;
-	Army *stored_army;
-	Army *armies[n_players_c];
-	int stored_defenders[n_epochs_c];
-	int stored_shields[4];
+	Army *stored_army; // saved
+	Army *armies[n_players_c]; // saved
+	int stored_defenders[n_epochs_c]; // saved
+	int stored_shields[4]; // saved
 	SmokeParticleSystem *smokeParticleSystem;
 	SmokeParticleSystem *jetParticleSystem;
 	SmokeParticleSystem *nukeParticleSystem;
@@ -545,7 +564,8 @@ public:
 	void buildDesign();
 	void buildBuilding(Type type);
 
-	//void doAIUpdate();
+	void saveState(stringstream &stream) const;
+	void loadStateParseXMLNode(const TiXmlNode *parent);
 
 	void printDebugInfo() const;
 };

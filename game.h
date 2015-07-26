@@ -13,6 +13,7 @@ namespace Gigalomania {
 using namespace Gigalomania;
 
 using std::vector;
+using std::stringstream;
 
 class Invention;
 class Weapon;
@@ -342,6 +343,8 @@ public:
 	}
 	void canMoveTo(bool temp[map_width_c][map_height_c], int sx,int sy,int player) const;
 	void calculateStats() const;
+
+	void saveStateSectors(stringstream &stream) const;
 };
 
 extern Screen *screen;
@@ -357,6 +360,8 @@ bool readLineFromRWOps(bool &ok, struct SDL_RWops *file, char *buffer, char *lin
 void keypressEscape();
 void togglePause();
 bool isPaused();
+void deleteState();
+void saveState();
 void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click);
 void updateGame();
 void drawGame();
@@ -372,7 +377,7 @@ void nextEpoch();
 void nextIsland();
 void returnToChooseIsland();
 void startNewGame();
-void setGameStateID(GameStateID state);
+void setGameStateID(GameStateID state, GameState *new_gamestate = NULL);
 void endIsland();
 void setupPlayers();
 

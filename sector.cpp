@@ -7,6 +7,8 @@
 using std::min;
 using std::max;
 
+#include <sstream>
+
 #include "sector.h"
 #include "game.h"
 #include "utils.h"
@@ -324,6 +326,83 @@ int Army::getIndividualBombardStrength(int i) {
 	return str;
 }
 
+void Army::saveState(stringstream &stream) const {
+	// caller should write the <Army> ... </Army> enclosing tags
+	for(int i=0;i<=n_epochs_c;i++) {
+		stream << "<soldiers epoch=\"" << i << "\" n=\"" << this->soldiers[i] << "\"/>\n";
+	}
+}
+
+void Army::loadStateParseXMLNode(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return;
+	}
+	bool read_children = true;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "army") == 0 )  {
+					// handled entirely by caller
+				}
+				else if( stricmp(element_name, "stored_army") == 0 )  {
+					// handled entirely by caller
+				}
+				else if( stricmp(element_name, "soldiers") == 0 ) {
+					int epoch = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "epoch") == 0 ) {
+							epoch = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown army/soldiers attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( epoch == -1 || n == -1 ) {
+						throw std::runtime_error("soldiers missing attributes");
+					}
+					else if( epoch < 0 || epoch > n_epochs_c ) {
+						throw std::runtime_error("soldiers invalid epoch");
+					}
+					this->soldiers[epoch] = n;
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown army tag: %s\n", element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			{
+			}
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		loadStateParseXMLNode(child);
+	}
+}
+
 Element::Element(const char *name,Id id,Type type) {
 	//strcpy(this->name,name);
 	this->name = name;
@@ -341,6 +420,7 @@ Image *Element::getImage() const {
 Design::Design(Invention *invention,bool ergonomically_terrific) {
 	this->invention = invention;
 	this->ergonomically_terrific = ergonomically_terrific;
+	this->save_id = -1;
 	for(int i=0;i<N_ID;i++)
 		this->cost[i] = 0;
 	//invention->designs->add(this);
@@ -377,6 +457,23 @@ Image *Invention::getImage() const {
 		return icon_defences[this->epoch];
 	else if( this->type == WEAPON )
 		return icon_weapons[this->epoch];
+	return NULL;
+}
+
+void Invention::addDesign(Design *design) {
+	ASSERT( design->getInvention() == this );
+	ASSERT( design->getSaveId() == -1 );
+	design->setSaveId( designs.size() );
+	this->designs.push_back(design);
+}
+
+Design *Invention::findDesign(int save_id) const {
+	for(vector<Design *>::const_iterator iter = designs.begin(); iter != designs.end(); ++iter) {
+		Design *design = *iter;
+		if( design->getSaveId() == save_id ) {
+			return design;
+		}
+	}
 	return NULL;
 }
 
@@ -614,6 +711,101 @@ void Building::clearTurretMan(int turret) {
 void Building::setTurretMan(int turret, int epoch) {
 	ASSERT( turret >= 0 && turret < this->n_turrets );
 	this->turret_man[turret] = epoch;
+}
+
+void Building::saveState(stringstream &stream) const {
+	stream << "<building ";
+	stream << "building_id=\"" << type << "\" ";
+	stream << "health=\"" << health << "\" ";
+	stream << ">\n";
+	for(int i=0;i<max_building_turrets_c;i++) {
+		stream << "<turret_soldier turret_id=\"" << i << "\" epoch=\"" << turret_man[i] <<"\"/>\n";
+	}
+	stream << "</building>\n";
+}
+
+void Building::loadStateParseXMLNode(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return;
+	}
+	bool read_children = true;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "building") == 0 ) {
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "building_id") == 0 ) {
+							// handled by caller
+						}
+						else if( stricmp(attribute_name, "health") == 0 ) {
+							health = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown building/building attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+				}
+				else if( stricmp(element_name, "turret_soldier") == 0 ) {
+					int turret_id = -1;
+					int epoch = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "turret_id") == 0 ) {
+							turret_id = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "epoch") == 0 ) {
+							epoch = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown building/turret_soldier attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( turret_id == -1  ) { // epoch allowed to be -1
+						throw std::runtime_error("turret_soldier missing attributes");
+					}
+					else if( turret_id < 0 || epoch >= max_building_turrets_c ) {
+						throw std::runtime_error("turret_soldier invalid turret_id");
+					}
+					else if( epoch < -1 || epoch >= n_epochs_c ) {
+						throw std::runtime_error("turret_soldier invalid epoch");
+					}
+					this->turret_man[turret_id] = epoch;
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown building tag: %s\n", element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			{
+			}
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		loadStateParseXMLNode(child);
+	}
 }
 
 Sector::Sector(PlayingGameState *gamestate, int epoch, int xpos, int ypos, MapColour map_colour) :
@@ -2618,6 +2810,461 @@ void Sector::evacuate() {
 	}
 
 	this->getArmy(this->getPlayer())->add(this->getAssembledArmy());
+}
+
+void Sector::saveState(stringstream &stream) const {
+	stream << "<sector ";
+	stream << "x=\"" << xpos << "\" ";
+	stream << "y=\"" << ypos << "\" ";
+	stream << "epoch=\"" << epoch << "\" ";
+	stream << "player=\"" << player << "\" ";
+	stream << "is_shutdown=\"" << (is_shutdown?1:0) << "\" ";
+	stream << "nuked=\"" << (nuked?1:0) << "\" ";
+	stream << "nuke_by_player=\"" << nuke_by_player << "\" ";
+	stream << "nuke_time=\"" << nuke_time << "\" ";
+	stream << "nuke_defence_animation=\"" << (nuke_defence_animation?1:0) << "\" ";
+	stream << "nuke_defence_time=\"" << nuke_defence_time << "\" ";
+	stream << "nuke_defence_x=\"" << nuke_defence_x << "\" ";
+	stream << "nuke_defence_y=\"" << nuke_defence_y << "\" ";
+	stream << "population=\"" << population << "\" ";
+	stream << "n_designers=\"" << n_designers << "\" ";
+	stream << "n_workers=\"" << n_workers << "\" ";
+	stream << "n_famount=\"" << n_famount << "\" ";
+	stream << "researched=\"" << researched << "\" ";
+
+	stream << "researched_lasttime=\"" << researched_lasttime << "\" ";
+	stream << "manufactured=\"" << manufactured << "\" ";
+	stream << "manufactured_lasttime=\"" << manufactured_lasttime << "\" ";
+	stream << "growth_lasttime=\"" << growth_lasttime << "\" ";
+	stream << "mined_lasttime=\"" << mined_lasttime << "\" ";
+	stream << "built_lasttime=\"" << built_lasttime << "\" ";
+	stream << ">\n";
+
+	for(int i=0;i<N_ID;i++) {
+		stream << "<n_miners element_id=\"" << i << "\" n=\"" << n_miners[i] << "\"/>\n";
+		stream << "<elements element_id=\"" << i << "\" n=\"" << elements[i] << "\"/>\n";
+		stream << "<elementstocks element_id=\"" << i << "\" n=\"" << elementstocks[i] << "\"/>\n";
+		stream << "<partial_elementstocks element_id=\"" << i << "\" n=\"" << partial_elementstocks[i] << "\"/>\n";
+	}
+	for(int i=0;i<N_BUILDINGS;i++) {
+		stream << "<n_builders building_id=\"" << i << "\" n=\"" << n_builders[i] << "\"/>\n";
+	}
+	if( current_design != NULL ) {
+		stream << "<current_design invention_type=\"" << current_design->getInvention()->getType() << "\" invention_epoch=\"" << current_design->getInvention()->getEpoch() << "\" design_id=\"" << current_design->getSaveId() << "\"/>\n";
+	}
+	if( current_manufacture != NULL ) {
+		stream << "<current_manufacture invention_type=\"" << current_manufacture->getInvention()->getType() << "\" invention_epoch=\"" << current_manufacture->getInvention()->getEpoch() << "\" design_id=\"" << current_manufacture->getSaveId() << "\"/>\n";
+	}
+	for(int i=0;i<n_players_c;i++) {
+		stream << "<built_towers player_id=\"" << i << "\" n=\"" << built_towers[i] << "\"/>\n";
+	}
+	for(int i=0;i<N_BUILDINGS;i++) {
+		stream << "<built building_id=\"" << i << "\" n=\"" << built[i] << "\"/>\n";
+	}
+	for(size_t i=0;i<designs.size();i++) {
+		const Design *design = designs.at(i);
+		stream << "<design invention_type=\"" << design->getInvention()->getType() << "\" invention_epoch=\"" << design->getInvention()->getEpoch() << "\" design_id=\"" << design->getSaveId() << "\"/>\n";
+	}
+	for(int i=0;i<N_BUILDINGS;i++) {
+		if( buildings[i] != NULL ) {
+			buildings[i]->saveState(stream);
+		}
+	}
+	if( stored_army != NULL ) {
+		stream << "<stored_army>\n";
+		stored_army->saveState(stream);
+		stream << "</stored_army>\n";
+	}
+	for(int i=0;i<n_players_c;i++) {
+		if( armies[i] != NULL ) {
+			stream << "<army player_id=\"" << i << "\">\n";
+			armies[i]->saveState(stream);
+			stream << "</army>\n";
+		}
+	}
+	for(int i=0;i<n_epochs_c;i++) {
+		stream << "<stored_defenders epoch=\"" << i << "\" n=\"" << stored_defenders[i] << "\"/>\n";
+	}
+	for(int i=0;i<4;i++) {
+		stream << "<stored_shields relative_epoch=\"" << i << "\" n=\"" << stored_shields[i] << "\"/>\n";
+	}
+
+	stream << "</sector>\n";
+}
+
+Design *Sector::loadStateParseXMLDesign(const TiXmlAttribute *attribute) {
+	Invention::Type invention_type = Invention::UNKNOWN_TYPE;
+	int invention_epoch = -1;
+	int design_id = -1;
+	while( attribute != NULL ) {
+		const char *attribute_name = attribute->Name();
+		if( stricmp(attribute_name, "invention_type") == 0 ) {
+			invention_type = static_cast<Invention::Type>(atoi(attribute->Value()));
+		}
+		else if( stricmp(attribute_name, "invention_epoch") == 0 ) {
+			invention_epoch = atoi(attribute->Value());
+		}
+		else if( stricmp(attribute_name, "design_id") == 0 ) {
+			design_id = atoi(attribute->Value());
+		}
+		else {
+			// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+			LOG("unknown sector/current_design attribute: %s\n", attribute_name);
+			ASSERT(false);
+		}
+		attribute = attribute->Next();
+	}
+	if( invention_type == Invention::UNKNOWN_TYPE || invention_type >= Invention::N_TYPES ) {
+		throw std::runtime_error("current_design invalid type");
+	}
+	else if( invention_epoch < 0 || invention_epoch >= n_epochs_c ) {
+		throw std::runtime_error("current_design invalid epoch");
+	}
+	else if( design_id < 0 ) {
+		throw std::runtime_error("current_design invalid design_id");
+	}
+	const Invention *invention = Invention::getInvention(invention_type, invention_epoch);
+	Design *design = invention->findDesign(design_id);
+	if( design == NULL ) {
+		throw std::runtime_error("unknown design");
+	}
+	return design;
+}
+
+void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return;
+	}
+	bool read_children = true;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "sector") == 0 ) {
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "epoch") == 0 ) {
+							this->epoch = atoi(attribute->Value());
+							if( epoch < 0 || epoch >= n_epochs_c+1 ) {
+								throw std::runtime_error("sector invalid epoch");
+							}
+						}
+						else if( stricmp(attribute_name, "x") == 0 ) {
+							// handled by caller
+						}
+						else if( stricmp(attribute_name, "y") == 0 ) {
+							// handled by caller
+						}
+						else if( stricmp(attribute_name, "player") == 0 ) {
+							this->player = atoi(attribute->Value());
+							if( player < -1 || player >= n_players_c ) {
+								throw std::runtime_error("sector invalid player");
+							}
+							if( player != -1 ) {
+								this->assembled_army = new Army(gamestate, this, this->getPlayer());
+							}
+						}
+						else if( stricmp(attribute_name, "is_shutdown") == 0 ) {
+							this->is_shutdown = atoi(attribute->Value()) == 1;
+						}
+						else if( stricmp(attribute_name, "nuked") == 0 ) {
+							this->nuked = atoi(attribute->Value()) == 1;
+						}
+						else if( stricmp(attribute_name, "nuke_by_player") == 0 ) {
+							this->nuke_by_player = atoi(attribute->Value());
+							if( nuke_by_player < -1 || nuke_by_player >= n_players_c ) {
+								throw std::runtime_error("sector invalid nuke_by_player");
+							}
+						}
+						else if( stricmp(attribute_name, "nuke_time") == 0 ) {
+							this->nuke_time = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "nuke_defence_animation") == 0 ) {
+							this->nuke_defence_animation = atoi(attribute->Value()) == 1;
+						}
+						else if( stricmp(attribute_name, "nuke_defence_time") == 0 ) {
+							this->nuke_defence_time = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "nuke_defence_x") == 0 ) {
+							this->nuke_defence_x = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "nuke_defence_y") == 0 ) {
+							this->nuke_defence_y = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "population") == 0 ) {
+							this->population = atoi(attribute->Value());
+							if( population < 0 ) {
+								throw std::runtime_error("sector invalid population");
+							}
+						}
+						else if( stricmp(attribute_name, "n_designers") == 0 ) {
+							this->n_designers = atoi(attribute->Value());
+							if( n_designers < 0 || n_designers > population ) {
+								throw std::runtime_error("sector invalid n_designers");
+							}
+						}
+						else if( stricmp(attribute_name, "n_workers") == 0 ) {
+							this->n_workers = atoi(attribute->Value());
+							if( n_workers < 0 || n_workers > population ) {
+								throw std::runtime_error("sector invalid n_workers");
+							}
+						}
+						else if( stricmp(attribute_name, "n_famount") == 0 ) {
+							this->n_famount = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "researched") == 0 ) {
+							this->researched = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "researched_lasttime") == 0 ) {
+							this->researched_lasttime = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "manufactured") == 0 ) {
+							this->manufactured = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "manufactured_lasttime") == 0 ) {
+							this->manufactured_lasttime = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "growth_lasttime") == 0 ) {
+							this->growth_lasttime = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "mined_lasttime") == 0 ) {
+							this->mined_lasttime = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "built_lasttime") == 0 ) {
+							this->built_lasttime = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown sector/sector attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+				}
+				else if( stricmp(element_name, "n_miners") == 0 || stricmp(element_name, "elements") == 0 || stricmp(element_name, "elementstocks") == 0 || stricmp(element_name, "partial_elementstocks") == 0 ) {
+					int element_id = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "element_id") == 0 ) {
+							element_id = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown sector/n_miners/etc attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( element_id == -1 || n == -1 ) {
+						throw std::runtime_error("n_miners/elements/partial_elementstocks missing attributes");
+					}
+					else if( element_id < 0 || element_id >= N_ID ) {
+						throw std::runtime_error("n_miners/elements/partial_elementstocks invalid element_id");
+					}
+					if( stricmp(element_name, "n_miners") == 0 )
+						n_miners[element_id] = n;
+					else if( stricmp(element_name, "elements") == 0 )
+						elements[element_id] = n;
+					else if( stricmp(element_name, "elementstocks") == 0 )
+						elementstocks[element_id] = n;
+					else if( stricmp(element_name, "partial_elementstocks") == 0 )
+						partial_elementstocks[element_id] = n;
+				}
+				else if( stricmp(element_name, "n_builders") == 0 || stricmp(element_name, "built") == 0 ) {
+					int building_id = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "building_id") == 0 ) {
+							building_id = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown sector/n_builders/etc attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( building_id == -1 || n == -1 ) {
+						throw std::runtime_error("n_builders/built missing attributes");
+					}
+					else if( building_id < 0 || building_id >= N_BUILDINGS ) {
+						throw std::runtime_error("n_builders/built invalid building_id");
+					}
+					if( stricmp(element_name, "n_builders") == 0 )
+						n_builders[building_id] = n;
+					else if( stricmp(element_name, "built") == 0 )
+						built[building_id] = n;
+				}
+				else if( stricmp(element_name, "current_design") == 0 ) {
+					this->current_design = this->loadStateParseXMLDesign(attribute);
+				}
+				else if( stricmp(element_name, "current_manufacture") == 0 ) {
+					this->current_manufacture = this->loadStateParseXMLDesign(attribute);
+				}
+				else if( stricmp(element_name, "design") == 0 ) {
+					Design *design = this->loadStateParseXMLDesign(attribute);
+					this->designs.push_back(design);
+					inventions_known[design->getInvention()->getType()][design->getInvention()->getEpoch()] = true;
+				}
+				else if( stricmp(element_name, "built_towers") == 0 ) {
+					int player_id = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id") == 0 ) {
+							player_id = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown sector/built_towers attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( player_id == -1 || n == -1 ) {
+						throw std::runtime_error("built_towers missing attributes");
+					}
+					else if( player_id < 0 || player_id >= n_players_c ) {
+						throw std::runtime_error("built_towers invalid player_id");
+					}
+					built_towers[player_id] = n;
+				}
+				else if( stricmp(element_name, "building") == 0 ) {
+					int building_id = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "building_id") == 0 ) {
+							building_id = atoi(attribute->Value());
+						}
+						else {
+							// everything else handed by sub-function
+						}
+						attribute = attribute->Next();
+					}
+					if( building_id < 0 || building_id >= N_BUILDINGS ) {
+						throw std::runtime_error("building invalid building_id");
+					}
+					if( buildings[building_id] == NULL ) {
+						this->buildings[building_id] = new Building(gamestate, this, (Type)building_id);
+					}
+					this->buildings[building_id]->loadStateParseXMLNode(parent);
+					read_children = false;
+				}
+				else if( stricmp(element_name, "stored_army") == 0 ) {
+					if( stored_army == NULL ) {
+						this->stored_army = new Army(gamestate, this, this->getPlayer());
+					}
+					this->stored_army->loadStateParseXMLNode(parent);
+					read_children = false;
+				}
+				else if( stricmp(element_name, "army") == 0 ) {
+					int player_id = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id") == 0 ) {
+							player_id = atoi(attribute->Value());
+						}
+						else {
+							// everything else handed by sub-function
+						}
+						attribute = attribute->Next();
+					}
+					if( player_id < 0 || player_id >= n_players_c ) {
+						throw std::runtime_error("army invalid player_id");
+					}
+					this->armies[player_id]->loadStateParseXMLNode(parent);
+					read_children = false;
+				}
+				else if( stricmp(element_name, "stored_defenders") == 0 ) {
+					int epoch = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "epoch") == 0 ) {
+							epoch = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown sector/stored_defenders attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( epoch == -1 || n == -1 ) {
+						throw std::runtime_error("stored_defenders missing attributes");
+					}
+					else if( epoch < 0 || epoch >= n_epochs_c ) {
+						throw std::runtime_error("stored_defenders invalid epoch");
+					}
+					this->stored_defenders[epoch] = n;
+				}
+				else if( stricmp(element_name, "stored_shields") == 0 ) {
+					int relative_epoch = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "relative_epoch") == 0 ) {
+							relative_epoch = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown sector/stored_shields attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( relative_epoch == -1 || n == -1 ) {
+						throw std::runtime_error("stored_shields missing attributes");
+					}
+					else if( relative_epoch < 0 || relative_epoch >= 4 ) {
+						throw std::runtime_error("stored_shields invalid relative_epoch");
+					}
+					this->stored_shields[relative_epoch] = n;
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown sector tag: %s\n", element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			{
+			}
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		loadStateParseXMLNode(child);
+	}
 }
 
 void Sector::printDebugInfo() const {

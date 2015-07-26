@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include <sstream>
+
 #include "player.h"
 #include "game.h"
 #include "gamestate.h"
@@ -68,6 +70,180 @@ index(index), dead(false), n_births(0), n_deaths(0), n_men_for_this_island(0), n
 }
 
 Player::~Player() {
+}
+
+void Player::saveState(stringstream &stream) const {
+	stream << "<player ";
+	stream << "player_id=\"" << index << "\" ";
+	stream << "dead=\"" << (dead?1:0) << "\" ";
+	stream << "n_births=\"" << n_births << "\" ";
+	stream << "n_deaths=\"" << n_deaths << "\" ";
+	stream << "n_men_for_this_island=\"" << n_men_for_this_island << "\" ";
+	stream << "n_suspended=\"" << n_suspended << "\" ";
+	stream << "alliance_last_asked_human=\"" << alliance_last_asked_human << "\" ";
+	stream << ">\n";
+	stream << "</player>\n";
+}
+
+void Player::loadStateParseXMLNode(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return;
+	}
+	bool read_children = true;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "player") == 0 ) {
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id") == 0 ) {
+							// handled by caller
+						}
+						else if( stricmp(attribute_name, "dead") == 0 ) {
+							dead = atoi(attribute->Value())==1;
+						}
+						else if( stricmp(attribute_name, "n_births") == 0 ) {
+							n_births = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n_deaths") == 0 ) {
+							n_deaths = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n_men_for_this_island") == 0 ) {
+							n_men_for_this_island = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n_suspended") == 0 ) {
+							n_suspended = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "alliance_last_asked_human") == 0 ) {
+							alliance_last_asked_human = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown player/player attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown player tag: %s\n", element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			{
+			}
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		loadStateParseXMLNode(child);
+	}
+}
+
+void Player::saveStateAlliances(stringstream &stream) {
+	stream << "<player_alliances>\n";
+	for(int i=0;i<n_players_c;i++) {
+		for(int j=i+1;j<n_players_c;j++) {
+			stream << "<player_alliance ";
+			stream << "player_id_i=\"" << i << "\" ";
+			stream << "player_id_j=\"" << j << "\" ";
+			stream << "alliances=\"" << (alliances[i][j] ? 1 : 0) << "\" ";
+			stream << "alliance_last_asked=\"" << alliance_last_asked[i][j] << "\" ";
+			stream << "/>\n";
+		}
+	}
+	stream << "</player_alliances>\n";
+}
+
+void Player::loadStateParseXMLNodeAlliances(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return;
+	}
+	bool read_children = true;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "player_alliances") == 0 ) {
+					// handled entirely by caller
+				}
+				else if( stricmp(element_name, "player_alliance") == 0 ) {
+					int player_id_i = -1;
+					int player_id_j = -1;
+					bool alliance = false;
+					int last_asked = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id_i") == 0 ) {
+							player_id_i = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "player_id_j") == 0 ) {
+							player_id_j = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "alliances") == 0 ) {
+							alliance = atoi(attribute->Value())==1;
+						}
+						else if( stricmp(attribute_name, "alliance_last_asked") == 0 ) {
+							last_asked = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown player_alliances/player_alliance attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( player_id_i < 0 || player_id_i >= n_players_c ) {
+						throw std::runtime_error("player_alliance invalid player_id_i");
+					}
+					else if( player_id_j < 0 || player_id_j >= n_players_c ) {
+						throw std::runtime_error("player_alliance invalid player_id_j");
+					}
+					alliances[player_id_i][player_id_j] = alliance;
+					alliance_last_asked[player_id_i][player_id_j] = last_asked;
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown player_alliances tag: %s\n", element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			{
+			}
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		loadStateParseXMLNodeAlliances(child);
+	}
 }
 
 void Player::setAlliance(int a, int b, bool alliance) {

@@ -47,12 +47,20 @@ static int loop_time = 0;
 //static int current_time = 0;
 //static int new_time = 0;
 
+void setRealTime(int real_time) {
+	::real_time = real_time;
+}
+
 int getRealTime() {
 	return real_time;
 }
 
 int getRealLoopTime() {
 	return real_loop_time;
+}
+
+void setGameTime(int game_time) {
+	::game_time = game_time;
 }
 
 int getGameTime() {
@@ -180,7 +188,6 @@ char oldlogfilename[] = "log_old.txt";
  * For Windows, this is in %APPDATA%/application_name/
  * For Linux (including Maemo and Meego), this is in user's home/.config/application_name/ (note the '.', to make it a hidden folder)
  * If the folder can't be accessed (or running on a new operating system), the program folder is used.
- * For Qt platforms, we use QDesktopServices::storageLocation(QDesktopServices::DataLocation).
  */
 char *getApplicationFilename(const char *name) {
     // not safe to use LOG here, as logfile may not have been initialised!

@@ -5,7 +5,6 @@
 #include <cerrno> // n.b., needed on Linux at least
 
 #include <sstream>
-using std::stringstream;
 
 #include "gamestate.h"
 #include "game.h"
@@ -1882,7 +1881,8 @@ bool PlayingGameState::buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m
 
 void PlayingGameState::moveTo(int map_x,int map_y) {
 	current_sector = map->getSector(map_x, map_y);
-	this->getGamePanel()->setPage( GamePanel::STATE_SECTORCONTROL );
+	if( this->getGamePanel() != NULL )
+		this->getGamePanel()->setPage( GamePanel::STATE_SECTORCONTROL );
 	this->reset();
 	for(size_t i=0;i<effects.size();i++) {
 		TimedEffect *effect = effects.at(i);
@@ -2875,6 +2875,201 @@ void PlayingGameState::shutdown(int sector_x, int sector_y) {
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->shutdown(client_player);
+	}
+}
+
+void PlayingGameState::saveState(stringstream &stream) const {
+	stream << "<playing_gamestate>\n";
+	stream << "<current_sector x=\"" << current_sector->getXPos() << "\" y=\"" << current_sector->getYPos() << "\" />\n";
+	stream << "<player_asking_alliance player_id=\"" << player_asking_alliance << "\" />\n";
+	stream << "<time real_time=\"" << getRealTime() << "\" game_time=\"" << getGameTime() << "\" />\n";
+
+	for(int i=0;i<n_players_c;i++) {
+		if( players[i] != NULL ) {
+			players[i]->saveState(stream);
+		}
+	}
+	Player::saveStateAlliances(stream);
+	for(int i=0;i<n_players_c;i++) {
+		for(int j=0;j<n_epochs_c+1;j++) {
+			stream << "<n_deaths player_id=\"" << i << "\" epoch=\"" << j << "\" n=\"" << n_deaths[i][j] << "\" />\n";
+		}
+	}
+	map->saveStateSectors(stream);
+	stream << "</playing_gamestate>\n";
+}
+
+void PlayingGameState::loadStateParseXMLMapXY(int *map_x, int *map_y, const TiXmlAttribute *attribute) {
+	*map_x = -1;
+	*map_y = -1;
+	while( attribute != NULL ) {
+		const char *attribute_name = attribute->Name();
+		if( stricmp(attribute_name, "x") == 0 ) {
+			*map_x = atoi(attribute->Value());
+		}
+		else if( stricmp(attribute_name, "y") == 0 ) {
+			*map_y = atoi(attribute->Value());
+		}
+		else {
+			// skip the other sector attributes, only interested in x/y in this subfunction
+		}
+		attribute = attribute->Next();
+	}
+	if( *map_x < 0 || *map_x >= map_width_c || *map_y < 0 || *map_y >= map_height_c ) {
+		throw std::runtime_error("current_sector invalid map reference");
+	}
+	else if( !map->isSectorAt(*map_x, *map_y) ) {
+		throw std::runtime_error("current_sector map reference doesn't exist");
+	}
+}
+
+void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return;
+	}
+	bool read_children = true;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "playing_gamestate") == 0 ) {
+					// handled entirely by caller
+				}
+				else if( stricmp(element_name, "player_asking_alliance") == 0 ) {
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id") == 0 ) {
+							player_asking_alliance = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown playinggamestate/player_asking_alliance attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+				}
+				else if( stricmp(element_name, "time") == 0 ) {
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "real_time") == 0 ) {
+							int real_time = atoi(attribute->Value());
+							setRealTime(real_time);
+						}
+						else if( stricmp(attribute_name, "game_time") == 0 ) {
+							int game_time = atoi(attribute->Value());
+							setGameTime(game_time);
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown playinggamestate/time attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+				}
+				else if( stricmp(element_name, "n_deaths") == 0 ) {
+					int player_id = -1;
+					int epoch = -1;
+					int n = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id") == 0 ) {
+							player_id = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "epoch") == 0 ) {
+							epoch = atoi(attribute->Value());
+						}
+						else if( stricmp(attribute_name, "n") == 0 ) {
+							n = atoi(attribute->Value());
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown playinggamestate/n_deaths attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( player_id == -1 || epoch == -1 || n == -1 ) {
+						throw std::runtime_error("n_deaths missing attributes");
+					}
+					else if( player_id < 0 || player_id >= n_players_c ) {
+						throw std::runtime_error("n_deaths invalid player_id");
+					}
+					else if( epoch < 0 || epoch >= n_epochs_c+1 ) {
+						throw std::runtime_error("n_deaths invalid epoch");
+					}
+					n_deaths[player_id][epoch] = n;
+				}
+				else if( stricmp(element_name, "current_sector") == 0 ) {
+					int map_x = -1, map_y = -1;
+					loadStateParseXMLMapXY(&map_x, &map_y, attribute);
+					this->moveTo(map_x, map_y);
+				}
+				else if( stricmp(element_name, "sector") == 0 ) {
+					int map_x = -1, map_y = -1;
+					loadStateParseXMLMapXY(&map_x, &map_y, attribute);
+					map->getSector(map_x, map_y)->loadStateParseXMLNode(parent);
+					read_children = false;
+				}
+				else if( stricmp(element_name, "player") == 0 ) {
+					int player_id = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "player_id") == 0 ) {
+							player_id = atoi(attribute->Value());
+						}
+						else {
+							// everything else parsed by Player::loadStateParseXMLNode()
+						}
+						attribute = attribute->Next();
+					}
+					if( player_id < 0 || player_id >= n_players_c ) {
+						throw std::runtime_error("player invalid player_id");
+					}
+					players[player_id] = new Player(player_id == this->client_player, player_id);
+					players[player_id]->loadStateParseXMLNode(parent);
+					read_children = false;
+				}
+				else if( stricmp(element_name, "player_alliances") == 0 ) {
+					Player::loadStateParseXMLNodeAlliances(parent);
+					read_children = false;
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown playinggamestate tag at line %d col %d: %s\n", parent->Row(), parent->Column(), element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			{
+				/*
+				// add to the existing node, not a child
+				vi_tree->setData( parent->Value() );
+				*/
+				/*VI_XMLTreeNode *vi_child = new VI_XMLTreeNode();
+				vi_child->setData( parent->Value() );
+				// add to the tree
+				vi_tree->addChild(vi_child);
+				vi_tree = vi_child;*/
+			}
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		loadStateParseXMLNode(child);
 	}
 }
 

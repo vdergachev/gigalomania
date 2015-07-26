@@ -241,8 +241,10 @@ bool paused = false;
 
 //const int n_men_per_epoch_c = 33;
 int n_men_store = 0;
-int n_suspended[n_players_c];
+int n_player_suspended = 0;
 //int n_men_for_this_island = 0;
+
+const char autosave_filename[] = "autosave.sav";
 
 bool validDifficulty(DifficultyLevel difficulty) {
 	return difficulty >= 0 && difficulty < DIFFICULTY_N_LEVELS;
@@ -262,12 +264,12 @@ int getMenPerEpoch() {
 
 int getMenAvailable() {
 	if( start_epoch == end_epoch_c && gameType == GAMETYPE_ALLISLANDS )
-		return n_suspended[human_player];
+		return n_player_suspended;
 	return n_men_store;
 }
 
 int getNSuspended() {
-	return n_suspended[human_player];
+	return n_player_suspended;
 }
 
 int start_epoch = 0;
@@ -484,7 +486,6 @@ void Map::calculateStats() const {
 					// check for players[sector->getPlayer()] not being NULL should be redundant, but just to be safe
 					players[sector->getPlayer()]->addNDeaths( - sector->getPopulation() );
 					if( sector->isShutdown() && gameResult == GAMERESULT_WON ) {
-						//players[sector->getPlayer()]->n_suspended += sector->getPopulation();
 						players[sector->getPlayer()]->addNSuspended(sector->getPopulation());
 					}
 				}
@@ -502,6 +503,17 @@ void Map::calculateStats() const {
 	}*/
 }
 
+void Map::saveStateSectors(stringstream &stream) const {
+	for(int x=0;x<map_width_c;x++) {
+		for(int y=0;y<map_height_c;y++) {
+			if( this->sector_at[x][y] ) {
+				Sector *sector = this->sectors[x][y];
+				sector->saveState(stream);
+			}
+		}
+	}
+}
+
 /*bool Map::mapIs(char *that_name) {
 //return strcmp( this->name, that_name ) == 0;
 return this->name == that_name;
@@ -511,7 +523,7 @@ int Map::getNSquares() const {
 	int n_squares = 0;
 	for(int y=0;y<map_height_c;y++) {
 		for(int x=0;x<map_width_c;x++) {
-			if( map->sector_at[x][y] ) {
+			if( this->sector_at[x][y] ) {
 				n_squares++;
 			}
 		}
@@ -627,8 +639,7 @@ void newGame() {
 		completed_island[i] = false;
 	//completed_island[0] = true;
 
-	for(int i=0;i<n_players_c;i++)
-		n_suspended[i] = 0;
+	n_player_suspended = 0;
 
 	setEpoch(0);
 
@@ -767,8 +778,7 @@ bool loadGame(const char *filename) {
 		difficulty_level = temp_difficulty;
 		setClientPlayer(temp_player);
 		n_men_store = temp_n_men_store;
-		for(int i=0;i<n_players_c;i++)
-			n_suspended[i] = temp_suspended[i];
+		n_player_suspended = temp_suspended[temp_player];
 		for(int i=0;i<max_islands_per_epoch_c;i++)
 			completed_island[i] = temp_completed[i];
 		setEpoch(temp_start_epoch);
@@ -831,6 +841,11 @@ void saveGame(int slot) {
 	*((int *)ptr) = n_men_store;
 	ptr += sizeof(int);
 
+	int n_suspended[n_players_c]; // no longer use n_suspended for all players, but still need to keep save game files compatible
+	for(int i=0;i<n_players_c;i++) {
+		n_suspended[i] = 0;
+	}
+	n_suspended[human_player] = n_player_suspended;
 	for(int i=0;i<n_players_c;i++) {
 		*((int *)ptr) = n_suspended[i];
 		ptr += sizeof(int);
@@ -3146,7 +3161,7 @@ void disposeGameState() {
 	gamestate = NULL;
 }
 
-void setGameStateID(GameStateID state) {
+void setGameStateID(GameStateID state, GameState *new_gamestate) {
 	gameStateID = state;
 	playMusic();
 
@@ -3155,7 +3170,10 @@ void setGameStateID(GameStateID state) {
 		disposeGameState();
 	}
 
-	if( gameStateID == GAMESTATEID_CHOOSEGAMETYPE )
+	if( new_gamestate != NULL ) {
+		gamestate = new_gamestate;
+	}
+	else if( gameStateID == GAMESTATEID_CHOOSEGAMETYPE )
 		gamestate = new ChooseGameTypeGameState(human_player);
 	else if( gameStateID == GAMESTATEID_CHOOSEDIFFICULTY )
 		gamestate = new ChooseDifficultyGameState(human_player);
@@ -3238,10 +3256,7 @@ void endIsland() {
 	ASSERT(gameStateID == GAMESTATEID_PLAYING);
 	map->calculateStats();
 	map->freeSectors();
-	for(int i=0;i<n_players_c;i++) {
-		if( players[i] != NULL )
-			n_suspended[i] += players[i]->getNSuspended();
-	}
+	n_player_suspended += players[human_player]->getNSuspended();
 	//cleanupPlayers();
 	setGameStateID(GAMESTATEID_ENDISLAND);
 	gamestate->fadeScreen(false, 0, NULL);
@@ -3397,6 +3412,269 @@ void togglePause() {
 
 bool isPaused() {
 	return paused;
+}
+
+void deleteState() {
+	char *save_fullfilename = getApplicationFilename(autosave_filename);
+	remove(save_fullfilename);
+	delete [] save_fullfilename;
+}
+
+void saveState() {
+    if( gameStateID == GAMESTATEID_UNDEFINED || gameStateID == GAMESTATEID_CHOOSEGAMETYPE || gameStateID == GAMESTATEID_CHOOSEDIFFICULTY || gameStateID == GAMESTATEID_CHOOSEPLAYER || gameStateID == GAMESTATEID_GAMECOMPLETE ) {
+		// no need to save state
+	}
+	else {
+		stringstream stream;
+		const int savegame_version_c = 1;
+		stream << "<?xml version=\"1.0\" ?>\n";
+		stream << "<savegame major=\"" << majorVersion << "\" minor=\"" << minorVersion << "\" savegame_version=\"" << savegame_version_c << "\">\n";
+		stream << "<global ";
+		stream << "game_type=\"" << gameType << "\" ";
+		stream << "difficulty_level=\"" << difficulty_level << "\" ";
+		stream << "human_player=\"" << human_player << "\" ";
+		stream << "n_men_store=\"" << n_men_store << "\" ";
+		stream << "n_player_suspended=\"" << n_player_suspended << "\" ";
+		stream << "start_epoch=\"" << start_epoch << "\" ";
+		stream << "selected_island=\"" << selected_island << "\" ";
+		stream << "/>\n";
+
+		for(int i=0;i<max_islands_per_epoch_c;i++) {
+			stream << "<completed_island island_id=\"" << i << "\" complete=\"" << (completed_island[i] ? 1 : 0) << "\"/>\n";
+		}
+
+		gamestate->saveState(stream);
+
+	    stream << "</savegame>\n";
+
+		char *save_fullfilename = getApplicationFilename(autosave_filename);
+		SDL_RWops *file = SDL_RWFromFile(save_fullfilename, "w+");
+		if( file == NULL ) {
+			LOG("failed to open: %s\n", save_fullfilename);
+			LOG("error: %s\n", SDL_GetError());
+		}
+		else {
+			size_t length = stream.str().length();
+			char *ptr = new char[length];
+			stream.read(ptr, length);
+			file->write(file, ptr, length, 1);
+			file->close(file);
+		}
+		delete [] save_fullfilename;
+	}
+}
+
+GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
+	if( parent == NULL ) {
+		return NULL;
+	}
+	bool read_children = true;
+	GameState *new_gamestate = NULL;
+
+	switch( parent->Type() ) {
+		case TiXmlNode::TINYXML_DOCUMENT:
+			break;
+		case TiXmlNode::TINYXML_ELEMENT:
+			{
+				const char *element_name = parent->Value();
+				const TiXmlElement *element = parent->ToElement();
+				const TiXmlAttribute *attribute = element->FirstAttribute();
+				if( stricmp(element_name, "savegame") == 0 ) {
+					int save_major = -1, save_minor = -1;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "major") == 0 ) {
+							save_major = static_cast<DifficultyLevel>(atoi(attribute->Value()));
+						}
+						else if( stricmp(attribute_name, "minor") == 0 ) {
+							save_minor = static_cast<DifficultyLevel>(atoi(attribute->Value()));
+						}
+						else if( stricmp(attribute_name, "savegame_version") == 0 ) {
+							int savegame_version = static_cast<DifficultyLevel>(atoi(attribute->Value()));
+							LOG("save game version %d\n", savegame_version);
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown game/savegame attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					LOG("saved game version %d.%d\n", save_major, save_minor);
+					LOG("current game version %d.%d\n", majorVersion, minorVersion);
+				}
+				else if( stricmp(element_name, "global") == 0 ) {
+					bool set_start_epoch = false;
+					bool set_start_island = false;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "game_type") == 0 ) {
+							gameType = static_cast<GameType>(atoi(attribute->Value()));
+							if( gameType != GAMETYPE_SINGLEISLAND && gameType != GAMETYPE_ALLISLANDS ) {
+								throw std::runtime_error("unknown game_type");
+							}
+						}
+						else if( stricmp(attribute_name, "difficulty_level") == 0 ) {
+							difficulty_level = static_cast<DifficultyLevel>(atoi(attribute->Value()));
+							if( difficulty_level < 0 || difficulty_level >= DIFFICULTY_N_LEVELS ) {
+								throw std::runtime_error("invalid difficulty_level");
+							}
+						}
+						else if( stricmp(attribute_name, "human_player") == 0 ) {
+							human_player = atoi(attribute->Value());
+							if( human_player < 0 || selected_island >= n_players_c ) {
+								throw std::runtime_error("invalid human_player");
+							}
+						}
+						else if( stricmp(attribute_name, "n_men_store") == 0 ) {
+							n_men_store = atoi(attribute->Value());
+							if( n_men_store < 0 ) {
+								throw std::runtime_error("invalid n_men_store");
+							}
+						}
+						else if( stricmp(attribute_name, "n_player_suspended") == 0 ) {
+							n_player_suspended = atoi(attribute->Value());
+							if( n_player_suspended < 0 ) {
+								throw std::runtime_error("invalid n_player_suspended");
+							}
+						}
+						else if( stricmp(attribute_name, "start_epoch") == 0 ) {
+							start_epoch = atoi(attribute->Value());
+							if( start_epoch < 0 || start_epoch >= n_epochs_c ) {
+								throw std::runtime_error("invalid start_epoch");
+							}
+							set_start_epoch = true;
+						}
+						else if( stricmp(attribute_name, "selected_island") == 0 ) {
+							selected_island = atoi(attribute->Value());
+							if( selected_island < 0 || selected_island >= max_islands_per_epoch_c ) {
+								throw std::runtime_error("invalid selected_island");
+							}
+							set_start_island = true;
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown game/global attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( set_start_epoch && set_start_island ) {
+						map = maps[start_epoch][selected_island];
+					}
+					else {
+						throw std::runtime_error("map not set");
+					}
+				}
+				else if( stricmp(element_name, "completed_island") == 0 ) {
+					int island_id = -1;
+					bool complete = false;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "island_id") == 0 ) {
+							island_id = atoi(attribute->Value());
+							if( island_id < 0 || island_id >= max_islands_per_epoch_c ) {
+								throw std::runtime_error("completed_island invalid island_id");
+							}
+						}
+						else if( stricmp(attribute_name, "complete") == 0 ) {
+							complete = atoi(attribute->Value())==1;
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown game/completed_island attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( island_id == -1 ) {
+						throw std::runtime_error("completed_island missing island_id");
+					}
+					completed_island[island_id] = complete;
+				}
+				else if( stricmp(element_name, "playing_gamestate") == 0 ) {
+					PlayingGameState *playing_gamestate = new PlayingGameState(human_player);
+					if( map == NULL ) {
+						throw std::runtime_error("playing_gamestate map not yet set");
+					}
+					map->createSectors(playing_gamestate, start_epoch);
+					playing_gamestate->loadStateParseXMLNode(parent);
+					new_gamestate = playing_gamestate;
+					read_children = false;
+				}
+				else {
+					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+					LOG("unknown game tag: %s\n", element_name);
+					ASSERT(false);
+				}
+			}
+			break;
+		case TiXmlNode::TINYXML_COMMENT:
+			break;
+		case TiXmlNode::TINYXML_UNKNOWN:
+			break;
+		case TiXmlNode::TINYXML_TEXT:
+			break;
+		case TiXmlNode::TINYXML_DECLARATION:
+			break;
+	}
+
+	for(const TiXmlNode *child=parent->FirstChild();child!=NULL && read_children;child=child->NextSibling())  {
+		GameState *sub_gamestate = loadStateParseXMLNode(child);
+		if( sub_gamestate != NULL ) {
+			if( new_gamestate != NULL ) {
+				throw std::runtime_error("more than one gamestate defined");
+			}
+			new_gamestate = sub_gamestate;
+		}
+	}
+	return new_gamestate;
+}
+
+bool loadState() {
+	bool ok = false;
+	stringstream stream;
+	char *save_fullfilename = getApplicationFilename(autosave_filename);
+	SDL_RWops *file = SDL_RWFromFile(save_fullfilename, "r");
+	if( file == NULL ) {
+		LOG("couldn't find or open saved state file: %s\n", save_fullfilename);
+	}
+	else {
+		LOG("found a saved state file: %s\n", save_fullfilename);
+		int size = file->size(file);
+		char *buffer = new char[size+1];
+		if( file->read(file, buffer, 1, size) > 0 ) {
+			buffer[size] = '\0';
+
+			TiXmlDocument doc;
+			if( doc.Parse(buffer) == NULL ) {
+				LOG("failed to parse XML file, error row %d col %d\n", doc.ErrorRow(), doc.ErrorCol());
+				LOG("error: %s\n", doc.ErrorDesc());
+			}
+			else {
+				try {
+					GameState *new_gamestate = loadStateParseXMLNode(&doc);
+					// we create a new gamestate if playing a game
+					if( new_gamestate != NULL ) {
+						LOG("loaded PlayingGameState\n");
+						setGameStateID(GAMESTATEID_PLAYING, new_gamestate);
+					}
+					else {
+						LOG("loaded PlaceMenGameState\n");
+						setGameStateID(GAMESTATEID_PLACEMEN);
+					}
+					ok = true;
+				}
+				catch(const std::runtime_error &error) {
+					LOG("caught error loading state: %s\n", error.what());
+				}
+			}
+		}
+		file->close(file);
+		delete [] buffer;
+	}
+	delete [] save_fullfilename;
+	return ok;
 }
 
 void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click) {
@@ -4277,8 +4555,7 @@ void playGame(int n_args, char *args[]) {
 	for(int i=0;i<max_islands_per_epoch_c;i++)
 		completed_island[i] = false;
 
-	for(int i=0;i<n_players_c;i++)
-		n_suspended[i] = 0;
+	n_player_suspended = 0;
 
 	// init application
 	application = new Application();
@@ -4346,8 +4623,6 @@ void playGame(int n_args, char *args[]) {
 	}
 	drawProgress(95);
 
-	map = maps[start_epoch][selected_island];
-
 	for(size_t i=0;i<TrackedObject::getNumTags();i++) {
 		TrackedObject *to = TrackedObject::getTag(i);
 		if( to != NULL && strcmp( to->getClass(), "CLASS_IMAGE" ) == 0 ) {
@@ -4377,8 +4652,16 @@ void playGame(int n_args, char *args[]) {
 		runTests();
 	}
 	else {
-		setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
-		//setGameStateID(GAMESTATEID_CHOOSEPLAYER);
+		if( loadState() ) {
+			// can now delete the saved state
+			deleteState();
+		}
+		else {
+			deleteState(); // remove file in case there was one we failed to load
+			map = maps[start_epoch][selected_island];
+			setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
+			//setGameStateID(GAMESTATEID_CHOOSEPLAYER);
+		}
 
 		application->runMainLoop();
 	}
