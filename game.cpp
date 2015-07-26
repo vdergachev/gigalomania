@@ -582,7 +582,6 @@ void Map::draw(int offset_x, int offset_y) const {
 
 void setEpoch(int epoch) {
 	LOG("set epoch %d\n", epoch);
-	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 	ASSERT( epoch >= 0 && epoch < n_epochs_c );
 	start_epoch = epoch;
 
@@ -656,7 +655,6 @@ void setClientPlayer(int set_client_player) {
 
 void nextEpoch() {
 	LOG("nextEpoch()\n");
-	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 	start_epoch++;
 	if( start_epoch == n_epochs_c ) {
 		ASSERT( gameType == GAMETYPE_SINGLEISLAND );
@@ -3283,19 +3281,13 @@ void endIsland() {
 			}
 		}
 	}
-}
 
-void returnToChooseIsland() {
-	ASSERT(gameStateID == GAMESTATEID_ENDISLAND);
 	if( gameResult == GAMERESULT_WON && gameType == GAMETYPE_ALLISLANDS ) {
 		//n_men_store -= n_men_for_this_island;
 		n_men_store -= players[human_player]->getNMenForThisIsland();
 		if( start_epoch == n_epochs_c-1 ) {
-			setGameStateID(GAMESTATEID_GAMECOMPLETE);
 		}
 		else {
-			setGameStateID(GAMESTATEID_PLACEMEN);
-
 			ASSERT( !completed_island[selected_island] );
 			completed_island[selected_island] = true;
 			// check advance to next epoch
@@ -3314,6 +3306,18 @@ void returnToChooseIsland() {
 			}
 		}
 	}
+}
+
+void returnToChooseIsland() {
+	ASSERT(gameStateID == GAMESTATEID_ENDISLAND);
+	if( gameResult == GAMERESULT_WON && gameType == GAMETYPE_ALLISLANDS ) {
+		if( start_epoch == n_epochs_c-1 ) {
+			setGameStateID(GAMESTATEID_GAMECOMPLETE);
+		}
+		else {
+			setGameStateID(GAMESTATEID_PLACEMEN);
+		}
+	}
 	else {
 		setGameStateID(GAMESTATEID_PLACEMEN);
 		// test
@@ -3322,7 +3326,6 @@ void returnToChooseIsland() {
 
 	gamestate->fadeScreen(false, 0, NULL);
 
-	//n_men_for_this_island = 0;
 	if( human_player != PLAYER_DEMO )
 		players[human_player]->setNMenForThisIsland(0);
 }
