@@ -339,6 +339,7 @@ class PlayingGameState : public GameState {
 	Button *alliance_no;
 	int n_deaths[n_players_c][n_epochs_c+1]; // saved
 
+	void getFlagOffset(int *offset_x, int *offset_y, int epoch) const;
 	bool openPitMine();
 	bool validSoldierLocation(int epoch,int xpos,int ypos);
 	bool buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m_right,Building *building);

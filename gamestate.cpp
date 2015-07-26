@@ -1267,6 +1267,22 @@ void GameState::whiteFlash() {
 	}
 }
 
+void PlayingGameState::getFlagOffset(int *offset_x, int *offset_y, int epoch) const {
+	if( using_old_gfx ) {
+		*offset_x = 22;
+		*offset_y = 6;
+	}
+	else if( epoch == 6  || epoch ==7 ) {
+		// building towers have flat roof
+		*offset_x = 22;
+		*offset_y = 6;
+	}
+	else {
+		*offset_x = 21;
+		*offset_y = 2;
+	}
+}
+
 void PlayingGameState::draw() {
 #if defined(__ANDROID__)
 	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
@@ -1421,8 +1437,11 @@ void PlayingGameState::draw() {
 				}
 			}
 
-			if( i == BUILDING_TOWER )
-				flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_flag_x_c, offset_land_y_c + building->getY() + offset_flag_y_c);
+			if( i == BUILDING_TOWER ) {
+				int offset_x = 0, offset_y = 0;
+				getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
+				flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
+			}
 
 			const int health_xpos = offset_land_x_c + building->getX() + 4;
 			//const int health_ypos = offset_land_y_c + building->getY() - 16;
@@ -1445,7 +1464,9 @@ void PlayingGameState::draw() {
 		ASSERT( building != NULL );
 		Image **images = building->getImages();
 		images[ current_sector->getBuildingEpoch() ]->draw(offset_land_x_c + building->getX(), offset_land_y_c + building->getY());
-		flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_flag_x_c, offset_land_y_c + building->getY() + offset_flag_y_c);
+		int offset_x = 0, offset_y = 0;
+		getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
+		flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
 	}
 
 	//Vector soldier_list(n_players_c * 250);

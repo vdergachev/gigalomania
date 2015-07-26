@@ -68,9 +68,6 @@ float scale_factor_h = 1.0f;
 float scale_width = 0.0f; // the scale of the logical resolution or graphics size wrt the default 320x240 coordinate system
 float scale_height = 0.0f;
 
-int offset_flag_x_c = 22;
-int offset_flag_y_c = 6;
-
 bool use_amigadata = true;
 
 GameMode gameMode = GAMEMODE_SINGLEPLAYER;
@@ -1914,7 +1911,6 @@ bool loadImages() {
 		delete temp;
 	}
 
-	offset_flag_y_c = 3; // correct placement of flag on tower for new graphics
 	drawProgress(40);
 
 	Image *icons = Image::loadImage(gfx_dir + "icons.png");
@@ -3202,7 +3198,7 @@ void setGameStateID(GameStateID state, GameState *new_gamestate) {
 	placeMenInfo.init();
 	}*/
 	// cheat/test:
-	/*if( gameStateID == GAMESTATEID_PLAYING ) {
+	/*if( gameStateID == GAMESTATEID_PLAYING && new_gamestate == NULL ) {
 		int map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
 		int map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();
 		Sector *start_sector = map->getSector(map_x, map_y);

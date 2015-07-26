@@ -46,9 +46,6 @@ extern const char *maps_dirname;
 extern const char *alt_maps_dirname;
 #endif
 
-extern int offset_flag_x_c;
-extern int offset_flag_y_c;
-
 //extern int lastmouseclick_time;
 
 enum GameStateID {
