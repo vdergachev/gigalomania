@@ -1051,10 +1051,10 @@ void PlayingGameState::setupMapGUI() {
 		}
 	}
 	if( this->player_asking_alliance != -1 ) {
-		alliance_yes = new Button(24, 80, "YES", letters_large);
+		alliance_yes = new Button(24, 82, "YES", letters_large);
 		alliance_yes->setInfoLMB("join the alliance");
 		screen_page->add(alliance_yes);
-		alliance_no = new Button(56, 80, "NO", letters_large);
+		alliance_no = new Button(56, 82, "NO", letters_large);
 		alliance_no->setInfoLMB("refuse the alliance");
 		screen_page->add(alliance_no);
 	}
