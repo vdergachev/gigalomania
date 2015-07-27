@@ -776,7 +776,7 @@ void Building::loadStateParseXMLNode(const TiXmlNode *parent) {
 					if( turret_id == -1  ) { // epoch allowed to be -1
 						throw std::runtime_error("turret_soldier missing attributes");
 					}
-					else if( turret_id < 0 || epoch >= max_building_turrets_c ) {
+					else if( turret_id < 0 || turret_id >= max_building_turrets_c ) {
 						throw std::runtime_error("turret_soldier invalid turret_id");
 					}
 					else if( epoch < -1 || epoch >= n_epochs_c ) {
