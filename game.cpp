@@ -242,6 +242,7 @@ int n_player_suspended = 0;
 //int n_men_for_this_island = 0;
 
 const char autosave_filename[] = "autosave.sav";
+const char autosave_bad_filename[] = "autosave_bad.sav";
 
 bool validDifficulty(DifficultyLevel difficulty) {
 	return difficulty >= 0 && difficulty < DIFFICULTY_N_LEVELS;
@@ -3745,6 +3746,10 @@ bool loadState() {
 		}
 		file->close(file);
 		delete [] buffer;
+	}
+	if( !ok ) {
+		char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename);
+		rename(save_fullfilename, save_bad_fullfilename);
 	}
 	delete [] save_fullfilename;
 	return ok;
