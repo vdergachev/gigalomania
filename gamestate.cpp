@@ -315,7 +315,7 @@ void GameState::draw() {
 		string str = mobile_ui ? "touch screen\nto unpause game" : "press p or click\nmouse to unpause game";
 		// n.b., don't use 120 for y pos, need to avoid collision with quit game message
 		// and offset x pos slightly, to avoid overlapping with GUI
-		Image::write(120, 100, letters_small, str.c_str(), Image::JUSTIFY_LEFT);
+		Image::write(120, 100, letters_large, str.c_str(), Image::JUSTIFY_LEFT);
 	}
 
 	if( application->hasFPS() ) {
@@ -342,11 +342,11 @@ void GameState::createQuitWindow() {
     if( confirm_window == NULL && !state_changed ) {
 		confirm_type = CONFIRMTYPE_QUITGAME;
 		confirm_window = new PanelPage(120, 120, 64, 32);
-		Button *text_button = new Button(0, 0, "REALLY QUIT?", letters_small);
+		Button *text_button = new Button(0, 0, "REALLY QUIT?", letters_large);
 		confirm_window->add(text_button);
-		confirm_yes_button = new Button(0, 16, "YES", letters_small);
+		confirm_yes_button = new Button(0, 16, "YES", letters_large);
 		confirm_window->add(confirm_yes_button);
-		confirm_no_button = new Button(32, 16, "NO", letters_small);
+		confirm_no_button = new Button(32, 16, "NO", letters_large);
 		confirm_window->add(confirm_no_button);
 		screen_page->add(confirm_window);
 	}
@@ -471,8 +471,8 @@ void ChoosePlayerGameState::reset() {
 	int ypos = 48;
 	const int ydiff = 48;
 	const int xindent = 8;
-	const int ylargediff = letters_large[0]->getScaledHeight();
-	const int ysmalldiff = letters_small[0]->getScaledHeight();
+	const int ylargediff = letters_large[0]->getScaledHeight() + 2;
+	const int ysmalldiff = letters_small[0]->getScaledHeight() + 2;
 	const int draw_offset_x = 32;
 
 	button_red = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", letters_large);
@@ -654,7 +654,11 @@ void PlaceMenGameState::draw() {
 	Image::writeNumbers(cx+8, cy, shiny ? numbers_largeshiny : numbers_largegrey, abs(year),Image::JUSTIFY_RIGHT);
 	Image *era = ( year < 0 ) ? icon_bc :
 		shiny ? icon_ad_shiny : icon_ad;
-	era->draw(cx+8, cy);
+	if( era != NULL )
+		era->draw(cx+8, cy);
+	else {
+		Image::write(cx+8, cy, letters_small, ( year < 0 ) ? "BC" : "AD", Image::JUSTIFY_LEFT);
+	}
     cy += l_h + 2;
 
     if( !isDemo() && gameType == GAMETYPE_ALLISLANDS ) {
@@ -1047,10 +1051,10 @@ void PlayingGameState::setupMapGUI() {
 		}
 	}
 	if( this->player_asking_alliance != -1 ) {
-		alliance_yes = new Button(24, 80, "YES", letters_small);
+		alliance_yes = new Button(24, 80, "YES", letters_large);
 		alliance_yes->setInfoLMB("join the alliance");
 		screen_page->add(alliance_yes);
-		alliance_no = new Button(56, 80, "NO", letters_small);
+		alliance_no = new Button(56, 80, "NO", letters_large);
 		alliance_no->setInfoLMB("refuse the alliance");
 		screen_page->add(alliance_no);
 	}
@@ -1114,9 +1118,9 @@ void PlayingGameState::reset() {
 
 		//if( mobile_ui )
 		{
-			pause_button = new Button(default_width_c - 80, default_height_c - quit_button_offset_c, "PAUSE", letters_small);
+			pause_button = new Button(default_width_c - 80, default_height_c - quit_button_offset_c, "PAUSE", letters_large);
 			screen_page->add(pause_button);
-			quit_button = new Button(default_width_c - 32, default_height_c - quit_button_offset_c, "QUIT", letters_small);
+			quit_button = new Button(default_width_c - 32, default_height_c - quit_button_offset_c, "QUIT", letters_large);
 			screen_page->add(quit_button);
 		}
 	}
@@ -3114,7 +3118,7 @@ void EndIslandGameState::draw() {
 	else {
 		ASSERT(false);
 	}
-	Image::write(160, 120, letters_small, text, Image::JUSTIFY_CENTRE);
+	Image::write(160, 122, letters_large, text, Image::JUSTIFY_CENTRE);
 
 	bool suspend = false;
 	if( start_epoch >= 6 && gameResult == GAMERESULT_WON )

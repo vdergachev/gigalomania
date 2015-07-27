@@ -1484,9 +1484,10 @@ void Image::write(int x,int y,Image *images[n_font_chars_c],const char *text,Jus
 void Image::writeMixedCase(int x,int y,Image *large[n_font_chars_c],Image *little[n_font_chars_c],Image *numbers[10],const char *text,Justify justify) {
 	int len = strlen(text);
 	int n_lines = 0;
+	int s_w = little[0]->getScaledWidth();
+	int l_w = large[0]->getScaledWidth();
 	int max_wid = 0;
-	textLines(&n_lines, &max_wid, text);
-	int w = little[0]->getScaledWidth();
+	textLines(&n_lines, &max_wid, text, s_w, l_w);
 	int n_h = 0;
 	if( numbers != NULL )
 		n_h = numbers[0]->getScaledHeight();
@@ -1496,13 +1497,14 @@ void Image::writeMixedCase(int x,int y,Image *large[n_font_chars_c],Image *littl
 	if( justify == JUSTIFY_LEFT )
 		sx = x;
 	else if( justify == JUSTIFY_CENTRE )
-		sx = x - ( w * max_wid ) / 2;
+		sx = x - max_wid / 2;
 	else if( justify == JUSTIFY_RIGHT )
-		sx = x - w * max_wid;
+		sx = x - max_wid;
 	int cx = sx;
 
 	for(int i=0;i<len;i++) {
 		char ch = text[i];
+		bool was_large = false;
 		if( numbers == NULL && ch == '0' ) {
 			ch = 'O'; // hack for 0 (we don't spell it O, due to alphabetical ordering)
 		}
@@ -1522,38 +1524,39 @@ void Image::writeMixedCase(int x,int y,Image *large[n_font_chars_c],Image *littl
 		else if( isupper( ch ) ) {
 			int indx = ch - 'A';
 			large[indx]->draw(cx, y);
+			was_large = true;
 		}
 		else if( islower( ch ) ) {
 			little[ ch - 'a' ]->draw(cx, y + l_h - s_h);
 		}
 		else if( ch == '.' ) {
 			if( little[font_index_period_c] != NULL )
-				little[font_index_period_c]->draw(cx, y);
+				little[font_index_period_c]->draw(cx, y + l_h - s_h);
 			else if( large[font_index_period_c] != NULL )
 				large[font_index_period_c]->draw(cx, y);
 		}
 		else if( ch == '\'' ) {
 			if( little[font_index_apostrophe_c] != NULL )
-				little[font_index_apostrophe_c]->draw(cx, y);
+				little[font_index_apostrophe_c]->draw(cx, y + l_h - s_h);
 			else if( large[font_index_apostrophe_c] != NULL )
 				large[font_index_apostrophe_c]->draw(cx, y);
 		}
 		else if( ch == '!' ) {
 			if( little[font_index_exclamation_c] != NULL )
-				little[font_index_exclamation_c]->draw(cx, y);
+				little[font_index_exclamation_c]->draw(cx, y + l_h - s_h);
 			else if( large[font_index_exclamation_c] != NULL )
 				large[font_index_exclamation_c]->draw(cx, y);
 		}
 		else if( ch == '?' ) {
 			if( little[font_index_question_c] != NULL )
-				little[font_index_question_c]->draw(cx, y);
+				little[font_index_question_c]->draw(cx, y + l_h - s_h);
 			else if( large[font_index_question_c] != NULL )
 				large[font_index_question_c]->draw(cx, y);
 		}
 		else {
 			continue; // don't increase cx
 		}
-		cx += w;
+		cx += was_large ? l_w : s_w;
 	}
 }
 

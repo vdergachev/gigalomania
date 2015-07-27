@@ -577,11 +577,9 @@ void Map::draw(int offset_x, int offset_y) const {
 	}
 }
 
-void setEpoch(int epoch) {
-	LOG("set epoch %d\n", epoch);
-	ASSERT( epoch >= 0 && epoch < n_epochs_c );
-	start_epoch = epoch;
-
+void updatedEpoch() {
+	// used directly when we've set epoch from loading state
+	ASSERT( start_epoch >= 0 && start_epoch < n_epochs_c );
 	n_sub_epochs = 4;
 	//if( start_epoch == n_epochs_c-1 )
 	if( start_epoch == end_epoch_c )
@@ -589,6 +587,13 @@ void setEpoch(int epoch) {
 	else if( start_epoch + n_sub_epochs > n_epochs_c ) {
 		n_sub_epochs = n_epochs_c - start_epoch;
 	}
+}
+
+void setEpoch(int epoch) {
+	LOG("set epoch %d\n", epoch);
+	ASSERT( epoch >= 0 && epoch < n_epochs_c );
+	start_epoch = epoch;
+	updatedEpoch();
 
 	selected_island = 0;
 
@@ -2048,9 +2053,11 @@ bool loadImages() {
 	icon_ad = icons->copy(208, 16, 12, 8);
 	icon_ad_shiny = icons->copy(208, 16, 12, 8);*/
 	icon_infinity = icons->copy(128, 112, 16, 16);
-	icon_bc = icons->copy(224, 15, 16, 16);
+	/*icon_bc = icons->copy(224, 15, 16, 16);
 	icon_ad = icons->copy(208, 16, 16, 16);
-	icon_ad_shiny = icons->copy(208, 16, 16, 16);
+	icon_ad_shiny = icons->copy(208, 16, 16, 16);*/
+
+	numbers_half = icons->copy(112, 112, 7, 4);
 
 	icon_nuke_hole = icons->copy(288, 96, 16, 16);
 
@@ -2089,44 +2096,110 @@ bool loadImages() {
 	if( icons == NULL )
 		return false;
 	drawProgress(48);
-	processImage(icons);
-    const int number_h_c = 10;
+	//processImage(icons);
+	//const int font_w = 6;
+	//const int font_h = 10;
+	//const int font_w = 8;
+	//const int font_h = 16;
+	int font_w = 12;
+	int font_h = 16;
     for(int i=0;i<10;i++) {
-        numbers_blue[i] = icons->copy(8*i, 0, 6, number_h_c);
-        numbers_grey[i] = icons->copy(8*i, 0, 6, number_h_c);
-        numbers_white[i] = icons->copy(8*i, 0, 6, number_h_c);
-        numbers_orange[i] = icons->copy(8*i, 0, 6, number_h_c);
-        numbers_yellow[i] = icons->copy(8*i, 0, 6, number_h_c);
-        numbers_largegrey[i] = icons->copy(8*i, 0, 6, number_h_c); // should be 6x15
-        numbers_largeshiny[i] = icons->copy(8*i, 0, 6, number_h_c); // should be 6x15
+		//int xpos = 8*i;
+		//int ypos = 0;
+		//int xpos = 136+9*i;
+		//int ypos = 1;
+		int xpos = 196+13*i;
+		int ypos = 1;
+        //int xpos = 512+32*i+4;
+		//int ypos = 0;
+		numbers_blue[i] = icons->copy(xpos, ypos, font_w, font_h);
+        numbers_grey[i] = icons->copy(xpos, ypos, font_w, font_h);
+        numbers_white[i] = icons->copy(xpos, ypos, font_w, font_h);
+        numbers_orange[i] = icons->copy(xpos, ypos, font_w, font_h);
+        numbers_yellow[i] = icons->copy(xpos, ypos, font_w, font_h);
 		for(int j=0;j<4;j++) {
-            numbers_small[j][i] = icons->copy(8*i, 32, 6, number_h_c);
-			// todo: remap to dark player colours too
-			/*int r=0, g=0, b=0;
-			PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)j);
-			numbers_small[j][i]->remap(240, 0, 0, r, g, b);
-			numbers_small[j][i]->remap(112, 32, 16, r, g, b);*/
+            numbers_small[j][i] = icons->copy(xpos, ypos, font_w, font_h);
 		}
-		numbers_small[1][i]->reshadeRGB(0, false, true, false);
-		numbers_small[2][i]->reshadeRGB(0, true, true, false);
-		numbers_small[3][i]->reshadeRGB(0, false, false, true);
+		numbers_small[0][i]->brighten(1.0f, 0.0f, 0.0f);
+		numbers_small[1][i]->brighten(0.0f, 1.0f, 0.0f);
+		numbers_small[2][i]->brighten(1.0f, 1.0f, 0.0f);
+		numbers_small[3][i]->brighten(0.0f, 0.0f, 1.0f);
+
+		processImage(numbers_blue[i]);
+		processImage(numbers_grey[i]);
+		processImage(numbers_white[i]);
+		processImage(numbers_orange[i]);
+		processImage(numbers_yellow[i]);
+		for(int j=0;j<4;j++) {
+			processImage(numbers_small[j][i]);
+		}
 	}
 	for(int i=0;i<n_font_chars_c;i++) {
-		letters_large[i] = NULL;
 		letters_small[i] = NULL;
 	}
 	for(int i=0;i<26;i++) {
-        letters_small[i] = icons->copy(80 + 8*i, 16, 6, number_h_c);
-        letters_large[i] = icons->copy(80 + 8*i, 16, 6, number_h_c); // should be 6x15
+		//int xpos = 80+8*i;
+		//int ypos = 16;
+		//int xpos = 289+9*i;
+		//int ypos = 1;
+		int xpos = 417+13*i;
+		int ypos = 1;
+        //int xpos = 1056+32*i+4;
+		//int ypos = 0;
+        letters_small[i] = icons->copy(xpos, ypos, font_w, font_h);
 	}
-    numbers_half = icons->copy(288, 16, 6, number_h_c);
-	letters_small[font_index_period_c] = icons->copy(296, 16, 6, number_h_c);
-	letters_small[font_index_apostrophe_c] = icons->copy(304, 16, 6, number_h_c);
-	letters_small[font_index_exclamation_c] = icons->copy(312, 16, 6, number_h_c);
-	letters_small[font_index_question_c] = icons->copy(320, 16, 6, number_h_c);
+    //numbers_half = icons->copy(288, 16, font_w, font_h);
+	/*letters_small[font_index_period_c] = icons->copy(296, 16, font_w, font_h);
+	letters_small[font_index_apostrophe_c] = icons->copy(304, 16, font_w, font_h);
+	letters_small[font_index_exclamation_c] = icons->copy(312, 16, font_w, font_h);
+	letters_small[font_index_question_c] = icons->copy(320, 16, font_w, font_h);*/
+	letters_small[font_index_period_c] = icons->copy(170, 1, font_w, font_h);
+	letters_small[font_index_apostrophe_c] = icons->copy(66, 1, font_w, font_h);
+	letters_small[font_index_exclamation_c] = icons->copy(1, 1, font_w, font_h);
+	letters_small[font_index_question_c] = icons->copy(391, 1, font_w, font_h);
+	for(int i=0;i<n_font_chars_c;i++) {
+		if( letters_small[i] != NULL )
+			processImage(letters_small[i]);
+	}
 
 	delete icons;
 	drawProgress(50);
+
+	icons = Image::loadImage(gfx_dir + "font_large.png");
+	if( icons == NULL )
+		return false;
+	drawProgress(48);
+	font_w = 24;
+	font_h = 32;
+    for(int i=0;i<10;i++) {
+		int xpos = 196+13*i;
+		int ypos = 1;
+		xpos *= 2;
+		ypos *= 2;
+        numbers_largegrey[i] = icons->copy(xpos, ypos, font_w, font_h);
+        numbers_largeshiny[i] = icons->copy(xpos, ypos, font_w, font_h);
+
+		processImage(numbers_largegrey[i]);
+		processImage(numbers_largeshiny[i]);
+	}
+	for(int i=0;i<n_font_chars_c;i++) {
+		letters_large[i] = NULL;
+	}
+	for(int i=0;i<26;i++) {
+		int xpos = 417+13*i;
+		int ypos = 1;
+		xpos *= 2;
+		ypos *= 2;
+        letters_large[i] = icons->copy(xpos, ypos, font_w, font_h);
+	}
+	letters_large[font_index_period_c] = icons->copy(170*2, 1*2, font_w, font_h);
+	letters_large[font_index_apostrophe_c] = icons->copy(66*2, 1*2, font_w, font_h);
+	letters_large[font_index_exclamation_c] = icons->copy(1*2, 1*2, font_w, font_h);
+	letters_large[font_index_question_c] = icons->copy(391*2, 1*2, font_w, font_h);
+	for(int i=0;i<n_font_chars_c;i++) {
+		if( letters_large[i] != NULL )
+			processImage(letters_large[i]);
+	}
 
     smoke_image = Image::createRadial((int)(scale_width * 16), (int)(scale_height * 16), 0.5f);
 	processImage(smoke_image);
@@ -3542,6 +3615,7 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 							if( start_epoch < 0 || start_epoch >= n_epochs_c ) {
 								throw std::runtime_error("invalid start_epoch");
 							}
+							updatedEpoch();
 							set_start_epoch = true;
 						}
 						else if( stricmp(attribute_name, "selected_island") == 0 ) {

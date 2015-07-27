@@ -213,7 +213,7 @@ void PanelPage::drawPopups() {
 					n_texts++;
 				}*/
 				int w = letters_small[0]->getScaledWidth();
-				int h = letters_small[0]->getScaledHeight();
+				int h = letters_small[0]->getScaledHeight() + 2;
 				int off_x = (int)(popup_x/scale_width + 24);
 				int gap_left = 20;
 				int gap_right = 4;
@@ -226,7 +226,7 @@ void PanelPage::drawPopups() {
 				int max_wid = 0;
 				for(int j=0;j<n_texts;j++) {
 					int this_max_wid = 0;
-					textLines(&n_lines[j], &this_max_wid, text[j]);
+					textLines(&n_lines[j], &this_max_wid, text[j], w, w);
 					if( this_max_wid > max_wid )
 						max_wid = this_max_wid;
 					one_line[j] = n_lines[j] == 1;
@@ -237,7 +237,7 @@ void PanelPage::drawPopups() {
 
 				int rect_x = (int)(off_x * scale_width);
 				int rect_y = (int)(popup_y - gap_y * scale_height);
-				int rect_w = (int)(( max_wid * w + gap_left + gap_right ) * scale_width);
+				int rect_w = (int)(( max_wid + gap_left + gap_right ) * scale_width);
 				int rect_h = (int)(( 2 * gap_y + h * total_lines +
 					between_lines_y * ( total_lines - 1 ) +
 					( between_texts_y - between_lines_y ) * ( n_texts - 1 ) ) * scale_height);
@@ -354,6 +354,7 @@ Button::Button(int x,int y,const char *text,Image *font[]) : PanelPage(x, y) {
 	this->w = font[0]->getScaledWidth() * this->text.length();
 	this->h = font[0]->getScaledHeight();
 	this->draw_offset_x = 0;
+	this->tolerance += 1;
 	if( mobile_ui ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
@@ -366,6 +367,7 @@ Button::Button(int x,int y,int h,const char *text,Image *font[]) : PanelPage(x, 
 	this->w = font[0]->getScaledWidth() * this->text.length();
 	this->h = h;
 	this->draw_offset_x = 0;
+	this->tolerance += 1;
 	if( mobile_ui ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
@@ -378,6 +380,7 @@ Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[
 	this->w = draw_offset_x + font[0]->getScaledWidth() * this->text.length();
 	this->h = h;
 	this->draw_offset_x = draw_offset_x;
+	this->tolerance += 1;
 	if( mobile_ui ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
@@ -491,7 +494,11 @@ CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Image *font
 	this->w = font[0]->getScaledWidth() * max_len;
 	this->h = font[0]->getScaledHeight();
 	this->active = 0;
-	this->tolerance *= 2;
+	this->tolerance += 1;
+	if( mobile_ui ) {
+		this->tolerance += 4;
+		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
+	}
 }
 
 CycleButton::~CycleButton() {

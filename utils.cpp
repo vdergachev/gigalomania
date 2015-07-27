@@ -139,7 +139,7 @@ int n_digits(int number) {
 	return num;
 }
 
-void textLines(int *n_lines,int *max_wid,const char *text) {
+void textLines(int *n_lines,int *max_wid,const char *text, int lower_w, int upper_w) {
 	*n_lines = 0;
 	*max_wid = 0;
 	const char *ptr = text;
@@ -147,10 +147,16 @@ void textLines(int *n_lines,int *max_wid,const char *text) {
 	for(;;) {
 		*n_lines = *n_lines + 1;
 
-		while( *n_ptr != '\n' && *n_ptr != '\0' )
+		int wid = 0;
+		while( *n_ptr != '\n' && *n_ptr != '\0' ) {
+			if( isupper(*n_ptr) )
+				wid += upper_w;
+			else
+				wid += lower_w;
 			n_ptr++;
+		}
 
-		int wid = (int)(n_ptr - ptr);
+		//int wid = (int)(n_ptr - ptr);
 		if( wid > *max_wid )
 			*max_wid = wid;
 

@@ -1211,7 +1211,11 @@ void GamePanel::draw() {
 			Image::writeNumbers(offset_panel_x_c + 96, offset_panel_y_c, shiny ? numbers_largeshiny : numbers_largegrey, abs(year),Image::JUSTIFY_RIGHT);
 			Image *era = ( year < 0 ) ? icon_bc :
 				shiny ? icon_ad_shiny : icon_ad;
-			era->draw(offset_panel_x_c + 88, offset_panel_y_c + 7);
+			if( era != NULL )
+				era->draw(offset_panel_x_c + 88, offset_panel_y_c + 7);
+			else {
+				Image::write(offset_panel_x_c + 88, offset_panel_y_c + 8, letters_small, ( year < 0 ) ? "BC" : "AD", Image::JUSTIFY_LEFT);
+			}
 		}
 
 		if( gamestate->viewingActiveClientSector() ) {
@@ -1380,10 +1384,10 @@ void GamePanel::draw() {
 			int ypos = offset_panel_y_c + 40 + 28 * i;
 			if( n_elements > 0 ) {
 				Image::writeNumbers(offset_panel_x_c + 72, ypos, numbers_blue, n_elements, Image::JUSTIFY_LEFT);
-				off += 8 * n_digits(n_elements);
+				off += numbers_blue[0]->getScaledWidth() * n_digits(n_elements);
 			}
 			if( fraction == 1 ) {
-				numbers_half->draw(offset_panel_x_c + 72 + off, ypos);
+				numbers_half->draw(offset_panel_x_c + 72 + off + 1, ypos);
 			}
 			if( this->button_nminers2[i]->isEnabled() ) {
 				int n_miners = gamestate->getCurrentSector()->getMiners( element );
@@ -1429,10 +1433,10 @@ void GamePanel::draw() {
 				int off = 0;
 				if( whole > 0 ) {
 					Image::writeNumbers(offset_panel_x_c + 36, offset_panel_y_c + 34 + 18 * cnt, numbers_blue, whole, Image::JUSTIFY_LEFT);
-					off += 8 * n_digits(whole);
+					off += numbers_blue[0]->getScaledWidth() * n_digits(whole);
 				}
 				if( frac == 1 ) {
-					numbers_half->draw(offset_panel_x_c + 36 + off, offset_panel_y_c + 34 + 18 * cnt);
+					numbers_half->draw(offset_panel_x_c + 36 + off + 1, offset_panel_y_c + 34 + 18 * cnt);
 				}
 				cnt++;
 			}

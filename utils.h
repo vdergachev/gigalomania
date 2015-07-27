@@ -123,7 +123,7 @@ int poisson(int mean_ticks_per_event,int time_interval);
 
 int n_digits(int number);
 
-void textLines(int *n_lines,int *max_wid,const char *text);
+void textLines(int *n_lines,int *max_wid,const char *text, int lower_w, int upper_w);
 
 float perlin_noise2(float vec[2]);
 
