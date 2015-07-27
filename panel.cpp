@@ -268,7 +268,7 @@ void PanelPage::drawPopups() {
 				fill_rect->drawWithAlpha(rect_x, rect_y, 160);
 				delete fill_rect;
 #else
-				screen->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, 0, 0, 128, 160);
+				screen->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, 128, 128, 128, 160);
 #endif
 
 				int py = (int)(popup_y/scale_height);
