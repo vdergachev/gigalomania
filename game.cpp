@@ -3512,6 +3512,8 @@ void saveState() {
 		stream << "selected_island=\"" << selected_island << "\" ";
 		stream << "/>\n";
 
+		stream << "<time real_time=\"" << getRealTime() << "\" game_time=\"" << getGameTime() << "\" />\n";
+
 		for(int i=0;i<max_islands_per_epoch_c;i++) {
 			stream << "<completed_island island_id=\"" << i << "\" complete=\"" << (completed_island[i] ? 1 : 0) << "\"/>\n";
 		}
@@ -3665,6 +3667,26 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 						throw std::runtime_error("completed_island missing island_id");
 					}
 					completed_island[island_id] = complete;
+				}
+				else if( stricmp(element_name, "time") == 0 ) {
+					// we need to set this at the Game level rather than the PlayingGamestate, so that the times are set before creating the map (otherwise messes up the saved times for the particle systems)
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "real_time") == 0 ) {
+							int real_time = atoi(attribute->Value());
+							setRealTime(real_time);
+						}
+						else if( stricmp(attribute_name, "game_time") == 0 ) {
+							int game_time = atoi(attribute->Value());
+							setGameTime(game_time);
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown game/time attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
 				}
 				else if( stricmp(element_name, "playing_gamestate") == 0 ) {
 					PlayingGameState *playing_gamestate = new PlayingGameState(human_player);

@@ -2907,7 +2907,6 @@ void PlayingGameState::saveState(stringstream &stream) const {
 	stream << "<playing_gamestate>\n";
 	stream << "<current_sector x=\"" << current_sector->getXPos() << "\" y=\"" << current_sector->getYPos() << "\" />\n";
 	stream << "<player_asking_alliance player_id=\"" << player_asking_alliance << "\" />\n";
-	stream << "<time real_time=\"" << getRealTime() << "\" game_time=\"" << getGameTime() << "\" />\n";
 
 	for(int i=0;i<n_players_c;i++) {
 		if( players[i] != NULL ) {
@@ -2974,25 +2973,6 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 						else {
 							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
 							LOG("unknown playinggamestate/player_asking_alliance attribute: %s\n", attribute_name);
-							ASSERT(false);
-						}
-						attribute = attribute->Next();
-					}
-				}
-				else if( stricmp(element_name, "time") == 0 ) {
-					while( attribute != NULL ) {
-						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "real_time") == 0 ) {
-							int real_time = atoi(attribute->Value());
-							setRealTime(real_time);
-						}
-						else if( stricmp(attribute_name, "game_time") == 0 ) {
-							int game_time = atoi(attribute->Value());
-							setGameTime(game_time);
-						}
-						else {
-							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
-							LOG("unknown playinggamestate/time attribute: %s\n", attribute_name);
 							ASSERT(false);
 						}
 						attribute = attribute->Next();

@@ -2240,7 +2240,6 @@ void Sector::buildBuilding(Type type) {
 	}
 	else if( type == BUILDING_FACTORY ) {
 		this->buildings[BUILDING_FACTORY] = new Building(gamestate, this, BUILDING_FACTORY);
-		this->setWorkers(0); // call to also set the particle system rate
 	}
 	else if( type == BUILDING_LAB ) {
 		this->buildings[BUILDING_LAB] = new Building(gamestate, this, BUILDING_LAB);
@@ -2250,10 +2249,17 @@ void Sector::buildBuilding(Type type) {
 		LOG("###Didn't expect completion of building type %d\n", (int)type);
 		ASSERT(0);
 	}
+	updateForNewBuilding(type);
 	if( this == gamestate->getCurrentSector() ) {
 		//((PlayingGameState *)gamestate)->getGamePanel()->refresh();
 		//((PlayingGameState *)gamestate)->addBuilding( this->buildings[(Type)i] ); // now done in Building constructor
 		gamestate->getGamePanel()->refresh();
+	}
+}
+
+void Sector::updateForNewBuilding(Type type) {
+	if( type == BUILDING_FACTORY ) {
+		this->updateWorkers(); // call to also set the particle system rate (calling updateWorkers() instead of setWorkers(0), so this doesn't reset n_workers when loading saved state)
 	}
 }
 
@@ -2542,7 +2548,9 @@ void Sector::setWorkers(int n_workers) {
 		gamestate->getGamePanel()->refresh();
 	}
 	this->n_workers = n_workers;
+}
 
+void Sector::updateWorkers() {
 	if( this->smokeParticleSystem != NULL ) {
 		if( this->getBuilding(BUILDING_FACTORY) == NULL ) {
 			this->smokeParticleSystem->setBirthRate(0.0f);
@@ -3162,6 +3170,7 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					}
 					if( buildings[building_id] == NULL ) {
 						this->buildings[building_id] = new Building(gamestate, this, (Type)building_id);
+						updateForNewBuilding((Type)building_id);
 					}
 					this->buildings[building_id]->loadStateParseXMLNode(parent);
 					read_children = false;

@@ -382,6 +382,7 @@ class Sector {
 	static int getBuildingCost(Type type, int building_player);
 	void destroyBuilding(Type building_type,int client_player);
 	void destroyBuilding(Type building_type,bool silent,int client_player);
+	void updateWorkers();
 
 	float getDefenceStrength() const;
 	void doCombat(int client_player);
@@ -563,6 +564,7 @@ public:
 	void invent(int client_player);
 	void buildDesign();
 	void buildBuilding(Type type);
+	void updateForNewBuilding(Type type);
 
 	void saveState(stringstream &stream) const;
 	void loadStateParseXMLNode(const TiXmlNode *parent);
