@@ -36,6 +36,7 @@ public:
 void processClick(ClickFunc *clickFunc, PanelPage *panel, void *data, int arg, PanelPage *caller_button, bool m_left, bool m_middle, bool m_right, bool click);
 
 class ChooseGameTypePanel : public MultiPanel {
+	Button *button_tutorial;
 	Button *button_singleisland;
 	Button *button_allislands;
 

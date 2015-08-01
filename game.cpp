@@ -27,6 +27,8 @@ using std::stringstream;
 #include "gamestate.h"
 #include "gui.h"
 #include "player.h"
+#include "tutorial.h"
+
 #include "screen.h"
 #include "image.h"
 #include "sound.h"
@@ -3251,11 +3253,22 @@ void setGameStateID(GameStateID state, GameState *new_gamestate) {
 		gamestate = new PlaceMenGameState(human_player);
 	else if( gameStateID == GAMESTATEID_PLAYING ) {
 		gamestate = new PlayingGameState(human_player);
-		int map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
-		int map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();
-		int n_men = human_player == PLAYER_DEMO ? 0 : players[human_player]->getNMenForThisIsland();
+		int map_x = 0, map_y = 0, n_men = 0;
+		if( gameType == GAMETYPE_TUTORIAL ) {
+			map_x = tutorial->getStartMapX();
+			map_y = tutorial->getStartMapY();
+			n_men = tutorial->getNMen();
+		}
+		else {
+			map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
+			map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();
+			n_men = human_player == PLAYER_DEMO ? 0 : players[human_player]->getNMenForThisIsland();
+		}
 		//createSectors(static_cast<PlayingGameState *>(gamestate), map_x, map_y, n_men);
 		static_cast<PlayingGameState *>(gamestate)->createSectors(map_x, map_y, n_men);
+		if( gameType == GAMETYPE_TUTORIAL ) {
+			tutorial->initCards();
+		}
 	}
 	else if( gameStateID == GAMESTATEID_ENDISLAND )
 		gamestate = new EndIslandGameState(human_player);
@@ -3380,7 +3393,10 @@ void endIsland() {
 
 void returnToChooseIsland() {
 	ASSERT(gameStateID == GAMESTATEID_ENDISLAND);
-	if( gameResult == GAMERESULT_WON && gameType == GAMETYPE_ALLISLANDS ) {
+	if( gameType == GAMETYPE_TUTORIAL ) {
+		setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
+	}
+	else if( gameResult == GAMERESULT_WON && gameType == GAMETYPE_ALLISLANDS ) {
 		if( start_epoch == n_epochs_c-1 ) {
 			setGameStateID(GAMESTATEID_GAMECOMPLETE);
 		}
@@ -3585,7 +3601,7 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 						const char *attribute_name = attribute->Name();
 						if( stricmp(attribute_name, "game_type") == 0 ) {
 							gameType = static_cast<GameType>(atoi(attribute->Value()));
-							if( gameType != GAMETYPE_SINGLEISLAND && gameType != GAMETYPE_ALLISLANDS ) {
+							if( gameType != GAMETYPE_SINGLEISLAND && gameType != GAMETYPE_ALLISLANDS && gameType != GAMETYPE_TUTORIAL ) {
 								throw std::runtime_error("unknown game_type");
 							}
 						}
@@ -3695,6 +3711,11 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 					}
 					map->createSectors(playing_gamestate, start_epoch);
 					playing_gamestate->loadStateParseXMLNode(parent);
+					if( gameType == GAMETYPE_TUTORIAL ) {
+						if( tutorial == NULL ) {
+							throw std::runtime_error("didn't set tutorial");
+						}
+					}
 					new_gamestate = playing_gamestate;
 					read_children = false;
 				}

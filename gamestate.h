@@ -309,6 +309,7 @@ class PlayingGameState : public GameState {
 	PanelPage *land_panel;
 	Button *pause_button;
 	Button *quit_button;
+	Button *tutorial_next_button;
     /*PanelPage *confirm_window;
 	Button *confirm_yes_button;
     Button *confirm_no_button;*/

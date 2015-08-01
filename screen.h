@@ -38,8 +38,13 @@ namespace Gigalomania {
 		void fillRect(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b);
 #if SDL_MAJOR_VERSION == 1
 		// not supported with SDL 1.2
+		void fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha) {
+		}
+		void drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
+		}
 #else
 		void fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha);
+		void drawLine(short x0, short y0, short x1, short y1, unsigned char r, unsigned char g, unsigned char b);
 		void convertWindowToLogical(int *m_x, int *m_y);
 		void getWindowSize(int *window_width, int *window_height);
 #endif

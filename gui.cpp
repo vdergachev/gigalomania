@@ -82,10 +82,13 @@ void OneMouseButtonPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m
 ChooseGameTypePanel::ChooseGameTypePanel() : MultiPanel(1, 0, 0) {
 	this->c_page = 0;
 	this->addToPanel(0, new Button(105, 50, "CHOOSE A GAME TYPE", letters_large));
-    this->button_singleisland = new Button(120, 90, "SINGLE ISLAND", letters_large);
+    this->button_tutorial = new Button(132, 90, "TUTORIAL", letters_large);
+	this->button_tutorial->setInfoLMB("play tutorial");
+	this->addToPanel(0, button_tutorial);
+    this->button_singleisland = new Button(120, 120, "SINGLE ISLAND", letters_large);
 	this->button_singleisland->setInfoLMB("choose to play on\nany island");
 	this->addToPanel(0, button_singleisland);
-    this->button_allislands = new Button(125, 130, "ALL ISLANDS", letters_large);
+    this->button_allislands = new Button(125, 150, "ALL ISLANDS", letters_large);
 	this->button_allislands->setInfoLMB("start on first age and\nplay full game");
 	this->addToPanel(0, button_allislands);
 }
@@ -98,7 +101,12 @@ void ChooseGameTypePanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m
 	//bool m_left = mouse_left(m_b);
 	//bool m_right = mouse_right(m_b);
 
-	if( m_left && click && this->button_singleisland->mouseOver(m_x, m_y) ) {
+	if( m_left && click && this->button_tutorial->mouseOver(m_x, m_y) ) {
+        registerClick();
+        gameType = GAMETYPE_TUTORIAL;
+        setGameStateID(GAMESTATEID_CHOOSEPLAYER);
+	}
+	else if( m_left && click && this->button_singleisland->mouseOver(m_x, m_y) ) {
         registerClick();
         gameType = GAMETYPE_SINGLEISLAND;
         setGameStateID(GAMESTATEID_CHOOSEPLAYER);

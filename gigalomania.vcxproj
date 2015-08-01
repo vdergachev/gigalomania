@@ -196,6 +196,7 @@
     <ClCompile Include="TinyXML\tinyxmlparser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="utils.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -215,6 +216,7 @@
     <ClInclude Include="sound.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TinyXML\tinyxml.h" />
+    <ClInclude Include="tutorial.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>

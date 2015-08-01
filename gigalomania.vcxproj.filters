@@ -72,6 +72,9 @@
     <ClCompile Include="TinyXML\tinyxmlparser.cpp">
       <Filter>Source Files\TinyXML</Filter>
     </ClCompile>
+    <ClCompile Include="tutorial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="TinyXML\tinyxml.h">
       <Filter>Source Files\TinyXML\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tutorial.h">
+      <Filter>Source Files\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

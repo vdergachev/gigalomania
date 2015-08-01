@@ -14,6 +14,7 @@ using namespace Gigalomania;
 
 using std::vector;
 using std::stringstream;
+using std::string;
 
 class Invention;
 class Weapon;
@@ -26,8 +27,6 @@ class Application;
 class TextEffect;
 
 #include "common.h"
-
-using std::string;
 
 /*struct FSOUND_SAMPLE;
 typedef FSOUND_SAMPLE Sample;*/
@@ -257,7 +256,8 @@ extern GameMode gameMode;
 
 enum GameType {
 	GAMETYPE_SINGLEISLAND = 0,
-	GAMETYPE_ALLISLANDS = 1
+	GAMETYPE_ALLISLANDS = 1,
+	GAMETYPE_TUTORIAL = 2
 };
 extern GameType gameType;
 
@@ -377,7 +377,6 @@ void startNewGame();
 void setGameStateID(GameStateID state, GameState *new_gamestate = NULL);
 void endIsland();
 void setupPlayers();
-
 bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot);
 bool loadGame(int slot);
 void saveGame(int slot);

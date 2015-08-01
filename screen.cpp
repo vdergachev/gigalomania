@@ -196,6 +196,15 @@ void Screen::fillRectWithAlpha(short x, short y, short w, short h, unsigned char
 #if SDL_MAJOR_VERSION == 1
 // not supported with SDL 1.2
 #else
+void Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
+	SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
+	SDL_RenderDrawLine(sdlRenderer, x1, y1, x2, y2);
+}
+#endif
+
+#if SDL_MAJOR_VERSION == 1
+// not supported with SDL 1.2
+#else
 void Screen::convertWindowToLogical(int *m_x, int *m_y) {
 	SDL_Rect rect;
 	SDL_RenderGetViewport(sdlRenderer, &rect);

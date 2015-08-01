@@ -12,6 +12,7 @@
 #include "sector.h"
 #include "gui.h"
 #include "player.h"
+#include "tutorial.h"
 
 #include "screen.h"
 #include "image.h"
@@ -545,8 +546,15 @@ void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 		//human_player = player;
 		//human_player = PLAYER_DEMO; // force demo mode
 		::setClientPlayer(player);
-		setGameStateID(GAMESTATEID_PLACEMEN);
-		newGame();
+		if( gameType == GAMETYPE_TUTORIAL ) {
+			setupPlayers();
+			setupTutorial("first");
+			setGameStateID(GAMESTATEID_PLAYING);
+		}
+		else {
+			setGameStateID(GAMESTATEID_PLACEMEN);
+			newGame();
+		}
 	}
 }
 
@@ -761,6 +769,7 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 	this->land_panel = NULL;
 	this->pause_button = NULL;
 	this->quit_button = NULL;
+	this->tutorial_next_button = NULL;
 	this->gamePanel = NULL;
 	this->selected_army = NULL;
 	this->map_display = MAPDISPLAY_MAP;
@@ -1084,6 +1093,7 @@ void PlayingGameState::reset() {
 	this->screen_page->free(true);
 	alliance_yes = NULL;
 	alliance_no = NULL;
+	tutorial_next_button = NULL;
 	for(int y=0;y<map_height_c;y++) {
 		for(int x=0;x<map_width_c;x++) {
 			map_panels[x][y] = NULL;
@@ -1616,6 +1626,45 @@ void PlayingGameState::draw() {
 	}
 
 	// panel
+	if( tutorial != NULL ) {
+		const TutorialCard *card = tutorial->getCard();
+		if( card != NULL ) {
+			int n_lines = 0, max_wid = 0;
+			int s_w = letters_small[0]->getScaledWidth();
+			int l_w = letters_large[0]->getScaledWidth();
+			int l_h = letters_large[0]->getScaledHeight();
+			textLines(&n_lines, &max_wid, card->getText().c_str(), s_w, l_w);
+			Rect2D rect;
+			rect.x = 100;
+			rect.y = 130;
+			rect.w = max_wid;
+			rect.h = n_lines * (l_h + 2);
+			const Image *player_image = player_heads_alliance[client_player];
+			player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
+			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, 127);
+			Image::writeMixedCase(rect.x, rect.y, letters_large, letters_small, numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
+			if( card->hasArrow() ) {
+				screen->drawLine(scale_width*(rect.x-4), scale_height*(rect.y+0.5*rect.h), scale_width*card->getArrowX(), scale_height*card->getArrowY(), 255, 255, 255);
+			}
+
+			if( !card->autoProceed() && card->canProceed(this) ) {
+				if( tutorial_next_button == NULL ) {
+					tutorial_next_button = new Button(rect.x + rect.w - 16, rect.y + rect.h + 4, card->getNextText().c_str(), letters_small);
+					screen_page->add(tutorial_next_button);
+				}
+			}
+			else {
+				if( tutorial_next_button != NULL ) {
+					delete tutorial_next_button;
+					tutorial_next_button = NULL;
+				}
+			}
+			if( card->autoProceed() && card->canProceed(this) ) {
+				tutorial->proceed();
+			}
+		}
+	}
+
 	this->gamePanel->draw();
 	//this->gamePanel->drawPopups();
 
@@ -2321,6 +2370,12 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 			togglePause();
 		}
 	}
+	else if( !done && m_left && click && tutorial_next_button != NULL && tutorial_next_button->mouseOver(m_x, m_y) ) {
+		tutorial->proceed();
+		delete tutorial_next_button;
+		tutorial_next_button = NULL;
+		done = true;
+	}
 
 	// switch map display
 	for(int i=0;i<n_players_c && !done && m_left && click;i++) {
@@ -2905,6 +2960,14 @@ void PlayingGameState::shutdown(int sector_x, int sector_y) {
 
 void PlayingGameState::saveState(stringstream &stream) const {
 	stream << "<playing_gamestate>\n";
+	if( gameType == GAMETYPE_TUTORIAL ) {
+		stream << "<tutorial ";
+		stream << "name=\"" << tutorial->getId().c_str() << "\" ";
+		if( tutorial->getCard() != NULL ) {
+			stream << "current_card_name=\"" << tutorial->getCard()->getId().c_str() << "\" ";
+		}
+		stream << "/>\n";
+	}
 	stream << "<current_sector x=\"" << current_sector->getXPos() << "\" y=\"" << current_sector->getYPos() << "\" />\n";
 	stream << "<player_asking_alliance player_id=\"" << player_asking_alliance << "\" />\n";
 
@@ -2963,6 +3026,41 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 				const TiXmlAttribute *attribute = element->FirstAttribute();
 				if( stricmp(element_name, "playing_gamestate") == 0 ) {
 					// handled entirely by caller
+				}
+				else if( stricmp(element_name, "tutorial") == 0 ) {
+					if( gameType != GAMETYPE_TUTORIAL ) {
+						throw std::runtime_error("wrong game type for tutorial");
+					}
+					bool has_card_name = false;
+					string card_name;
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "name") == 0 ) {
+							string name = attribute->Value();
+							setupTutorial(name);
+						}
+						else if( stricmp(attribute_name, "current_card_name") == 0 ) {
+							has_card_name = true;
+							card_name = attribute->Value();
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown playinggamestate/tutorial attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
+					if( tutorial == NULL ) {
+						throw std::runtime_error("unknown tutorial name");
+					}
+					tutorial->initCards();
+					if( has_card_name ) {
+						if( !tutorial->jumpTo(card_name) ) {
+							throw std::runtime_error("unknown tutorial card name");
+						}
+					}
+					else
+						tutorial->jumpToEnd();
 				}
 				else if( stricmp(element_name, "player_asking_alliance") == 0 ) {
 					while( attribute != NULL ) {
