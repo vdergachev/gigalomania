@@ -105,7 +105,7 @@ void Tutorial1::initCards() {
 	card->setArrow(36, 156);
 	cards.push_back(card);
 
-	card = new TutorialCard("6", "This page allows you to design new inventions.\nThe left hand column shows shield, which are used to repair buildings.\nThe middle shows defences for your sector.\nThe right shows weapons to attack the enemy!");
+	card = new TutorialCard("6", "This page allows you to design new inventions:\nThe left hand column shows shield, which are used to repair buildings.\nThe middle shows defences for your sector.\nThe right shows weapons to attack the enemy!");
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDesign("7", "For this tutorial, we're going to design a weapon.\nClick on one of the weapons.\nI recommend the Rock weapon, but any will do.", TutorialCardWaitForDesign::WAITTYPE_CURRENT_DESIGN, true, Invention::WEAPON);
@@ -145,14 +145,14 @@ void Tutorial1::initCards() {
 	card = new TutorialCard("12", "This page shows you the available soldiers to deploy.\nThey can be unarmed or, preferably, armed with weapons\nyou have invented.");
 	cards.push_back(card);
 
-	card = new TutorialCard("13", "Not only are armed men stronger, but they are required to destory\nan enemy's buildings. Unarmed men can fight other men,\nbut won't knock down their tower.");
+	card = new TutorialCard("13", "Not only are armed soldiers stronger, but they are required to destory\nan enemy's buildings. Unarmed soldiers can fight other soldiers,\nbut won't knock down the enemy tower.");
 	cards.push_back(card);
 
 	card = new TutorialCard("14", "Click to assemble soldiers with the weapon you've just invented.\nAssemble as many soldiers as we have people available!");
 	card->setArrow(15, 170);
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForDeployedArmy("15", "Now click on the enemy's sector in the map\nto send your army to attack.\nThat's the right hand square.", enemy_sector);
+	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector);
 	card->setArrow(48, 56);
 	cards.push_back(card);
 
