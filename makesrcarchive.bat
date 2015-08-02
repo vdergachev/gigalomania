@@ -74,6 +74,7 @@ copy %src%\resources.cpp %dst%
 copy %src%\screen.cpp %dst%
 copy %src%\sector.cpp %dst%
 copy %src%\sound.cpp %dst%
+copy %src%\tutorial.cpp %dst%
 copy %src%\utils.cpp %dst%
 copy %src%\stdafx.cpp %dst%
 
@@ -87,6 +88,7 @@ copy %src%\resources.h %dst%
 copy %src%\screen.h %dst%
 copy %src%\sector.h %dst%
 copy %src%\sound.h %dst%
+copy %src%\tutorial.h %dst%
 copy %src%\utils.h %dst%
 copy %src%\common.h %dst%
 copy %src%\stdafx.h %dst%
