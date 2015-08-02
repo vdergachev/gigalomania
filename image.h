@@ -22,7 +22,8 @@ const int font_index_apostrophe_c = 27;
 const int font_index_exclamation_c = 28;
 const int font_index_question_c = 29;
 const int font_index_comma_c = 30;
-const int n_font_chars_c = 31;
+const int font_index_dash_c = 31;
+const int n_font_chars_c = 32;
 
 namespace Gigalomania {
 	class Image : public TrackedObject {
