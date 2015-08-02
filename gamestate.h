@@ -270,7 +270,7 @@ public:
 
 class PlaceMenGameState : public GameState {
 	ChooseMenPanel *choosemenPanel;
-	int off_x;
+	int off_x, off_y;
 	PanelPage *map_panels[map_width_c][map_height_c];
 	int start_map_x, start_map_y;
 

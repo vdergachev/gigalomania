@@ -160,8 +160,7 @@ ChooseMenPanel::ChooseMenPanel(PlaceMenGameState *gamestate) : MultiPanel(N_STAT
 	this->n_men = 0;
 
 	this->button_nextisland = NULL;
-    //int mx = gamestate->getOffX();
-    int mx = 200;
+    int mx = 80;
     const int start_y = 76;
     int cy = start_y;
     int step_y = 28;

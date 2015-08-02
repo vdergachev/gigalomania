@@ -559,7 +559,8 @@ void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 }
 
 PlaceMenGameState::PlaceMenGameState(int client_player) : GameState(client_player), start_map_x(-1), start_map_y(-1) {
-	this->off_x = (int)(0.25 * default_width_c);
+	this->off_x = 220;
+	this->off_y = 32;
 	this->choosemenPanel = NULL;
 	for(int y=0;y<map_height_c;y++) {
 		for(int x=0;x<map_width_c;x++) {
@@ -612,7 +613,7 @@ void PlaceMenGameState::reset() {
 			if( getMap()->isSectorAt(x, y) ) {
 				//int map_x = offset_map_x_c + 16 * x;
 				int map_x = this->off_x - 8 * map_width_c + 16 * x;
-				int map_y = offset_map_y_c + 16 * y;
+				int map_y = this->off_y + 16 * y;
 				PanelPage *panel = new PanelPage(map_x, map_y, 16, 16);
 				panel->setInfoLMB("place starting tower\nin this sector");
 				panel->setEnabled(false);
@@ -647,8 +648,7 @@ void PlaceMenGameState::draw() {
     int l_h = letters_large[0]->getScaledHeight();
 	int s_h = letters_small[0]->getScaledHeight();
 	const int cx = this->off_x;
-    //int cy = 100;
-    int cy = 120;
+    int cy = this->off_y + 104;
     Image::writeMixedCase(cx, cy, letters_large, letters_small, NULL, map->getName(), Image::JUSTIFY_CENTRE);
 	cy += s_h + 2;
 	Image::writeMixedCase(cx, cy, letters_large, letters_small, NULL, "of the", Image::JUSTIFY_CENTRE);
@@ -689,31 +689,21 @@ void PlaceMenGameState::draw() {
     cy += s_h + 2;*/
 
 	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN ) {
-		cy = 60;
-		Image::writeMixedCase(200, cy, letters_large, letters_small, NULL, "Click on the icon below", Image::JUSTIFY_CENTRE);
+		cy = 100;
+		const int xpos = 80;
+		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "Click on the icon below", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(200, cy, letters_large, letters_small, NULL, "to choose how many men", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "to choose how many men", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(200, cy, letters_large, letters_small, NULL, "to play with", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "to play with", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(200, cy, letters_large, letters_small, NULL, "then click on the map", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "then click on the map", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(200, cy, letters_large, letters_small, NULL, "to the left", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "to the right", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
 	}
 
-	// map
-	/*for(int y=0;y<map_height_c;y++) {
-	for(int x=0;x<map_width_c;x++) {
-	if( map->sector_at[x][y] ) {
-	int map_x = offset_map_x_c - 3 + 16 * x;
-	int map_y = offset_map_y_c - 3 + 16 * y;
-	map_sq[15]->draw(map_x, map_y, true);
-	}
-	}
-	}*/
-	//map->draw(offset_map_x_c, offset_map_y_c);
-	map->draw(cx - 8*map_width_c, offset_map_y_c);
+	map->draw(cx - 8*map_width_c, off_y);
 
 	this->choosemenPanel->draw();
 	//this->choosemenPanel->drawPopups();
