@@ -284,9 +284,6 @@ public:
     virtual void requestQuit();
 
 	ChooseMenPanel *getChooseMenPanel();
-    /*int getOffX() const {
-		return this->off_x;
-    }*/
 	const PanelPage *getMapPanel(int x, int y) const;
 	PanelPage *getMapPanel(int x, int y);
 	int getStartMapX() const {
