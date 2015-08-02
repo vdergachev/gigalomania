@@ -342,12 +342,14 @@ void GameState::requestQuit() {
 void GameState::createQuitWindow() {
     if( confirm_window == NULL && !state_changed ) {
 		confirm_type = CONFIRMTYPE_QUITGAME;
-		confirm_window = new PanelPage(120, 120, 64, 32);
-		Button *text_button = new Button(0, 0, "REALLY QUIT?", letters_large);
+		confirm_window = new PanelPage(0, 0, default_width_c, default_height_c);
+		confirm_window->setBackground(0, 0, 0, 200);
+		const int offset_x_c = 120, offset_y_c = 120;
+		Button *text_button = new Button(offset_x_c, offset_y_c, "REALLY QUIT?", letters_large);
 		confirm_window->add(text_button);
-		confirm_yes_button = new Button(0, 16, "YES", letters_large);
+		confirm_yes_button = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
 		confirm_window->add(confirm_yes_button);
-		confirm_no_button = new Button(32, 16, "NO", letters_large);
+		confirm_no_button = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
 		confirm_window->add(confirm_no_button);
 		screen_page->add(confirm_window);
 	}
@@ -812,13 +814,15 @@ void PlaceMenGameState::requestNewGame() {
 	if( confirm_window != NULL ) {
 		this->closeConfirmWindow();
 	}
-	confirm_window = new PanelPage(120, 120, 64, 32);
+	confirm_window = new PanelPage(0, 0, default_width_c, default_height_c);
 	confirm_type = CONFIRMTYPE_NEWGAME;
-	Button *text_button = new Button(0, 0, "NEW GAME?", letters_large);
+	confirm_window->setBackground(0, 0, 0, 200);
+	const int offset_x_c = 120, offset_y_c = 120;
+	Button *text_button = new Button(offset_x_c, offset_y_c, "NEW GAME?", letters_large);
 	confirm_window->add(text_button);
-	confirm_yes_button = new Button(0, 16, "YES", letters_large);
+	confirm_yes_button = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
 	confirm_window->add(confirm_yes_button);
-	confirm_no_button = new Button(32, 16, "NO", letters_large);
+	confirm_no_button = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
 	confirm_window->add(confirm_no_button);
 	this->screen_page->add(confirm_window);
 }

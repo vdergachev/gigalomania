@@ -379,16 +379,6 @@ void ChooseMenPanel::draw() {
 		Image::writeNumbers( this->button_nmen->getXCentre(), this->button_nmen->getTop() + 2, numbers_white, this->n_men,Image::JUSTIFY_CENTRE);
 		Image::writeNumbers( this->button_nmen->getXCentre(), this->button_nmen->getTop() + 36, numbers_white, getMenAvailable() - this->n_men,Image::JUSTIFY_CENTRE);
 	}
-
-    if( this->gamestate->hasConfirmWindow() ) {
-        // hide background (do here, as also want to cover the GUI)
-#if SDL_MAJOR_VERSION == 1
-        screen->fillRect(0, 0, default_width_c*scale_width, default_height_c*scale_height, 0, 0, 0);
-#else
-        screen->fillRectWithAlpha(0, 0, (short)(default_width_c*scale_width), (short)(default_height_c*scale_height), 0, 0, 0, 255-32);
-#endif
-    }
-
 }
 
 void ChooseMenPanel::buttonNMenClick(void *data, int arg, bool m_left, bool m_middle, bool m_right) {
