@@ -37,12 +37,17 @@ namespace Gigalomania {
 		int w, h;
 		int tolerance;
 
+		bool has_background;
+		unsigned char background[4];
+
 		PanelPage *owner;
 		bool survive_owner;
 
 		PanelPage *modal_child;
-
+		
 		virtual void drawPopups();
+		virtual void drawBackground();
+		virtual void drawForeground();
 	public:
 
 		PanelPage(int offset_x,int offset_y);
@@ -78,6 +83,13 @@ namespace Gigalomania {
 		virtual void setEnabled(bool enabled);
 		virtual bool isEnabled() const {
 			return this->enabled;
+		}
+		void setBackground(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+			this->has_background = true;
+			this->background[0] = r;
+			this->background[1] = g;
+			this->background[2] = b;
+			this->background[3] = a;
 		}
 		virtual void enableHelpText(bool helpTextOn) {
 			this->helpTextOn = helpTextOn;

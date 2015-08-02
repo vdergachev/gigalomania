@@ -1703,6 +1703,7 @@ void PlayingGameState::draw() {
 	if( tutorial != NULL ) {
 		const TutorialCard *card = tutorial->getCard();
 		if( card != NULL ) {
+			const unsigned char tutorial_alpha_c = 127;
 			int n_lines = 0, max_wid = 0;
 			int s_w = letters_small[0]->getScaledWidth();
 			int l_w = letters_large[0]->getScaledWidth();
@@ -1715,7 +1716,7 @@ void PlayingGameState::draw() {
 			rect.h = n_lines * (l_h + 2);
 			const Image *player_image = player_heads_alliance[client_player];
 			player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
-			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, 127);
+			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, tutorial_alpha_c);
 			Image::writeMixedCase(rect.x, rect.y, letters_large, letters_small, numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
 			if( card->hasArrow() ) {
 				screen->drawLine(scale_width*(rect.x-4), scale_height*(rect.y+0.5*rect.h), scale_width*card->getArrowX(), scale_height*card->getArrowY(), 255, 255, 255);
@@ -1724,6 +1725,7 @@ void PlayingGameState::draw() {
 			if( !card->autoProceed() && card->canProceed(this) ) {
 				if( tutorial_next_button == NULL ) {
 					tutorial_next_button = new Button(rect.x + rect.w - 16, rect.y + rect.h + 4, card->getNextText().c_str(), letters_small);
+					tutorial_next_button->setBackground(0, 0, 0, tutorial_alpha_c);
 					screen_page->add(tutorial_next_button);
 				}
 			}
