@@ -3776,7 +3776,9 @@ bool loadState() {
 					// we create a new gamestate if playing a game
 					if( new_gamestate != NULL ) {
 						LOG("loaded PlayingGameState\n");
+						int c_page = static_cast<PlayingGameState *>(new_gamestate)->getGamePanel()->getPage();
 						setGameStateID(GAMESTATEID_PLAYING, new_gamestate);
+						static_cast<PlayingGameState *>(new_gamestate)->getGamePanel()->setPage(c_page);
 					}
 					else {
 						LOG("loaded PlaceMenGameState\n");

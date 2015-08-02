@@ -2969,6 +2969,7 @@ void PlayingGameState::saveState(stringstream &stream) const {
 		stream << "/>\n";
 	}
 	stream << "<current_sector x=\"" << current_sector->getXPos() << "\" y=\"" << current_sector->getYPos() << "\" />\n";
+	stream << "<game_panel page=\"" << this->gamePanel->getPage() << "\" />\n";
 	stream << "<player_asking_alliance player_id=\"" << player_asking_alliance << "\" />\n";
 
 	for(int i=0;i<n_players_c;i++) {
@@ -3113,6 +3114,24 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					int map_x = -1, map_y = -1;
 					loadStateParseXMLMapXY(&map_x, &map_y, attribute);
 					this->moveTo(map_x, map_y);
+				}
+				else if( stricmp(element_name, "game_panel") == 0 ) {
+					while( attribute != NULL ) {
+						const char *attribute_name = attribute->Name();
+						if( stricmp(attribute_name, "page") == 0 ) {
+							int page = atoi(attribute->Value());
+							if( page < 0 || page > GamePanel::N_STATES ) {
+								throw std::runtime_error("game_panel invalid page");
+							}
+							this->gamePanel->setPage(page);
+						}
+						else {
+							// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
+							LOG("unknown playinggamestate/game_panel attribute: %s\n", attribute_name);
+							ASSERT(false);
+						}
+						attribute = attribute->Next();
+					}
 				}
 				else if( stricmp(element_name, "sector") == 0 ) {
 					int map_x = -1, map_y = -1;
