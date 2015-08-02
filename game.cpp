@@ -3481,6 +3481,12 @@ void keypressEscape() {
 	}
 }
 
+void keypressReturn() {
+    if( !state_changed ) {
+	    gamestate->requestConfirm();
+	}
+}
+
 void togglePause() {
     if( gameStateID == GAMESTATEID_PLAYING ) {
         paused = !paused;

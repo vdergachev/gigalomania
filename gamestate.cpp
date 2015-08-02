@@ -351,6 +351,9 @@ void GameState::createQuitWindow() {
 		confirm_window->add(confirm_no_button);
 		screen_page->add(confirm_window);
 	}
+	else if( confirm_window != NULL && !state_changed ) {
+		closeConfirmWindow();
+	}
 }
 
 void GameState::closeConfirmWindow() {
@@ -715,19 +718,55 @@ void PlaceMenGameState::draw() {
 	GameState::draw();
 }
 
-void PlaceMenGameState::requestNewGame() {
-	if( confirm_window != NULL ) {
-		this->closeConfirmWindow();
+void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
+	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
+
+	//bool m_left = mouse_left(m_b);
+	//bool m_right = mouse_right(m_b);
+	/*int s_m_x = (int)(m_x / scale_width);
+	int s_m_y = (int)(m_y / scale_height);*/
+
+    bool done = false;
+    if( !done && m_left && click && confirm_yes_button != NULL && confirm_yes_button->mouseOver(m_x, m_y) ) {
+        LOG("confirm yes clicked\n");
+        done = true;
+        registerClick();
+        ASSERT( confirm_window != NULL );
+		this->requestConfirm();
+    }
+    else if( !done && m_left && click && confirm_no_button != NULL && confirm_no_button->mouseOver(m_x, m_y) ) {
+        LOG("confirm no clicked\n");
+        done = true;
+        registerClick();
+        ASSERT( confirm_window != NULL );
+        this->closeConfirmWindow();
+    }
+
+    if( !done && m_left && click && this->choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN && this->choosemenPanel->getNMen() > 0 ) {
+		bool found = false;
+		int map_x = -1;
+		int map_y = -1;
+		for(int y=0;y<map_height_c && !found;y++) {
+			for(int x=0;x<map_width_c && !found;x++) {
+				if( map->isSectorAt(x, y) ) {
+					ASSERT( this->map_panels[x][y] != NULL );
+					if( this->map_panels[x][y]->mouseOver(m_x, m_y) ) {
+						found = true;
+						map_x = x;
+						map_y = y;
+					}
+				}
+			}
+		}
+		if( found ) {
+			LOG("starting epoch %d island %s at %d, %d\n", start_epoch, map->getName(), map_x, map_y);
+			this->setStartMapPos(map_x, map_y);
+			return;
+		}
 	}
-	confirm_window = new PanelPage(120, 120, 64, 32);
-	confirm_type = CONFIRMTYPE_NEWGAME;
-	Button *text_button = new Button(0, 0, "NEW GAME", letters_small);
-	confirm_window->add(text_button);
-	confirm_yes_button = new Button(0, 16, "YES", letters_small);
-	confirm_window->add(confirm_yes_button);
-	confirm_no_button = new Button(32, 16, "NO", letters_small);
-	confirm_window->add(confirm_no_button);
-	this->screen_page->add(confirm_window);
+
+    if( !done )
+        this->choosemenPanel->input(m_x, m_y, m_left, m_middle, m_right, click);
 }
 
 void PlaceMenGameState::requestQuit() {
@@ -737,6 +776,51 @@ void PlaceMenGameState::requestQuit() {
 	else {
 		this->createQuitWindow();
 	}
+}
+
+void PlaceMenGameState::requestConfirm() {
+	if( confirm_window != NULL ) {
+        this->closeConfirmWindow();
+		if( confirm_type == CONFIRMTYPE_NEWGAME ) {
+			newGame();
+		}
+		else if( confirm_type == CONFIRMTYPE_QUITGAME ) {
+	        application->setQuit();
+		}
+		else {
+			T_ASSERT(false);
+		}
+	}
+}
+
+void PlaceMenGameState::setStartMapPos(int start_map_x, int start_map_y ) {
+	this->start_map_x = start_map_x;
+	this->start_map_y = start_map_y;
+	if( !isDemo() ) {
+		players[client_player]->setNMenForThisIsland( this->choosemenPanel->getNMen() );
+		ASSERT( players[client_player]->getNMenForThisIsland() <= getMenAvailable() );
+		LOG("human is player %d, starting with %d men\n", client_player, players[client_player]->getNMenForThisIsland());
+	}
+	else {
+		LOG("DEMO mode\n");
+		//placeTower(map_x, map_y, 0);
+	}
+	placeTower();
+}
+
+void PlaceMenGameState::requestNewGame() {
+	if( confirm_window != NULL ) {
+		this->closeConfirmWindow();
+	}
+	confirm_window = new PanelPage(120, 120, 64, 32);
+	confirm_type = CONFIRMTYPE_NEWGAME;
+	Button *text_button = new Button(0, 0, "NEW GAME?", letters_large);
+	confirm_window->add(text_button);
+	confirm_yes_button = new Button(0, 16, "YES", letters_large);
+	confirm_window->add(confirm_yes_button);
+	confirm_no_button = new Button(32, 16, "NO", letters_large);
+	confirm_window->add(confirm_no_button);
+	this->screen_page->add(confirm_window);
 }
 
 
@@ -1960,81 +2044,6 @@ void PlayingGameState::moveTo(int map_x,int map_y) {
 	ammo_effects.clear();
 }
 
-void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
-	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
-
-	//bool m_left = mouse_left(m_b);
-	//bool m_right = mouse_right(m_b);
-	/*int s_m_x = (int)(m_x / scale_width);
-	int s_m_y = (int)(m_y / scale_height);*/
-
-    bool done = false;
-    if( !done && m_left && click && confirm_yes_button != NULL && confirm_yes_button->mouseOver(m_x, m_y) ) {
-        LOG("confirm yes clicked\n");
-        done = true;
-        registerClick();
-        ASSERT( confirm_window != NULL );
-        this->closeConfirmWindow();
-		if( confirm_type == CONFIRMTYPE_NEWGAME ) {
-			newGame();
-		}
-		else if( confirm_type == CONFIRMTYPE_QUITGAME ) {
-	        application->setQuit();
-		}
-		else {
-			T_ASSERT(false);
-		}
-    }
-    else if( !done && m_left && click && confirm_no_button != NULL && confirm_no_button->mouseOver(m_x, m_y) ) {
-        LOG("confirm no clicked\n");
-        done = true;
-        registerClick();
-        ASSERT( confirm_window != NULL );
-        this->closeConfirmWindow();
-    }
-
-    if( !done && m_left && click && this->choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN && this->choosemenPanel->getNMen() > 0 ) {
-		bool found = false;
-		int map_x = -1;
-		int map_y = -1;
-		for(int y=0;y<map_height_c && !found;y++) {
-			for(int x=0;x<map_width_c && !found;x++) {
-				if( map->isSectorAt(x, y) ) {
-					ASSERT( this->map_panels[x][y] != NULL );
-					if( this->map_panels[x][y]->mouseOver(m_x, m_y) ) {
-						found = true;
-						map_x = x;
-						map_y = y;
-					}
-				}
-			}
-		}
-		if( found ) {
-			LOG("starting epoch %d island %s at %d, %d\n", start_epoch, map->getName(), map_x, map_y);
-			this->setStartMapPos(map_x, map_y);
-			return;
-		}
-	}
-
-    if( !done )
-        this->choosemenPanel->input(m_x, m_y, m_left, m_middle, m_right, click);
-}
-
-void PlaceMenGameState::setStartMapPos(int start_map_x, int start_map_y ) {
-	this->start_map_x = start_map_x;
-	this->start_map_y = start_map_y;
-	if( !isDemo() ) {
-		players[client_player]->setNMenForThisIsland( this->choosemenPanel->getNMen() );
-		ASSERT( players[client_player]->getNMenForThisIsland() <= getMenAvailable() );
-		LOG("human is player %d, starting with %d men\n", client_player, players[client_player]->getNMenForThisIsland());
-	}
-	else {
-		LOG("DEMO mode\n");
-		//placeTower(map_x, map_y, 0);
-	}
-	placeTower();
-}
-
 bool PlayingGameState::canRequestAlliance(int player,int i) const {
 	ASSERT(player != i);
 	ASSERT(players[player] != NULL);
@@ -2338,13 +2347,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
         done = true;
         registerClick();
         ASSERT( confirm_window != NULL );
-        this->closeConfirmWindow();
-        if( !state_changed ) {
-			gameResult = GAMERESULT_QUIT;
-			fadeMusic(1000);
-			state_changed = true;
-			this->fadeScreen(true, 0, endIsland);
-		}
+		this->requestConfirm();
 	}
 	else if( !done && m_left && click && confirm_no_button != NULL && confirm_no_button->mouseOver(m_x, m_y) ) {
         done = true;
@@ -2507,6 +2510,18 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		refreshButtons();
 	}
 
+}
+
+void PlayingGameState::requestConfirm() {
+	if( confirm_window != NULL ) {
+        this->closeConfirmWindow();
+        if( !state_changed ) {
+			gameResult = GAMERESULT_QUIT;
+			fadeMusic(1000);
+			state_changed = true;
+			this->fadeScreen(true, 0, endIsland);
+		}
+	}
 }
 
 bool PlayingGameState::validSoldierLocation(int epoch,int xpos,int ypos) {

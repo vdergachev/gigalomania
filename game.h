@@ -355,6 +355,7 @@ const Map *getMap();
 bool readLineFromRWOps(bool &ok, struct SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
 
 void keypressEscape();
+void keypressReturn();
 void togglePause();
 bool isPaused();
 void deleteState();

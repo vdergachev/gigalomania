@@ -211,6 +211,8 @@ public:
 	virtual void update() {};
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
     virtual void requestQuit();
+	virtual void requestConfirm() {
+	}
 
 	void fadeScreen(bool out, int delay, void (*func_finish)());
 	void whiteFlash();
@@ -282,6 +284,7 @@ public:
 	virtual void draw();
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
     virtual void requestQuit();
+	virtual void requestConfirm();
 
 	ChooseMenPanel *getChooseMenPanel();
 	const PanelPage *getMapPanel(int x, int y) const;
@@ -364,6 +367,7 @@ public:
     virtual void requestQuit() {
 		this->createQuitWindow();
 	}
+	virtual void requestConfirm();
 
 	GamePanel *getGamePanel();
 	//Sector *getCurrentSector();

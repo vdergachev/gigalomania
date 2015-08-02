@@ -372,6 +372,9 @@ void Application::runMainLoop() {
 					else if( key.sym == SDLK_p ) {
 						togglePause();
 					}
+					else if( key.sym == SDLK_RETURN ) {
+						keypressReturn();
+					}
 					break;
 				}
 			case SDL_MOUSEBUTTONDOWN:
