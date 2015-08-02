@@ -2160,6 +2160,7 @@ bool loadImages() {
 	letters_small[font_index_apostrophe_c] = icons->copy(66, 1, font_w, font_h);
 	letters_small[font_index_exclamation_c] = icons->copy(1, 1, font_w, font_h);
 	letters_small[font_index_question_c] = icons->copy(391, 1, font_w, font_h);
+	letters_small[font_index_comma_c] = icons->copy(144, 1, font_w, font_h);
 	for(int i=0;i<n_font_chars_c;i++) {
 		if( letters_small[i] != NULL )
 			processImage(letters_small[i]);
@@ -2199,6 +2200,7 @@ bool loadImages() {
 	letters_large[font_index_apostrophe_c] = icons->copy(66*2, 1*2, font_w, font_h);
 	letters_large[font_index_exclamation_c] = icons->copy(1*2, 1*2, font_w, font_h);
 	letters_large[font_index_question_c] = icons->copy(391*2, 1*2, font_w, font_h);
+	letters_large[font_index_comma_c] = icons->copy(144*2, 1*2, font_w, font_h);
 	for(int i=0;i<n_font_chars_c;i++) {
 		if( letters_large[i] != NULL )
 			processImage(letters_large[i]);
