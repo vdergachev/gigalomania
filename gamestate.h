@@ -315,10 +315,12 @@ class PlayingGameState : public GameState {
     Button *confirm_no_button;*/
 	int flag_frame_step;
 	int defenders_last_time_update;
-	int soldiers_last_time_moved_x;
-	int soldiers_last_time_moved_y;
-	int soldiers_last_time_turned;
+	int soldier_last_time_moved_x;
+	int soldier_last_time_moved_y;
+	int cannon_last_time_moved_x;
+	int cannon_last_time_moved_y;
 	int air_last_time_moved;
+	int soldiers_last_time_turned;
 	const Army *selected_army;
 	//int n_soldiers[n_players_c];
 	//Vector *soldiers[n_players_c];

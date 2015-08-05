@@ -21,11 +21,11 @@
 //---------------------------------------------------------------------------
 
 const int defenders_ticks_per_update_c = (int)(60.0 * ticks_per_frame_c * time_ratio_c); // consider a turn every this number of ticks
-const int soldier_move_rate_c = (int)(1.9 * ticks_per_frame_c * time_ratio_c); // ticks per pixel - needs to be in sync with the animation!
+const int soldier_move_rate_c = (int)(1.8 * ticks_per_frame_c * time_ratio_c); // ticks per pixel - needs to be in sync with the animation!
+const int cannon_move_rate_c = (int)(0.6 * ticks_per_frame_c * time_ratio_c); // ticks per pixel - needs to be in sync with the animation!
 const int air_move_rate_c = (int)(0.2 * ticks_per_frame_c * time_ratio_c); // ticks per pixel
-const int soldier_turn_rate_c = (int)(20.0 * ticks_per_frame_c * time_ratio_c); // mean ticks per turn
+const int soldier_turn_rate_c = (int)(50.0 * ticks_per_frame_c * time_ratio_c); // mean ticks per turn
 
-//const int shield_step_y_c = 16;
 const int shield_step_y_c = 20;
 
 class Soldier {
@@ -832,10 +832,12 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 	this->current_sector = NULL;
 	this->flag_frame_step = 0;
 	this->defenders_last_time_update = 0;
-	this->soldiers_last_time_moved_x = 0;
-	this->soldiers_last_time_moved_y = 0;
-	this->soldiers_last_time_turned = 0;
+	this->soldier_last_time_moved_x = 0;
+	this->soldier_last_time_moved_y = 0;
+	this->cannon_last_time_moved_x = 0;
+	this->cannon_last_time_moved_y = 0;
 	this->air_last_time_moved = 0;
+	this->soldiers_last_time_turned = 0;
 
 	this->text_effect = NULL;
 	this->speed_button = NULL;
@@ -1838,17 +1840,27 @@ void PlayingGameState::update() {
 			this->smokeParticleSystem->setBirthRate(0.004f);
 		}
 	}*/
-	int move_soldiers_step_x = 0;
-	int move_soldiers_step_y = 0;
+	int move_soldier_step_x = 0;
+	int move_soldier_step_y = 0;
+	int move_cannon_step_x = 0;
+	int move_cannon_step_y = 0;
 	int move_air_step = 0;
 	// move twice as fast in x direction, to simulate 3D look
-	while( getGameTime() - soldiers_last_time_moved_x > soldier_move_rate_c ) {
-		move_soldiers_step_x++;
-		soldiers_last_time_moved_x += soldier_move_rate_c;
+	while( getGameTime() - soldier_last_time_moved_x > soldier_move_rate_c ) {
+		move_soldier_step_x++;
+		soldier_last_time_moved_x += soldier_move_rate_c;
 	}
-	while( getGameTime() - soldiers_last_time_moved_y > 2*soldier_move_rate_c ) {
-		move_soldiers_step_y++;
-		soldiers_last_time_moved_y += 2*soldier_move_rate_c;
+	while( getGameTime() - soldier_last_time_moved_y > 2*soldier_move_rate_c ) {
+		move_soldier_step_y++;
+		soldier_last_time_moved_y += 2*soldier_move_rate_c;
+	}
+	while( getGameTime() - cannon_last_time_moved_x > cannon_move_rate_c ) {
+		move_cannon_step_x++;
+		cannon_last_time_moved_x += cannon_move_rate_c;
+	}
+	while( getGameTime() - cannon_last_time_moved_y > 2*cannon_move_rate_c ) {
+		move_cannon_step_y++;
+		cannon_last_time_moved_y += 2*cannon_move_rate_c;
 	}
 	while( getGameTime() - air_last_time_moved > air_move_rate_c ) {
 		move_air_step++;
@@ -1925,18 +1937,22 @@ void PlayingGameState::update() {
 					// turn!
 					soldier->dir = (AmmoDirection)(rand() % 4);
 				}
-				int move_soldiers_step = (soldier->dir == 0 || soldier->dir == 1) ? move_soldiers_step_y : move_soldiers_step_x;
-				if( move_soldiers_step > 0  ) {
+				int move_step = 0;
+				if( soldier->epoch == cannon_epoch_c )
+					move_step = (soldier->dir == 0 || soldier->dir == 1) ? move_cannon_step_y : move_cannon_step_x;
+				else
+					move_step = (soldier->dir == 0 || soldier->dir == 1) ? move_soldier_step_y : move_soldier_step_x;
+				if( move_step > 0  ) {
 					int step_x = 0;
 					int step_y = 0;
 					if( soldier->dir == 0 )
-						step_y = move_soldiers_step;
+						step_y = move_step;
 					else if( soldier->dir == 1 )
-						step_y = - move_soldiers_step;
+						step_y = - move_step;
 					else if( soldier->dir == 2 )
-						step_x = move_soldiers_step;
+						step_x = move_step;
 					else if( soldier->dir == 3 )
-						step_x = - move_soldiers_step;
+						step_x = - move_step;
 
 					int new_xpos = soldier->xpos + step_x;
 					int new_ypos = soldier->ypos + step_y;
@@ -1962,7 +1978,32 @@ void PlayingGameState::update() {
 					if( fire_random <= fire_prob ) {
 						// fire!
 						Image *image = attackers_walking[soldier->player][soldier->epoch][soldier->dir][0];
-						AmmoEffect *ammoeffect = new AmmoEffect( this, soldier->epoch, soldier->dir, soldier->xpos + image->getScaledWidth()/2, soldier->ypos );
+						int xpos = 0, ypos = 0;
+						if( soldier->epoch == cannon_epoch_c ) {
+							xpos = soldier->xpos;
+							ypos = soldier->ypos;
+							if( soldier->dir == ATTACKER_AMMO_LEFT ) {
+								xpos = soldier->xpos;
+								ypos = soldier->ypos;
+							}
+							else if( soldier->dir == ATTACKER_AMMO_RIGHT ) {
+								xpos = soldier->xpos + image->getScaledWidth();
+								ypos = soldier->ypos;
+							}
+							else if( soldier->dir == ATTACKER_AMMO_UP ) {
+								xpos = soldier->xpos + image->getScaledWidth()/4;
+								ypos = soldier->ypos;
+							}
+							else if( soldier->dir == ATTACKER_AMMO_DOWN ) {
+								xpos = soldier->xpos + image->getScaledWidth()/4;
+								ypos = soldier->ypos + image->getScaledHeight();
+							}
+						}
+						else {
+							xpos = soldier->xpos + image->getScaledWidth()/2;
+							ypos = soldier->ypos;
+						}
+						AmmoEffect *ammoeffect = new AmmoEffect( this, soldier->epoch, soldier->dir, xpos, ypos );
 						this->ammo_effects.push_back(ammoeffect);
 					}
 				}

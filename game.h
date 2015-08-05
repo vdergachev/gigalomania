@@ -88,6 +88,7 @@ const int screen_height = scale_height * 256;
 const int infinity_c = 31;
 //const int end_epoch_c = 9; // use this to have the last epoch game
 const int end_epoch_c = -1; // use this to have the last epoch as being 2100AD
+const int cannon_epoch_c = 5;
 const int biplane_epoch_c = 6;
 const int jetplane_epoch_c = 7;
 const int nuclear_epoch_c = 8;
