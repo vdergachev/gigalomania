@@ -3257,6 +3257,7 @@ void EndIslandGameState::draw() {
 	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
 	background->draw(0, 0);
+	screen->fillRectWithAlpha(scale_width*40, scale_height*120, scale_width*240, scale_height*70, 0, 0, 0, 127);
 	char text[4096] = "";
 	if( gameResult == GAMERESULT_QUIT )
 		strcpy(text, "QUITTER!");
@@ -3303,6 +3304,7 @@ void EndIslandGameState::draw() {
 		Image::write(260, 140, letters_small, "SAVED", Image::JUSTIFY_LEFT);
 
 	int ypos = 150;
+	int rect_y_offset = 2;
 	//int r = 0, g = 0, b = 0, col = 0;
 	int r = 0, g = 0, b = 0;
 	/*SDL_Rect rect;
@@ -3311,7 +3313,7 @@ void EndIslandGameState::draw() {
 	rect.w = (Uint16)(16 * scale_width);
 	rect.h = (Uint16)(8 * scale_height);*/
 	int rect_x = (int)(20 * scale_width);
-	int rect_y = (int)(ypos * scale_height);
+	int rect_y = (int)((ypos-rect_y_offset) * scale_height);
 	int rect_w = (int)(16 * scale_width);
 	int rect_h = (int)(8 * scale_height);
 
@@ -3340,7 +3342,7 @@ void EndIslandGameState::draw() {
 		/*col = SDL_MapRGB(screen->getSurface()->format, r, g, b);
 		rect.y = (Sint16)(ypos * scale_height);
 		SDL_FillRect(screen->getSurface(), &rect, col);*/
-		rect_y = (int)(ypos * scale_height);
+		rect_y = (int)((ypos-rect_y_offset) * scale_height);
 		screen->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
 
 		//Image::write(40, ypos, letters_small, "COMPUTER", Image::JUSTIFY_LEFT, true);
