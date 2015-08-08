@@ -784,7 +784,7 @@ void PlaceMenGameState::requestConfirm() {
 	if( confirm_window != NULL ) {
         this->closeConfirmWindow();
 		if( confirm_type == CONFIRMTYPE_NEWGAME ) {
-			newGame();
+			setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
 		}
 		else if( confirm_type == CONFIRMTYPE_QUITGAME ) {
 	        application->setQuit();

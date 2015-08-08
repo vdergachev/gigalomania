@@ -240,13 +240,13 @@ ChooseMenPanel::ChooseMenPanel(PlaceMenGameState *gamestate) : MultiPanel(N_STAT
     this->button_disallow_nukes->setActive( pref_disallow_nukes ? 0 : 1 );
 	this->addToPanel(STATE_OPTIONS, button_disallow_nukes);
 
-	this->button_new = NULL;
+    this->button_new = new Button((int)(mx - 4.0*fw), cy, "NEW GAME", letters_large);
+    cy += step_y;
+    this->addToPanel(STATE_OPTIONS, button_new);
+
 	this->button_load = NULL;
 	this->button_save = NULL;
 	if( gameType == GAMETYPE_ALLISLANDS ) {
-        this->button_new = new Button((int)(mx - 4.0*fw), cy, "NEW GAME", letters_large);
-        cy += step_y;
-        this->addToPanel(STATE_OPTIONS, button_new);
         this->button_load = new Button((int)(mx - 2.0*fw), cy, "LOAD", letters_large);
         cy += step_y;
         this->addToPanel(STATE_OPTIONS, button_load);
@@ -503,9 +503,6 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
 		else if( m_left && click && this->button_new != NULL && this->button_new->mouseOver(m_x, m_y) ) {
             done = true;
             registerClick();
-			//newGame();
-			// this panel is now destroyed, need to exit immediately!
-			//return;
 			this->gamestate->requestNewGame();
 		}
 		else if( m_left && click && this->button_load != NULL && this->button_load->mouseOver(m_x, m_y) ) {
