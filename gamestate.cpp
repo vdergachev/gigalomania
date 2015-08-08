@@ -1730,7 +1730,8 @@ void PlayingGameState::draw() {
 
 			if( !card->autoProceed() && card->canProceed(this) ) {
 				if( tutorial_next_button == NULL ) {
-					tutorial_next_button = new Button(rect.x + rect.w - 16, rect.y + rect.h + 4, card->getNextText().c_str(), letters_small);
+					textLines(&n_lines, &max_wid, card->getNextText().c_str(), l_w, l_w);
+					tutorial_next_button = new Button(rect.x + rect.w - max_wid, rect.y + rect.h + 4, card->getNextText().c_str(), letters_large);
 					tutorial_next_button->setBackground(0, 0, 0, tutorial_alpha_c);
 					screen_page->add(tutorial_next_button);
 				}
