@@ -3289,7 +3289,8 @@ void setGameStateID(GameStateID state, GameState *new_gamestate) {
 	placeMenInfo.init();
 	}*/
 	// cheat/test:
-	/*if( gameStateID == GAMESTATEID_PLAYING && new_gamestate == NULL ) {
+	/*if( gameStateID == GAMESTATEID_PLAYING && new_gamestate == NULL && gameType != GAMETYPE_TUTORIAL ) {
+		// n.b., if we ever want this to run in tutorial mode, the old_gamestate won't be of type PlaceMenGameState
 		int map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
 		int map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();
 		Sector *start_sector = map->getSector(map_x, map_y);
