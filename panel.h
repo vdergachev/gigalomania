@@ -22,7 +22,8 @@ namespace Gigalomania {
 	private:
 		void init_panelpage();
 	protected:
-		bool enabled;
+		bool visible;
+		//bool enabled;
 		vector <PanelPage *> *children;
 		int popup_x;
 		int popup_y;
@@ -82,10 +83,14 @@ namespace Gigalomania {
 		virtual bool hasModal() const {
 			return this->modal_child != NULL;
 		}
-		virtual void setEnabled(bool enabled);
+		virtual void setVisible(bool visible);
+		virtual bool isVisible() const {
+			return this->visible;
+		}
+		/*virtual void setEnabled(bool enabled);
 		virtual bool isEnabled() const {
 			return this->enabled;
-		}
+		}*/
 		void setBackground(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 			this->has_background = true;
 			this->background[0] = r;

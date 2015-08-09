@@ -399,11 +399,11 @@ void ChooseMenPanel::buttonNMenClick(void *data, int arg, bool m_left, bool m_mi
 		for(int x=0;x<map_width_c;x++) {
 			if( getMap()->isSectorAt(x, y) ) {
 				/*ASSERT( ((PlaceMenGameState *)gamestate)->map_panels[x][y] != NULL );
-				((PlaceMenGameState *)gamestate)->map_panels[x][y]->setEnabled( n_men > 0 );*/
+				((PlaceMenGameState *)gamestate)->map_panels[x][y]->setVisible( n_men > 0 );*/
 				/*ASSERT( ((PlaceMenGameState *)gamestate)->getMapPanel(x, y) != NULL );
-				((PlaceMenGameState *)gamestate)->getMapPanel(x, y)->setEnabled( n_men > 0 );*/
+				((PlaceMenGameState *)gamestate)->getMapPanel(x, y)->setVisible( n_men > 0 );*/
 				ASSERT( chooseMenPanel->gamestate->getMapPanel(x, y) != NULL );
-				chooseMenPanel->gamestate->getMapPanel(x, y)->setEnabled( chooseMenPanel->n_men > 0 );
+				chooseMenPanel->gamestate->getMapPanel(x, y)->setVisible( chooseMenPanel->n_men > 0 );
 			}
 		}
 	}
@@ -967,7 +967,7 @@ void GamePanel::refreshCanDesign() {
 		return;
 	}
 	if( start_epoch == end_epoch_c ) {
-		this->button_design->setEnabled(false);
+		this->button_design->setVisible(false);
 		return;
 	}
 	bool any_design = false;
@@ -982,7 +982,7 @@ void GamePanel::refreshCanDesign() {
 		else if( gamestate->getCurrentSector()->canResearch(Invention::WEAPON, i) )
 			any_design = true;
 	}
-	this->button_design->setEnabled(any_design);
+	this->button_design->setVisible(any_design);
 	if( gamestate->getCurrentSector()->getBuilding(BUILDING_LAB) != NULL ) {
 		this->button_design->setImage(panel_lab);
 		this->button_bigdesign->setImage(panel_biglab);
@@ -992,7 +992,7 @@ void GamePanel::refreshCanDesign() {
 		this->button_design->setImage(panel_design);
 		this->button_bigdesign->setImage(panel_bigdesign);
 	}
-	this->button_ndesigners->setEnabled( gamestate->getCurrentSector()->getCurrentDesign() != NULL );
+	this->button_ndesigners->setVisible( gamestate->getCurrentSector()->getCurrentDesign() != NULL );
 }
 
 void GamePanel::refreshDesignInventions() {
@@ -1000,16 +1000,16 @@ void GamePanel::refreshDesignInventions() {
 		return;
 	}
 	for(int i=0;i<n_sub_epochs;i++) {
-		this->button_shields[i]->setEnabled(true);
-		this->button_defences[i]->setEnabled(true);
-		this->button_weapons[i]->setEnabled(true);
+		this->button_shields[i]->setVisible(true);
+		this->button_defences[i]->setVisible(true);
+		this->button_weapons[i]->setVisible(true);
 
 		if( !gamestate->getCurrentSector()->canResearch(Invention::SHIELD, start_epoch + i) )
-			this->button_shields[i]->setEnabled(false);
+			this->button_shields[i]->setVisible(false);
 		if( !gamestate->getCurrentSector()->canResearch(Invention::DEFENCE, start_epoch + i) )
-			this->button_defences[i]->setEnabled(false);
+			this->button_defences[i]->setVisible(false);
 		if( !gamestate->getCurrentSector()->canResearch(Invention::WEAPON, start_epoch + i) )
-			this->button_weapons[i]->setEnabled(false);
+			this->button_weapons[i]->setVisible(false);
 	}
 }
 
@@ -1018,16 +1018,16 @@ void GamePanel::refreshManufactureInventions() {
 		return;
 	}
 	for(int i=0;i<n_sub_epochs;i++) {
-		this->button_fshields[i]->setEnabled(true);
-		this->button_fdefences[i]->setEnabled(true);
-		this->button_fweapons[i]->setEnabled(true);
+		this->button_fshields[i]->setVisible(true);
+		this->button_fdefences[i]->setVisible(true);
+		this->button_fweapons[i]->setVisible(true);
 
 		if( start_epoch + i < factory_epoch_c || !gamestate->getCurrentSector()->canBuildDesign(Invention::SHIELD, start_epoch + i) )
-			this->button_fshields[i]->setEnabled(false);
+			this->button_fshields[i]->setVisible(false);
 		if( start_epoch + i < factory_epoch_c || !gamestate->getCurrentSector()->canBuildDesign(Invention::DEFENCE, start_epoch + i) )
-			this->button_fdefences[i]->setEnabled(false);
+			this->button_fdefences[i]->setVisible(false);
 		if( start_epoch + i < factory_epoch_c || !gamestate->getCurrentSector()->canBuildDesign(Invention::WEAPON, start_epoch + i) )
-			this->button_fweapons[i]->setEnabled(false);
+			this->button_fweapons[i]->setVisible(false);
 	}
 }
 
@@ -1036,23 +1036,23 @@ void GamePanel::refreshDeployInventions() {
 		return;
 	}
 	for(int i=0;i<n_sub_epochs;i++) {
-		this->button_deploy_shields[i]->setEnabled(false);
+		this->button_deploy_shields[i]->setVisible(false);
 		if( gamestate->getCurrentSector()->inventionKnown(Invention::SHIELD, start_epoch + i) )
-			this->button_deploy_shields[i]->setEnabled(true);
+			this->button_deploy_shields[i]->setVisible(true);
 	}
 
 	for(int i=0;i<n_sub_epochs;i++) {
-		this->button_deploy_defences[i]->setEnabled(false);
+		this->button_deploy_defences[i]->setVisible(false);
 		if( gamestate->getCurrentSector()->inventionKnown(Invention::DEFENCE, start_epoch + i) )
-			this->button_deploy_defences[i]->setEnabled(true);
+			this->button_deploy_defences[i]->setVisible(true);
 	}
 
-	this->button_deploy_unarmedmen->setEnabled(true);
+	this->button_deploy_unarmedmen->setVisible(true);
 	for(int i=0;i<n_sub_epochs;i++) {
-		this->button_deploy_attackers[i]->setEnabled(false);
+		this->button_deploy_attackers[i]->setVisible(false);
 		if( gamestate->getCurrentSector()->inventionKnown(Invention::WEAPON, start_epoch + i) ||
 			gamestate->getCurrentSector()->getStoredArmy()->getSoldiers(start_epoch + i) > 0 )
-			this->button_deploy_attackers[i]->setEnabled(true);
+			this->button_deploy_attackers[i]->setVisible(true);
 	}
 }
 
@@ -1060,24 +1060,18 @@ void GamePanel::refreshShutdown() {
 	if( !gamestate->viewingActiveClientSector() ) {
 		return;
 	}
-	this->button_shutdown->setEnabled( gamestate->getCurrentSector()->canShutdown() );
+	this->button_shutdown->setVisible( gamestate->getCurrentSector()->canShutdown() );
 }
 
 void GamePanel::refresh() {
 	//LOG("GamePanel::refresh()\n");
 	// set all enabled to false
-	/*for(i=0;i<nChildren();i++) {
-	for(int j=0;j<get(i)->nChildren();j++) {
-	PanelPage *panel = get(i)->get(j);
-	panel->setEnabled(false);
-	}
-	}*/
 	if( !gamestate->viewingActiveClientSector() ) {
-		this->setEnabled(false);
+		this->setVisible(false);
 		return;
 	}
 
-	this->setEnabled(true);
+	this->setVisible(true);
 
 	this->refreshCanDesign();
 
@@ -1086,15 +1080,15 @@ void GamePanel::refresh() {
 		any_defences = ( gamestate->getCurrentSector()->getStoredDefenders(i) > 0 || gamestate->getCurrentSector()->inventionKnown(Invention::DEFENCE, i) );
 	bool any_designs = ( gamestate->getCurrentSector()->getNDesigns() > 0 );
 
-	this->button_shield->setEnabled(true);
-	this->button_defence->setEnabled(any_defences);
-	this->button_attack->setEnabled(true);
-	//this->button_elementstocks->setEnabled(start_epoch != end_epoch_c);
+	this->button_shield->setVisible(true);
+	this->button_defence->setVisible(any_defences);
+	this->button_attack->setVisible(true);
+	//this->button_elementstocks->setVisible(start_epoch != end_epoch_c);
 	for(int i=0;i<4;i++) {
-		this->button_elements[i]->setEnabled(false);
-		this->button_nminers[i]->setEnabled(false);
-		this->button_elements2[i]->setEnabled(false);
-		this->button_nminers2[i]->setEnabled(false);
+		this->button_elements[i]->setVisible(false);
+		this->button_nminers[i]->setVisible(false);
+		this->button_elements2[i]->setVisible(false);
+		this->button_nminers2[i]->setVisible(false);
 
 		if( this->element_index[i] != -1 ) {
 			ASSERT_ELEMENT_ID( this->element_index[i] );
@@ -1102,77 +1096,77 @@ void GamePanel::refresh() {
 			int n_elements = 0, fraction = 0;
 			gamestate->getCurrentSector()->getElementStocks(&n_elements, &fraction, (Id)this->element_index[i]);
 			if( n_elements > 0 || fraction > 0 || can_mine ) {
-				this->button_elements[i]->setEnabled(true);
-				this->button_elements2[i]->setEnabled(true);
+				this->button_elements[i]->setVisible(true);
+				this->button_elements2[i]->setVisible(true);
 			}
 			if( can_mine && elements[ this->element_index[i] ]->getType() != Element::GATHERABLE ) {
-				this->button_nminers[i]->setEnabled(true);
-				this->button_nminers2[i]->setEnabled(true);
+				this->button_nminers[i]->setVisible(true);
+				this->button_nminers2[i]->setVisible(true);
 			}
 		}
 	}
 	/*if( onemousebutton ) {
 		// if one mouse button, only allow changing via the sub-menu (otherwise problems with left/right icons going off screen)
-		this->button_nbuilders[BUILDING_MINE]->setEnabled(false);
-		this->button_nbuilders[BUILDING_FACTORY]->setEnabled(false);
-		this->button_nbuilders[BUILDING_LAB]->setEnabled(false);
+		this->button_nbuilders[BUILDING_MINE]->setVisible(false);
+		this->button_nbuilders[BUILDING_FACTORY]->setVisible(false);
+		this->button_nbuilders[BUILDING_LAB]->setVisible(false);
 	}*/
 	if( !gamestate->getCurrentSector()->canBuild( BUILDING_MINE ) ) {
-		this->button_build[BUILDING_MINE]->setEnabled(false);
-		this->button_nbuilders[BUILDING_MINE]->setEnabled(false);
-		this->button_nbuilders2[BUILDING_MINE]->setEnabled(false);
+		this->button_build[BUILDING_MINE]->setVisible(false);
+		this->button_nbuilders[BUILDING_MINE]->setVisible(false);
+		this->button_nbuilders2[BUILDING_MINE]->setVisible(false);
 	}
 	if( !gamestate->getCurrentSector()->canBuild( BUILDING_FACTORY ) ) {
-		this->button_build[BUILDING_FACTORY]->setEnabled(false);
-		this->button_nbuilders[BUILDING_FACTORY]->setEnabled(false);
-		this->button_nbuilders2[BUILDING_FACTORY]->setEnabled(false);
+		this->button_build[BUILDING_FACTORY]->setVisible(false);
+		this->button_nbuilders[BUILDING_FACTORY]->setVisible(false);
+		this->button_nbuilders2[BUILDING_FACTORY]->setVisible(false);
 	}
 	if( !gamestate->getCurrentSector()->canBuild( BUILDING_LAB ) ) {
-		this->button_build[BUILDING_LAB]->setEnabled(false);
-		this->button_nbuilders[BUILDING_LAB]->setEnabled(false);
-		this->button_nbuilders2[BUILDING_LAB]->setEnabled(false);
+		this->button_build[BUILDING_LAB]->setVisible(false);
+		this->button_nbuilders[BUILDING_LAB]->setVisible(false);
+		this->button_nbuilders2[BUILDING_LAB]->setVisible(false);
 	}
-	this->button_bigbuild->setEnabled(true);
-	this->button_knowndesigns->setEnabled(any_designs);
+	this->button_bigbuild->setVisible(true);
+	this->button_knowndesigns->setVisible(any_designs);
 	if( gamestate->getCurrentSector()->getBuilding(BUILDING_FACTORY) == NULL ) {
-		this->button_factory->setEnabled(false);
+		this->button_factory->setVisible(false);
 	}
-	this->button_nworkers->setEnabled( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
+	this->button_nworkers->setVisible( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
 
-	this->button_bigdesign->setEnabled(true);
-	this->button_designers->setEnabled( gamestate->getCurrentSector()->getCurrentDesign() != NULL );
+	this->button_bigdesign->setVisible(true);
+	this->button_designers->setVisible( gamestate->getCurrentSector()->getCurrentDesign() != NULL );
 	this->button_designers->enableHelpText( gamestate->getCurrentSector()->getCurrentDesign() != NULL );
 	this->refreshDesignInventions();
 
-	this->button_bigshield->setEnabled(true);
+	this->button_bigshield->setVisible(true);
 	this->refreshShutdown();
 
-	this->button_bigdefence->setEnabled(true);
+	this->button_bigdefence->setVisible(true);
 
-	this->button_bigattack->setEnabled(true);
-	this->button_return_attackers->setEnabled(true);
+	this->button_bigattack->setVisible(true);
+	this->button_return_attackers->setVisible(true);
 
 	this->refreshDeployInventions();
 
-	this->button_bigelementstocks->setEnabled(true);
+	this->button_bigelementstocks->setVisible(true);
 
-	this->button_bigknowndesigns->setEnabled(true);
+	this->button_bigknowndesigns->setVisible(true);
 	for(int i=0;i<n_sub_epochs;i++) {
 		if( !gamestate->getCurrentSector()->knownDesign(Invention::SHIELD, start_epoch + i) )
-			this->button_knownshields[i]->setEnabled(false);
+			this->button_knownshields[i]->setVisible(false);
 		if( !gamestate->getCurrentSector()->knownDesign(Invention::DEFENCE, start_epoch + i) )
-			this->button_knowndefences[i]->setEnabled(false);
+			this->button_knowndefences[i]->setVisible(false);
 		if( !gamestate->getCurrentSector()->knownDesign(Invention::WEAPON, start_epoch + i) )
-			this->button_knownweapons[i]->setEnabled(false);
+			this->button_knownweapons[i]->setVisible(false);
 	}
 
-	this->button_bigdesigninfo->setEnabled(true);
-	this->button_trashdesign->setEnabled(true);
+	this->button_bigdesigninfo->setVisible(true);
+	this->button_trashdesign->setVisible(true);
 
-	this->button_bigfactory->setEnabled(true);
-	this->button_workers->setEnabled( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
+	this->button_bigfactory->setVisible(true);
+	this->button_workers->setVisible( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
 	this->button_workers->enableHelpText( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
-	this->button_famount->setEnabled( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
+	this->button_famount->setVisible( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
 	this->button_famount->enableHelpText( gamestate->getCurrentSector()->getCurrentManufacture() != NULL );
 	this->refreshManufactureInventions();
 
@@ -1222,7 +1216,7 @@ void GamePanel::draw() {
 			}
 			for(int i=0;i<4;i++) {
 				Id element = (Id)this->element_index[i];
-				if( this->button_nminers[i]->isEnabled() ) {
+				if( this->button_nminers[i]->isVisible() ) {
 					ASSERT_ELEMENT_ID( this->element_index[i] );
 					int n_miners = gamestate->getCurrentSector()->getMiners( element );
 					Image::writeNumbers( this->button_nminers[i]->getXCentre(), this->button_nminers[i]->getTop() + 2, numbers_white, n_miners,Image::JUSTIFY_CENTRE);
@@ -1232,7 +1226,7 @@ void GamePanel::draw() {
 				Image::writeNumbers( this->button_nworkers->getXCentre(), this->button_nworkers->getTop() + 2, numbers_white, gamestate->getCurrentSector()->getWorkers(),Image::JUSTIFY_CENTRE);
 			}
 			for(int i=0;i<N_BUILDINGS;i++) {
-				if( this->button_nbuilders[i] != NULL && this->button_nbuilders[i]->isEnabled() ) {
+				if( this->button_nbuilders[i] != NULL && this->button_nbuilders[i]->isVisible() ) {
 					Image::writeNumbers( this->button_nbuilders[i]->getXCentre(), this->button_nbuilders[i]->getBottom() - 8, numbers_white, gamestate->getCurrentSector()->getBuilders((Type)i),Image::JUSTIFY_CENTRE);
 				}
 			}
@@ -1305,7 +1299,7 @@ void GamePanel::draw() {
 		}
 
 		for(int i=0;i<n_sub_epochs;i++) {
-			if( this->button_deploy_shields[i]->isEnabled() ) {
+			if( this->button_deploy_shields[i]->isVisible() ) {
 				int n_store = gamestate->getCurrentSector()->getStoredShields(i);
 				int pos_x = button_deploy_shields[i]->getLeft() + 8;
 				int pos_y = button_deploy_shields[i]->getBottom() + 2;
@@ -1326,7 +1320,7 @@ void GamePanel::draw() {
 		men[gamestate->getCurrentSector()->getBuildingEpoch()]->draw(offset_panel_x_c + 8, offset_panel_y_c + 24);
 		Image::writeNumbers(offset_panel_x_c + 16, offset_panel_y_c + 42, numbers_grey, gamestate->getCurrentSector()->getSparePopulation(), Image::JUSTIFY_CENTRE);
 		for(int i=0;i<n_sub_epochs;i++) {
-			if( this->button_deploy_defences[i]->isEnabled() ) {
+			if( this->button_deploy_defences[i]->isVisible() ) {
 				int n_store = gamestate->getCurrentSector()->getStoredDefenders(start_epoch+i);
 				int pos_x = button_deploy_defences[i]->getLeft() + 8;
 				int pos_y = button_deploy_defences[i]->getBottom() + 2;
@@ -1345,7 +1339,7 @@ void GamePanel::draw() {
 	else if( this->c_page == STATE_ATTACK ) {
 		Image::writeNumbers(offset_panel_x_c + offset_attack_x_c + 8, offset_panel_y_c + 42, numbers_yellow, gamestate->getCurrentSector()->getSparePopulation(), Image::JUSTIFY_CENTRE);
 		for(int i=0;i<n_sub_epochs;i++) {
-			if( this->button_deploy_attackers[i]->isEnabled() ) {
+			if( this->button_deploy_attackers[i]->isVisible() ) {
 				int n_store = gamestate->getCurrentSector()->getStoredArmy()->getSoldiers(start_epoch+i);
 				if( gamestate->getCurrentSector()->canBuildDesign(Invention::WEAPON, start_epoch+i) || n_store > 0 ) {
 					if( n_store == 0 && start_epoch + i < factory_epoch_c )
@@ -1383,7 +1377,7 @@ void GamePanel::draw() {
 			if( fraction == 1 ) {
 				numbers_half->draw(offset_panel_x_c + 72 + off + 1, ypos);
 			}
-			if( this->button_nminers2[i]->isEnabled() ) {
+			if( this->button_nminers2[i]->isVisible() ) {
 				int n_miners = gamestate->getCurrentSector()->getMiners( element );
 				Image::writeNumbers( this->button_nminers2[i]->getXCentre(), this->button_nminers2[i]->getTop() + 2, numbers_white, n_miners,Image::JUSTIFY_CENTRE);
 			}
@@ -1392,7 +1386,7 @@ void GamePanel::draw() {
 	else if( this->c_page == STATE_BUILD ) {
 		for(int i=0;i<N_BUILDINGS;i++)
 		{
-			if( this->button_nbuilders2[i] != NULL && this->button_nbuilders2[i]->isEnabled() ) {
+			if( this->button_nbuilders2[i] != NULL && this->button_nbuilders2[i]->isVisible() ) {
 				Image::writeNumbers( this->button_nbuilders2[i]->getXCentre(), this->button_nbuilders2[i]->getTop() + 20, numbers_white, gamestate->getCurrentSector()->getBuilders((Type)i),Image::JUSTIFY_CENTRE);
 				if( gamestate->getCurrentSector()->getBuilders((Type)i) > 0 ) {
 					int halfdays = 0, hours = 0;
@@ -1604,7 +1598,7 @@ void GamePanel::buttonFAmountClick(void *data, int arg, bool m_left, bool m_midd
 
 void GamePanel::buttonNMinersClick(void *data, int arg, bool m_left, bool m_middle, bool m_right) {
 	GamePanel *gamePanel = static_cast<GamePanel *>(data);
-    if( gamePanel->button_nminers[arg] == NULL || !gamePanel->button_nminers[arg]->isEnabled() ) {
+    if( gamePanel->button_nminers[arg] == NULL || !gamePanel->button_nminers[arg]->isVisible() ) {
 		// no longer relevant
 		return;
 	}
@@ -1615,7 +1609,7 @@ void GamePanel::buttonNMinersClick(void *data, int arg, bool m_left, bool m_midd
 
 void GamePanel::buttonNBuildersClick(void *data, int arg, bool m_left, bool m_middle, bool m_right) {
 	GamePanel *gamePanel = static_cast<GamePanel *>(data);
-	if( gamePanel->button_nbuilders[arg] == NULL || !gamePanel->button_nbuilders[arg]->isEnabled() ) {
+	if( gamePanel->button_nbuilders[arg] == NULL || !gamePanel->button_nbuilders[arg]->isVisible() ) {
 		// no longer relevant
 		return;
 	}

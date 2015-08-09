@@ -621,7 +621,7 @@ void PlaceMenGameState::reset() {
 				int map_y = this->off_y + 16 * y;
 				PanelPage *panel = new PanelPage(map_x, map_y, 16, 16);
 				panel->setInfoLMB("place starting tower\nin this sector");
-				panel->setEnabled(false);
+				panel->setVisible(false);
 				screen_page->add(panel);
 				map_panels[x][y] = panel;
 			}
@@ -1681,7 +1681,7 @@ void PlayingGameState::draw() {
 			if( shield_buttons[i] == NULL ) {
 				continue;
 			}
-			shield_number_panels[i]->setEnabled(false);
+			shield_number_panels[i]->setVisible(false);
 			/*int n_allied = 1;
 			for(j=i+1;j<n_players_c;j++) {
 			if( Player::isAlliance(i, j) ) {
@@ -1695,7 +1695,7 @@ void PlayingGameState::draw() {
 					const Army *army = current_sector->getArmy(j);
 					int n_army = army->getTotal();
 					if( n_army > 0 ) {
-						shield_number_panels[i]->setEnabled(true);
+						shield_number_panels[i]->setVisible(true);
 						//Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8, numbers_small[i], n_army, Image::JUSTIFY_LEFT, true);
 						Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8 * off + 8, numbers_small[j], n_army, Image::JUSTIFY_LEFT);
 						off++;
@@ -2794,7 +2794,7 @@ void PlayingGameState::refreshShieldNumberPanels() {
 	if( this->map_display == MAPDISPLAY_MAP ) {
 		for(int i=0;i<n_players_c;i++) {
 			if( shield_number_panels[i] != NULL ) {
-				//shield_number_panels[i]->setEnabled(false);
+				//shield_number_panels[i]->setVisible(false);
 				shield_number_panels[i]->setInfoLMB("display numbers in each army");
 			}
 		}

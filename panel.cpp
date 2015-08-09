@@ -59,7 +59,8 @@ void PanelPage::init_panelpage() {
 	for(int i=0;i<4;i++)
 		this->background[i] = 0;
 	this->tolerance = mobile_ui ? 2 : 0;
-	this->enabled = true;
+	this->visible = true;
+	//this->enabled = true;
 	this->children = new vector<PanelPage *>();
 	this->popup_item = false;
 	this->popup_x = 0;
@@ -108,13 +109,21 @@ int PanelPage::getBottom() const {
 	return owner->getTop() + offset_y + h;
 }
 
-void PanelPage::setEnabled(bool enabled) {
+void PanelPage::setVisible(bool visible) {
+	this->visible = visible;
+	for(int i=0;i<nChildren();i++) {
+		PanelPage *panel = get(i);
+		panel->setVisible(visible);
+	}
+}
+
+/*void PanelPage::setEnabled(bool enabled) {
 	this->enabled = enabled;
 	for(int i=0;i<nChildren();i++) {
 		PanelPage *panel = get(i);
 		panel->setEnabled(enabled);
 	}
-}
+}*/
 
 void PanelPage::setInfoLMB(const char *text) {
 	/*strncpy(infoLMB, text, GUI_MAX_STRING);
@@ -312,7 +321,7 @@ void PanelPage::drawPopups() {
 }
 
 void PanelPage::drawBackground() {
-	if( this->has_background && this->enabled ) {
+	if( this->has_background && this->visible ) {
 		screen->fillRectWithAlpha((short)(scale_width*(owner->getLeft() + offset_x)), (short)(scale_width*(owner->getTop() + offset_y)), (short)(scale_width*this->w), (short)(scale_height*this->h), background[0], background[1], background[2], background[3]);
 	}
 }
@@ -332,7 +341,7 @@ void PanelPage::draw() {
 }
 
 bool PanelPage::mouseOver(int m_x,int m_y) {
-	if( enabled &&
+	if( visible &&
         m_x >= ( this->getLeft() - tolerance ) * scale_width &&
         m_x < ( this->getLeft() + w + tolerance ) * scale_width &&
         m_y >= ( this->getTop() - tolerance ) * scale_height &&
@@ -417,23 +426,9 @@ Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[
 Button::~Button() {
 }
 
-/*void Button::init_button() {
-this->image = NULL;
-*this->text = '\0';
-this->font = NULL;
-}
-
-void Button::draw() {
-if( enabled && image != NULL )
-image->draw(owner->getLeft() + offset_x, owner->getTop() + offset_y, true);
-else if( enabled && *this->text != '\0' ) {
-Image::write(owner->getLeft() + offset_x, owner->getTop() + offset_y, this->font, this->text, Image::JUSTIFY_LEFT, true);
-}
-}*/
-
 void Button::draw() {
 	this->drawBackground();
-	if( enabled ) {
+	if( visible ) {
         //LOG("write: %s\n", this->text.c_str());
        /*{
             // DEBUG
@@ -487,7 +482,7 @@ ImageButton::~ImageButton() {
 
 void ImageButton::draw() {
 	this->drawBackground();
-    if( enabled && image != NULL ) {
+    if( visible && image != NULL ) {
         //LOG("imagebutton: %d, %d\n", owner->getLeft() + offset_x, owner->getTop() + offset_y);
         /*{
             // DEBUG
@@ -538,7 +533,7 @@ CycleButton::~CycleButton() {
 
 void CycleButton::draw() {
 	this->drawBackground();
-	if( enabled ) {
+	if( visible ) {
        /*{
             // DEBUG
             int sx = (int)((owner->getLeft() + offset_x - tolerance) * scale_width);
