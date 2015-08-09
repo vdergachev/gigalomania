@@ -60,7 +60,7 @@ void PanelPage::init_panelpage() {
 		this->background[i] = 0;
 	this->tolerance = mobile_ui ? 2 : 0;
 	this->visible = true;
-	//this->enabled = true;
+	this->enabled = true;
 	this->children = new vector<PanelPage *>();
 	this->popup_item = false;
 	this->popup_x = 0;
@@ -117,13 +117,13 @@ void PanelPage::setVisible(bool visible) {
 	}
 }
 
-/*void PanelPage::setEnabled(bool enabled) {
+void PanelPage::setEnabled(bool enabled) {
 	this->enabled = enabled;
 	for(int i=0;i<nChildren();i++) {
 		PanelPage *panel = get(i);
 		panel->setEnabled(enabled);
 	}
-}*/
+}
 
 void PanelPage::setInfoLMB(const char *text) {
 	/*strncpy(infoLMB, text, GUI_MAX_STRING);
@@ -341,7 +341,7 @@ void PanelPage::draw() {
 }
 
 bool PanelPage::mouseOver(int m_x,int m_y) {
-	if( visible &&
+	if( visible && enabled &&
         m_x >= ( this->getLeft() - tolerance ) * scale_width &&
         m_x < ( this->getLeft() + w + tolerance ) * scale_width &&
         m_y >= ( this->getTop() - tolerance ) * scale_height &&

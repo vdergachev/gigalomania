@@ -1709,12 +1709,14 @@ void PlayingGameState::draw() {
 	if( tutorial != NULL ) {
 		const TutorialCard *card = tutorial->getCard();
 		if( card != NULL ) {
+			card->setGUI();
 			const unsigned char tutorial_alpha_c = 127;
 			int n_lines = 0, max_wid = 0;
 			int s_w = letters_small[0]->getScaledWidth();
 			int l_w = letters_large[0]->getScaledWidth();
 			int l_h = letters_large[0]->getScaledHeight();
 			textLines(&n_lines, &max_wid, card->getText().c_str(), s_w, l_w);
+
 			Rect2D rect;
 			rect.x = 100;
 			rect.y = 130;

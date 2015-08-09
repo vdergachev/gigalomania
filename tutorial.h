@@ -62,6 +62,9 @@ public:
 	virtual bool canProceed(PlayingGameState *playing_gamestate) const {
 		return true;
 	}
+
+	virtual void setGUI() const {
+	}
 };
 
 class TutorialCardWaitForPanelPage : public TutorialCard {
