@@ -45,8 +45,8 @@ namespace Gigalomania {
 #else
 		void fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha);
 		void drawLine(short x0, short y0, short x1, short y1, unsigned char r, unsigned char g, unsigned char b);
-		void convertWindowToLogical(int *m_x, int *m_y);
-		void getWindowSize(int *window_width, int *window_height);
+		void convertWindowToLogical(int *m_x, int *m_y) const;
+		void getWindowSize(int *window_width, int *window_height) const;
 #endif
 		void setMousePos(int x, int y) {
 			this->m_pos_x = x;
@@ -61,8 +61,8 @@ namespace Gigalomania {
 		void setMouseRight(bool down) {
 			this->m_down_right = down;
 		}
-		void getMouseCoords(int *m_x, int *m_y);
-		bool getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right);
+		void getMouseCoords(int *m_x, int *m_y) const;
+		bool getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) const;
 	};
 }
 

@@ -205,7 +205,7 @@ void Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, u
 #if SDL_MAJOR_VERSION == 1
 // not supported with SDL 1.2
 #else
-void Screen::convertWindowToLogical(int *m_x, int *m_y) {
+void Screen::convertWindowToLogical(int *m_x, int *m_y) const {
 	SDL_Rect rect;
 	SDL_RenderGetViewport(sdlRenderer, &rect);
 	float scale_x = 0.0f, scale_y = 0.0f;
@@ -218,13 +218,13 @@ void Screen::convertWindowToLogical(int *m_x, int *m_y) {
 	*m_y -= rect.y;
 }
 
-void Screen::getWindowSize(int *window_width, int *window_height) {
+void Screen::getWindowSize(int *window_width, int *window_height) const {
 	SDL_GetWindowSize(sdlWindow, window_width, window_height);
 }
 #endif
 
 
-void Screen::getMouseCoords(int *m_x, int *m_y) {
+void Screen::getMouseCoords(int *m_x, int *m_y) const {
 	// SDL_GetMouseState doesn't play well with touch events
 	/*SDL_GetMouseState(m_x, m_y);
 	// need to convert from window space to logical space
@@ -237,7 +237,7 @@ void Screen::getMouseCoords(int *m_x, int *m_y) {
 	//LOG("Screen::getMouseCoords: %d, %d\n", *m_x, *m_y);
 }
 
-bool Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) {
+bool Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) const {
 	// SDL_GetMouseState doesn't play well with touch events
 	/*int m_b = SDL_GetMouseState(m_x, m_y);
 	*m_left = ( m_b & SDL_BUTTON(1) ) != 0;
@@ -379,6 +379,7 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEBUTTONDOWN:
 				{
+					//LOG("received mouse down\n");
 					int m_x = event.button.x;
 					int m_y = event.button.y;
 					screen->setMousePos(m_x, m_y);
@@ -450,7 +451,7 @@ void Application::runMainLoop() {
 #else
 			// support for touchscreens
 			// when a touch even occurs, we receive SDL_FINGERDOWN
-			// when the touch is released, we receive SDL_FINGERUP, followed by SDL_MOUSEBUTTONDOWN then SDL_MOUSEBUTTONUP
+			// when the touch is released, we receive SDL_FINGERUP, followed by SDL_MOUSEBUTTONDOWN then SDL_MOUSEBUTTONUP, then SDL_MOUSEMOTION
 			case SDL_FINGERDOWN:
 				{
 					//LOG("received fingerdown: %f , %f\n", event.tfinger.x, event.tfinger.y);
