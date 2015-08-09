@@ -14,5 +14,11 @@ INCLUDEPATH += ../APIs/SDL2_mixer/include/
 LIBS += -L$$PWD # add the source folder for libs
 LIBS += -lUser32 -lShell32 -lSDL2 -lSDL2main -lSDL2_image -lSDL2_mixer
 
+dir1.source = gfx
+dir2.source = sound
+dir3.source = music
+dir4.source = islands
+DEPLOYMENTFOLDERS += dir1 dir2 dir3 dir4
+
 include(deployment.pri)
 qtcAddDeployment()
