@@ -27,6 +27,8 @@ namespace Gigalomania {
 		int popup_x;
 		int popup_y;
 		bool popup_item;
+		bool is_inside_area;
+		int inside_area_time;
 
 		bool helpTextOn;
 		string infoLMB;

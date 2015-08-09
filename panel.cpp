@@ -64,6 +64,8 @@ void PanelPage::init_panelpage() {
 	this->popup_item = false;
 	this->popup_x = 0;
 	this->popup_y = 0;
+	this->is_inside_area = false;
+	this->inside_area_time = 0;
 	this->survive_owner = false;
 	this->helpTextOn = true;
 }
@@ -183,9 +185,22 @@ void PanelPage::drawPopups() {
 	const char *lmb_text = panel->getInfoLMB();
 	const char *rmb_text = panel->getInfoRMB();
 	//const char *bmb_text = panel->getInfoBMB();
+	if( is_inside_area ) {
+		if( !panel->mouseOver(m_x, m_y) ) {
+			is_inside_area = false;
+			inside_area_time = 0;
+		}
+	}
+	else {
+		if( panel->mouseOver(m_x, m_y) ) {
+			is_inside_area = true;
+			inside_area_time = getRealTime();
+		}
+	}
 	if( lmb_text != NULL || rmb_text != NULL /*|| bmb_text != NULL*/ ) {
-		if( panel->isHelpTextOn() && panel->mouseOver(m_x, m_y) ) {
+		if( panel->isHelpTextOn() && is_inside_area && getRealTime() < inside_area_time + 5000 ) {
 			if( !popup_item ) {
+				//LOG("create popup\n");
 				popup_item = true;
 				popup_x = (int)(m_x/scale_width);
 				popup_y = (int)(m_y/scale_height);
@@ -194,6 +209,7 @@ void PanelPage::drawPopups() {
 				popup_x = (int)(popup_x*scale_width);
 				popup_y = (int)(popup_y*scale_height);
 			}
+			//LOG("draw popup\n");
 			{
 				int n_texts = 0;
 				/*const char *text[3] = {NULL, NULL, NULL};
