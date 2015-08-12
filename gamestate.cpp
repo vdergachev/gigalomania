@@ -1723,7 +1723,9 @@ void PlayingGameState::draw() {
 			rect.w = max_wid;
 			rect.h = n_lines * (l_h + 2);
 			const Image *player_image = player_heads_alliance[client_player];
-			player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
+			if( player_image != NULL ) {
+				player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
+			}
 			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, tutorial_alpha_c);
 			Image::writeMixedCase(rect.x, rect.y, letters_large, letters_small, numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
 			if( card->hasArrow() ) {
