@@ -82,9 +82,15 @@ void OneMouseButtonPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m
 ChooseGameTypePanel::ChooseGameTypePanel() : MultiPanel(1, 0, 0) {
 	this->c_page = 0;
 	this->addToPanel(0, new Button(105, 50, "CHOOSE A GAME TYPE", letters_large));
-    this->button_tutorial = new Button(132, 90, "TUTORIAL", letters_large);
-	this->button_tutorial->setInfoLMB("play tutorial");
-	this->addToPanel(0, button_tutorial);
+	if( !using_old_gfx ) {
+		// tutorial not supported due to font/layout being different
+	    this->button_tutorial = new Button(132, 90, "TUTORIAL", letters_large);
+		this->button_tutorial->setInfoLMB("play tutorial");
+		this->addToPanel(0, button_tutorial);
+	}
+	else {
+		button_tutorial = NULL;
+	}
     this->button_singleisland = new Button(120, 120, "SINGLE ISLAND", letters_large);
 	this->button_singleisland->setInfoLMB("choose to play on\nany island");
 	this->addToPanel(0, button_singleisland);
@@ -101,7 +107,7 @@ void ChooseGameTypePanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m
 	//bool m_left = mouse_left(m_b);
 	//bool m_right = mouse_right(m_b);
 
-	if( m_left && click && this->button_tutorial->mouseOver(m_x, m_y) ) {
+	if( m_left && click && button_tutorial != NULL && this->button_tutorial->mouseOver(m_x, m_y) ) {
         registerClick();
         gameType = GAMETYPE_TUTORIAL;
         setGameStateID(GAMESTATEID_CHOOSEPLAYER);
