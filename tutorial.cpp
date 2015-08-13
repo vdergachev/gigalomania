@@ -13,6 +13,24 @@ void setupTutorial(const string &id) {
 		tutorial = new Tutorial1(id);
 }
 
+void GUIHandlerBlockAll::setGUI(PlayingGameState *playing_gamestate) const {
+	playing_gamestate->getGamePanel()->setEnabled(false);
+	for(vector<string>::const_iterator iter = exceptions.begin(); iter != exceptions.end(); ++iter) {
+		const string exception = *iter;
+		PanelPage *panel = playing_gamestate->getGamePanel()->findById(exception);
+		if( panel != NULL ) {
+			panel->setEnabled(true);
+		}
+	}
+}
+
+void TutorialCard::setGUI(PlayingGameState *playing_gamestate) const {
+	playing_gamestate->getGamePanel()->setEnabled(true);
+	if( gui_handler != NULL ) {
+		gui_handler->setGUI(playing_gamestate);
+	}
+}
+
 bool TutorialCardWaitForPanelPage::canProceed(PlayingGameState *playing_gamestate) const {
 	int c_page = playing_gamestate->getGamePanel()->getPage();
 	return c_page == wait_page;
@@ -84,32 +102,51 @@ void Tutorial1::initCards() {
 	TutorialCard *card = NULL;
 
 	card = new TutorialCard("0", "Welcome to Gigalomania!\nThis tutorial will introduce you to the game,\nand show you how to win your first island.\nClick 'next' to continue when you're ready.");
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("1", "Here you can see a map of the current island.\nThe island is split up into sectors.\nThe coloured squares represent sectors controlled by a player.");
 	card->setArrow(40, 56);
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("2", "The age of this sector is 10,000 bc.\nThis represents the state of technology. \nIt's possible for different sectors to be in different ages.");
 	card->setArrow(80, 110);
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("3", "Next we'll go over the control panel, which\nallows you to control your sector.");
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("4", "This shows the number of people in your sector that are available.\nThe population will grow gradually with time.");
 	card->setArrow(16, 136);
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForPanelPage("5", "Now let's design a weapon!\nClick on the lightbulb icon to start researching.", (int)GamePanel::STATE_DESIGN);
 	card->setArrow(36, 156);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_design");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCard("6", "This page allows you to design new inventions:\nThe left hand column shows shield, which are used to repair buildings.\nThe middle shows defences for your sector.\nThe right shows weapons to attack the enemy!");
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDesign("7", "For this tutorial, we're going to design a weapon.\nClick on one of the weapons.\nI recommend the Rock weapon, but any will do.", TutorialCardWaitForDesign::WAITTYPE_CURRENT_DESIGN, true, Invention::WEAPON);
 	card->setArrow(90, 168);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_weapons_2");
+		gui_handler->addException("button_weapons_3");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	if( oneMouseButtonMode() ) {
@@ -119,10 +156,28 @@ void Tutorial1::initCards() {
 		card = new TutorialCard("8", "Now put some of your people to work designing the weapon.\nUse the right mouse button to increase the number of designers,\nleft mouse button to decrease.");
 	}
 	card->setArrow(50, 130);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_weapons_2");
+		gui_handler->addException("button_weapons_3");
+		gui_handler->addException("button_designers");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCard("9", "While your designers are working, the clock shows the remaining time\nuntil the invention is ready.");
 	card->setArrow(86, 130);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_weapons_2");
+		gui_handler->addException("button_weapons_3");
+		gui_handler->addException("button_designers");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	if( oneMouseButtonMode() ) {
@@ -132,28 +187,70 @@ void Tutorial1::initCards() {
 		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nRight click on this icon to speed time up.", TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON);
 	}
 	card->setArrow(100, 10);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_weapons_2");
+		gui_handler->addException("button_weapons_3");
+		gui_handler->addException("button_designers");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForPanelPage("11", "Great! Now click here to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
 	card->setArrow(50, 110);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_weapons_2");
+		gui_handler->addException("button_weapons_3");
+		gui_handler->addException("button_designers");
+		gui_handler->addException("button_bigdesign");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForPanelPage("11", "Time to attack our enemy. This button allows you to\nassemble your army.", (int)GamePanel::STATE_ATTACK);
 	card->setArrow(80, 125);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_attack");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCard("12", "This page shows you the available soldiers to deploy.\nThey can be unarmed or, preferably, armed with weapons\nyou have invented.");
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("13", "Not only are armed soldiers stronger, but they are required to destory\nan enemy's buildings. Unarmed soldiers can fight other soldiers,\nbut won't knock down the enemy tower.");
+	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("14", "Click to assemble soldiers with the weapon you've just invented.\nAssemble as many soldiers as we have people available!");
 	card->setArrow(15, 170);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_deploy_attackers_0");
+		gui_handler->addException("button_deploy_attackers_1");
+		gui_handler->addException("button_deploy_attackers_2");
+		gui_handler->addException("button_deploy_attackers_3");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector);
 	card->setArrow(48, 56);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_deploy_attackers_0");
+		gui_handler->addException("button_deploy_attackers_1");
+		gui_handler->addException("button_deploy_attackers_2");
+		gui_handler->addException("button_deploy_attackers_3");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCard("16", "Now wait until the battle is won!\nRemember to speed up the time rate if you prefer.");

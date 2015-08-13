@@ -12,6 +12,21 @@ class PlayingGameState;
 
 void setupTutorial(const string &id);
 
+class GUIHandler {
+public:
+	virtual void setGUI(PlayingGameState *playing_gamestate) const {
+	}
+};
+
+class GUIHandlerBlockAll : public GUIHandler {
+	vector<string> exceptions;
+public:
+	virtual void setGUI(PlayingGameState *playing_gamestate) const;
+	void addException(const string &exception) {
+		exceptions.push_back(exception);
+	}
+};
+
 class TutorialCard {
 	string id;
 	string text;
@@ -19,8 +34,15 @@ class TutorialCard {
 	bool has_arrow;
 	int arrow_x, arrow_y;
 	bool auto_proceed;
+
+	GUIHandler *gui_handler;
 public:
-	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), auto_proceed(false) {
+	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), auto_proceed(false), gui_handler(NULL) {
+	}
+	virtual ~TutorialCard() {
+		if( gui_handler != NULL ) {
+			delete gui_handler;
+		}
 	}
 
 	string getId() const {
@@ -63,7 +85,9 @@ public:
 		return true;
 	}
 
-	virtual void setGUI() const {
+	virtual void setGUI(PlayingGameState *playing_gamestate) const;
+	void setGUIHandler(GUIHandler *gui_handler) {
+		this->gui_handler = gui_handler;
 	}
 };
 

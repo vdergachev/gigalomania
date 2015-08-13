@@ -109,6 +109,18 @@ int PanelPage::getBottom() const {
 	return owner->getTop() + offset_y + h;
 }
 
+PanelPage *PanelPage::findById(const string &id) {
+	if( this->id == id )
+		return this;
+	for(int i=0;i<nChildren();i++) {
+		PanelPage *panel = get(i);
+		PanelPage *found = panel->findById(id);
+		if( found != NULL )
+			return found;
+	}
+	return NULL;
+}
+
 void PanelPage::setVisible(bool visible) {
 	this->visible = visible;
 	for(int i=0;i<nChildren();i++) {

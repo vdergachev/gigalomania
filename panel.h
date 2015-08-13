@@ -22,6 +22,7 @@ namespace Gigalomania {
 	private:
 		void init_panelpage();
 	protected:
+		string id;
 		bool visible;
 		bool enabled;
 		vector <PanelPage *> *children;
@@ -58,6 +59,13 @@ namespace Gigalomania {
 		PanelPage(int offset_x,int offset_y,int w,int h);
 		virtual ~PanelPage();
 
+		void setId(const string &id) {
+			this->id = id;
+		}
+		string getId() const {
+			return this->id;
+		}
+		PanelPage *findById(const string &id);
 		virtual const char *getClass() const { return "CLASS_PANELPAGE"; }
 		virtual void add(PanelPage *panel);
 		virtual void remove(PanelPage *panel);

@@ -614,6 +614,7 @@ void GamePanel::setup() {
 
 	//
 	this->button_attack = new ImageButton(xpos, ypos, panel_attack, "view army weapon stocks\nand assemble army");
+	this->button_attack->setId("button_attack");
 	this->addToPanel(STATE_SECTORCONTROL, button_attack);
 	//xpos += step_x;
 	xpos = start_x;
@@ -627,6 +628,7 @@ void GamePanel::setup() {
 	//
 	//this->button_design = new ImageButton(8, 40, panel_design, "view and alter\ncurrent design");
 	this->button_design = new ImageButton(xpos, ypos, panel_design, "view and alter\ncurrent design");
+	this->button_design->setId("button_design");
 	this->addToPanel(STATE_SECTORCONTROL, button_design);
 	this->button_ndesigners = new PanelPage(xpos, ypos+16, 16, 16);
 	if( onemousebutton ) {
@@ -796,6 +798,8 @@ void GamePanel::setup() {
 	for(int i=0;i<n_sub_epochs;i++) {
 		//this->button_deploy_attackers[i] = new ImageButton(offset_attack_x_c + space_attack_x_c*i, 56, 16, 28, numbered_weapons[start_epoch + i]);
 		this->button_deploy_attackers[i] = new ImageButton(offset_attack_x_c + space_attack_x_c*i, 56, 16, 40, numbered_weapons[start_epoch + i]);
+		sprintf(buffer, "button_deploy_attackers_%d", i);
+		this->button_deploy_attackers[i]->setId(buffer);
 		sprintf(buffer, "add a %s to the army", Invention::getInvention(Invention::WEAPON, start_epoch + i)->getName());
 		this->button_deploy_attackers[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_ATTACK, button_deploy_attackers[i]);
@@ -806,8 +810,10 @@ void GamePanel::setup() {
 
 	// DESIGN
 	this->button_bigdesign = new ImageButton(33, 0, 32, 16, panel_bigdesign, "return to main screen");
+	this->button_bigdesign->setId("button_bigdesign");
 	this->addToPanel(STATE_DESIGN, button_bigdesign);
 	this->button_designers = new ImageButton(40, 16, 16, 40, men[gamestate->getCurrentSector()->getBuildingEpoch()]);
+	this->button_designers->setId("button_designers");
 	if( onemousebutton ) {
 		this->button_designers->setInfoLMB("change the number of designers");
 	}
@@ -820,13 +826,19 @@ void GamePanel::setup() {
         //int this_y = 60 + i*16;
         int this_y = 60 + i*20;
         this->button_shields[i] = new ImageButton(8, this_y, icon_shields[i]);
+		sprintf(buffer, "button_shields_%d", i);
+		this->button_shields[i]->setId(buffer);
 		this->button_shields[i]->setInfoLMB("design a shield");
 		this->addToPanel(STATE_DESIGN, button_shields[i]);
         this->button_defences[i] = new ImageButton(40, this_y, icon_defences[start_epoch + i]);
+		sprintf(buffer, "button_defences_%d", i);
+		this->button_defences[i]->setId(buffer);
 		sprintf(buffer, "design a %s", Invention::getInvention(Invention::DEFENCE, start_epoch + i)->getName());
 		this->button_defences[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_DESIGN, button_defences[i]);
         this->button_weapons[i] = new ImageButton(72, this_y, icon_weapons[start_epoch + i]);
+		sprintf(buffer, "button_weapons_%d", i);
+		this->button_weapons[i]->setId(buffer);
 		sprintf(buffer, "design a %s", Invention::getInvention(Invention::WEAPON, start_epoch + i)->getName());
 		this->button_weapons[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_DESIGN, button_weapons[i]);

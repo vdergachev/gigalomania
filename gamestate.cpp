@@ -1250,6 +1250,12 @@ void PlayingGameState::reset() {
 	// must call setup last, in case it recalls member functions of PlayingGameState, that requires the buttons to have been initialised
 	this->gamePanel->setup();
 
+	if( tutorial != NULL ) {
+		const TutorialCard *card = tutorial->getCard();
+		if( card != NULL ) {
+			card->setGUI(this);
+		}
+	}
 	if( LOGGING ) {
 		current_sector->printDebugInfo();
 	}
@@ -1709,7 +1715,6 @@ void PlayingGameState::draw() {
 	if( tutorial != NULL ) {
 		const TutorialCard *card = tutorial->getCard();
 		if( card != NULL ) {
-			card->setGUI();
 			const unsigned char tutorial_alpha_c = 127;
 			int n_lines = 0, max_wid = 0;
 			int s_w = letters_small[0]->getScaledWidth();
@@ -1748,6 +1753,10 @@ void PlayingGameState::draw() {
 			}
 			if( card->autoProceed() && card->canProceed(this) ) {
 				tutorial->proceed();
+				const TutorialCard *new_card = tutorial->getCard();
+				if( new_card != NULL ) {
+					new_card->setGUI(this);
+				}
 			}
 		}
 	}
@@ -2417,6 +2426,10 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 	}
 	else if( !done && m_left && click && tutorial_next_button != NULL && tutorial_next_button->mouseOver(m_x, m_y) ) {
 		tutorial->proceed();
+		const TutorialCard *new_card = tutorial->getCard();
+		if( new_card != NULL ) {
+			new_card->setGUI(this);
+		}
 		delete tutorial_next_button;
 		tutorial_next_button = NULL;
 		done = true;
