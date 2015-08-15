@@ -1261,6 +1261,9 @@ void PlayingGameState::reset() {
 		if( card != NULL ) {
 			card->setGUI(this);
 		}
+		else {
+			GUIHandler::resetGUI(this);
+		}
 	}
 	if( LOGGING ) {
 		current_sector->printDebugInfo();
@@ -1762,6 +1765,9 @@ void PlayingGameState::draw() {
 				const TutorialCard *new_card = tutorial->getCard();
 				if( new_card != NULL ) {
 					new_card->setGUI(this);
+				}
+				else {
+					GUIHandler::resetGUI(this);
 				}
 			}
 		}
@@ -2436,6 +2442,9 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		const TutorialCard *new_card = tutorial->getCard();
 		if( new_card != NULL ) {
 			new_card->setGUI(this);
+		}
+		else {
+			GUIHandler::resetGUI(this);
 		}
 		delete tutorial_next_button;
 		tutorial_next_button = NULL;

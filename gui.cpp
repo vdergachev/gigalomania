@@ -791,6 +791,7 @@ void GamePanel::setup() {
 
 	// ATTACK
 	this->button_bigattack = new ImageButton(33, 0, 32, 16, panel_bigattack, "return to main screen");
+	this->button_bigattack->setId("button_bigattack");
 	this->addToPanel(STATE_ATTACK, button_bigattack);
 	this->button_deploy_unarmedmen = new ImageButton(offset_attack_x_c, 24, 16, 28, unarmed_man);
 	this->button_deploy_unarmedmen->setInfoLMB("add an unarmed man to the army");

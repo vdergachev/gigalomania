@@ -13,6 +13,11 @@ void setupTutorial(const string &id) {
 		tutorial = new Tutorial1(id);
 }
 
+void GUIHandler::resetGUI(PlayingGameState *playing_gamestate) {
+	playing_gamestate->getGamePanel()->setEnabled(true);
+	playing_gamestate->getScreenPage()->setEnabled(true);
+}
+
 void GUIHandlerBlockAll::setGUI(PlayingGameState *playing_gamestate) const {
 	playing_gamestate->getGamePanel()->setEnabled(false);
 	playing_gamestate->getScreenPage()->setEnabled(false);
@@ -27,6 +32,7 @@ void GUIHandlerBlockAll::setGUI(PlayingGameState *playing_gamestate) const {
 			if( panel != NULL ) {
 				panel->setEnabled(true);
 			}
+			T_ASSERT(panel != NULL);
 		}
 	}
 	// the following are always exceptions
@@ -275,10 +281,10 @@ void Tutorial1::initCards() {
 		gui_handler->addException("button_deploy_attackers_1");
 		gui_handler->addException("button_deploy_attackers_2");
 		gui_handler->addException("button_deploy_attackers_3");
-		gui_handler->addException("map_1_2"); // need to allow the user to return to the player sector if necessary
+		gui_handler->addException("map_1_2"); // need to allow the user to return to the player sector if necessary (as user can switch to the other sector without sending men)
 		gui_handler->addException("map_2_2");
-		gui_handler->addException("button_attack"); // allow the user to get back to send more attackers
-		gui_handler->addException("button_bigattack");
+		gui_handler->addException("button_attack"); // allow the user to get back to the attack screen (a GUI resets to main if user switches current sector)
+		gui_handler->addException("button_bigattack"); // ...and for consistency, allow the user to go back to the main screen
 		// and in case the user wants to design some more:
 		gui_handler->addException("button_design");
 		gui_handler->addException("button_weapons_0");
@@ -293,7 +299,6 @@ void Tutorial1::initCards() {
 
 	card = new TutorialCard("16", "Now wait until the battle is won!\nRemember to speed up the time rate if you prefer.");
 	card->setNextText("Done");
-	card->setGUIHandler(gui_handler_15);
 	cards.push_back(card);
 
 	// for debugging

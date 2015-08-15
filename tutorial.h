@@ -16,6 +16,8 @@ class GUIHandler {
 public:
 	virtual void setGUI(PlayingGameState *playing_gamestate) const {
 	}
+
+	static void resetGUI(PlayingGameState *playing_gamestate);
 };
 
 class GUIHandlerBlockAll : public GUIHandler {
@@ -134,7 +136,7 @@ protected:
 	string id;
 	int start_map_x, start_map_y;
 	int n_men;
-	int card_index;
+	size_t card_index;
 	vector<TutorialCard *> cards;
 
 public:
