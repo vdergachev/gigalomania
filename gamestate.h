@@ -200,6 +200,9 @@ public:
 	GameState(int client_player);
 	virtual ~GameState();
 
+	PanelPage *getScreenPage() {
+		return screen_page;
+	}
 	void setClientPlayer(int client_player) {
 		this->client_player = client_player;
 	}

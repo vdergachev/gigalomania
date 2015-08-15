@@ -15,17 +15,41 @@ void setupTutorial(const string &id) {
 
 void GUIHandlerBlockAll::setGUI(PlayingGameState *playing_gamestate) const {
 	playing_gamestate->getGamePanel()->setEnabled(false);
+	playing_gamestate->getScreenPage()->setEnabled(false);
 	for(vector<string>::const_iterator iter = exceptions.begin(); iter != exceptions.end(); ++iter) {
 		const string exception = *iter;
 		PanelPage *panel = playing_gamestate->getGamePanel()->findById(exception);
 		if( panel != NULL ) {
 			panel->setEnabled(true);
 		}
+		else {
+			panel = playing_gamestate->getScreenPage()->findById(exception);
+			if( panel != NULL ) {
+				panel->setEnabled(true);
+			}
+		}
+	}
+	// the following are always exceptions
+	PanelPage *pause_button = playing_gamestate->getScreenPage()->findById("pause_button");
+	T_ASSERT( pause_button != NULL );
+	if( pause_button != NULL ) {
+		pause_button->setEnabled(true);
+	}
+	PanelPage *quit_button = playing_gamestate->getScreenPage()->findById("quit_button");
+	T_ASSERT( quit_button != NULL );
+	if( quit_button != NULL ) {
+		quit_button->setEnabled(true);
+	}
+	PanelPage *speed_button = playing_gamestate->getScreenPage()->findById("speed_button");
+	T_ASSERT( speed_button != NULL );
+	if( speed_button != NULL ) {
+		speed_button->setEnabled(true);
 	}
 }
 
 void TutorialCard::setGUI(PlayingGameState *playing_gamestate) const {
 	playing_gamestate->getGamePanel()->setEnabled(true);
+	playing_gamestate->getScreenPage()->setEnabled(true);
 	if( gui_handler != NULL ) {
 		gui_handler->setGUI(playing_gamestate);
 	}
@@ -243,18 +267,32 @@ void Tutorial1::initCards() {
 
 	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector);
 	card->setArrow(48, 56);
+	GUIHandler *gui_handler_15 = NULL;
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_deploy_attackers_0");
 		gui_handler->addException("button_deploy_attackers_1");
 		gui_handler->addException("button_deploy_attackers_2");
 		gui_handler->addException("button_deploy_attackers_3");
-		card->setGUIHandler(gui_handler);
+		gui_handler->addException("map_1_2"); // need to allow the user to return to the player sector if necessary
+		gui_handler->addException("map_2_2");
+		gui_handler->addException("button_attack"); // allow the user to get back to send more attackers
+		gui_handler->addException("button_bigattack");
+		// and in case the user wants to design some more:
+		gui_handler->addException("button_design");
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_weapons_2");
+		gui_handler->addException("button_weapons_3");
+		gui_handler->addException("button_designers");
+		gui_handler->addException("button_bigdesign");
 	}
+	card->setGUIHandler(gui_handler_15);
 	cards.push_back(card);
 
 	card = new TutorialCard("16", "Now wait until the battle is won!\nRemember to speed up the time rate if you prefer.");
 	card->setNextText("Done");
+	card->setGUIHandler(gui_handler_15);
 	cards.push_back(card);
 
 	// for debugging

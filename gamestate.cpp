@@ -1159,6 +1159,9 @@ void PlayingGameState::setupMapGUI() {
 					screen_page->add(panel);
 					//map->panels[x][y] = panel;
 					map_panels[x][y] = panel;
+					char buffer[256] = "";
+					sprintf(buffer, "map_%d_%d", x, y);
+					map_panels[x][y]->setId(buffer);
 				}
 			}
 		}
@@ -1197,6 +1200,7 @@ void PlayingGameState::reset() {
 
 	if( !isDemo() ) {
 		speed_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, 4, icon_speeds[time_rate-1]);
+		speed_button->setId("speed_button");
 		if( onemousebutton ) {
 			speed_button->setInfoLMB("cycle through different time rates");
 		}
@@ -1209,8 +1213,10 @@ void PlayingGameState::reset() {
 		//if( mobile_ui )
 		{
 			pause_button = new Button(default_width_c - 80, default_height_c - quit_button_offset_c, "PAUSE", letters_large);
+			pause_button->setId("pause_button");
 			screen_page->add(pause_button);
 			quit_button = new Button(default_width_c - 32, default_height_c - quit_button_offset_c, "QUIT", letters_large);
+			quit_button->setId("quit_button");
 			screen_page->add(quit_button);
 		}
 	}
@@ -2298,7 +2304,8 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		}
 	}
 	if( !done && click && map_x >= 0 && map_x < map_width_c && map_y >= 0 && map_y < map_height_c ) {
-		if( this->player_asking_alliance == -1 && map_display == MAPDISPLAY_MAP && map->isSectorAt(map_x, map_y) ) {
+		if( this->player_asking_alliance == -1 && map_display == MAPDISPLAY_MAP && map->isSectorAt(map_x, map_y) && this->map_panels[map_x][map_y]->mouseOver(m_x, m_y) ) {
+			// although the mouse should always be over the map square, we call mouseOver so that the enabled flag is checked
 			done = true;
 			if( m_left && selected_army != NULL ) {
 				if( selected_army->getSector() != map->getSector(map_x, map_y) ) {
