@@ -270,6 +270,7 @@ void Tutorial1::initCards() {
 	GUIHandler *gui_handler_15 = NULL;
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler_15 = gui_handler;
 		gui_handler->addException("button_deploy_attackers_0");
 		gui_handler->addException("button_deploy_attackers_1");
 		gui_handler->addException("button_deploy_attackers_2");
