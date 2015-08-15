@@ -11,6 +11,7 @@
 #include "gamestate.h"
 #include "utils.h"
 #include "sector.h"
+#include "tutorial.h"
 //---------------------------------------------------------------------------
 
 bool Player::alliances[n_players_c][n_players_c];
@@ -707,7 +708,10 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	// trash designs?
 	sector->autoTrashDesigns();
 
-	if( sector->getCurrentDesign() == NULL ) {
+	if( tutorial != NULL && !tutorial->aiAllowDesign() ) {
+		// don't allow designs
+	}
+	else if( sector->getCurrentDesign() == NULL ) {
 		// set new invention?
 		int best_weapon = -1;
 		int best_defence = -1;

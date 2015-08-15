@@ -19,6 +19,7 @@ using std::max;
 #include "screen.h"
 #include "image.h"
 #include "sound.h"
+#include "tutorial.h"
 
 //---------------------------------------------------------------------------
 
@@ -1950,6 +1951,9 @@ void Sector::doPlayer(int client_player) {
 
 	if( this->growth_lasttime == -1 )
 		this->growth_lasttime = time;
+	else if( tutorial != NULL && !tutorial->aiAllowGrowth() && !players[this->player]->isHuman() ) {
+		// don't allow growth
+	}
 	else if( this->getSparePopulation() > 0 ) {
 		int delay = ( growth_rate_c * gameticks_per_hour_c ) / this->getSparePopulation();
 		/*if( delay == 0 )

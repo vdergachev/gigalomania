@@ -123,6 +123,8 @@ Tutorial1::Tutorial1(const string &id) : Tutorial(id) {
 	start_map_x = 1;
 	start_map_y = 2;
 	n_men = 20;
+	ai_allow_growth = false;
+	ai_allow_design = false;
 }
 
 void Tutorial1::initCards() {

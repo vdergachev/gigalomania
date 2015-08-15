@@ -138,9 +138,11 @@ protected:
 	int n_men;
 	size_t card_index;
 	vector<TutorialCard *> cards;
+	bool ai_allow_growth;
+	bool ai_allow_design;
 
 public:
-	Tutorial(const string &id) : id(id), start_map_x(0), start_map_y(0), n_men(0), card_index(0) {
+	Tutorial(const string &id) : id(id), start_map_x(0), start_map_y(0), n_men(0), card_index(0), ai_allow_growth(true), ai_allow_design(true) {
 	}
 	virtual ~Tutorial();
 
@@ -155,6 +157,12 @@ public:
 	}
 	int getNMen() const {
 		return n_men;
+	}
+	bool aiAllowGrowth() const {
+		return ai_allow_growth;
+	}
+	bool aiAllowDesign() const {
+		return ai_allow_design;
 	}
 	const TutorialCard *getCard() const {
 		if( card_index >= cards.size() )
