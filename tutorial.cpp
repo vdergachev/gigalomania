@@ -11,6 +11,8 @@ Tutorial *tutorial = NULL;
 void setupTutorial(const string &id) {
 	if( id == "first" )
 		tutorial = new Tutorial1(id);
+	else if( id == "second" )
+		tutorial = new Tutorial2(id);
 }
 
 void GUIHandler::resetGUI(PlayingGameState *playing_gamestate) {
@@ -94,9 +96,60 @@ bool TutorialCardWaitForDesign::canProceed(PlayingGameState *playing_gamestate) 
 }
 
 bool TutorialCardWaitForDeployedArmy::canProceed(PlayingGameState *playing_gamestate) const {
-	if( deploy_sector->getArmy(playing_gamestate->getClientPlayer())->getBombardStrength() > 0 )
-	//if( deploy_sector->getArmy(playing_gamestate->getClientPlayer())->getTotal() > 0 ) // test
-		return true;
+	if( !inverse ) {
+		int str = require_bombard ? deploy_sector->getArmy(playing_gamestate->getClientPlayer())->getBombardStrength() : deploy_sector->getArmy(playing_gamestate->getClientPlayer())->getTotal();
+		if( require_unoccupied && deploy_sector->getPlayer() != PLAYER_NONE ) {
+			return false;
+		}
+		if( require_empty && str == 0 )
+			return true;
+		else if( !require_empty && str > 0 )
+			return true;
+	}
+	else {
+		for(int y=0;y<map_height_c;y++) {
+			for(int x=0;x<map_width_c;x++) {
+				if( map->isSectorAt(x, y) ) {
+					const Sector *sector = map->getSector(x, y);
+					if( sector == deploy_sector )
+						continue;
+					if( require_unoccupied && sector->getPlayer() != PLAYER_NONE ) {
+						continue;
+					}
+					int str = require_bombard ? sector->getArmy(playing_gamestate->getClientPlayer())->getBombardStrength() : sector->getArmy(playing_gamestate->getClientPlayer())->getTotal();
+					if( require_empty && str > 0 )
+						return false;
+					else if( !require_empty && str > 0 )
+						return true;
+				}
+			}
+		}
+		if( require_empty )
+			return true;
+	}
+	return false;
+}
+
+bool TutorialCardWaitForNewTower::canProceed(PlayingGameState *playing_gamestate) const {
+	if( !inverse ) {
+		bool has_tower = tower_sector->getPlayer() == playing_gamestate->getClientPlayer();
+		if( has_tower )
+			return true;
+	}
+	else {
+		for(int y=0;y<map_height_c;y++) {
+			for(int x=0;x<map_width_c;x++) {
+				if( map->isSectorAt(x, y) ) {
+					const Sector *sector = map->getSector(x, y);
+					if( sector == tower_sector )
+						continue;
+					bool has_tower = sector->getPlayer() == playing_gamestate->getClientPlayer();
+					if( has_tower )
+						return true;
+				}
+			}
+		}
+	}
 	return false;
 }
 
@@ -120,6 +173,8 @@ bool Tutorial::jumpTo(const string &id) {
 }
 
 Tutorial1::Tutorial1(const string &id) : Tutorial(id) {
+	start_epoch = 0;
+	island = 0;
 	start_map_x = 1;
 	start_map_y = 2;
 	n_men = 20;
@@ -273,7 +328,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector);
+	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector, true);
 	card->setArrow(48, 56);
 	GUIHandler *gui_handler_15 = NULL;
 	{
@@ -305,4 +360,104 @@ void Tutorial1::initCards() {
 
 	// for debugging
 	//this->card_index = 13;
+}
+
+Tutorial2::Tutorial2(const string &id) : Tutorial(id) {
+	start_epoch = 0;
+	island = 2;
+	start_map_x = 2;
+	start_map_y = 2;
+	n_men = 25;
+	auto_end = true;
+	ai_allow_growth = false;
+	ai_allow_design = false;
+}
+
+void Tutorial2::initCards() {
+	Sector *start_sector = map->getSector(start_map_x, start_map_y);
+	ASSERT(start_sector != NULL);
+
+	TutorialCard *card = NULL;
+
+	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some combat maneuvers.\nSelect the attack menu option to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
+	card->setArrow(80, 125);
+	cards.push_back(card);
+
+	card = new TutorialCard("1", "In the first tutorial you learnt how to design weapons.\nHere you'll be learning how to deploy and move your soldiers,\nso unarmed men will do.");
+	card->setGUIHandler(new GUIHandlerBlockAll());
+	cards.push_back(card);
+
+	card = new TutorialCard("2", "Click to assemble some unarmed men.");
+	card->setArrow(15, 145);
+	GUIHandler *gui_handler_2 = NULL;
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler_2 = gui_handler;
+		gui_handler->addException("button_deploy_unarmedmen");
+		gui_handler->addException("button_deploy_attackers_0");
+		gui_handler->addException("button_deploy_attackers_1");
+		gui_handler->addException("button_deploy_attackers_2");
+		gui_handler->addException("button_deploy_attackers_3");
+		gui_handler->addException("button_return_attackers");
+	}
+	card->setGUIHandler(gui_handler_2);
+	cards.push_back(card);
+
+	card = new TutorialCard("3", "Note that if you make a mistake assembling your army,\nyou can cancel by clicking here.");
+	card->setArrow(87, 195);
+	card->setGUIHandler(gui_handler_2);
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDeployedArmy("4", "Assemble some unarmed men, and send them to a\nsector by clicking on a new map square of your choice.", start_sector, false);
+	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setInverse(true);
+	card->setArrow(60, 70);
+	cards.push_back(card);
+
+	if( oneMouseButtonMode() ) {
+		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by clicking,\neither on the current map square,\nor clicking on the main area to the right.");
+	}
+	else {
+		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by right clicking,\neither on the current map square,\nor right clicking on the main area to the right.");
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDeployedArmy("6", "When the army is selected, the shield icon will show.\nMove the army back home by clicking on the square of your sector", start_sector, false);
+	card->setArrow(47, 54);
+	cards.push_back(card);
+
+	// return back home
+
+	if( oneMouseButtonMode() ) {
+		card = new TutorialCardWaitForDeployedArmy("7", "Now let's return our men back to the tower.\nClick to select the army as before, then\nclick on your tower.", NULL, false);
+	}
+	else {
+		card = new TutorialCardWaitForDeployedArmy("7", "Now let's return our men back to the tower.\nRight click to select the army as before, then\nleft click on your tower.", NULL, false);
+	}
+	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setInverse(true);
+	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setRequireEmpty(true);
+	card->setArrow(260, 80);
+	cards.push_back(card);
+
+	// build new tower
+
+	card = new TutorialCard("8", "So far you've only had a single tower,\nbut you can build new towers.");
+	cards.push_back(card);
+
+	card = new TutorialCard("9", "Each tower can act independently, researching and\nconstructing different weapons.\nEach tower needs to invent its own weapons.");
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDeployedArmy("10", "Assemble some unarmed men again, and this time\nsend them to a square that isn't occupied by the enemy", start_sector, false);
+	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setInverse(true);
+	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setRequireUnoccupied(true);
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForNewTower("11", "Now sit back and wait until your new tower is constructed.\nRemember to speed up the rate of time if you want.", start_sector);
+	static_cast<TutorialCardWaitForNewTower *>(card)->setInverse(true);
+	cards.push_back(card);
+
+	card = new TutorialCard("12", "You have completed this tutorial!");
+	cards.push_back(card);
+
+	// for debugging
+	//this->card_index = 11;
 }

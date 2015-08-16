@@ -123,9 +123,38 @@ public:
 
 class TutorialCardWaitForDeployedArmy : public TutorialCard {
 	Sector *deploy_sector;
+	bool require_bombard;
+	bool inverse; // if true, wait until an army is deployed anywhere other than deploy_sector (or anywhere, if deploy_sector is NULL)
+	bool require_empty; // if true, check the square(s) is empty instead
+	bool require_unoccupied; // if true, require that the square is not occupied by a player's tower
 public:
-	TutorialCardWaitForDeployedArmy(const string &id, const string &text, Sector *deploy_sector) : TutorialCard(id, text), deploy_sector(deploy_sector) {
+	TutorialCardWaitForDeployedArmy(const string &id, const string &text, Sector *deploy_sector, bool require_bombard) : TutorialCard(id, text), deploy_sector(deploy_sector), require_bombard(require_bombard), inverse(false), require_empty(false), require_unoccupied(false) {
 		this->setAutoProceed(true);
+	}
+
+	void setInverse(bool inverse) {
+		this->inverse = inverse;
+	}
+	void setRequireEmpty(bool require_empty) {
+		this->require_empty = require_empty;
+	}
+	void setRequireUnoccupied(bool require_unoccupied) {
+		this->require_unoccupied = require_unoccupied;
+	}
+
+	virtual bool canProceed(PlayingGameState *playing_gamestate) const;
+};
+
+class TutorialCardWaitForNewTower : public TutorialCard {
+	Sector *tower_sector;
+	bool inverse; // if true, wait until a tower is built anywhere other than tower_sector (or anywhere, if tower_sector is NULL)
+public:
+	TutorialCardWaitForNewTower(const string &id, const string &text, Sector *tower_sector) : TutorialCard(id, text), tower_sector(tower_sector), inverse(false)  {
+		this->setAutoProceed(true);
+	}
+
+	void setInverse(bool inverse) {
+		this->inverse = inverse;
 	}
 
 	virtual bool canProceed(PlayingGameState *playing_gamestate) const;
@@ -134,20 +163,29 @@ public:
 class Tutorial {
 protected:
 	string id;
+	int start_epoch;
+	int island;
 	int start_map_x, start_map_y;
 	int n_men;
+	bool auto_end;
 	size_t card_index;
 	vector<TutorialCard *> cards;
 	bool ai_allow_growth;
 	bool ai_allow_design;
 
 public:
-	Tutorial(const string &id) : id(id), start_map_x(0), start_map_y(0), n_men(0), card_index(0), ai_allow_growth(true), ai_allow_design(true) {
+	Tutorial(const string &id) : id(id), start_epoch(0), island(0), start_map_x(0), start_map_y(0), n_men(0), auto_end(false), card_index(0), ai_allow_growth(true), ai_allow_design(true) {
 	}
 	virtual ~Tutorial();
 
 	string getId() const {
 		return id;
+	}
+	int getStartEpoch() const {
+		return start_epoch;
+	}
+	int getIsland() const {
+		return island;
 	}
 	int getStartMapX() const {
 		return start_map_x;
@@ -176,6 +214,9 @@ public:
 	void jumpToEnd() {
 		card_index = cards.size();
 	}
+	bool autoEnd() const {
+		return auto_end;
+	}
 
 	virtual void initCards()=0;
 };
@@ -183,6 +224,13 @@ public:
 class Tutorial1 : public Tutorial {
 public:
 	Tutorial1(const string &id);
+
+	virtual void initCards();
+};
+
+class Tutorial2 : public Tutorial {
+public:
+	Tutorial2(const string &id);
 
 	virtual void initCards();
 };

@@ -273,9 +273,8 @@ extern DifficultyLevel difficulty_level;
 int getMenAvailable();
 int getNSuspended();
 
-//extern int n_men_store;
-//extern int n_men_for_this_island;
 extern int start_epoch;
+extern int selected_island;
 extern int n_sub_epochs;
 enum PlayerMode {
 	PLAYER_DEMO = -2,

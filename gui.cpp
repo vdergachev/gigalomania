@@ -795,6 +795,7 @@ void GamePanel::setup() {
 	this->addToPanel(STATE_ATTACK, button_bigattack);
 	this->button_deploy_unarmedmen = new ImageButton(offset_attack_x_c, 24, 16, 28, unarmed_man);
 	this->button_deploy_unarmedmen->setInfoLMB("add an unarmed man to the army");
+	this->button_deploy_unarmedmen->setId("button_deploy_unarmedmen");
 	this->addToPanel(STATE_ATTACK, button_deploy_unarmedmen);
 	for(int i=0;i<n_sub_epochs;i++) {
 		//this->button_deploy_attackers[i] = new ImageButton(offset_attack_x_c + space_attack_x_c*i, 56, 16, 28, numbered_weapons[start_epoch + i]);
@@ -807,6 +808,7 @@ void GamePanel::setup() {
 	}
 	this->button_return_attackers = new ImageButton(80, 96, 16, 28, panel_twoattack);
 	this->button_return_attackers->setInfoLMB("return the assembled army");
+	this->button_return_attackers->setId("button_return_attackers");
 	this->addToPanel(STATE_ATTACK, button_return_attackers);
 
 	// DESIGN

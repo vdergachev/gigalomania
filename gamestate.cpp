@@ -552,8 +552,12 @@ void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 		//human_player = PLAYER_DEMO; // force demo mode
 		::setClientPlayer(player);
 		if( gameType == GAMETYPE_TUTORIAL ) {
-			setupPlayers();
 			setupTutorial("first");
+			//setupTutorial("second"); // test
+			start_epoch = tutorial->getStartEpoch();
+			selected_island = tutorial->getIsland();
+			map = maps[start_epoch][selected_island];
+			setupPlayers();
 			setGameStateID(GAMESTATEID_PLAYING);
 		}
 		else {

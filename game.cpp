@@ -3894,7 +3894,7 @@ void updateGame() {
 				}
 			}
 			//if( !playerAlive(enemy_player) ) {
-			if( all_dead ) {
+			if( all_dead || (tutorial != NULL && tutorial->getCard() == NULL && tutorial->autoEnd() ) ) {
 				playSample(s_won);
 				state_changed = true;
 				gameResult = GAMERESULT_WON;
