@@ -371,6 +371,7 @@ void GameState::closeConfirmWindow() {
 
 ChooseGameTypeGameState::ChooseGameTypeGameState(int client_player) : GameState(client_player) {
 	this->choosegametypePanel = NULL;
+	T_ASSERT(tutorial == NULL);
 }
 
 ChooseGameTypeGameState::~ChooseGameTypeGameState() {

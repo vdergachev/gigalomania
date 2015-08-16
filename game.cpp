@@ -3401,6 +3401,9 @@ void endIsland() {
 void returnToChooseIsland() {
 	ASSERT(gameStateID == GAMESTATEID_ENDISLAND);
 	if( gameType == GAMETYPE_TUTORIAL ) {
+		LOG("delete tutorial %d\n", tutorial);
+		delete tutorial;
+		tutorial = NULL;
 		setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
 	}
 	else if( gameResult == GAMERESULT_WON && gameType == GAMETYPE_ALLISLANDS ) {
