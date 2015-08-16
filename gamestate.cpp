@@ -1792,7 +1792,23 @@ void PlayingGameState::draw() {
 			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, tutorial_alpha_c);
 			Image::writeMixedCase(rect.x, rect.y, letters_large, letters_small, numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
 			if( card->hasArrow() ) {
-				screen->drawLine(scale_width*(rect.x-4), scale_height*(rect.y+0.5*rect.h), scale_width*card->getArrowX(), scale_height*card->getArrowY(), 255, 255, 255);
+				int arrow_x = card->getArrowX();
+				int arrow_y = card->getArrowY();
+				int src_x = rect.x - 4;
+				int src_y = rect.y + 0.5*rect.h;
+				if( arrow_x >= rect.x + rect.w ) {
+					src_x = rect.x + rect.w + 4;
+				}
+				else if( arrow_x >= rect.x && arrow_x < rect.x + rect.w ) {
+					src_x = rect.x + 0.5*rect.w;
+					if( arrow_y < src_y ) {
+						src_y = rect.y - 4;
+					}
+					else {
+						src_y = rect.y + rect.h + 4;
+					}
+				}
+				screen->drawLine(scale_width*src_x, scale_height*src_y, scale_width*arrow_x, scale_height*arrow_y, 255, 255, 255);
 			}
 
 			if( !card->autoProceed() && card->canProceed(this) ) {
