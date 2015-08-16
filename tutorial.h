@@ -37,9 +37,11 @@ class TutorialCard {
 	int arrow_x, arrow_y;
 	bool auto_proceed;
 
+	bool player_allow_build_tower;
+
 	GUIHandler *gui_handler;
 public:
-	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), auto_proceed(false), gui_handler(NULL) {
+	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), auto_proceed(false), player_allow_build_tower(true), gui_handler(NULL) {
 	}
 	virtual ~TutorialCard() {
 		if( gui_handler != NULL ) {
@@ -87,6 +89,12 @@ public:
 		return true;
 	}
 
+	void setPlayerAllowBuildTower(bool player_allow_build_tower) {
+		this->player_allow_build_tower = player_allow_build_tower;
+	}
+	bool playerAllowBuildTower() const {
+		return player_allow_build_tower;
+	}
 	virtual void setGUI(PlayingGameState *playing_gamestate) const;
 	void setGUIHandler(GUIHandler *gui_handler) {
 		this->gui_handler = gui_handler;
@@ -172,9 +180,12 @@ protected:
 	vector<TutorialCard *> cards;
 	bool ai_allow_growth;
 	bool ai_allow_design;
+	bool ai_allow_ask_alliance;
+	bool ai_allow_deploy;
+	bool allow_retreat_loss;
 
 public:
-	Tutorial(const string &id) : id(id), start_epoch(0), island(0), start_map_x(0), start_map_y(0), n_men(0), auto_end(false), card_index(0), ai_allow_growth(true), ai_allow_design(true) {
+	Tutorial(const string &id) : id(id), start_epoch(0), island(0), start_map_x(0), start_map_y(0), n_men(0), auto_end(false), card_index(0), ai_allow_growth(true), ai_allow_design(true), ai_allow_ask_alliance(true), ai_allow_deploy(true), allow_retreat_loss(true) {
 	}
 	virtual ~Tutorial();
 
@@ -201,6 +212,15 @@ public:
 	}
 	bool aiAllowDesign() const {
 		return ai_allow_design;
+	}
+	bool aiAllowAskAlliance() const {
+		return ai_allow_ask_alliance;
+	}
+	bool aiAllowDeploy() const {
+		return ai_allow_deploy;
+	}
+	bool allowRetreatLoss() const {
+		return allow_retreat_loss;
 	}
 	const TutorialCard *getCard() const {
 		if( card_index >= cards.size() )

@@ -265,6 +265,9 @@ bool Army::canLeaveSafely() const {
 }
 
 void Army::retreat(bool only_air) {
+	if( tutorial != NULL && !tutorial->allowRetreatLoss() ) {
+		return;
+	}
 	for(int i=0;i<=n_epochs_c;i++) {
 		//if( only_air && ( i < air_epoch_c || i == n_epochs_c ) ) {
 		if( this->soldiers[i] > 0 ) {
@@ -2039,7 +2042,10 @@ void Sector::update(int client_player) {
 		}
 
 		// build new tower?
-		if( n_players_in_sector == 1 ) {
+		if( tutorial != NULL && tutorial->getCard() != NULL && !tutorial->getCard()->playerAllowBuildTower() ) {
+			// don't allow building new tower
+		}
+		else if( n_players_in_sector == 1 ) {
 			if( this->built_lasttime == -1 )
 				this->built_lasttime = time;
 			while( time - this->built_lasttime > gameticks_per_hour_c ) {

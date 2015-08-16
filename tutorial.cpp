@@ -180,6 +180,8 @@ Tutorial1::Tutorial1(const string &id) : Tutorial(id) {
 	n_men = 20;
 	ai_allow_growth = false;
 	ai_allow_design = false;
+	ai_allow_ask_alliance = false;
+	ai_allow_deploy = false;
 }
 
 void Tutorial1::initCards() {
@@ -371,6 +373,9 @@ Tutorial2::Tutorial2(const string &id) : Tutorial(id) {
 	auto_end = true;
 	ai_allow_growth = false;
 	ai_allow_design = false;
+	ai_allow_ask_alliance = false;
+	ai_allow_deploy = false;
+	allow_retreat_loss = false;
 }
 
 void Tutorial2::initCards() {
@@ -380,14 +385,17 @@ void Tutorial2::initCards() {
 	TutorialCard *card = NULL;
 
 	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some combat maneuvers.\nSelect the attack menu option to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
+	card->setPlayerAllowBuildTower(false);
 	card->setArrow(80, 125);
 	cards.push_back(card);
 
 	card = new TutorialCard("1", "In the first tutorial you learnt how to design weapons.\nHere you'll be learning how to deploy and move your soldiers,\nso unarmed men will do.");
+	card->setPlayerAllowBuildTower(false);
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
 	card = new TutorialCard("2", "Click to assemble some unarmed men.");
+	card->setPlayerAllowBuildTower(false);
 	card->setArrow(15, 145);
 	GUIHandler *gui_handler_2 = NULL;
 	{
@@ -404,11 +412,13 @@ void Tutorial2::initCards() {
 	cards.push_back(card);
 
 	card = new TutorialCard("3", "Note that if you make a mistake assembling your army,\nyou can cancel by clicking here.");
+	card->setPlayerAllowBuildTower(false);
 	card->setArrow(87, 195);
 	card->setGUIHandler(gui_handler_2);
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDeployedArmy("4", "Assemble some unarmed men, and send them to a\nsector by clicking on a new map square of your choice.", start_sector, false);
+	card->setPlayerAllowBuildTower(false);
 	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setInverse(true);
 	card->setArrow(60, 70);
 	cards.push_back(card);
@@ -419,9 +429,11 @@ void Tutorial2::initCards() {
 	else {
 		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by right clicking,\neither on the current map square,\nor right clicking on the main area to the right.");
 	}
+	card->setPlayerAllowBuildTower(false);
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDeployedArmy("6", "When the army is selected, the shield icon will show.\nMove the army back home by clicking on the square of your sector", start_sector, false);
+	card->setPlayerAllowBuildTower(false);
 	card->setArrow(47, 54);
 	cards.push_back(card);
 
@@ -435,15 +447,18 @@ void Tutorial2::initCards() {
 	}
 	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setInverse(true);
 	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setRequireEmpty(true);
+	card->setPlayerAllowBuildTower(false);
 	card->setArrow(260, 80);
 	cards.push_back(card);
 
 	// build new tower
 
 	card = new TutorialCard("8", "So far you've only had a single tower,\nbut you can build new towers.");
+	card->setPlayerAllowBuildTower(false);
 	cards.push_back(card);
 
 	card = new TutorialCard("9", "Each tower can act independently, researching and\nconstructing different weapons.\nEach tower needs to invent its own weapons.");
+	card->setPlayerAllowBuildTower(false);
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDeployedArmy("10", "Assemble some unarmed men again, and this time\nsend them to a square that isn't occupied by the enemy", start_sector, false);

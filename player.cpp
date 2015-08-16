@@ -319,6 +319,9 @@ bool Player::askHuman() {
 	//ASSERT( index != human_player );
 	ASSERT( !this->is_human );
 	// whether to _consider_ asking the human player - we still have to go through the requestAlliance test afterwards
+	if( tutorial != NULL && !tutorial->aiAllowAskAlliance() ) {
+		return false;
+	}
 	int time = getGameTime();
 	if( alliance_last_asked_human == -1 ) {
 		// note - don't ask if alliance_last_asked_human==-1, to avoid being asked straight away
@@ -844,7 +847,10 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	}
 
 
-	if( sector->getCurrentDesign() == NULL || enemiesPresentWithBombardment ) {
+	if( tutorial != NULL && !tutorial->aiAllowDeploy() ) {
+		// don't allow deployment
+	}
+	else if( sector->getCurrentDesign() == NULL || enemiesPresentWithBombardment ) {
 		//if( used_up || enemiesPresentWithBombardment ) {
 		bool used_up = start_epoch != end_epoch_c && sector->usedUp();
 		// think about attacking?
