@@ -8,6 +8,13 @@
 
 Tutorial *tutorial = NULL;
 
+vector<TutorialInfo> getTutorialInfo() {
+	vector<TutorialInfo> infos;
+	infos.push_back( TutorialInfo("first", "play your first island") );
+	infos.push_back( TutorialInfo("second", "army maneuvers") );
+	return infos;
+}
+
 void setupTutorial(const string &id) {
 	if( id == "first" )
 		tutorial = new Tutorial1(id);
@@ -384,7 +391,7 @@ void Tutorial2::initCards() {
 
 	TutorialCard *card = NULL;
 
-	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some combat maneuvers.\nSelect the attack menu option to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
+	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some army maneuvers.\nSelect the attack menu option to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(80, 125);
 	cards.push_back(card);

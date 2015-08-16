@@ -352,7 +352,7 @@ void PanelPage::draw() {
 	this->drawForeground();
 }
 
-bool PanelPage::mouseOver(int m_x,int m_y) {
+bool PanelPage::mouseOver(int m_x,int m_y) const {
 	if( visible && enabled &&
         m_x >= ( this->getLeft() - tolerance ) * scale_width &&
         m_x < ( this->getLeft() + w + tolerance ) * scale_width &&

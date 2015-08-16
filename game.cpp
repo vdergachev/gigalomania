@@ -3253,6 +3253,8 @@ void setGameStateID(GameStateID state, GameState *new_gamestate) {
 		gamestate = new ChooseDifficultyGameState(human_player);
 	else if( gameStateID == GAMESTATEID_CHOOSEPLAYER )
 		gamestate = new ChoosePlayerGameState(human_player);
+	else if( gameStateID == GAMESTATEID_CHOOSETUTORIAL )
+		gamestate = new ChooseTutorialGameState(human_player);
 	else if( gameStateID == GAMESTATEID_PLACEMEN )
 		gamestate = new PlaceMenGameState(human_player);
 	else if( gameStateID == GAMESTATEID_PLAYING ) {
@@ -3521,7 +3523,7 @@ void deleteState() {
 }
 
 void saveState() {
-    if( gameStateID == GAMESTATEID_UNDEFINED || gameStateID == GAMESTATEID_CHOOSEGAMETYPE || gameStateID == GAMESTATEID_CHOOSEDIFFICULTY || gameStateID == GAMESTATEID_CHOOSEPLAYER || gameStateID == GAMESTATEID_GAMECOMPLETE ) {
+    if( gameStateID == GAMESTATEID_UNDEFINED || gameStateID == GAMESTATEID_CHOOSEGAMETYPE || gameStateID == GAMESTATEID_CHOOSEDIFFICULTY || gameStateID == GAMESTATEID_CHOOSEPLAYER || gameStateID == GAMESTATEID_CHOOSETUTORIAL || gameStateID == GAMESTATEID_GAMECOMPLETE ) {
 		// no need to save state
 	}
 	else if( gameType == GAMETYPE_TUTORIAL && gameStateID == GAMESTATEID_ENDISLAND ) {

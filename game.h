@@ -28,9 +28,6 @@ class TextEffect;
 
 #include "common.h"
 
-/*struct FSOUND_SAMPLE;
-typedef FSOUND_SAMPLE Sample;*/
-
 extern bool onemousebutton;
 extern bool mobile_ui;
 bool oneMouseButtonMode();
@@ -45,13 +42,12 @@ extern const char *maps_dirname;
 extern const char *alt_maps_dirname;
 #endif
 
-//extern int lastmouseclick_time;
-
 enum GameStateID {
 	GAMESTATEID_UNDEFINED = -1,
 	GAMESTATEID_CHOOSEGAMETYPE = 0,
 	GAMESTATEID_CHOOSEDIFFICULTY,
 	GAMESTATEID_CHOOSEPLAYER,
+	GAMESTATEID_CHOOSETUTORIAL,
 	GAMESTATEID_PLACEMEN,
 	GAMESTATEID_PLAYING,
 	GAMESTATEID_ENDISLAND,
@@ -256,6 +252,7 @@ enum GameMode {
 extern GameMode gameMode;
 
 enum GameType {
+	// don't change the numbers, as will break saved state compatibility!
 	GAMETYPE_SINGLEISLAND = 0,
 	GAMETYPE_ALLISLANDS = 1,
 	GAMETYPE_TUTORIAL = 2
@@ -281,7 +278,6 @@ enum PlayerMode {
 	PLAYER_NONE = -1
 };
 bool isDemo();
-//extern int human_player;
 extern bool pref_sound_on;
 extern bool pref_music_on;
 extern bool pref_disallow_nukes;
@@ -296,9 +292,7 @@ class Map {
 	Sector *sectors[map_width_c][map_height_c];
 	bool sector_at[map_width_c][map_height_c];
 	bool reserved[map_width_c][map_height_c]; // if true, don't use for starting players - used for testing
-	//bool temp[map_width_c][map_height_c];
 
-	//void clearTemp();
 public:
 
 	Map(MapColour colour,int n_opponents,const char *name);
@@ -345,7 +339,6 @@ public:
 };
 
 extern Screen *screen;
-//extern GameState *gamestate;
 
 const int max_islands_per_epoch_c = 3;
 extern Map *maps[n_epochs_c][max_islands_per_epoch_c];

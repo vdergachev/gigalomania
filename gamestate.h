@@ -273,6 +273,18 @@ public:
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
 };
 
+class ChooseTutorialGameState : public GameState {
+	vector<Button *> buttons;
+public:
+	ChooseTutorialGameState(int client_player);
+	virtual ~ChooseTutorialGameState() {
+	}
+
+	virtual void reset();
+	virtual void draw();
+	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
+};
+
 class PlaceMenGameState : public GameState {
 	ChooseMenPanel *choosemenPanel;
 	int off_x, off_y;

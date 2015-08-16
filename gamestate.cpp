@@ -552,17 +552,61 @@ void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 		//human_player = PLAYER_DEMO; // force demo mode
 		::setClientPlayer(player);
 		if( gameType == GAMETYPE_TUTORIAL ) {
-			setupTutorial("first");
-			//setupTutorial("second"); // test
+			setGameStateID(GAMESTATEID_CHOOSETUTORIAL);
+		}
+		else {
+			setGameStateID(GAMESTATEID_PLACEMEN);
+			newGame();
+		}
+	}
+}
+
+ChooseTutorialGameState::ChooseTutorialGameState(int client_player) : GameState(client_player) {
+}
+
+void ChooseTutorialGameState::reset() {
+	this->screen_page->free(true);
+
+	const int xpos = 96;
+	int ypos = 48;
+	const int ydiff = 16;
+
+	vector<TutorialInfo> infos = getTutorialInfo();
+	for(vector<TutorialInfo>::const_iterator iter = infos.begin(); iter != infos.end(); ++iter) {
+		TutorialInfo info = *iter;
+		Button *button = new Button(xpos, ypos, info.text.c_str(), letters_large);
+		button->setId(info.id);
+		ypos += ydiff;
+		screen_page->add(button);
+		buttons.push_back(button);
+	}
+}
+
+void ChooseTutorialGameState::draw() {
+#if defined(__ANDROID__)
+	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+#endif
+	background->draw(0, 0);
+    Image::writeMixedCase(160, 16, letters_large, letters_small, NULL, "Select a Tutorial", Image::JUSTIFY_CENTRE);
+
+	this->screen_page->draw();
+
+	GameState::setDefaultMouseImage();
+	GameState::draw();
+}
+
+void ChooseTutorialGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
+	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
+
+	for(vector<Button *>::const_iterator iter = buttons.begin(); iter != buttons.end(); ++iter) {
+		const Button *button = *iter;
+	    if( m_left && click && button->mouseOver(m_x, m_y) ) {
+			setupTutorial(button->getId());
 			start_epoch = tutorial->getStartEpoch();
 			selected_island = tutorial->getIsland();
 			map = maps[start_epoch][selected_island];
 			setupPlayers();
 			setGameStateID(GAMESTATEID_PLAYING);
-		}
-		else {
-			setGameStateID(GAMESTATEID_PLACEMEN);
-			newGame();
 		}
 	}
 }

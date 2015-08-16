@@ -148,7 +148,7 @@ namespace Gigalomania {
 
 		virtual void free(bool free_this);
 		virtual void draw();
-		virtual bool mouseOver(int m_x,int m_y);
+		virtual bool mouseOver(int m_x,int m_y) const;
 		virtual void input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
 	};
 

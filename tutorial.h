@@ -10,6 +10,16 @@ class PlayingGameState;
 
 #include "sector.h"
 
+class TutorialInfo {
+public:
+	string id;
+	string text;
+
+	TutorialInfo(const string &id, const string &text) : id(id), text(text) {
+	}
+};
+
+vector<TutorialInfo> getTutorialInfo();
 void setupTutorial(const string &id);
 
 class GUIHandler {
