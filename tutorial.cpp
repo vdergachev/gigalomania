@@ -363,10 +363,8 @@ void Tutorial1::initCards() {
 
 	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector, true);
 	card->setArrow(48, 56);
-	GUIHandler *gui_handler_15 = NULL;
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
-		gui_handler_15 = gui_handler;
 		gui_handler->addException("button_deploy_attackers_0");
 		gui_handler->addException("button_deploy_attackers_1");
 		gui_handler->addException("button_deploy_attackers_2");
@@ -383,8 +381,8 @@ void Tutorial1::initCards() {
 		gui_handler->addException("button_weapons_3");
 		gui_handler->addException("button_designers");
 		gui_handler->addException("button_bigdesign");
+		card->setGUIHandler(gui_handler);
 	}
-	card->setGUIHandler(gui_handler_15);
 	cards.push_back(card);
 
 	card = new TutorialCard("16", "Now wait until the battle is won!\nRemember to speed up the time rate if you prefer.");
@@ -428,24 +426,31 @@ void Tutorial2::initCards() {
 	card = new TutorialCard("2", "Click to assemble some unarmed men.");
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(15, 145);
-	GUIHandler *gui_handler_2 = NULL;
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
-		gui_handler_2 = gui_handler;
 		gui_handler->addException("button_deploy_unarmedmen");
 		gui_handler->addException("button_deploy_attackers_0");
 		gui_handler->addException("button_deploy_attackers_1");
 		gui_handler->addException("button_deploy_attackers_2");
 		gui_handler->addException("button_deploy_attackers_3");
 		gui_handler->addException("button_return_attackers");
+		card->setGUIHandler(gui_handler);
 	}
-	card->setGUIHandler(gui_handler_2);
 	cards.push_back(card);
 
 	card = new TutorialCard("3", "Note that if you make a mistake assembling your army,\nyou can cancel by clicking here.");
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(87, 195);
-	card->setGUIHandler(gui_handler_2);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_deploy_unarmedmen");
+		gui_handler->addException("button_deploy_attackers_0");
+		gui_handler->addException("button_deploy_attackers_1");
+		gui_handler->addException("button_deploy_attackers_2");
+		gui_handler->addException("button_deploy_attackers_3");
+		gui_handler->addException("button_return_attackers");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCardWaitForDeployedArmy("4", "Assemble some unarmed men, and send them to a\nsector by clicking on a new map square of your choice.", start_sector, false);
