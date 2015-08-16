@@ -45,13 +45,18 @@ class TutorialCard {
 	string next_text;
 	bool has_arrow;
 	int arrow_x, arrow_y;
+	bool show_arrow_on_page;
+	int show_arrow_page;
+	bool show_arrow_on_sector;
+	int show_arrow_sector_x;
+	int show_arrow_sector_y;
 	bool auto_proceed;
 
 	bool player_allow_build_tower;
 
 	GUIHandler *gui_handler;
 public:
-	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), auto_proceed(false), player_allow_build_tower(true), gui_handler(NULL) {
+	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), show_arrow_on_page(false), show_arrow_page(-1), show_arrow_on_sector(false), show_arrow_sector_x(-1), show_arrow_sector_y(-1), auto_proceed(false), player_allow_build_tower(true), gui_handler(NULL) {
 	}
 	virtual ~TutorialCard() {
 		if( gui_handler != NULL ) {
@@ -78,9 +83,16 @@ public:
 		this->arrow_x = arrow_x;
 		this->arrow_y = arrow_y;
 	}
-	bool hasArrow() const {
-		return has_arrow;
+	void setArrowShowPage(int show_arrow_page) {
+		this->show_arrow_on_page = true;
+		this->show_arrow_page = show_arrow_page;
 	}
+	void setArrowShowSector(int show_arrow_sector_x, int show_arrow_sector_y) {
+		this->show_arrow_on_sector = true;
+		this->show_arrow_sector_x = show_arrow_sector_x;
+		this->show_arrow_sector_y = show_arrow_sector_y;
+	}
+	bool hasArrow(PlayingGameState *playing_gamestate) const;
 	int getArrowX() const {
 		return arrow_x;
 	}

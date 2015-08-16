@@ -1791,7 +1791,7 @@ void PlayingGameState::draw() {
 			}
 			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, tutorial_alpha_c);
 			Image::writeMixedCase(rect.x, rect.y, letters_large, letters_small, numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
-			if( card->hasArrow() ) {
+			if( card->hasArrow(this) ) {
 				int arrow_x = card->getArrowX();
 				int arrow_y = card->getArrowY();
 				int src_x = rect.x - 4;
@@ -2514,6 +2514,9 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		delete tutorial_next_button;
 		tutorial_next_button = NULL;
 		done = true;
+        registerClick();
+		// don't lose selection, important for tutorial:
+		clear_selected_army = false;
 	}
 
 	// switch map display

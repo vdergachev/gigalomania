@@ -64,6 +64,14 @@ void GUIHandlerBlockAll::setGUI(PlayingGameState *playing_gamestate) const {
 	}
 }
 
+bool TutorialCard::hasArrow(PlayingGameState *playing_gamestate) const {
+	if( this->show_arrow_on_page && playing_gamestate->getGamePanel()->getPage() != this->show_arrow_page )
+		return false;
+	if( this->show_arrow_on_sector && ( playing_gamestate->getCurrentSector()->getXPos() != this->show_arrow_sector_x || playing_gamestate->getCurrentSector()->getYPos() != this->show_arrow_sector_y ) )
+		return false;
+	return has_arrow;
+}
+
 void TutorialCard::setGUI(PlayingGameState *playing_gamestate) const {
 	playing_gamestate->getGamePanel()->setEnabled(true);
 	playing_gamestate->getScreenPage()->setEnabled(true);
@@ -363,6 +371,7 @@ void Tutorial1::initCards() {
 
 	card = new TutorialCardWaitForDeployedArmy("15", "Then click on the enemy's sector in the map - that's the\nright hand square - to send your army to attack.", enemy_sector, true);
 	card->setArrow(48, 56);
+	card->setArrowShowPage((int)GamePanel::STATE_ATTACK);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_deploy_attackers_0");
@@ -416,6 +425,11 @@ void Tutorial2::initCards() {
 	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some army maneuvers.\nSelect the attack menu option to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(80, 125);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_attack");
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	card = new TutorialCard("1", "In the first tutorial you learnt how to design weapons.\nHere you'll be learning how to deploy and move your soldiers,\nso unarmed men will do.");
@@ -457,6 +471,28 @@ void Tutorial2::initCards() {
 	card->setPlayerAllowBuildTower(false);
 	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setInverse(true);
 	card->setArrow(60, 70);
+	card->setArrowShowPage((int)GamePanel::STATE_ATTACK);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_deploy_unarmedmen");
+		gui_handler->addException("button_deploy_attackers_0");
+		gui_handler->addException("button_deploy_attackers_1");
+		gui_handler->addException("button_deploy_attackers_2");
+		gui_handler->addException("button_deploy_attackers_3");
+		gui_handler->addException("button_return_attackers");
+		gui_handler->addException("button_attack");
+		for(int y=0;y<map_height_c;y++) {
+			for(int x=0;x<map_width_c;x++) {
+				// enable the current square too, as we need to allow getting back if the user clicks another square without an assembled army!
+				if( map->isSectorAt(x, y) ) {
+					char buffer[256] = "";
+					sprintf(buffer, "map_%d_%d", x, y);
+					gui_handler->addException(buffer);
+				}
+			}
+		}
+		card->setGUIHandler(gui_handler);
+	}
 	cards.push_back(card);
 
 	if( oneMouseButtonMode() ) {
@@ -485,6 +521,7 @@ void Tutorial2::initCards() {
 	static_cast<TutorialCardWaitForDeployedArmy *>(card)->setRequireEmpty(true);
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(260, 80);
+	card->setArrowShowSector(start_map_x, start_map_y);
 	cards.push_back(card);
 
 	// build new tower
@@ -510,7 +547,7 @@ void Tutorial2::initCards() {
 	cards.push_back(card);
 
 	// for debugging
-	//this->card_index = 11;
+	this->card_index = 5;
 }
 
 Tutorial3::Tutorial3(const string &id) : Tutorial(id) {
@@ -608,6 +645,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForPanelPage("8", "Now let's design a weapon!\nClick on the lightbulb icon to start researching.", (int)GamePanel::STATE_DESIGN);
 	card->setArrow(36, 156);
+	card->setArrowShowPage((int)GamePanel::STATE_SECTORCONTROL);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -626,6 +664,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForDesign("9", "First, design a longbow", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, true, 3);
 	card->setArrow(90, 168);
+	card->setArrowShowPage((int)GamePanel::STATE_DESIGN);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -647,6 +686,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForDesign("10", "Now design a trebuchet", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, true, 4);
 	card->setArrow(90, 188);
+	card->setArrowShowPage((int)GamePanel::STATE_DESIGN);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -668,6 +708,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForPanelPage("11", "Now go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
 	card->setArrow(50, 110);
+	card->setArrowShowPage((int)GamePanel::STATE_DESIGN);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -686,6 +727,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForPanelPage("12", "As a result of your two inventions, we've moved forward to a new age.\nThis means we can build a factory, which is necessary to construct\ntrebuchets. Click here to build a factory.",  (int)GamePanel::STATE_BUILD);
 	card->setArrow(45, 210);
+	card->setArrowShowPage((int)GamePanel::STATE_SECTORCONTROL);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -704,6 +746,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForBuilding("13", "Now assign some men to build a factory, as you did with the mine,\nand wait for it to be constructed.", start_sector, BUILDING_FACTORY);
 	card->setArrow(60, 160);
+	card->setArrowShowPage((int)GamePanel::STATE_BUILD);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -742,6 +785,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForPanelPage("15", "Click on the factory icon to start manufacturing.", (int)GamePanel::STATE_FACTORY);
 	card->setArrow(65, 156);
+	card->setArrowShowPage((int)GamePanel::STATE_SECTORCONTROL);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -760,6 +804,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForDesign("16", "Select the trebuchet to start manufacturing", start_sector, TutorialCardWaitForDesign::WAITTYPE_CURRENT_MANUFACTURE, true, Invention::WEAPON, false, -1);
 	card->setArrow(90, 205);
+	card->setArrowShowPage((int)GamePanel::STATE_FACTORY);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
@@ -780,6 +825,7 @@ void Tutorial3::initCards() {
 
 	card = new TutorialCardWaitForDesign("17", "The top number shows the assigned number of workers,\nthe bottom shows the number of trebuchets to be manufactured.\nAssign workers by increasing the top number, then wait!", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_MANUFACTURED, true, Invention::WEAPON, false, -1);
 	card->setArrow(90, 135);
+	card->setArrowShowPage((int)GamePanel::STATE_FACTORY);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
