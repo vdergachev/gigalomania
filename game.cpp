@@ -3524,6 +3524,9 @@ void saveState() {
     if( gameStateID == GAMESTATEID_UNDEFINED || gameStateID == GAMESTATEID_CHOOSEGAMETYPE || gameStateID == GAMESTATEID_CHOOSEDIFFICULTY || gameStateID == GAMESTATEID_CHOOSEPLAYER || gameStateID == GAMESTATEID_GAMECOMPLETE ) {
 		// no need to save state
 	}
+	else if( gameType == GAMETYPE_TUTORIAL && gameStateID == GAMESTATEID_ENDISLAND ) {
+		// no need to save state (and don't want to, otherwise this will resume to the islands screen instead the main menu)
+	}
 	else {
 		stringstream stream;
 		const int savegame_version_c = 1;
