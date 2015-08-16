@@ -125,14 +125,30 @@ class TutorialCardWaitForDesign : public TutorialCard {
 public:
 	enum WaitType {
 		WAITTYPE_CURRENT_DESIGN = 0,
-		WAITTYPE_HAS_DESIGNED = 1
+		WAITTYPE_HAS_DESIGNED = 1,
+		WAITTYPE_CURRENT_MANUFACTURE = 2,
+		WAITTYPE_HAS_MANUFACTURED = 3
 	};
 private:
+	const Sector *sector;
 	WaitType wait_type;
 	bool require_type;
 	Invention::Type invention_type;
+	bool require_epoch;
+	int invention_epoch;
 public:
-	TutorialCardWaitForDesign(const string &id, const string &text, WaitType wait_type, bool require_type, Invention::Type invention_type) : TutorialCard(id, text), wait_type(wait_type), require_type(require_type), invention_type(invention_type) {
+	TutorialCardWaitForDesign(const string &id, const string &text, const Sector *sector, WaitType wait_type, bool require_type, Invention::Type invention_type, bool require_epoch, int invention_epoch) : TutorialCard(id, text), sector(sector), wait_type(wait_type), require_type(require_type), invention_type(invention_type), require_epoch(require_epoch), invention_epoch(invention_epoch) {
+		this->setAutoProceed(true);
+	}
+
+	virtual bool canProceed(PlayingGameState *playing_gamestate) const;
+};
+
+class TutorialCardWaitForBuilding : public TutorialCard {
+	const Sector *sector;
+	Type building_type;
+public:
+	TutorialCardWaitForBuilding(const string &id, const string &text, const Sector *sector, Type building_type) : TutorialCard(id, text), sector(sector), building_type(building_type) {
 		this->setAutoProceed(true);
 	}
 
@@ -261,6 +277,13 @@ public:
 class Tutorial2 : public Tutorial {
 public:
 	Tutorial2(const string &id);
+
+	virtual void initCards();
+};
+
+class Tutorial3 : public Tutorial {
+public:
+	Tutorial3(const string &id);
 
 	virtual void initCards();
 };

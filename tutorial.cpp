@@ -10,16 +10,19 @@ Tutorial *tutorial = NULL;
 
 vector<TutorialInfo> getTutorialInfo() {
 	vector<TutorialInfo> infos;
-	infos.push_back( TutorialInfo("first", "play your first island") );
-	infos.push_back( TutorialInfo("second", "army maneuvers") );
+	infos.push_back( TutorialInfo("intro", "play your first island") );
+	infos.push_back( TutorialInfo("army_maneuvers", "army maneuvers") );
+	infos.push_back( TutorialInfo("build_manufacture", "learn to build and manufacture") );
 	return infos;
 }
 
 void setupTutorial(const string &id) {
-	if( id == "first" )
+	if( id == "intro" )
 		tutorial = new Tutorial1(id);
-	else if( id == "second" )
+	else if( id == "army_maneuvers" )
 		tutorial = new Tutorial2(id);
+	else if( id == "build_manufacture" )
+		tutorial = new Tutorial3(id);
 }
 
 void GUIHandler::resetGUI(PlayingGameState *playing_gamestate) {
@@ -41,7 +44,6 @@ void GUIHandlerBlockAll::setGUI(PlayingGameState *playing_gamestate) const {
 			if( panel != NULL ) {
 				panel->setEnabled(true);
 			}
-			T_ASSERT(panel != NULL);
 		}
 	}
 	// the following are always exceptions
@@ -76,22 +78,35 @@ bool TutorialCardWaitForPanelPage::canProceed(PlayingGameState *playing_gamestat
 }
 
 bool TutorialCardWaitForDesign::canProceed(PlayingGameState *playing_gamestate) const {
-	const Sector *current_sector = playing_gamestate->getCurrentSector();
-	if( wait_type == WAITTYPE_CURRENT_DESIGN ) {
-		const Design *current_design = current_sector->getCurrentDesign();
+	if( wait_type == WAITTYPE_CURRENT_DESIGN || wait_type == WAITTYPE_CURRENT_MANUFACTURE ) {
+		const Design *current_design = wait_type == WAITTYPE_CURRENT_DESIGN ? sector->getCurrentDesign() : sector->getCurrentManufacture();
 		if( current_design == NULL )
 			return false;
 		const Invention *invention = current_design->getInvention();
 		if( require_type && invention->getType() != invention_type )
 			return false;
+		if( require_epoch && invention->getEpoch() != invention_epoch )
+			return false;
 		return true;
 	}
-	else if( wait_type == WAITTYPE_HAS_DESIGNED ) {
+	else if( wait_type == WAITTYPE_HAS_DESIGNED || wait_type == WAITTYPE_HAS_MANUFACTURED ) {
 		for(int i=0;i<Invention::N_TYPES;i++) {
 			if( require_type && i != invention_type )
 				continue;
-			for(int j=0;j<n_epochs_c;j++) {
-				if( current_sector->inventionKnown(static_cast<Invention::Type>(i), j) ) {
+			int n_j = i == Invention::SHIELD ? n_shields_c : n_epochs_c;
+			for(int j=0;j<n_j;j++) {
+				if( require_epoch && j != invention_epoch )
+					continue;
+				if( wait_type == WAITTYPE_HAS_DESIGNED && sector->inventionKnown(static_cast<Invention::Type>(i), j) ) {
+					return true;
+				}
+				else if( wait_type == WAITTYPE_HAS_MANUFACTURED && i == Invention::SHIELD && sector->getStoredShields(j) > 0 ) {
+					return true;
+				}
+				else if( wait_type == WAITTYPE_HAS_MANUFACTURED && i == Invention::DEFENCE && sector->getStoredDefenders(j) > 0 ) {
+					return true;
+				}
+				else if( wait_type == WAITTYPE_HAS_MANUFACTURED && i == Invention::WEAPON && sector->getStoredArmy()->getSoldiers(j) > 0 ) {
 					return true;
 				}
 			}
@@ -100,6 +115,13 @@ bool TutorialCardWaitForDesign::canProceed(PlayingGameState *playing_gamestate) 
 	}
 	ASSERT(false);
 	return true;
+}
+
+bool TutorialCardWaitForBuilding::canProceed(PlayingGameState *playing_gamestate) const {
+	if( sector->getBuilding(building_type) != NULL ) {
+		return true;
+	}
+	return false;
 }
 
 bool TutorialCardWaitForDeployedArmy::canProceed(PlayingGameState *playing_gamestate) const {
@@ -192,6 +214,8 @@ Tutorial1::Tutorial1(const string &id) : Tutorial(id) {
 }
 
 void Tutorial1::initCards() {
+	Sector *start_sector = map->getSector(start_map_x, start_map_y);
+	ASSERT(start_sector != NULL);
 	Sector *enemy_sector = map->getSector(2, 2);
 	ASSERT(enemy_sector != NULL);
 
@@ -233,7 +257,7 @@ void Tutorial1::initCards() {
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForDesign("7", "For this tutorial, we're going to design a weapon.\nClick on one of the weapons.\nI recommend the Rock weapon, but any will do.", TutorialCardWaitForDesign::WAITTYPE_CURRENT_DESIGN, true, Invention::WEAPON);
+	card = new TutorialCardWaitForDesign("7", "For this tutorial, we're going to design a weapon.\nClick on one of the weapons.\nI recommend the Rock weapon, but any will do.", start_sector, TutorialCardWaitForDesign::WAITTYPE_CURRENT_DESIGN, true, Invention::WEAPON, false, -1);
 	card->setArrow(90, 168);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
@@ -277,10 +301,10 @@ void Tutorial1::initCards() {
 	cards.push_back(card);
 
 	if( oneMouseButtonMode() ) {
-		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nClick this icon to cycle through different time rates.", TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON);
+		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nClick this icon to cycle through different time rates.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
 	}
 	else {
-		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nRight click on this icon to speed time up.", TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON);
+		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nRight click on this icon to speed time up.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
 	}
 	card->setArrow(100, 10);
 	{
@@ -294,7 +318,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("11", "Great! Now click here to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
+	card = new TutorialCardWaitForPanelPage("11", "Great! Now click to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
 	card->setArrow(50, 110);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
@@ -482,4 +506,296 @@ void Tutorial2::initCards() {
 
 	// for debugging
 	//this->card_index = 11;
+}
+
+Tutorial3::Tutorial3(const string &id) : Tutorial(id) {
+	start_epoch = 3;
+	island = 1;
+	start_map_x = 3;
+	start_map_y = 3;
+	n_men = 50;
+	//auto_end = true;
+	ai_allow_growth = false;
+	ai_allow_design = false;
+	ai_allow_ask_alliance = false;
+	ai_allow_deploy = false;
+	//allow_retreat_loss = false;
+}
+
+void Tutorial3::initCards() {
+	Sector *start_sector = map->getSector(start_map_x, start_map_y);
+	ASSERT(start_sector != NULL);
+
+	TutorialCard *card = NULL;
+
+	card = new TutorialCard("0", "We're now thousands of years into the future since the last tutorial.\nIn this tutorial, you'll learn how to make use of newer technology\nto build weapons to destroy your enemies!");
+	card->setGUIHandler(new GUIHandlerBlockAll());
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("1", "From the fourth age onwards, you can construct an additional building\nin your sector - a mine.\nSelect the build option.", (int)GamePanel::STATE_BUILD);
+	card->setArrow(25, 210);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_build_mine");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForBuilding("2", "Assign some men to start building a mine, and then\nwait for it to be constructed.", start_sector, BUILDING_MINE);
+	card->setArrow(60, 130);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_nbuilders2_mine");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("3", "Now click to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_bigbuild");
+		card->setGUIHandler(gui_handler);
+	}
+	card->setArrow(50, 110);
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("4", "Your mine can extract elements from the ground, in order to\ncreate new inventions. To do this, click on any of the elements.", (int)GamePanel::STATE_ELEMENTSTOCKS);
+	card->setArrow(45, 185);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCard("5", "This page shows you the sector's current element stocks.\nSo far you've worked with gatherables, that your men automatically\npick up, without the need for a mine.");
+	card->setGUIHandler(new GUIHandlerBlockAll());
+	card->setArrow(80, 150);
+	cards.push_back(card);
+
+	card = new TutorialCard("6", "But more advanced elements require you to assign miners to them.\nClick to add some miners now, and wait until we have at least 1 unit.\nOnly use a few of your men for this.");
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		card->setGUIHandler(gui_handler);
+	}
+	card->setArrow(52, 183);
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("7", "Now go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		card->setGUIHandler(gui_handler);
+	}
+	card->setArrow(50, 110);
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("8", "Now let's design a weapon!\nClick on the lightbulb icon to start researching.", (int)GamePanel::STATE_DESIGN);
+	card->setArrow(36, 156);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_design");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDesign("9", "First, design a longbow", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, true, 3);
+	card->setArrow(90, 168);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_design");
+		gui_handler->addException("button_bigdesign");
+		gui_handler->addException("button_weapons_0");
+		gui_handler->addException("button_designers");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDesign("10", "Now design a trebuchet", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, true, 4);
+	card->setArrow(90, 188);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_design");
+		gui_handler->addException("button_bigdesign");
+		gui_handler->addException("button_weapons_1");
+		gui_handler->addException("button_designers");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("11", "Now go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
+	card->setArrow(50, 110);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_bigdesign");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("12", "As a result of your two inventions, we've moved forward to a new age.\nThis means we can build a factory, which is necessary to construct\ntrebuchets. Click here to build a factory.",  (int)GamePanel::STATE_BUILD);
+	card->setArrow(45, 210);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_build_factory");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForBuilding("13", "Now assign some men to build a factory, as you did with the mine,\nand wait for it to be constructed.", start_sector, BUILDING_FACTORY);
+	card->setArrow(60, 160);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_build_factory");
+		gui_handler->addException("button_bigbuild");
+		gui_handler->addException("button_nbuilders2_factory");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("14", "Now click to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_bigbuild");
+		card->setGUIHandler(gui_handler);
+	}
+	card->setArrow(50, 110);
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForPanelPage("15", "Click on the factory icon to start manufacturing.", (int)GamePanel::STATE_FACTORY);
+	card->setArrow(65, 156);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_factory");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDesign("16", "Select the trebuchet to start manufacturing", start_sector, TutorialCardWaitForDesign::WAITTYPE_CURRENT_MANUFACTURE, true, Invention::WEAPON, false, -1);
+	card->setArrow(90, 205);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_factory");
+		gui_handler->addException("button_bigfactory");
+		gui_handler->addException("button_fweapons_1");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCardWaitForDesign("17", "The top number shows the assigned number of workers,\nthe bottom shows the number of trebuchets to be manufactured.\nAssign workers by increasing the top number, then wait!", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_MANUFACTURED, true, Invention::WEAPON, false, -1);
+	card->setArrow(90, 135);
+	{
+		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
+		gui_handler->addException("button_elements_0");
+		gui_handler->addException("button_elements_1");
+		gui_handler->addException("button_elements_2");
+		gui_handler->addException("button_elements_3");
+		gui_handler->addException("button_nminers2_0");
+		gui_handler->addException("button_nminers2_1");
+		gui_handler->addException("button_nminers2_2");
+		gui_handler->addException("button_nminers2_3");
+		gui_handler->addException("button_bigelementstocks");
+		gui_handler->addException("button_factory");
+		gui_handler->addException("button_bigfactory");
+		gui_handler->addException("button_fweapons_1");
+		gui_handler->addException("button_workers");
+		gui_handler->addException("button_famount");
+		card->setGUIHandler(gui_handler);
+	}
+	cards.push_back(card);
+
+	card = new TutorialCard("18", "You now have your first trebchet! Now manufacture some more,\nand use them to defeat your enemies. Good luck!");
+	card->setNextText("Done");
+	cards.push_back(card);
 }

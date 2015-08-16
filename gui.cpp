@@ -650,6 +650,7 @@ void GamePanel::setup() {
 	//
 	//this->button_factory = new ImageButton(68, 40, panel_factory, "view and alter current\nitem being manufactured");
 	this->button_factory = new ImageButton(xpos, ypos, panel_factory, "view and alter current\nitem being manufactured");
+	this->button_factory->setId("button_factory");
 	this->addToPanel(STATE_SECTORCONTROL, button_factory);
 	this->button_nworkers = new PanelPage(xpos, ypos+16, 16, 16);
 	if( onemousebutton ) {
@@ -698,6 +699,8 @@ void GamePanel::setup() {
 		ASSERT_ELEMENT_ID( this->element_index[i] );
 		//this->button_elements[i] = new ImageButton(8 + 24*i, 90, icon_elements[ this->element_index[i] ]);
 		this->button_elements[i] = new ImageButton(xpos, ypos, icon_elements[ this->element_index[i] ], "view element stocks");
+		sprintf(buffer, "button_elements_%d", i);
+		this->button_elements[i]->setId(buffer);
 		//this->button_elements[i]->setInfoLMB("view element stocks");
 		this->addToPanel(STATE_SECTORCONTROL, button_elements[i]);
 		this->button_nminers[i] = new PanelPage(xpos, ypos+16, 16, 12);
@@ -722,6 +725,7 @@ void GamePanel::setup() {
 
 	//this->button_build[BUILDING_MINE] = new ImageButton(8, 118, panel_build[BUILDING_MINE]);
 	this->button_build[BUILDING_MINE] = new ImageButton(xpos, ypos, panel_build[BUILDING_MINE]);
+	this->button_build[BUILDING_MINE]->setId("button_build_mine");
 	this->button_build[BUILDING_MINE]->setInfoLMB("change the number of builders");
 	this->addToPanel(STATE_SECTORCONTROL, button_build[BUILDING_MINE]);
 	//this->button_nbuilders[BUILDING_MINE] = new PanelPage(8, 134, 16, 12);
@@ -738,6 +742,7 @@ void GamePanel::setup() {
 
 	//this->button_build[BUILDING_FACTORY] = new ImageButton(28, 118, panel_build[BUILDING_FACTORY]);
 	this->button_build[BUILDING_FACTORY] = new ImageButton(xpos, ypos, panel_build[BUILDING_FACTORY]);
+	this->button_build[BUILDING_FACTORY]->setId("button_build_factory");
 	this->button_build[BUILDING_FACTORY]->setInfoLMB("change the number of builders");
 	this->addToPanel(STATE_SECTORCONTROL, button_build[BUILDING_FACTORY]);
 	//this->button_nbuilders[BUILDING_FACTORY] = new PanelPage(28, 134, 16, 12);
@@ -754,6 +759,7 @@ void GamePanel::setup() {
 
 	//this->button_build[BUILDING_LAB] = new ImageButton(48, 118, panel_build[BUILDING_LAB]);
 	this->button_build[BUILDING_LAB] = new ImageButton(xpos, ypos, panel_build[BUILDING_LAB]);
+	this->button_build[BUILDING_LAB]->setId("button_build_lab");
 	this->button_build[BUILDING_LAB]->setInfoLMB("change the number of builders");
 	this->addToPanel(STATE_SECTORCONTROL, button_build[BUILDING_LAB]);
 	//this->button_nbuilders[BUILDING_LAB] = new PanelPage(48, 134, 16, 12);
@@ -849,12 +855,15 @@ void GamePanel::setup() {
 
 	// ELEMENTSTOCKS
 	this->button_bigelementstocks = new ImageButton(33, 0, 32, 16, mine_gatherable_large, "return to main screen");
+	this->button_bigelementstocks->setId("button_bigelementstocks");
 	this->addToPanel(STATE_ELEMENTSTOCKS, button_bigelementstocks);
 	for(int i=0;i<4;i++) {
 		if( this->element_index[i] == -1 ) {
 			this->button_elements2[i] = new PanelPage(0, 0, 0, 0);
 			this->addToPanel(STATE_SECTORCONTROL, button_elements2[i]);
 			this->button_nminers2[i] = new PanelPage(0, 0, 0, 0);
+			sprintf(buffer, "button_nminers2_%d", i);
+			this->button_nminers2[i]->setId(buffer);
 			this->addToPanel(STATE_SECTORCONTROL, button_nminers2[i]);
 			continue;
 		}
@@ -864,6 +873,8 @@ void GamePanel::setup() {
         this->button_elements2[i] = new ImageButton(64, this_y, 16, 24, icon_elements[ this->element_index[i] ]);
 		this->addToPanel(STATE_ELEMENTSTOCKS, button_elements2[i]);
         this->button_nminers2[i] = new PanelPage(40, this_y, 16, 16);
+		sprintf(buffer, "button_nminers2_%d", i);
+		this->button_nminers2[i]->setId(buffer);
 		if( onemousebutton ) {
 			this->button_nminers2[i]->setInfoLMB("change the number of miners");
 		}
@@ -876,11 +887,13 @@ void GamePanel::setup() {
 
 	// BUILD
 	this->button_bigbuild = new ImageButton(33, 0, 32, 16, panel_bigbuild, "return to main screen");
+	this->button_bigbuild->setId("button_bigbuild");
 	this->addToPanel(STATE_BUILD, button_bigbuild);
 	for(int i=0;i<N_BUILDINGS;i++)
 		this->button_nbuilders2[i] = NULL;
 	//this->button_nbuilders2[BUILDING_MINE] = new ImageButton(40, 20, 19, 28, panel_build[BUILDING_MINE]);
 	this->button_nbuilders2[BUILDING_MINE] = new ImageButton(40, 20, 19, build_step_y_c, panel_build[BUILDING_MINE]);
+	this->button_nbuilders2[BUILDING_MINE]->setId("button_nbuilders2_mine");
 	if( onemousebutton ) {
 		this->button_nbuilders2[BUILDING_MINE]->setInfoLMB("change the number of builders\nbuilding a mine");
 	}
@@ -891,6 +904,7 @@ void GamePanel::setup() {
 	this->addToPanel(STATE_BUILD, button_nbuilders2[BUILDING_MINE]);
     //this->button_nbuilders2[BUILDING_FACTORY] = new ImageButton(40, 20 + build_step_y_c, 19, 28, panel_build[BUILDING_FACTORY]);
     this->button_nbuilders2[BUILDING_FACTORY] = new ImageButton(40, 20 + build_step_y_c, 19, build_step_y_c, panel_build[BUILDING_FACTORY]);
+	this->button_nbuilders2[BUILDING_FACTORY]->setId("button_nbuilders2_factory");
     if( onemousebutton ) {
 		this->button_nbuilders2[BUILDING_FACTORY]->setInfoLMB("change the number of builders\nbuilding a factory");
 	}
@@ -901,6 +915,7 @@ void GamePanel::setup() {
 	this->addToPanel(STATE_BUILD, button_nbuilders2[BUILDING_FACTORY]);
     //this->button_nbuilders2[BUILDING_LAB] = new ImageButton(40, 20 + 2*build_step_y_c, 19, 28, panel_build[BUILDING_LAB]);
     this->button_nbuilders2[BUILDING_LAB] = new ImageButton(40, 20 + 2*build_step_y_c, 19, build_step_y_c, panel_build[BUILDING_LAB]);
+	this->button_nbuilders2[BUILDING_LAB]->setId("button_nbuilders2_lab");
     if( onemousebutton ) {
 		this->button_nbuilders2[BUILDING_LAB]->setInfoLMB("change the number of builders\nbuilding a research centre");
 	}
@@ -944,8 +959,10 @@ void GamePanel::setup() {
 
 	// FACTORY
 	this->button_bigfactory = new ImageButton(33, 0, 32, 16, panel_bigfactory, "return to main screen");
+	this->button_bigfactory->setId("button_bigfactory");
 	this->addToPanel(STATE_FACTORY, button_bigfactory);
 	this->button_workers = new ImageButton(40, 14, 16, 26, men[gamestate->getCurrentSector()->getBuildingEpoch()]);
+	this->button_workers->setId("button_workers");
 	if( onemousebutton ) {
 		this->button_workers->setInfoLMB("change the number of workers");
 	}
@@ -955,6 +972,7 @@ void GamePanel::setup() {
 	}
 	this->addToPanel(STATE_FACTORY, button_workers);
 	this->button_famount = new ImageButton(40, 40, 14, 28, men[gamestate->getCurrentSector()->getBuildingEpoch()]);
+	this->button_famount->setId("button_famount");
 	if( onemousebutton ) {
 		this->button_famount->setInfoLMB("change the number to produce");
 	}
@@ -966,13 +984,19 @@ void GamePanel::setup() {
 	for(int i=0;i<n_sub_epochs;i++) {
         const int this_y = 82 + i*14;
         this->button_fshields[i] = new ImageButton(8, this_y, 16, 14, icon_shields[i]);
+		sprintf(buffer, "button_fshields_%d", i);
+		this->button_fshields[i]->setId(buffer);
 		this->button_fshields[i]->setInfoLMB("manufacture a shield");
 		this->addToPanel(STATE_FACTORY, button_fshields[i]);
         this->button_fdefences[i] = new ImageButton(40, this_y, 16, 14, icon_defences[start_epoch + i]);
+		sprintf(buffer, "button_fdefences_%d", i);
+		this->button_fdefences[i]->setId(buffer);
 		sprintf(buffer, "manufacture a %s", Invention::getInvention(Invention::DEFENCE, start_epoch + i)->getName());
 		this->button_fdefences[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_FACTORY, button_fdefences[i]);
         this->button_fweapons[i] = new ImageButton(72, this_y, 16, 14, icon_weapons[start_epoch + i]);
+		sprintf(buffer, "button_fweapons_%d", i);
+		this->button_fweapons[i]->setId(buffer);
 		sprintf(buffer, "manufacture a %s", Invention::getInvention(Invention::WEAPON, start_epoch + i)->getName());
 		this->button_fweapons[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_FACTORY, button_fweapons[i]);
