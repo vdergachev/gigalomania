@@ -135,11 +135,11 @@ copy %src%\music\ %dst%\music\
 mkdir %dst%\sound
 copy %src%\sound\ %dst%\sound\
 
-mkdir %dst%\debian
-copy %src%\debian\ %dst%\debian\
+REM mkdir %dst%\debian
+REM copy %src%\debian\ %dst%\debian\
 
-mkdir %dst%\debian_maemo
-copy %src%\debian_maemo\ %dst%\debian_maemo\
+REM mkdir %dst%\debian_maemo
+REM copy %src%\debian_maemo\ %dst%\debian_maemo\
 
 REM mkdir %dst%\androidaudio\
 

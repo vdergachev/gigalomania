@@ -31,8 +31,6 @@ It will also (at least in GNOME) add shortcuts to the menu Applications/Games/.
 
 Uninstallation can be done with: sudo make uninstall
 
-Packages can also be created using debuild.
-
 If SDL 2 isn't available on your distribution, you can also compile with SDL 1.2, though some changes are required:
 
 * The #include directories in stdafx.h, image.h, sound.h need to be changed from SDL2/ to SDL/ .
@@ -191,7 +189,7 @@ History
 
 Note, this history is only for changes related to the source code. See the Gigalomania readme or homepage for a full history.
 
-Version 0.28 adds support for Qt Creator as an IDE.
+Version 0.28 adds support for Qt Creator as an IDE. Debian and Maemo/Meego packaging info was removed from main source archive.
 
 Version 0.27, Windows version now compiled with Visual C++ 2012 Express Edition. Also now using SDLmain.lib instead of SDL_main.c on Windows, and compiled with SDL 2. Linux version now compiles with SDL 2. Android port now compiled using SDL 2 instead of Qt/necessitas. Symbian port now dropped.
 
@@ -230,4 +228,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 10 August 2015
+Mark Harman 17 August 2015
