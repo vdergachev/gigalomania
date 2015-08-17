@@ -190,11 +190,12 @@ protected:
 	};
 	ConfirmType confirm_type;
     PanelPage *confirm_window;
-    Button *confirm_yes_button;
-    Button *confirm_no_button;
+    Button *confirm_button_1;
+    Button *confirm_button_2;
+    Button *confirm_button_3;
 
 	void setDefaultMouseImage();
-    void createQuitWindow();
+    virtual void createQuitWindow();
 
 public:
 	GameState(int client_player);
@@ -325,9 +326,6 @@ class PlayingGameState : public GameState {
 	Button *pause_button;
 	Button *quit_button;
 	Button *tutorial_next_button;
-    /*PanelPage *confirm_window;
-	Button *confirm_yes_button;
-    Button *confirm_no_button;*/
 	int flag_frame_step;
 	int defenders_last_time_update;
 	int soldier_last_time_moved_x;
@@ -368,6 +366,7 @@ class PlayingGameState : public GameState {
 	bool readSectorsProcessLine(Map *map, char *line, bool *done_header, int *sec_x, int *sec_y);
 	bool readSectors(Map *map);
 	void loadStateParseXMLMapXY(int *map_x, int *map_y, const TiXmlAttribute *attribute);
+    virtual void createQuitWindow();
 
 	//static void buttonSpeedClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
 public:

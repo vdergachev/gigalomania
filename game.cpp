@@ -3343,7 +3343,6 @@ void startIsland() {
 void endIsland() {
 	ASSERT(gameStateID == GAMESTATEID_PLAYING);
 	map->calculateStats();
-	map->freeSectors();
 	n_player_suspended += players[human_player]->getNSuspended();
 	//cleanupPlayers();
 	setGameStateID(GAMESTATEID_ENDISLAND);

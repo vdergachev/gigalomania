@@ -248,8 +248,9 @@ GameState::GameState(int client_player) : client_player(client_player) {
 	this->mouse_off_y = 0;
 	this->confirm_type = CONFIRMTYPE_UNKNOWN;
     this->confirm_window = NULL;
-    this->confirm_yes_button = NULL;
-    this->confirm_no_button = NULL;
+    this->confirm_button_1 = NULL;
+    this->confirm_button_2 = NULL;
+    this->confirm_button_3 = NULL;
 }
 
 GameState::~GameState() {
@@ -347,10 +348,10 @@ void GameState::createQuitWindow() {
 		const int offset_x_c = 120, offset_y_c = 120;
 		Button *text_button = new Button(offset_x_c, offset_y_c, "REALLY QUIT?", letters_large);
 		confirm_window->add(text_button);
-		confirm_yes_button = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
-		confirm_window->add(confirm_yes_button);
-		confirm_no_button = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
-		confirm_window->add(confirm_no_button);
+		confirm_button_1 = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
+		confirm_window->add(confirm_button_1);
+		confirm_button_2 = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
+		confirm_window->add(confirm_button_2);
 		screen_page->add(confirm_window);
 	}
 	else if( confirm_window != NULL && !state_changed ) {
@@ -363,8 +364,9 @@ void GameState::closeConfirmWindow() {
     if( confirm_window != NULL ) {
         delete confirm_window;
         confirm_window = NULL;
-        confirm_yes_button = NULL;
-        confirm_no_button = NULL;
+        confirm_button_1 = NULL;
+        confirm_button_2 = NULL;
+        confirm_button_3 = NULL;
     }
     //LOG("GameState::closeConfirmWindow() done\n");
 }
@@ -778,14 +780,14 @@ void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,boo
 	int s_m_y = (int)(m_y / scale_height);*/
 
     bool done = false;
-    if( !done && m_left && click && confirm_yes_button != NULL && confirm_yes_button->mouseOver(m_x, m_y) ) {
+    if( !done && m_left && click && confirm_button_1 != NULL && confirm_button_1->mouseOver(m_x, m_y) ) {
         LOG("confirm yes clicked\n");
         done = true;
         registerClick();
         ASSERT( confirm_window != NULL );
 		this->requestConfirm();
     }
-    else if( !done && m_left && click && confirm_no_button != NULL && confirm_no_button->mouseOver(m_x, m_y) ) {
+    else if( !done && m_left && click && confirm_button_2 != NULL && confirm_button_2->mouseOver(m_x, m_y) ) {
         LOG("confirm no clicked\n");
         done = true;
         registerClick();
@@ -869,10 +871,10 @@ void PlaceMenGameState::requestNewGame() {
 	const int offset_x_c = 120, offset_y_c = 120;
 	Button *text_button = new Button(offset_x_c, offset_y_c, "NEW GAME?", letters_large);
 	confirm_window->add(text_button);
-	confirm_yes_button = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
-	confirm_window->add(confirm_yes_button);
-	confirm_no_button = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
-	confirm_window->add(confirm_no_button);
+	confirm_button_1 = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
+	confirm_window->add(confirm_button_1);
+	confirm_button_2 = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
+	confirm_window->add(confirm_button_2);
 	this->screen_page->add(confirm_window);
 }
 
@@ -921,6 +923,7 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
+	map->freeSectors();
 	s_biplane->fadeOut(500);
 	s_jetplane->fadeOut(500);
 	s_spaceship->fadeOut(500);
@@ -938,6 +941,29 @@ PlayingGameState::~PlayingGameState() {
 	if( this->gamePanel )
 		delete gamePanel;
 	LOG("~PlayingGameState() done\n");
+}
+
+void PlayingGameState::createQuitWindow() {
+    if( confirm_window == NULL && !state_changed ) {
+		confirm_type = CONFIRMTYPE_QUITGAME;
+		confirm_window = new PanelPage(0, 0, default_width_c, default_height_c);
+		confirm_window->setBackground(0, 0, 0, 200);
+		const int offset_x_c = 80, offset_y_c = 120;
+#if defined(__ANDROID__)
+		confirm_button_1 = new Button(offset_x_c, offset_y_c, "SAVE GAME AND QUIT TO HOMESCREEN", letters_large);
+#else
+		confirm_button_1 = new Button(offset_x_c, offset_y_c, "SAVE GAME AND QUIT TO DESKTOP", letters_large);
+#endif
+		confirm_window->add(confirm_button_1);
+		confirm_button_2 = new Button(offset_x_c, offset_y_c+16, "EXIT BATTLE", letters_large);
+		confirm_window->add(confirm_button_2);
+		confirm_button_3 = new Button(offset_x_c, offset_y_c+32, "CANCEL", letters_large);
+		confirm_window->add(confirm_button_3);
+		screen_page->add(confirm_window);
+	}
+	else if( confirm_window != NULL && !state_changed ) {
+		closeConfirmWindow();
+	}
 }
 
 bool PlayingGameState::readSectorsProcessLine(Map *map, char *line, bool *done_header, int *sec_x, int *sec_y) {
@@ -1233,8 +1259,9 @@ void PlayingGameState::reset() {
 	}
 	confirm_type = CONFIRMTYPE_UNKNOWN;
 	confirm_window = NULL;
-	confirm_yes_button = NULL;
-	confirm_no_button = NULL;
+	confirm_button_1 = NULL;
+	confirm_button_2 = NULL;
+	confirm_button_3 = NULL;
 
 	if( this->gamePanel != NULL ) {
 		delete this->gamePanel;
@@ -2482,13 +2509,23 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
         registerClick();
         requestQuit();
 	}
-	else if( !done && m_left && click && confirm_yes_button != NULL && confirm_yes_button->mouseOver(m_x, m_y) ) {
+	else if( !done && m_left && click && confirm_button_1 != NULL && confirm_button_1->mouseOver(m_x, m_y) ) {
+		// save game and quit to desktop
+        done = true;
+        registerClick();
+        ASSERT( confirm_window != NULL );
+		::saveState();
+	    application->setQuit();
+	}
+	else if( !done && m_left && click && confirm_button_2 != NULL && confirm_button_2->mouseOver(m_x, m_y) ) {
+		// exit battle
         done = true;
         registerClick();
         ASSERT( confirm_window != NULL );
 		this->requestConfirm();
 	}
-	else if( !done && m_left && click && confirm_no_button != NULL && confirm_no_button->mouseOver(m_x, m_y) ) {
+	else if( !done && m_left && click && confirm_button_3 != NULL && confirm_button_3->mouseOver(m_x, m_y) ) {
+		// cancel
         done = true;
         registerClick();
         ASSERT( confirm_window != NULL );

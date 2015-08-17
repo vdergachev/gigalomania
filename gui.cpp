@@ -197,7 +197,7 @@ ChooseMenPanel::ChooseMenPanel(PlaceMenGameState *gamestate) : MultiPanel(N_STAT
     this->addToPanel(STATE_CHOOSEISLAND, button_help);
 #endif
 #if defined(__ANDROID__)
-	// Applications don't quit on Android
+	// user can use back button on Android to quit
 	this->button_quit = NULL;
 #else
     this->button_quit = new Button((int)(mx - 2.0*fw), cy, "QUIT", letters_large);
