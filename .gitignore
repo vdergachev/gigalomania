@@ -1,5 +1,4 @@
 _old/
-_old_qt/
 archive/
 data/
 docs/
@@ -14,7 +13,6 @@ Debug/
 Release/
 CreateScaledGfx-build-*/
 newgfx/
-android_qt/
 
 *.dll
 *.lib
