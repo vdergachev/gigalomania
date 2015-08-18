@@ -3207,6 +3207,7 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 		return;
 	}
 	bool read_children = true;
+	//throw std::runtime_error("blah"); // test failing to load state
 
 	switch( parent->Type() ) {
 		case TiXmlNode::TINYXML_DOCUMENT:
