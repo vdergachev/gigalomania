@@ -245,6 +245,7 @@ int n_player_suspended = 0;
 
 const char autosave_filename[] = "autosave.sav";
 const char autosave_bad_filename[] = "autosave_bad.sav";
+const char autosave_old_filename[] = "autosave_old.sav";
 
 bool validDifficulty(DifficultyLevel difficulty) {
 	return difficulty >= 0 && difficulty < DIFFICULTY_N_LEVELS;
@@ -3724,18 +3725,26 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 				}
 				else if( stricmp(element_name, "playing_gamestate") == 0 ) {
 					PlayingGameState *playing_gamestate = new PlayingGameState(human_player);
-					if( map == NULL ) {
-						throw std::runtime_error("playing_gamestate map not yet set");
-					}
-					map->createSectors(playing_gamestate, start_epoch);
-					playing_gamestate->loadStateParseXMLNode(parent);
-					if( gameType == GAMETYPE_TUTORIAL ) {
-						if( tutorial == NULL ) {
-							throw std::runtime_error("didn't set tutorial");
+					try {
+						if( map == NULL ) {
+							throw std::runtime_error("playing_gamestate map not yet set");
 						}
+						map->createSectors(playing_gamestate, start_epoch);
+						playing_gamestate->loadStateParseXMLNode(parent);
+						if( gameType == GAMETYPE_TUTORIAL ) {
+							if( tutorial == NULL ) {
+								throw std::runtime_error("didn't set tutorial");
+							}
+						}
+						//throw std::runtime_error("blah"); // test failing to load state
+						new_gamestate = playing_gamestate;
+						read_children = false;
 					}
-					new_gamestate = playing_gamestate;
-					read_children = false;
+					catch(const std::runtime_error &error) {
+						LOG("cleanup due to error loading state: %s\n", error.what());
+						delete playing_gamestate;
+						throw error;
+					}
 				}
 				else {
 					// don't throw an error here, to help backwards compatibility, but should throw an error in debug mode in case this is a sign of not loading something that we've saved
@@ -3779,6 +3788,12 @@ bool loadState() {
 		int size = file->size(file);
 		char *buffer = new char[size+1];
 		if( file->read(file, buffer, 1, size) > 0 ) {
+			file->close(file);
+			// rename immediately so that if there's a crash while loading the saved state, the game doesn't repeatedly crash
+			char *save_old_fullfilename = getApplicationFilename(autosave_old_filename);
+			remove(save_old_fullfilename);
+			rename(save_fullfilename, save_old_fullfilename);
+
 			buffer[size] = '\0';
 
 			TiXmlDocument doc;
@@ -3806,13 +3821,31 @@ bool loadState() {
 					LOG("caught error loading state: %s\n", error.what());
 				}
 			}
+			if( !ok ) {
+				LOG("rename bad save file\n");
+				char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename);
+				remove(save_bad_fullfilename);
+				rename(save_old_fullfilename, save_bad_fullfilename);
+
+				if( gamestate != NULL ) {
+					LOG("delete gamestate\n");
+					delete gamestate;
+					gamestate = NULL;
+				}
+				if( tutorial != NULL ) {
+					LOG("delete tutorial\n");
+					delete tutorial;
+					tutorial = NULL;
+				}
+			}
 		}
-		file->close(file);
+		else {
+			file->close(file);
+			char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename);
+			remove(save_bad_fullfilename);
+			rename(save_fullfilename, save_bad_fullfilename);
+		}
 		delete [] buffer;
-	}
-	if( !ok ) {
-		char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename);
-		rename(save_fullfilename, save_bad_fullfilename);
 	}
 	delete [] save_fullfilename;
 	return ok;
@@ -4793,12 +4826,7 @@ void playGame(int n_args, char *args[]) {
 		runTests();
 	}
 	else {
-		if( loadState() ) {
-			// can now delete the saved state
-			deleteState();
-		}
-		else {
-			deleteState(); // remove file in case there was one we failed to load
+		if( !loadState() ) {
 			map = maps[start_epoch][selected_island];
 			setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
 			//setGameStateID(GAMESTATEID_CHOOSEPLAYER);
