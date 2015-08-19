@@ -493,7 +493,11 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
 				pref_sound_on = button_sound->getActive() == 0;
 			}
 			if( button_music != NULL ) {
+				bool old_pref_music_on = pref_music_on;
 				pref_music_on = button_music->getActive() == 0;
+				if( pref_music_on != old_pref_music_on ) {
+					playMusic(); // this will start/stop music as required - only call if the pref actually changed, to avoid unnecessarily restarting music
+				}
 			}
 			if( button_onemousebutton != NULL ) {
 				onemousebutton = button_onemousebutton->getActive() == 0;

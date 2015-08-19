@@ -358,6 +358,7 @@ void updateGame();
 void drawGame();
 
 void fadeMusic(int duration_ms);
+void playMusic();
 void playGame(int n_args, char *args[]);
 void placeTower();
 bool playerAlive(int player);
