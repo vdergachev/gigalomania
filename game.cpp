@@ -4060,6 +4060,7 @@ void runTests() {
 	human_player = rand() % 4;
 	//human_player = 0;
 	//human_player = 1;
+	map = maps[start_epoch][selected_island];
 	setGameStateID(GAMESTATEID_PLACEMEN);
 	newGame();
 	// check all maps are loaded
@@ -4121,8 +4122,19 @@ void runTests() {
 		}
 		placeMenGameState->setStartMapPos(sx, sy); // will automatically switch to playing gamestate
 		updateGame(); // needed to dispose the gamestate
-		PlayingGameState *playingGameState = static_cast<PlayingGameState *>(gamestate);
 
+		// test saving state
+		saveState();
+
+		// test loading state
+		delete gamestate;
+		gamestate = NULL;
+		if( !loadState() ) {
+			throw string("failed to load state");
+		}
+
+		PlayingGameState *playingGameState = static_cast<PlayingGameState *>(gamestate);
+		// island specific testing
 		if( start_epoch == 0 && selected_island == 0 ) {
 			Sector *start_sector = map->getSector(sx, sy);
 			if( start_sector->bestDesign(Invention::WEAPON, 0) != NULL ) {
