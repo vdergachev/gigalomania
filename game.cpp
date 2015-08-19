@@ -913,11 +913,17 @@ void fadeMusic(int duration_ms) {
 void playMusic() {
 	stopMusic();
 
-	if( gameStateID == GAMESTATEID_CHOOSEPLAYER ) {
+	if( !pref_music_on ) {
+		// don't play any music
+	}
+	else if( gameStateID == GAMESTATEID_CHOOSEPLAYER ) {
 	}
 	else if( gameStateID == GAMESTATEID_PLACEMEN ) {
+		music = Sample::loadMusic("music/mainscreen.ogg");
+		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
+		music->play(SOUND_CHANNEL_MUSIC, -1);
 	}
-	else if( pref_music_on && gameStateID == GAMESTATEID_PLAYING ) {
+	else if( gameStateID == GAMESTATEID_PLAYING ) {
 		music = Sample::loadMusic("music/gamemusic.ogg");
 		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
 		music->play(SOUND_CHANNEL_MUSIC, -1);
