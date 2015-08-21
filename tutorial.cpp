@@ -547,7 +547,7 @@ void Tutorial2::initCards() {
 	cards.push_back(card);
 
 	// for debugging
-	this->card_index = 5;
+	//this->card_index = 5;
 }
 
 Tutorial3::Tutorial3(const string &id) : Tutorial(id) {
