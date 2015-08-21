@@ -8,10 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
 
-/* 
- * A sample wrapper class that just calls SDLActivity 
- */
-
 public class Gigalomania extends SDLActivity {
     private static final String TAG = "Gigalomania";
 
