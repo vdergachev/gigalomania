@@ -5,6 +5,8 @@
 #include <ctime>
 #include <cerrno> // n.b., needed on Linux at least
 
+#include <stdexcept> // needed for Android at least
+
 #include <sstream>
 using std::stringstream;
 
@@ -3243,6 +3245,8 @@ void disposeGameState() {
 }
 
 void setGameStateID(GameStateID state, GameState *new_gamestate) {
+	LOG("setGameStateID(%d, %d)\n", state, new_gamestate);
+	LOG("old gameStateID was %d\n", gameStateID);
 	gameStateID = state;
 	playMusic();
 
@@ -3595,17 +3599,17 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "savegame") == 0 ) {
+				if( strcmp(element_name, "savegame") == 0 ) {
 					int save_major = -1, save_minor = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "major") == 0 ) {
+						if( strcmp(attribute_name, "major") == 0 ) {
 							save_major = static_cast<DifficultyLevel>(atoi(attribute->Value()));
 						}
-						else if( stricmp(attribute_name, "minor") == 0 ) {
+						else if( strcmp(attribute_name, "minor") == 0 ) {
 							save_minor = static_cast<DifficultyLevel>(atoi(attribute->Value()));
 						}
-						else if( stricmp(attribute_name, "savegame_version") == 0 ) {
+						else if( strcmp(attribute_name, "savegame_version") == 0 ) {
 							int savegame_version = static_cast<DifficultyLevel>(atoi(attribute->Value()));
 							LOG("save game version %d\n", savegame_version);
 						}
@@ -3619,42 +3623,42 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 					LOG("saved game version %d.%d\n", save_major, save_minor);
 					LOG("current game version %d.%d\n", majorVersion, minorVersion);
 				}
-				else if( stricmp(element_name, "global") == 0 ) {
+				else if( strcmp(element_name, "global") == 0 ) {
 					bool set_start_epoch = false;
 					bool set_start_island = false;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "game_type") == 0 ) {
+						if( strcmp(attribute_name, "game_type") == 0 ) {
 							gameType = static_cast<GameType>(atoi(attribute->Value()));
 							if( gameType != GAMETYPE_SINGLEISLAND && gameType != GAMETYPE_ALLISLANDS && gameType != GAMETYPE_TUTORIAL ) {
 								throw std::runtime_error("unknown game_type");
 							}
 						}
-						else if( stricmp(attribute_name, "difficulty_level") == 0 ) {
+						else if( strcmp(attribute_name, "difficulty_level") == 0 ) {
 							difficulty_level = static_cast<DifficultyLevel>(atoi(attribute->Value()));
 							if( difficulty_level < 0 || difficulty_level >= DIFFICULTY_N_LEVELS ) {
 								throw std::runtime_error("invalid difficulty_level");
 							}
 						}
-						else if( stricmp(attribute_name, "human_player") == 0 ) {
+						else if( strcmp(attribute_name, "human_player") == 0 ) {
 							human_player = atoi(attribute->Value());
 							if( human_player < 0 || selected_island >= n_players_c ) {
 								throw std::runtime_error("invalid human_player");
 							}
 						}
-						else if( stricmp(attribute_name, "n_men_store") == 0 ) {
+						else if( strcmp(attribute_name, "n_men_store") == 0 ) {
 							n_men_store = atoi(attribute->Value());
 							if( n_men_store < 0 ) {
 								throw std::runtime_error("invalid n_men_store");
 							}
 						}
-						else if( stricmp(attribute_name, "n_player_suspended") == 0 ) {
+						else if( strcmp(attribute_name, "n_player_suspended") == 0 ) {
 							n_player_suspended = atoi(attribute->Value());
 							if( n_player_suspended < 0 ) {
 								throw std::runtime_error("invalid n_player_suspended");
 							}
 						}
-						else if( stricmp(attribute_name, "start_epoch") == 0 ) {
+						else if( strcmp(attribute_name, "start_epoch") == 0 ) {
 							start_epoch = atoi(attribute->Value());
 							if( start_epoch < 0 || start_epoch >= n_epochs_c ) {
 								throw std::runtime_error("invalid start_epoch");
@@ -3662,7 +3666,7 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 							updatedEpoch();
 							set_start_epoch = true;
 						}
-						else if( stricmp(attribute_name, "selected_island") == 0 ) {
+						else if( strcmp(attribute_name, "selected_island") == 0 ) {
 							selected_island = atoi(attribute->Value());
 							if( selected_island < 0 || selected_island >= max_islands_per_epoch_c ) {
 								throw std::runtime_error("invalid selected_island");
@@ -3683,18 +3687,18 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 						throw std::runtime_error("map not set");
 					}
 				}
-				else if( stricmp(element_name, "completed_island") == 0 ) {
+				else if( strcmp(element_name, "completed_island") == 0 ) {
 					int island_id = -1;
 					bool complete = false;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "island_id") == 0 ) {
+						if( strcmp(attribute_name, "island_id") == 0 ) {
 							island_id = atoi(attribute->Value());
 							if( island_id < 0 || island_id >= max_islands_per_epoch_c ) {
 								throw std::runtime_error("completed_island invalid island_id");
 							}
 						}
-						else if( stricmp(attribute_name, "complete") == 0 ) {
+						else if( strcmp(attribute_name, "complete") == 0 ) {
 							complete = atoi(attribute->Value())==1;
 						}
 						else {
@@ -3709,15 +3713,15 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 					}
 					completed_island[island_id] = complete;
 				}
-				else if( stricmp(element_name, "time") == 0 ) {
+				else if( strcmp(element_name, "time") == 0 ) {
 					// we need to set this at the Game level rather than the PlayingGamestate, so that the times are set before creating the map (otherwise messes up the saved times for the particle systems)
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "real_time") == 0 ) {
+						if( strcmp(attribute_name, "real_time") == 0 ) {
 							int real_time = atoi(attribute->Value());
 							setRealTime(real_time);
 						}
-						else if( stricmp(attribute_name, "game_time") == 0 ) {
+						else if( strcmp(attribute_name, "game_time") == 0 ) {
 							int game_time = atoi(attribute->Value());
 							setGameTime(game_time);
 						}
@@ -3729,7 +3733,7 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 						attribute = attribute->Next();
 					}
 				}
-				else if( stricmp(element_name, "playing_gamestate") == 0 ) {
+				else if( strcmp(element_name, "playing_gamestate") == 0 ) {
 					PlayingGameState *playing_gamestate = new PlayingGameState(human_player);
 					try {
 						if( map == NULL ) {
@@ -4673,6 +4677,11 @@ void runTests() {
 
 void playGame(int n_args, char *args[]) {
     LOG("playGame()\n");
+
+	// initialise statics to default - this is needed on Android where exiting the native app and then restarting doesn't wipe the memory!
+	icon_clutter.clear();
+	icon_clutter_nuked.clear();
+
 #ifdef _DEBUG
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );  // TEST!
 	debugwindow = true;

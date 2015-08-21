@@ -7,6 +7,8 @@
 using std::min;
 using std::max;
 
+#include <stdexcept> // needed for Android at least
+
 #include <sstream>
 
 #include "sector.h"
@@ -351,21 +353,21 @@ void Army::loadStateParseXMLNode(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "army") == 0 )  {
+				if( strcmp(element_name, "army") == 0 )  {
 					// handled entirely by caller
 				}
-				else if( stricmp(element_name, "stored_army") == 0 )  {
+				else if( strcmp(element_name, "stored_army") == 0 )  {
 					// handled entirely by caller
 				}
-				else if( stricmp(element_name, "soldiers") == 0 ) {
+				else if( strcmp(element_name, "soldiers") == 0 ) {
 					int epoch = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "epoch") == 0 ) {
+						if( strcmp(attribute_name, "epoch") == 0 ) {
 							epoch = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {
@@ -742,13 +744,13 @@ void Building::loadStateParseXMLNode(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "building") == 0 ) {
+				if( strcmp(element_name, "building") == 0 ) {
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "building_id") == 0 ) {
+						if( strcmp(attribute_name, "building_id") == 0 ) {
 							// handled by caller
 						}
-						else if( stricmp(attribute_name, "health") == 0 ) {
+						else if( strcmp(attribute_name, "health") == 0 ) {
 							health = atoi(attribute->Value());
 						}
 						else {
@@ -759,15 +761,15 @@ void Building::loadStateParseXMLNode(const TiXmlNode *parent) {
 						attribute = attribute->Next();
 					}
 				}
-				else if( stricmp(element_name, "turret_soldier") == 0 ) {
+				else if( strcmp(element_name, "turret_soldier") == 0 ) {
 					int turret_id = -1;
 					int epoch = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "turret_id") == 0 ) {
+						if( strcmp(attribute_name, "turret_id") == 0 ) {
 							turret_id = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "epoch") == 0 ) {
+						else if( strcmp(attribute_name, "epoch") == 0 ) {
 							epoch = atoi(attribute->Value());
 						}
 						else {
@@ -2916,13 +2918,13 @@ Design *Sector::loadStateParseXMLDesign(const TiXmlAttribute *attribute) {
 	int design_id = -1;
 	while( attribute != NULL ) {
 		const char *attribute_name = attribute->Name();
-		if( stricmp(attribute_name, "invention_type") == 0 ) {
+		if( strcmp(attribute_name, "invention_type") == 0 ) {
 			invention_type = static_cast<Invention::Type>(atoi(attribute->Value()));
 		}
-		else if( stricmp(attribute_name, "invention_epoch") == 0 ) {
+		else if( strcmp(attribute_name, "invention_epoch") == 0 ) {
 			invention_epoch = atoi(attribute->Value());
 		}
-		else if( stricmp(attribute_name, "design_id") == 0 ) {
+		else if( strcmp(attribute_name, "design_id") == 0 ) {
 			design_id = atoi(attribute->Value());
 		}
 		else {
@@ -2963,22 +2965,22 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "sector") == 0 ) {
+				if( strcmp(element_name, "sector") == 0 ) {
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "epoch") == 0 ) {
+						if( strcmp(attribute_name, "epoch") == 0 ) {
 							this->epoch = atoi(attribute->Value());
 							if( epoch < 0 || epoch >= n_epochs_c+1 ) {
 								throw std::runtime_error("sector invalid epoch");
 							}
 						}
-						else if( stricmp(attribute_name, "x") == 0 ) {
+						else if( strcmp(attribute_name, "x") == 0 ) {
 							// handled by caller
 						}
-						else if( stricmp(attribute_name, "y") == 0 ) {
+						else if( strcmp(attribute_name, "y") == 0 ) {
 							// handled by caller
 						}
-						else if( stricmp(attribute_name, "player") == 0 ) {
+						else if( strcmp(attribute_name, "player") == 0 ) {
 							this->player = atoi(attribute->Value());
 							if( player < -1 || player >= n_players_c ) {
 								throw std::runtime_error("sector invalid player");
@@ -2987,73 +2989,73 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 								this->assembled_army = new Army(gamestate, this, this->getPlayer());
 							}
 						}
-						else if( stricmp(attribute_name, "is_shutdown") == 0 ) {
+						else if( strcmp(attribute_name, "is_shutdown") == 0 ) {
 							this->is_shutdown = atoi(attribute->Value()) == 1;
 						}
-						else if( stricmp(attribute_name, "nuked") == 0 ) {
+						else if( strcmp(attribute_name, "nuked") == 0 ) {
 							this->nuked = atoi(attribute->Value()) == 1;
 						}
-						else if( stricmp(attribute_name, "nuke_by_player") == 0 ) {
+						else if( strcmp(attribute_name, "nuke_by_player") == 0 ) {
 							this->nuke_by_player = atoi(attribute->Value());
 							if( nuke_by_player < -1 || nuke_by_player >= n_players_c ) {
 								throw std::runtime_error("sector invalid nuke_by_player");
 							}
 						}
-						else if( stricmp(attribute_name, "nuke_time") == 0 ) {
+						else if( strcmp(attribute_name, "nuke_time") == 0 ) {
 							this->nuke_time = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "nuke_defence_animation") == 0 ) {
+						else if( strcmp(attribute_name, "nuke_defence_animation") == 0 ) {
 							this->nuke_defence_animation = atoi(attribute->Value()) == 1;
 						}
-						else if( stricmp(attribute_name, "nuke_defence_time") == 0 ) {
+						else if( strcmp(attribute_name, "nuke_defence_time") == 0 ) {
 							this->nuke_defence_time = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "nuke_defence_x") == 0 ) {
+						else if( strcmp(attribute_name, "nuke_defence_x") == 0 ) {
 							this->nuke_defence_x = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "nuke_defence_y") == 0 ) {
+						else if( strcmp(attribute_name, "nuke_defence_y") == 0 ) {
 							this->nuke_defence_y = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "population") == 0 ) {
+						else if( strcmp(attribute_name, "population") == 0 ) {
 							this->population = atoi(attribute->Value());
 							if( population < 0 ) {
 								throw std::runtime_error("sector invalid population");
 							}
 						}
-						else if( stricmp(attribute_name, "n_designers") == 0 ) {
+						else if( strcmp(attribute_name, "n_designers") == 0 ) {
 							this->n_designers = atoi(attribute->Value());
 							if( n_designers < 0 || n_designers > population ) {
 								throw std::runtime_error("sector invalid n_designers");
 							}
 						}
-						else if( stricmp(attribute_name, "n_workers") == 0 ) {
+						else if( strcmp(attribute_name, "n_workers") == 0 ) {
 							this->n_workers = atoi(attribute->Value());
 							if( n_workers < 0 || n_workers > population ) {
 								throw std::runtime_error("sector invalid n_workers");
 							}
 						}
-						else if( stricmp(attribute_name, "n_famount") == 0 ) {
+						else if( strcmp(attribute_name, "n_famount") == 0 ) {
 							this->n_famount = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "researched") == 0 ) {
+						else if( strcmp(attribute_name, "researched") == 0 ) {
 							this->researched = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "researched_lasttime") == 0 ) {
+						else if( strcmp(attribute_name, "researched_lasttime") == 0 ) {
 							this->researched_lasttime = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "manufactured") == 0 ) {
+						else if( strcmp(attribute_name, "manufactured") == 0 ) {
 							this->manufactured = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "manufactured_lasttime") == 0 ) {
+						else if( strcmp(attribute_name, "manufactured_lasttime") == 0 ) {
 							this->manufactured_lasttime = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "growth_lasttime") == 0 ) {
+						else if( strcmp(attribute_name, "growth_lasttime") == 0 ) {
 							this->growth_lasttime = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "mined_lasttime") == 0 ) {
+						else if( strcmp(attribute_name, "mined_lasttime") == 0 ) {
 							this->mined_lasttime = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "built_lasttime") == 0 ) {
+						else if( strcmp(attribute_name, "built_lasttime") == 0 ) {
 							this->built_lasttime = atoi(attribute->Value());
 						}
 						else {
@@ -3064,15 +3066,15 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 						attribute = attribute->Next();
 					}
 				}
-				else if( stricmp(element_name, "n_miners") == 0 || stricmp(element_name, "elements") == 0 || stricmp(element_name, "elementstocks") == 0 || stricmp(element_name, "partial_elementstocks") == 0 ) {
+				else if( strcmp(element_name, "n_miners") == 0 || strcmp(element_name, "elements") == 0 || strcmp(element_name, "elementstocks") == 0 || strcmp(element_name, "partial_elementstocks") == 0 ) {
 					int element_id = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "element_id") == 0 ) {
+						if( strcmp(attribute_name, "element_id") == 0 ) {
 							element_id = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {
@@ -3088,24 +3090,24 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					else if( element_id < 0 || element_id >= N_ID ) {
 						throw std::runtime_error("n_miners/elements/partial_elementstocks invalid element_id");
 					}
-					if( stricmp(element_name, "n_miners") == 0 )
+					if( strcmp(element_name, "n_miners") == 0 )
 						n_miners[element_id] = n;
-					else if( stricmp(element_name, "elements") == 0 )
+					else if( strcmp(element_name, "elements") == 0 )
 						elements[element_id] = n;
-					else if( stricmp(element_name, "elementstocks") == 0 )
+					else if( strcmp(element_name, "elementstocks") == 0 )
 						elementstocks[element_id] = n;
-					else if( stricmp(element_name, "partial_elementstocks") == 0 )
+					else if( strcmp(element_name, "partial_elementstocks") == 0 )
 						partial_elementstocks[element_id] = n;
 				}
-				else if( stricmp(element_name, "n_builders") == 0 || stricmp(element_name, "built") == 0 ) {
+				else if( strcmp(element_name, "n_builders") == 0 || strcmp(element_name, "built") == 0 ) {
 					int building_id = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "building_id") == 0 ) {
+						if( strcmp(attribute_name, "building_id") == 0 ) {
 							building_id = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {
@@ -3121,31 +3123,31 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					else if( building_id < 0 || building_id >= N_BUILDINGS ) {
 						throw std::runtime_error("n_builders/built invalid building_id");
 					}
-					if( stricmp(element_name, "n_builders") == 0 )
+					if( strcmp(element_name, "n_builders") == 0 )
 						n_builders[building_id] = n;
-					else if( stricmp(element_name, "built") == 0 )
+					else if( strcmp(element_name, "built") == 0 )
 						built[building_id] = n;
 				}
-				else if( stricmp(element_name, "current_design") == 0 ) {
+				else if( strcmp(element_name, "current_design") == 0 ) {
 					this->current_design = this->loadStateParseXMLDesign(attribute);
 				}
-				else if( stricmp(element_name, "current_manufacture") == 0 ) {
+				else if( strcmp(element_name, "current_manufacture") == 0 ) {
 					this->current_manufacture = this->loadStateParseXMLDesign(attribute);
 				}
-				else if( stricmp(element_name, "design") == 0 ) {
+				else if( strcmp(element_name, "design") == 0 ) {
 					Design *design = this->loadStateParseXMLDesign(attribute);
 					this->designs.push_back(design);
 					inventions_known[design->getInvention()->getType()][design->getInvention()->getEpoch()] = true;
 				}
-				else if( stricmp(element_name, "built_towers") == 0 ) {
+				else if( strcmp(element_name, "built_towers") == 0 ) {
 					int player_id = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id") == 0 ) {
+						if( strcmp(attribute_name, "player_id") == 0 ) {
 							player_id = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {
@@ -3163,11 +3165,11 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					}
 					built_towers[player_id] = n;
 				}
-				else if( stricmp(element_name, "building") == 0 ) {
+				else if( strcmp(element_name, "building") == 0 ) {
 					int building_id = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "building_id") == 0 ) {
+						if( strcmp(attribute_name, "building_id") == 0 ) {
 							building_id = atoi(attribute->Value());
 						}
 						else {
@@ -3185,18 +3187,18 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					this->buildings[building_id]->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
-				else if( stricmp(element_name, "stored_army") == 0 ) {
+				else if( strcmp(element_name, "stored_army") == 0 ) {
 					if( stored_army == NULL ) {
 						this->stored_army = new Army(gamestate, this, this->getPlayer());
 					}
 					this->stored_army->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
-				else if( stricmp(element_name, "army") == 0 ) {
+				else if( strcmp(element_name, "army") == 0 ) {
 					int player_id = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id") == 0 ) {
+						if( strcmp(attribute_name, "player_id") == 0 ) {
 							player_id = atoi(attribute->Value());
 						}
 						else {
@@ -3210,15 +3212,15 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					this->armies[player_id]->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
-				else if( stricmp(element_name, "stored_defenders") == 0 ) {
+				else if( strcmp(element_name, "stored_defenders") == 0 ) {
 					int epoch = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "epoch") == 0 ) {
+						if( strcmp(attribute_name, "epoch") == 0 ) {
 							epoch = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {
@@ -3236,15 +3238,15 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 					}
 					this->stored_defenders[epoch] = n;
 				}
-				else if( stricmp(element_name, "stored_shields") == 0 ) {
+				else if( strcmp(element_name, "stored_shields") == 0 ) {
 					int relative_epoch = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "relative_epoch") == 0 ) {
+						if( strcmp(attribute_name, "relative_epoch") == 0 ) {
 							relative_epoch = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {

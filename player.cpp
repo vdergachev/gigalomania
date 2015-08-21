@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include <stdexcept> // needed for Android at least
+
 #include <sstream>
 
 #include "player.h"
@@ -100,28 +102,28 @@ void Player::loadStateParseXMLNode(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "player") == 0 ) {
+				if( strcmp(element_name, "player") == 0 ) {
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id") == 0 ) {
+						if( strcmp(attribute_name, "player_id") == 0 ) {
 							// handled by caller
 						}
-						else if( stricmp(attribute_name, "dead") == 0 ) {
+						else if( strcmp(attribute_name, "dead") == 0 ) {
 							dead = atoi(attribute->Value())==1;
 						}
-						else if( stricmp(attribute_name, "n_births") == 0 ) {
+						else if( strcmp(attribute_name, "n_births") == 0 ) {
 							n_births = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n_deaths") == 0 ) {
+						else if( strcmp(attribute_name, "n_deaths") == 0 ) {
 							n_deaths = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n_men_for_this_island") == 0 ) {
+						else if( strcmp(attribute_name, "n_men_for_this_island") == 0 ) {
 							n_men_for_this_island = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n_suspended") == 0 ) {
+						else if( strcmp(attribute_name, "n_suspended") == 0 ) {
 							n_suspended = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "alliance_last_asked_human") == 0 ) {
+						else if( strcmp(attribute_name, "alliance_last_asked_human") == 0 ) {
 							alliance_last_asked_human = atoi(attribute->Value());
 						}
 						else {
@@ -185,26 +187,26 @@ void Player::loadStateParseXMLNodeAlliances(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "player_alliances") == 0 ) {
+				if( strcmp(element_name, "player_alliances") == 0 ) {
 					// handled entirely by caller
 				}
-				else if( stricmp(element_name, "player_alliance") == 0 ) {
+				else if( strcmp(element_name, "player_alliance") == 0 ) {
 					int player_id_i = -1;
 					int player_id_j = -1;
 					bool alliance = false;
 					int last_asked = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id_i") == 0 ) {
+						if( strcmp(attribute_name, "player_id_i") == 0 ) {
 							player_id_i = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "player_id_j") == 0 ) {
+						else if( strcmp(attribute_name, "player_id_j") == 0 ) {
 							player_id_j = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "alliances") == 0 ) {
+						else if( strcmp(attribute_name, "alliances") == 0 ) {
 							alliance = atoi(attribute->Value())==1;
 						}
-						else if( stricmp(attribute_name, "alliance_last_asked") == 0 ) {
+						else if( strcmp(attribute_name, "alliance_last_asked") == 0 ) {
 							last_asked = atoi(attribute->Value());
 						}
 						else {

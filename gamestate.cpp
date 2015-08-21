@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cerrno> // n.b., needed on Linux at least
 
+#include <stdexcept> // needed for Android at least
+
 #include <sstream>
 
 #include "gamestate.h"
@@ -610,6 +612,7 @@ void ChooseTutorialGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_midd
 			map = maps[start_epoch][selected_island];
 			setupPlayers();
 			setGameStateID(GAMESTATEID_PLAYING);
+			break;
 		}
 	}
 }
@@ -3183,10 +3186,10 @@ void PlayingGameState::loadStateParseXMLMapXY(int *map_x, int *map_y, const TiXm
 	*map_y = -1;
 	while( attribute != NULL ) {
 		const char *attribute_name = attribute->Name();
-		if( stricmp(attribute_name, "x") == 0 ) {
+		if( strcmp(attribute_name, "x") == 0 ) {
 			*map_x = atoi(attribute->Value());
 		}
-		else if( stricmp(attribute_name, "y") == 0 ) {
+		else if( strcmp(attribute_name, "y") == 0 ) {
 			*map_y = atoi(attribute->Value());
 		}
 		else {
@@ -3217,10 +3220,10 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 				const char *element_name = parent->Value();
 				const TiXmlElement *element = parent->ToElement();
 				const TiXmlAttribute *attribute = element->FirstAttribute();
-				if( stricmp(element_name, "playing_gamestate") == 0 ) {
+				if( strcmp(element_name, "playing_gamestate") == 0 ) {
 					// handled entirely by caller
 				}
-				else if( stricmp(element_name, "tutorial") == 0 ) {
+				else if( strcmp(element_name, "tutorial") == 0 ) {
 					if( gameType != GAMETYPE_TUTORIAL ) {
 						throw std::runtime_error("wrong game type for tutorial");
 					}
@@ -3228,11 +3231,11 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					string card_name;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "name") == 0 ) {
+						if( strcmp(attribute_name, "name") == 0 ) {
 							string name = attribute->Value();
 							setupTutorial(name);
 						}
-						else if( stricmp(attribute_name, "current_card_name") == 0 ) {
+						else if( strcmp(attribute_name, "current_card_name") == 0 ) {
 							has_card_name = true;
 							card_name = attribute->Value();
 						}
@@ -3255,10 +3258,10 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					else
 						tutorial->jumpToEnd();
 				}
-				else if( stricmp(element_name, "player_asking_alliance") == 0 ) {
+				else if( strcmp(element_name, "player_asking_alliance") == 0 ) {
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id") == 0 ) {
+						if( strcmp(attribute_name, "player_id") == 0 ) {
 							player_asking_alliance = atoi(attribute->Value());
 						}
 						else {
@@ -3269,19 +3272,19 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 						attribute = attribute->Next();
 					}
 				}
-				else if( stricmp(element_name, "n_deaths") == 0 ) {
+				else if( strcmp(element_name, "n_deaths") == 0 ) {
 					int player_id = -1;
 					int epoch = -1;
 					int n = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id") == 0 ) {
+						if( strcmp(attribute_name, "player_id") == 0 ) {
 							player_id = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "epoch") == 0 ) {
+						else if( strcmp(attribute_name, "epoch") == 0 ) {
 							epoch = atoi(attribute->Value());
 						}
-						else if( stricmp(attribute_name, "n") == 0 ) {
+						else if( strcmp(attribute_name, "n") == 0 ) {
 							n = atoi(attribute->Value());
 						}
 						else {
@@ -3302,15 +3305,15 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					}
 					n_deaths[player_id][epoch] = n;
 				}
-				else if( stricmp(element_name, "current_sector") == 0 ) {
+				else if( strcmp(element_name, "current_sector") == 0 ) {
 					int map_x = -1, map_y = -1;
 					loadStateParseXMLMapXY(&map_x, &map_y, attribute);
 					this->moveTo(map_x, map_y);
 				}
-				else if( stricmp(element_name, "game_panel") == 0 ) {
+				else if( strcmp(element_name, "game_panel") == 0 ) {
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "page") == 0 ) {
+						if( strcmp(attribute_name, "page") == 0 ) {
 							int page = atoi(attribute->Value());
 							if( page < 0 || page > GamePanel::N_STATES ) {
 								throw std::runtime_error("game_panel invalid page");
@@ -3325,17 +3328,17 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 						attribute = attribute->Next();
 					}
 				}
-				else if( stricmp(element_name, "sector") == 0 ) {
+				else if( strcmp(element_name, "sector") == 0 ) {
 					int map_x = -1, map_y = -1;
 					loadStateParseXMLMapXY(&map_x, &map_y, attribute);
 					map->getSector(map_x, map_y)->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
-				else if( stricmp(element_name, "player") == 0 ) {
+				else if( strcmp(element_name, "player") == 0 ) {
 					int player_id = -1;
 					while( attribute != NULL ) {
 						const char *attribute_name = attribute->Name();
-						if( stricmp(attribute_name, "player_id") == 0 ) {
+						if( strcmp(attribute_name, "player_id") == 0 ) {
 							player_id = atoi(attribute->Value());
 						}
 						else {
@@ -3350,7 +3353,7 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					players[player_id]->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
-				else if( stricmp(element_name, "player_alliances") == 0 ) {
+				else if( strcmp(element_name, "player_alliances") == 0 ) {
 					Player::loadStateParseXMLNodeAlliances(parent);
 					read_children = false;
 				}
