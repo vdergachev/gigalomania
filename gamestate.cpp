@@ -953,11 +953,11 @@ void PlayingGameState::createQuitWindow() {
 		confirm_window->setBackground(0, 0, 0, 200);
 		const int offset_x_c = 80, offset_y_c = 120;
 #if defined(__ANDROID__)
-		confirm_button_1 = new Button(offset_x_c, offset_y_c, "SAVE GAME AND QUIT TO HOMESCREEN", letters_large);
+		confirm_button_1 = NULL; // if user wants to exit to homescreen, they can just press the Home button
 #else
 		confirm_button_1 = new Button(offset_x_c, offset_y_c, "SAVE GAME AND QUIT TO DESKTOP", letters_large);
-#endif
 		confirm_window->add(confirm_button_1);
+#endif
 		confirm_button_2 = new Button(offset_x_c, offset_y_c+16, "EXIT BATTLE", letters_large);
 		confirm_window->add(confirm_button_2);
 		confirm_button_3 = new Button(offset_x_c, offset_y_c+32, "CANCEL", letters_large);
