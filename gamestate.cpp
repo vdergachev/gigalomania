@@ -926,6 +926,7 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
+	map->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
 	s_biplane->fadeOut(500);
 	s_jetplane->fadeOut(500);
 	s_spaceship->fadeOut(500);

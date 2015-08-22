@@ -3280,7 +3280,6 @@ void setGameStateID(GameStateID state, GameState *new_gamestate) {
 			map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();
 			n_men = human_player == PLAYER_DEMO ? 0 : players[human_player]->getNMenForThisIsland();
 		}
-		//createSectors(static_cast<PlayingGameState *>(gamestate), map_x, map_y, n_men);
 		static_cast<PlayingGameState *>(gamestate)->createSectors(map_x, map_y, n_men);
 		if( gameType == GAMETYPE_TUTORIAL ) {
 			tutorial->initCards();
@@ -3344,8 +3343,6 @@ void startIsland() {
 	time_rate = human_player == PLAYER_DEMO ? 5 : 1;
 	LOG("time_rate = %d\n", time_rate);
 	setGameStateID(GAMESTATEID_PLAYING);
-	/*int n_men = human_player == PLAYER_DEMO ? players[human_player]->getNMenForThisIsland() : 0;
-	createSectors(static_cast<PlayingGameState *>(gamestate), map_x, map_y, n_men);*/
 	gamestate->fadeScreen(false, 0, NULL);
 	gameResult = GAMERESULT_UNDEFINED;
 }
@@ -3353,7 +3350,7 @@ void startIsland() {
 void endIsland() {
 	ASSERT(gameStateID == GAMESTATEID_PLAYING);
 	map->calculateStats();
-	map->freeSectors(); // must do this here rather than when deleting PlayingGameState, as by that time the "map" variable may have switched to a different island
+	map->freeSectors(); // must do this here rather than waiting until deleting PlayingGameState, as by that time the "map" variable may have switched to a different island
 	n_player_suspended += players[human_player]->getNSuspended();
 	setGameStateID(GAMESTATEID_ENDISLAND);
 	gamestate->fadeScreen(false, 0, NULL);
@@ -3445,19 +3442,13 @@ void startNewGame() {
 void placeTower() {
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 	if( !state_changed ) {
-		//createSectors(x, y, n_men); // now done in startIsland()
 		state_changed = true;
 		gamestate->fadeScreen(true, 0, startIsland);
-		//startIsland();
 	}
 }
 
 void cleanup() {
 	LOG("cleanup()\n");
-	if( map != NULL ) {
-		// need to free the current map's sectors (if it has any) before deleting a PlayingGameState (needed to avoid crash when quitting to desktop)
-		map->freeSectors();
-	}
 	if( gamestate != NULL ) {
 		LOG("delete gamestate %d\n", gamestate);
 		delete gamestate;
