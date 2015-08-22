@@ -260,7 +260,7 @@ bool Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, boo
 	return ( *m_left || *m_middle || *m_right );
 }
 
-Application::Application() : quit(false), blank_mouse(false), compute_fps(false), fps(0.0f) {
+Application::Application() : quit(false), blank_mouse(false), compute_fps(false), fps(0.0f), last_time(0) {
 	// uncomment to display fps
 	//compute_fps = true;
 }
@@ -284,24 +284,29 @@ bool Application::init() {
 	return true;
 }
 
-int Application::getTicks() const {
+unsigned int Application::getTicks() const {
 	return SDL_GetTicks();
 }
 
-void Application::delay(int time) {
+void Application::delay(unsigned int time) {
 	SDL_Delay(time);
 }
 
 const int TICK_INTERVAL = 16; // 62.5 fps max
-static int next_time = 0;
 
 void Application::wait() {
-	int now = application->getTicks();
-	int res = 0;
-	if(next_time > now)
-		res = next_time - now;
-	application->delay(res);
-	next_time = now + res + TICK_INTERVAL;
+	unsigned int now = application->getTicks();
+	// use unsigned int and compare by subtraction to avoid overflow problems - see http://blogs.msdn.com/b/oldnewthing/archive/2005/05/31/423407.aspx, http://www.gammon.com.au/millis
+	unsigned int elapsed = now - last_time;
+	unsigned int delay = 0;
+	if( elapsed >= TICK_INTERVAL ) {
+		// fine, we've already passed TICK_INTERVAL
+	}
+	else {
+		delay = TICK_INTERVAL - elapsed;
+		application->delay(delay);
+	}
+	last_time = now + delay;
 }
 
 void Application::runMainLoop() {

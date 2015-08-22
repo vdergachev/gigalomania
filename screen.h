@@ -71,6 +71,7 @@ class Application {
 	bool blank_mouse;
 	bool compute_fps;
 	float fps;
+	unsigned int last_time;
 
 public:
 	Application();
@@ -78,8 +79,8 @@ public:
 
 	bool init();
 
-	int getTicks() const;
-	void delay(int time);
+	unsigned int getTicks() const;
+	void delay(unsigned int time);
 	void wait();
 	void runMainLoop();
 	void setQuit() {
