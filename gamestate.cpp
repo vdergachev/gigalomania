@@ -926,7 +926,6 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
-	map->freeSectors();
 	s_biplane->fadeOut(500);
 	s_jetplane->fadeOut(500);
 	s_spaceship->fadeOut(500);

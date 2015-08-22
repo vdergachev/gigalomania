@@ -3355,8 +3355,8 @@ void startIsland() {
 void endIsland() {
 	ASSERT(gameStateID == GAMESTATEID_PLAYING);
 	map->calculateStats();
+	map->freeSectors(); // must do this here rather than when deleting PlayingGameState, as by that time the "map" variable may have switched to a different island
 	n_player_suspended += players[human_player]->getNSuspended();
-	//cleanupPlayers();
 	setGameStateID(GAMESTATEID_ENDISLAND);
 	gamestate->fadeScreen(false, 0, NULL);
 
@@ -3454,9 +3454,12 @@ void placeTower() {
 	}
 }
 
-
 void cleanup() {
 	LOG("cleanup()\n");
+	if( map != NULL ) {
+		// need to free the current map's sectors (if it has any) before deleting a PlayingGameState (needed to avoid crash when quitting to desktop)
+		map->freeSectors();
+	}
 	if( gamestate != NULL ) {
 		LOG("delete gamestate %d\n", gamestate);
 		delete gamestate;
