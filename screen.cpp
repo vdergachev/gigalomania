@@ -310,7 +310,7 @@ void Application::wait() {
 }
 
 void Application::runMainLoop() {
-	int elapsed_time = application->getTicks();
+	unsigned int elapsed_time = application->getTicks();
 
 	SDL_Event event;
 	quit = false;
@@ -343,7 +343,7 @@ void Application::runMainLoop() {
 		 */
 		wait();
 
-		int new_time = application->getTicks();
+		unsigned int new_time = application->getTicks();
 		//LOG("%d, %d\n", new_time, new_time - elapsed_time);
 		if( !isPaused() ) {
 			updateTime(new_time - elapsed_time);

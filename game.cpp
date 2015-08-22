@@ -65,8 +65,6 @@ const char *maps_dirname = "islands";
 const char *alt_maps_dirname = "/usr/share/gigalomania/islands";
 #endif
 
-//int lastmouseclick_time = 0;
-
 float scale_factor_w = 1.0f; // how much the input graphics are scaled
 float scale_factor_h = 1.0f;
 float scale_width = 0.0f; // the scale of the logical resolution or graphics size wrt the default 320x240 coordinate system
@@ -3867,7 +3865,7 @@ bool loadState() {
 
 void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click) {
 	const int mousepress_delay = 100;
-	static int lastmousepress_time = 0;
+	static unsigned int lastmousepress_time = 0;
 	T_ASSERT( m_left || m_middle || m_right );
 	if( click ) {
 		//LOG("mouse click\n");
@@ -3875,7 +3873,7 @@ void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool
 	}
 	else {
 		// use getTicks() not getRealTime(), as this function may be called at any occasion (due to mouse click events), so getRealTime() might not yet be updated!
-		int ticks = application->getTicks();
+		unsigned int ticks = application->getTicks();
 		if( ticks - lastmousepress_time >= mousepress_delay ) {
 			//LOG("mouse press: %d, %d\n", lastmousepress_time, ticks);
 			lastmousepress_time = ticks;
@@ -4234,8 +4232,8 @@ void runTests() {
 			}
 			// test time with and without sleep for mining:
 			for(int type=0;type<2;type++) {
-				int time_s = application->getTicks();
-				int elapsed_time = time_s;
+				unsigned int time_s = application->getTicks();
+				unsigned int elapsed_time = time_s;
 				int i_mined = 0, i_mined_fraction = 0;
 				start_sector->getElementStocks(&i_mined, &i_mined_fraction, ROCK);
 				int i_total = i_mined*element_multiplier_c + i_mined_fraction;
@@ -4244,7 +4242,7 @@ void runTests() {
 					if( type == 0 ) {
 						application->wait();
 					}
-					int new_time = application->getTicks();
+					unsigned int new_time = application->getTicks();
 					updateTime(new_time - elapsed_time);
 					elapsed_time = new_time;
 					updateGame();
@@ -4260,7 +4258,7 @@ void runTests() {
 				int allowed_error = 20;
 				if( abs(time - expected_time) > allowed_error ) {
 					LOG("mining took %d , expected %d\n", time, expected_time);
-					throw string("unexpected time for designing, without sleep");
+					throw string("unexpected time for designing");
 				}
 			}
 			// now mine the rest
@@ -4278,8 +4276,8 @@ void runTests() {
 			playingGameState->setNDesigners(sx, sy, 1);
 			// test time with and without sleep for designing:
 			for(int type=0;type<2;type++) {
-				int time_s = application->getTicks();
-				int elapsed_time = time_s;
+				unsigned int time_s = application->getTicks();
+				unsigned int elapsed_time = time_s;
 				int i_halfdays = 0, i_hours = 0;
 				start_sector->inventionTimeLeft(&i_halfdays, &i_hours);
 				int i_total = i_halfdays*12 + i_hours;
@@ -4288,7 +4286,7 @@ void runTests() {
 					if( type == 0 ) {
 						application->wait();
 					}
-					int new_time = application->getTicks();
+					unsigned int new_time = application->getTicks();
 					updateTime(new_time - elapsed_time);
 					elapsed_time = new_time;
 					updateGame();
@@ -4304,7 +4302,7 @@ void runTests() {
 				int allowed_error = 100;
 				if( abs(time - expected_time) > allowed_error ) {
 					LOG("halfday took %d , expected %d\n", time, expected_time);
-					throw string("unexpected time for designing, without sleep");
+					throw string("unexpected time for designing");
 				}
 			}
 		}
