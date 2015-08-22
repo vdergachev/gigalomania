@@ -3240,6 +3240,7 @@ GameState *dispose_gamestate = NULL;
 
 void disposeGameState() {
 	ASSERT( dispose_gamestate == NULL );
+	LOG("disposeGameState: %d", gamestate);
 	dispose_gamestate = gamestate;
 	gamestate = NULL;
 }
