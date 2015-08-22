@@ -165,7 +165,7 @@ I've tested this with version 2.0.0 of the SDL, SDL_image and SDL_mixer sources.
 See README-android.txt in the SDL source archive for some information. You need to obtain the Android SDK and Android NDK. Then create the Gigalomania folder as follows:
 
 1. Copy the android/Gigalomania project into your workspace.
-2. Copy the Gigalomania source files (*.cpp, *.h) into jni/src/
+2. Copy the Gigalomania source files (*.cpp, *.h, and the TinyXML subfolder) into jni/src/
 3. Copy the gfx/, islands/, music/ and sound/ folders into assets/
 4. Copy the source from SDL2, SDL2_image, SDL2_mixer into jni/ (so you have folders jni/SDL/, jni/SDL_image/, jni/SDL_mixer/; each of these folders should be the root folder for the SDL sources - e.g., so inside jni/SDL/ will be folders such as acinclude/, include/, src/ etc). 
 5. You need to configure the file jni/SDL_image/Android.mk: comment out the lines SUPPORT_WEBP and WEBP_LIBRARY_PATH (by adding a # to the start of the lines).
@@ -228,4 +228,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 17 August 2015
+Mark Harman 22 August 2015
