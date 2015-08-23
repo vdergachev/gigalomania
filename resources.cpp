@@ -13,9 +13,7 @@
 
 using namespace Gigalomania;
 
-//Vector TrackedObject::tags;
 vector<TrackedObject *> TrackedObject::tags;
-//VisionException *Vision::error = NULL;
 
 TrackedObject::TrackedObject() {
 	this->tag = TrackedObject::addTag(this);
