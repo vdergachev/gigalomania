@@ -7,6 +7,7 @@ using std::vector;
 using std::string;
 
 class PlayingGameState;
+class Tutorial;
 
 #include "sector.h"
 
@@ -19,8 +20,11 @@ public:
 	}
 };
 
-vector<TutorialInfo> getTutorialInfo();
-void setupTutorial(const string &id);
+class TutorialManager {
+public:
+	static vector<TutorialInfo> getTutorialInfo();
+	static Tutorial *setupTutorial(const string &id);
+};
 
 class GUIHandler {
 public:
@@ -299,5 +303,3 @@ public:
 
 	virtual void initCards();
 };
-
-extern Tutorial *tutorial;

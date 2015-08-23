@@ -313,7 +313,7 @@ bool Player::askHuman() {
 	//ASSERT( index != human_player );
 	ASSERT( !this->is_human );
 	// whether to _consider_ asking the human player - we still have to go through the requestAlliance test afterwards
-	if( tutorial != NULL && !tutorial->aiAllowAskAlliance() ) {
+	if( game_g->getTutorial() != NULL && !game_g->getTutorial()->aiAllowAskAlliance() ) {
 		return false;
 	}
 	int time = game_g->getGameTime();
@@ -705,7 +705,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	// trash designs?
 	sector->autoTrashDesigns();
 
-	if( tutorial != NULL && !tutorial->aiAllowDesign() ) {
+	if( game_g->getTutorial() != NULL && !game_g->getTutorial()->aiAllowDesign() ) {
 		// don't allow designs
 	}
 	else if( sector->getCurrentDesign() == NULL ) {
@@ -841,7 +841,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	}
 
 
-	if( tutorial != NULL && !tutorial->aiAllowDeploy() ) {
+	if( game_g->getTutorial() != NULL && !game_g->getTutorial()->aiAllowDeploy() ) {
 		// don't allow deployment
 	}
 	else if( sector->getCurrentDesign() == NULL || enemiesPresentWithBombardment ) {

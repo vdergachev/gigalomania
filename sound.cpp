@@ -27,6 +27,10 @@ Sample::~Sample() {
 }
 
 bool initSound() {
+	// important to reinitialise for Android, where globals aren't reinitialised when native app is restarted
+	error_occurred = false;
+	have_sound = false;
+
 	if( SDL_InitSubSystem(SDL_INIT_AUDIO) != 0 ) {
 		LOG("failed to init SDL audio subsystem");
 		return false;

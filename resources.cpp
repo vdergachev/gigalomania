@@ -26,6 +26,11 @@ TrackedObject::~TrackedObject() {
 	removeTag(this->tag);
 }
 
+void TrackedObject::initialise() {
+	// important for Android, where static/globals aren't cleared when native app is restarted
+	tags.clear();
+}
+
 void TrackedObject::flushAll() {
 	LOG("TrackedObject::flushAll()\n");
 	for(size_t i=0;i<tags.size();i++) {
@@ -35,6 +40,7 @@ void TrackedObject::flushAll() {
 			tags[i] = NULL;
 		}
 	}
+	tags.clear();
 }
 
 void TrackedObject::flush(int deleteLevel) {

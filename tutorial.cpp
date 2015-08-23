@@ -6,9 +6,7 @@
 #include "gui.h"
 #include "utils.h"
 
-Tutorial *tutorial = NULL;
-
-vector<TutorialInfo> getTutorialInfo() {
+vector<TutorialInfo> TutorialManager::getTutorialInfo() {
 	vector<TutorialInfo> infos;
 	infos.push_back( TutorialInfo("intro", "play your first island") );
 	infos.push_back( TutorialInfo("army_maneuvers", "army maneuvers") );
@@ -16,13 +14,15 @@ vector<TutorialInfo> getTutorialInfo() {
 	return infos;
 }
 
-void setupTutorial(const string &id) {
+Tutorial *TutorialManager::setupTutorial(const string &id) {
+	Tutorial *tutorial = NULL;
 	if( id == "intro" )
 		tutorial = new Tutorial1(id);
 	else if( id == "army_maneuvers" )
 		tutorial = new Tutorial2(id);
 	else if( id == "build_manufacture" )
 		tutorial = new Tutorial3(id);
+	return tutorial;
 }
 
 void GUIHandler::resetGUI(PlayingGameState *playing_gamestate) {

@@ -40,6 +40,8 @@ const bool default_pref_music_on_c = true;
 const bool default_pref_disallow_nukes_c = false;
 
 Game::Game() {
+	TrackedObject::initialise();
+
 	scale_factor_w = 1.0f;
 	scale_factor_h = 1.0f;
 	scale_width = 0.0f;
@@ -83,6 +85,7 @@ Game::Game() {
 	gameType = GAMETYPE_SINGLEISLAND;
 	difficulty_level = DIFFICULTY_EASY;
 	human_player = 0;
+	tutorial = NULL;
 
 	gameStateID = GAMESTATEID_UNDEFINED;
 	state_changed = false;
@@ -311,6 +314,11 @@ Game::~Game() {
 		LOG("delete gamestate %d\n", gamestate);
 		delete gamestate;
 		gamestate = NULL;
+	}
+	if( tutorial != NULL ) {
+		LOG("delete tutorial\n");
+		delete tutorial;
+		tutorial = NULL;
 	}
 	LOG("delete maps\n");
 	for(int i=0;i<n_epochs_c;i++) {
@@ -3426,6 +3434,11 @@ void Game::setGameStateID(GameStateID state, GameState *new_gamestate) {
 			}
 		}
 	}*/
+}
+
+void Game::setupTutorial(const string &id) {
+	T_ASSERT(tutorial == NULL);
+	tutorial = TutorialManager::setupTutorial(id);
 }
 
 void Game::startIsland() {

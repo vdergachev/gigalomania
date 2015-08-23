@@ -375,7 +375,7 @@ void GameState::closeConfirmWindow() {
 
 ChooseGameTypeGameState::ChooseGameTypeGameState(int client_player) : GameState(client_player) {
 	this->choosegametypePanel = NULL;
-	T_ASSERT(tutorial == NULL);
+	T_ASSERT(game_g->getTutorial() == NULL);
 }
 
 ChooseGameTypeGameState::~ChooseGameTypeGameState() {
@@ -574,7 +574,7 @@ void ChooseTutorialGameState::reset() {
 	int ypos = 48;
 	const int ydiff = 16;
 
-	vector<TutorialInfo> infos = getTutorialInfo();
+	vector<TutorialInfo> infos = TutorialManager::getTutorialInfo();
 	for(vector<TutorialInfo>::const_iterator iter = infos.begin(); iter != infos.end(); ++iter) {
 		TutorialInfo info = *iter;
 		Button *button = new Button(xpos, ypos, info.text.c_str(), game_g->letters_large);
@@ -604,8 +604,8 @@ void ChooseTutorialGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_midd
 	for(vector<Button *>::const_iterator iter = buttons.begin(); iter != buttons.end(); ++iter) {
 		const Button *button = *iter;
 	    if( m_left && click && button->mouseOver(m_x, m_y) ) {
-			setupTutorial(button->getId());
-			game_g->setCurrentIsand(tutorial->getStartEpoch(), tutorial->getIsland());
+			game_g->setupTutorial(button->getId());
+			game_g->setCurrentIsand(game_g->getTutorial()->getStartEpoch(), game_g->getTutorial()->getIsland());
 			game_g->setupPlayers();
 			game_g->setGameStateID(GAMESTATEID_PLAYING);
 			break;
@@ -1326,8 +1326,8 @@ void PlayingGameState::reset() {
 	// must call setup last, in case it recalls member functions of PlayingGameState, that requires the buttons to have been initialised
 	this->gamePanel->setup();
 
-	if( tutorial != NULL ) {
-		const TutorialCard *card = tutorial->getCard();
+	if( game_g->getTutorial() != NULL ) {
+		const TutorialCard *card = game_g->getTutorial()->getCard();
 		if( card != NULL ) {
 			card->setGUI(this);
 		}
@@ -1787,8 +1787,8 @@ void PlayingGameState::draw() {
 	}
 
 	// panel
-	if( tutorial != NULL ) {
-		const TutorialCard *card = tutorial->getCard();
+	if( game_g->getTutorial() != NULL ) {
+		const TutorialCard *card = game_g->getTutorial()->getCard();
 		if( card != NULL ) {
 			const unsigned char tutorial_alpha_c = 127;
 			int n_lines = 0, max_wid = 0;
@@ -1843,8 +1843,8 @@ void PlayingGameState::draw() {
 				}
 			}
 			if( card->autoProceed() && card->canProceed(this) ) {
-				tutorial->proceed();
-				const TutorialCard *new_card = tutorial->getCard();
+				game_g->getTutorial()->proceed();
+				const TutorialCard *new_card = game_g->getTutorial()->getCard();
 				if( new_card != NULL ) {
 					new_card->setGUI(this);
 				}
@@ -2508,8 +2508,8 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		}
 	}
 	else if( !done && m_left && click && tutorial_next_button != NULL && tutorial_next_button->mouseOver(m_x, m_y) ) {
-		tutorial->proceed();
-		const TutorialCard *new_card = tutorial->getCard();
+		game_g->getTutorial()->proceed();
+		const TutorialCard *new_card = game_g->getTutorial()->getCard();
 		if( new_card != NULL ) {
 			new_card->setGUI(this);
 		}
@@ -3121,9 +3121,9 @@ void PlayingGameState::saveState(stringstream &stream) const {
 	stream << "<playing_gamestate>\n";
 	if( game_g->getGameType() == GAMETYPE_TUTORIAL ) {
 		stream << "<tutorial ";
-		stream << "name=\"" << tutorial->getId().c_str() << "\" ";
-		if( tutorial->getCard() != NULL ) {
-			stream << "current_card_name=\"" << tutorial->getCard()->getId().c_str() << "\" ";
+		stream << "name=\"" << game_g->getTutorial()->getId().c_str() << "\" ";
+		if( game_g->getTutorial()->getCard() != NULL ) {
+			stream << "current_card_name=\"" << game_g->getTutorial()->getCard()->getId().c_str() << "\" ";
 		}
 		stream << "/>\n";
 	}
@@ -3198,7 +3198,7 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 						const char *attribute_name = attribute->Name();
 						if( strcmp(attribute_name, "name") == 0 ) {
 							string name = attribute->Value();
-							setupTutorial(name);
+							game_g->setupTutorial(name);
 						}
 						else if( strcmp(attribute_name, "current_card_name") == 0 ) {
 							has_card_name = true;
@@ -3211,17 +3211,17 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 						}
 						attribute = attribute->Next();
 					}
-					if( tutorial == NULL ) {
+					if( game_g->getTutorial() == NULL ) {
 						throw std::runtime_error("unknown tutorial name");
 					}
-					tutorial->initCards();
+					game_g->getTutorial()->initCards();
 					if( has_card_name ) {
-						if( !tutorial->jumpTo(card_name) ) {
+						if( !game_g->getTutorial()->jumpTo(card_name) ) {
 							throw std::runtime_error("unknown tutorial card name");
 						}
 					}
 					else
-						tutorial->jumpToEnd();
+						game_g->getTutorial()->jumpToEnd();
 				}
 				else if( strcmp(element_name, "player_asking_alliance") == 0 ) {
 					while( attribute != NULL ) {

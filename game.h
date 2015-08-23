@@ -26,6 +26,7 @@ class Player;
 class Application;
 class TextEffect;
 class Map;
+class Tutorial;
 
 #include "common.h"
 #include "image.h"
@@ -133,6 +134,7 @@ class Game {
 	GameType gameType;
 	DifficultyLevel difficulty_level;
 	int human_player;
+	Tutorial *tutorial;
 
 	GameStateID gameStateID;
 	bool state_changed;
@@ -393,7 +395,7 @@ public:
 	DifficultyLevel getDifficultyLevel() const {
 		return this->difficulty_level;
 	}
-	void Game::disposeGameState();
+	void disposeGameState();
 	void setGameStateID(GameStateID state, GameState *new_gamestate = NULL);
 	GameStateID getGameStateID() const {
 		return this->gameStateID;
@@ -409,6 +411,13 @@ public:
 	}
 	GameResult getGameResult() const {
 		return this->gameResult;
+	}
+	void setupTutorial(const string &id);
+	const Tutorial *getTutorial() const {
+		return this->tutorial;
+	}
+	Tutorial *getTutorial() {
+		return this->tutorial;
 	}
 	void setCurrentMap() {
 		map = maps[start_epoch][selected_island];
