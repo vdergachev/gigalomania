@@ -356,7 +356,7 @@ const char *maps_dirname = "islands";
 const char *alt_maps_dirname = "/usr/share/gigalomania/islands";
 #endif
 
-bool use_amigadata = true;
+//bool use_amigadata = true;
 
 const unsigned char shadow_alpha_c = (unsigned char)160;
 
