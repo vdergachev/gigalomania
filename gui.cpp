@@ -390,7 +390,7 @@ void ChooseMenPanel::draw() {
 void ChooseMenPanel::buttonNMenClick(void *data, int arg, bool m_left, bool m_middle, bool m_right) {
 	ChooseMenPanel *chooseMenPanel = static_cast<ChooseMenPanel *>(data);
 
-	int n = getNClicks();
+	int n = game_g->getNClicks();
 	if( m_left && chooseMenPanel->n_men > 0 ) {
 		chooseMenPanel->n_men -= n;
 		if( chooseMenPanel->n_men < 0 )
@@ -1576,7 +1576,7 @@ void GamePanel::buttonNDesignersClick(void *data, int arg, bool m_left, bool m_m
 	}
 	int n_designers = gamePanel->gamestate->getCurrentSector()->getDesigners();
 	int n_spare = gamePanel->gamestate->getCurrentSector()->getAvailablePopulation();
-	int n = getNClicks();
+	int n = game_g->getNClicks();
 	if( m_left ) {
 		n_designers -= n;
 		if( n_designers < 0 )
@@ -1603,7 +1603,7 @@ void GamePanel::buttonNManufacturersClick(void *data, int arg, bool m_left, bool
 	}
 	int n_workers = gamePanel->gamestate->getCurrentSector()->getWorkers();
 	int n_spare = gamePanel->gamestate->getCurrentSector()->getAvailablePopulation();
-	int n = getNClicks();
+	int n = game_g->getNClicks();
 	if( m_left ) {
 		n_workers -= n;
 		if( n_workers < 0 )
@@ -1649,7 +1649,7 @@ void GamePanel::buttonNMinersClick(void *data, int arg, bool m_left, bool m_midd
 		// no longer relevant
 		return;
 	}
-    int n = getNClicks();
+    int n = game_g->getNClicks();
 	Id element = (Id)gamePanel->element_index[arg];
 	gamePanel->changeMiners(element, m_left, n);
 }
@@ -1662,7 +1662,7 @@ void GamePanel::buttonNBuildersClick(void *data, int arg, bool m_left, bool m_mi
 	}
 	int n_builders = gamePanel->gamestate->getCurrentSector()->getBuilders((Type)arg);
 	int n_spare = gamePanel->gamestate->getCurrentSector()->getAvailablePopulation();
-	int n = getNClicks();
+	int n = game_g->getNClicks();
 	if( m_left && n_builders > 0 ) {
 		n_builders -= n;
 		if( n_builders < 0 )
@@ -1932,7 +1932,7 @@ x		}*/
             done = true;
             // add unarmed man to assembled army
 			int n_spare = gamestate->getCurrentSector()->getAvailablePopulation();
-			int n = getNClicks();
+			int n = game_g->getNClicks();
 			ASSERT(n >= 1);
 			if( n_spare < n )
 				n = 1;
@@ -1956,7 +1956,7 @@ x		}*/
 			}
 			if( ok && this->button_deploy_attackers[i]->mouseOver(m_x,m_y) ) {
                 done = true;
-                int n = getNClicks();
+                int n = game_g->getNClicks();
 				//if( gamestate->getCurrentSector()->assembleArmy(game_g->getStartEpoch() + i, n) ) {
 				if( gamestate->assembleArmy(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos(), game_g->getStartEpoch() + i, n) ) {
 					setMouseState(MOUSESTATE_DEPLOY_WEAPON);
@@ -1978,7 +1978,7 @@ x		}*/
 			if( ( m_left || m_right ) && this->button_nminers2[i]->mouseOver(m_x,m_y) ) {
                 done = true;
                 ASSERT_ELEMENT_ID( this->element_index[i] );
-				/*int n = getNClicks();
+				/*int n = game_g->getNClicks();
 				changeMiners(element, m_left, n);*/
 				//processClick(buttonNMinersClick, this, i, button_nminers2[i], m_left, m_middle, m_right);
 				processClick(buttonNMinersClick, this->get(this->c_page), this, i, button_nminers2[i], m_left, m_middle, m_right, click);
@@ -1997,7 +1997,7 @@ x		}*/
                     done = true;
                     /*int n_builders = gamestate->getCurrentSector()->getBuilders((Type)i);
 					int n_spare = gamestate->getCurrentSector()->getAvailablePopulation();
-					int n = getNClicks();
+					int n = game_g->getNClicks();
 					if( m_left && n_builders > 0 ) {
 						n_builders -= n;
 						if( n_builders < 0 )
@@ -2113,7 +2113,7 @@ x		}*/
             done = true;
             /*int n_workers = gamestate->getCurrentSector()->getWorkers();
 			int n_spare = gamestate->getCurrentSector()->getAvailablePopulation();
-			int n = getNClicks();
+			int n = game_g->getNClicks();
 			if( m_left ) {
 				n_workers -= n;
 				if( n_workers < 0 )

@@ -66,6 +66,15 @@ Game::Game() {
 	dispose_gamestate = NULL;
 	lastmousepress_time = 0;
 
+	frame_counter = 0;
+	time_rate = 1;
+	real_time = 0;
+	real_loop_time = 0;
+	game_time = 0;
+	loop_time = 0;
+	accumulated_time = 0.0f;
+	mouseTime = -1;
+
 	pref_sound_on = default_pref_sound_on_c;
 	pref_music_on = default_pref_music_on_c;
 	pref_disallow_nukes = default_pref_disallow_nukes_c;
@@ -3601,6 +3610,65 @@ bool Game::isPaused() const {
 	return paused;
 }
 
+void Game::setRealTime(int real_time) {
+	this->real_time = real_time;
+}
+
+int Game::getRealTime() const {
+	return real_time;
+}
+
+int Game::getRealLoopTime() const {
+	return real_loop_time;
+}
+
+void Game::setGameTime(int game_time) {
+	this->game_time = game_time;
+}
+
+int Game::getGameTime() const {
+	return game_time;
+}
+
+int Game::getLoopTime() const {
+	return loop_time;
+}
+
+void Game::updateTime(int time) {
+	// prevent instability on slow machines
+	const int max_interval_c = 200;
+	if( time > max_interval_c )
+		time = max_interval_c;
+
+	real_loop_time = time;
+	real_time += time;
+
+	// Ideally we'd have always had time_rate being an integer, and have all usages of loop_time cope with that, but this would now be a significant change.
+	// So we add this fix so that we don't have inaccuracy due to rounding. To test this code, disable wait() in Application::runMainLoop(), which means
+	// we'll test this function with very small values of time.
+	loop_time = (int)(time * time_ratio_c * time_rate + accumulated_time);
+	accumulated_time = (time * time_ratio_c * time_rate + accumulated_time) - loop_time;
+	//LOG("time %d loop time %d accumulated %f\n", time, loop_time, accumulated_time);
+
+	game_time += loop_time;
+	frame_counter = (getRealTime() * time_rate) / ticks_per_frame_c;
+}
+
+void Game::resetMouseClick() {
+	mouseTime = -1;
+}
+
+int Game::getNClicks() {
+	if( mouseTime == -1 )
+		mouseTime = getRealTime();
+	int time = getRealTime() - mouseTime;
+	if( time < 2000 )
+		return 1;
+	else if( time < 5000 )
+		return 2;
+	return 3;
+}
+
 void deleteState() {
 	char *save_fullfilename = getApplicationFilename(autosave_filename);
 	remove(save_fullfilename);
@@ -4806,8 +4874,8 @@ void playGame(int n_args, char *args[]) {
 
 	initLogFile();
 
-	bool run_tests = true;
-	//bool run_tests = false;
+	//bool run_tests = true;
+	bool run_tests = false;
 
         /*if( access("data", 0)==0 ) {
 	use_amigadata = true;

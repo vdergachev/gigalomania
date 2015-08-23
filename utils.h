@@ -102,23 +102,6 @@ public:
 	}
 };
 
-extern int frame_counter;
-extern const int ticks_per_frame_c;
-extern const float time_ratio_c;
-extern int time_rate;
-
-void setRealTime(int real_time);
-int getRealTime();
-int getRealLoopTime();
-void setGameTime(int game_time);
-int getGameTime();
-int getLoopTime();
-void updateTime(int time);
-//int timeLeft();
-
-void resetMouseClick();
-int getNClicks();
-
 int poisson(int mean_ticks_per_event,int time_interval);
 
 int n_digits(int number);

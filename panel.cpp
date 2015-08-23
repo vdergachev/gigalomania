@@ -215,11 +215,11 @@ void PanelPage::drawPopups() {
 	else {
 		if( panel->mouseOver(m_x, m_y) ) {
 			is_inside_area = true;
-			inside_area_time = getRealTime();
+			inside_area_time = game_g->getRealTime();
 		}
 	}
 	if( lmb_text != NULL || rmb_text != NULL /*|| bmb_text != NULL*/ ) {
-		if( panel->isHelpTextOn() && is_inside_area && getRealTime() < inside_area_time + 5000 ) {
+		if( panel->isHelpTextOn() && is_inside_area && game_g->getRealTime() < inside_area_time + 5000 ) {
 			if( !popup_item ) {
 				//LOG("create popup\n");
 				popup_item = true;

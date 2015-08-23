@@ -58,7 +58,7 @@ bool defenceNeedsMan(int epoch) {
 }
 
 Particle::Particle() : xpos(0.0f), ypos(0.0f), birth_time(0) {
-	this->birth_time = getGameTime();
+	this->birth_time = game_g->getGameTime();
 }
 
 void ParticleSystem::draw(int xpos, int ypos) const {
@@ -69,7 +69,7 @@ void ParticleSystem::draw(int xpos, int ypos) const {
 
 SmokeParticleSystem::SmokeParticleSystem(const Image *image) : ParticleSystem(image),
 birth_rate(0.0f), life_exp(225), last_emit_time(0), move_x(0.0f), move_y(-6.667f) {
-	this->last_emit_time = getGameTime();
+	this->last_emit_time = game_g->getGameTime();
 }
 
 void SmokeParticleSystem::setBirthRate(float birth_rate) {
@@ -78,7 +78,7 @@ void SmokeParticleSystem::setBirthRate(float birth_rate) {
 
 void SmokeParticleSystem::update() {
 	// expire old particles
-	int time_now = getGameTime();
+	int time_now = game_g->getGameTime();
 	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
 		if( time_now >= particles.at(i).getBirthTime() + life_exp ) {
 			// for performance, we reorder and reduce the length by 1 (as the order of the particles shouldn't matter)
@@ -87,7 +87,7 @@ void SmokeParticleSystem::update() {
 		}
 	}
 
-	int real_loop_time = getLoopTime();
+	int real_loop_time = game_g->getLoopTime();
 	//LOG("%d\n", real_loop_time);
 	// update particles
 	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
@@ -121,7 +121,7 @@ void SmokeParticleSystem::update() {
 	}
 
 	// emit new particles
-	int accumulated_time = getGameTime() - this->last_emit_time;
+	int accumulated_time = game_g->getGameTime() - this->last_emit_time;
 	int new_particles = (int)(this->birth_rate * accumulated_time);
 	new_particles = min(1, new_particles); // helps make rate more steady
 	this->last_emit_time += (int)(1.0f/birth_rate * new_particles);
@@ -1467,7 +1467,7 @@ bool Sector::nukeSector(Sector *source) {
 
 	// we still start the timer, even if a laser will shoot it
 	this->nuke_by_player = source->player;
-	this->nuke_time = getGameTime();
+	this->nuke_time = game_g->getGameTime();
 
 	if( this->getActivePlayer() != -1 ) {
 		// nuke defences
@@ -1478,7 +1478,7 @@ bool Sector::nukeSector(Sector *source) {
 					if( this->buildings[i]->getTurretMan(j) == nuclear_epoch_c ) {
 						ASSERT( !this->nuke_defence_animation );
 						this->nuke_defence_animation = true;
-						this->nuke_defence_time = getGameTime();
+						this->nuke_defence_time = game_g->getGameTime();
 						this->nuke_defence_x = this->buildings[i]->getTurretButton(j)->getLeft();
 						this->nuke_defence_y = this->buildings[i]->getTurretButton(j)->getTop();
 						this->buildings[i]->clearTurretMan(j);
@@ -1689,7 +1689,7 @@ float Sector::getDefenceStrength() const {
 
 void Sector::doCombat(int client_player) {
 	//LOG("Sector::doCombat()\n");
-	int looptime = getLoopTime();
+	int looptime = game_g->getLoopTime();
 
 	/*int army_strengths[n_players_c];
 	int n_armies = 0;
@@ -1826,8 +1826,8 @@ void Sector::doPlayer(int client_player) {
 		return;
 	}
 
-	int time = getGameTime();
-	int looptime = getLoopTime();
+	int time = game_g->getGameTime();
+	int looptime = game_g->getLoopTime();
 
 	if( this->current_design != NULL ) {
 		if( this->researched_lasttime == -1 )
@@ -1991,7 +1991,7 @@ void Sector::getNukePos(int *nuke_x, int *nuke_y) const {
 	*nuke_y = -1;
 	if( this->isBeingNuked() ) {
 		ASSERT( nuke_time != -1 );
-		float alpha = ((float)( getGameTime() - nuke_time )) / (float)nuke_delay_c;
+		float alpha = ((float)( game_g->getGameTime() - nuke_time )) / (float)nuke_delay_c;
 		ASSERT( alpha >= 0.0 );
 		if( alpha > 1.0 )
 			alpha = 1.0;
@@ -2024,7 +2024,7 @@ void Sector::update(int client_player) {
 			this->doPlayer(client_player); // still call for clients, to update particle system
 	}
 	else if( game_g->getGameMode() != GAMEMODE_MULTIPLAYER_CLIENT ) {
-		int time = getGameTime();
+		int time = game_g->getGameTime();
 		int n_players_in_sector = 0;
 		int player_in_sector = -1;
 		for(int i=0;i<n_players_c;i++) {
@@ -2072,7 +2072,7 @@ void Sector::update(int client_player) {
 
 	if( this->nuke_by_player != -1 ) {
 		ASSERT( this->nuke_time != -1 );
-		if( getGameTime() >= this->nuke_time + nuke_delay_c ) {
+		if( game_g->getGameTime() >= this->nuke_time + nuke_delay_c ) {
 			this->nuked = true;
 
 			if( this->getActivePlayer() != -1 ) {
@@ -2391,7 +2391,7 @@ void Sector::setCurrentDesign(Design *current_design) {
 	this->current_design = current_design;
 	this->n_designers = 0;
 	this->researched = 0;
-	this->researched_lasttime = getGameTime();
+	this->researched_lasttime = game_g->getGameTime();
 	if( this == gamestate->getCurrentSector() ) {
 		//((PlayingGameState *)gamestate)->getGamePanel()->refresh();
 		gamestate->getGamePanel()->refresh();
@@ -2416,7 +2416,7 @@ void Sector::setCurrentManufacture(Design *current_manufacture) {
 	this->setWorkers(0); // call to also set the particle system rate
 	this->n_famount = 1;
 	this->manufactured = 0;
-	this->manufactured_lasttime = getGameTime();
+	this->manufactured_lasttime = game_g->getGameTime();
 /*#ifdef _DEBUG
 	LOG("### Sector::setCurrentManufacture b\n");
 	game_g->getMap()->checkSectors();

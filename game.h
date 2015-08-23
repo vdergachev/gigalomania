@@ -116,6 +116,15 @@ class Game {
 	GameState *dispose_gamestate;
 	unsigned int lastmousepress_time;
 
+	int frame_counter;
+	int time_rate; // time factor
+	int real_time;
+	int real_loop_time;
+	int game_time;
+	int loop_time;
+	float accumulated_time;
+	int mouseTime;
+
 	bool pref_sound_on;
 	bool pref_music_on;
 	bool pref_disallow_nukes;
@@ -333,6 +342,39 @@ public:
 		return this->screen;
 	}
 	bool isPaused() const;
+
+	void cycleTimeRate() {
+		time_rate++;
+		if( time_rate > 3 )
+			time_rate = 1;
+	}
+	void increaseTimeRate() {
+		if( time_rate > 1 )
+			time_rate--;
+	}
+	void decreaseTimeRate() {
+		if( time_rate < 3 )
+			time_rate++;
+	}
+	void setTimeRate(int time_rate) {
+		this->time_rate = time_rate;
+	}
+	int getTimeRate() const {
+		return this->time_rate;
+	}
+	void setRealTime(int real_time);
+	int getRealTime() const;
+	int getRealLoopTime() const;
+	void setGameTime(int game_time);
+	int getGameTime() const;
+	int getLoopTime() const;
+	int getFrameCounter() const {
+		return this->frame_counter;
+	}
+	void updateTime(int time);
+	void resetMouseClick();
+	int getNClicks();
+
 	void setGameMode(GameMode gameMode) {
 		this->gameMode = gameMode;
 	}
@@ -581,3 +623,6 @@ const int BUILDTIME_TOWER = 80;
 const int BUILDTIME_MINE = 40;
 const int BUILDTIME_FACTORY = 40;
 const int BUILDTIME_LAB = 40;
+
+const int ticks_per_frame_c = 100; // game time ticks per frame rate (used for various animated sprites)
+const float time_ratio_c = 0.15f; // game time ticks per time ticks

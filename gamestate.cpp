@@ -63,17 +63,17 @@ int Soldier::sort_soldier_pair(const void *v1,const void *v2) {
 
 void Feature::draw() const {
 	const int ticks_per_frame_c = 110; // tree animation looks better if offset from main animation, and if slightly slower
-	int counter = ( getRealTime() * time_rate ) / ticks_per_frame_c;
+	int counter = ( game_g->getRealTime() * game_g->getTimeRate() ) / ticks_per_frame_c;
 	image[counter % n_frames]->draw(xpos, ypos);
 }
 
 TimedEffect::TimedEffect() {
-	this->timeset = getRealTime();
+	this->timeset = game_g->getRealTime();
 	this->func_finish = NULL;
 }
 
 TimedEffect::TimedEffect(int delay, void (*func_finish)()) {
-	this->timeset = getRealTime() + delay;
+	this->timeset = game_g->getRealTime() + delay;
 	this->func_finish = func_finish;
 }
 
@@ -82,7 +82,7 @@ const float ammo_speed_c = 1.5f; // higher is faster
 
 AmmoEffect::AmmoEffect(PlayingGameState *gamestate,int epoch, AmmoDirection dir, int xpos, int ypos) : TimedEffect(), gamestate(gamestate) {
 	ASSERT_EPOCH(epoch);
-	this->gametimeset = getGameTime();
+	this->gametimeset = game_g->getGameTime();
 	this->epoch = epoch;
 	this->dir = dir;
 	this->xpos = xpos;
@@ -90,10 +90,10 @@ AmmoEffect::AmmoEffect(PlayingGameState *gamestate,int epoch, AmmoDirection dir,
 }
 
 bool AmmoEffect::render() const {
-	int time = getRealTime() - this->timeset;
+	int time = game_g->getRealTime() - this->timeset;
 	if( time < 0 )
 		return false;
-	int gametime = getGameTime() - this->gametimeset;
+	int gametime = game_g->getGameTime() - this->gametimeset;
 	int x = xpos;
 	int y = ypos;
 	int dist = (int)(gametime * ammo_speed_c);
@@ -162,7 +162,7 @@ FadeEffect::~FadeEffect() {
 }
 
 bool FadeEffect::render() const {
-	int time = getRealTime() - this->timeset;
+	int time = game_g->getRealTime() - this->timeset;
 	int length = white ? whitefade_time_c : fade_time_c;
 	if( time < 0 )
 		return false;
@@ -197,7 +197,7 @@ const int flashingsquare_flash_time_c = 250;
 const int flashing_square_n_flashes_c = 8;
 
 bool FlashingSquare::render() const {
-	int time = getRealTime() - this->timeset;
+	int time = game_g->getRealTime() - this->timeset;
 	if( time < 0 )
 		return false;
 	if( time > flashingsquare_flash_time_c * flashing_square_n_flashes_c ) {
@@ -214,7 +214,7 @@ bool FlashingSquare::render() const {
 }
 
 bool AnimationEffect::render() const {
-	int time = getRealTime() - this->timeset;
+	int time = game_g->getRealTime() - this->timeset;
 	if( time < 0 )
 		return false;
 	int frame = time / time_per_frame;
@@ -230,7 +230,7 @@ bool AnimationEffect::render() const {
 }
 
 bool TextEffect::render() const {
-	int time = getRealTime() - this->timeset;
+	int time = game_g->getRealTime() - this->timeset;
 	if( time < 0 )
 		return false;
 	else if( time > duration )
@@ -1269,7 +1269,7 @@ void PlayingGameState::reset() {
 	this->setupMapGUI();
 
 	if( !game_g->isDemo() ) {
-		speed_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, 4, game_g->icon_speeds[time_rate-1]);
+		speed_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, 4, game_g->icon_speeds[game_g->getTimeRate()-1]);
 		speed_button->setId("speed_button");
 		if( game_g->isOneMouseButton() ) {
 			speed_button->setInfoLMB("cycle through different time rates");
@@ -1578,9 +1578,9 @@ void PlayingGameState::draw() {
 			game_g->icon_openpitmine->draw(offset_land_x_c + offset_openpitmine_x_c, offset_land_y_c + offset_openpitmine_y_c);
 
 		bool rotate_defenders = false;
-		if( getGameTime() - defenders_last_time_update > defenders_ticks_per_update_c ) {
+		if( game_g->getGameTime() - defenders_last_time_update > defenders_ticks_per_update_c ) {
 			rotate_defenders = true;
-			defenders_last_time_update = getGameTime();
+			defenders_last_time_update = game_g->getGameTime();
 		}
 
 		for(int i=0;i<N_BUILDINGS;i++) {
@@ -1619,7 +1619,7 @@ void PlayingGameState::draw() {
 			if( i == BUILDING_TOWER ) {
 				int offset_x = 0, offset_y = 0;
 				getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
-				game_g->flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
+				game_g->flags[ current_sector->getPlayer() ][game_g->getFrameCounter() % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
 			}
 
 			const int health_xpos = offset_land_x_c + building->getX() + 4;
@@ -1641,7 +1641,7 @@ void PlayingGameState::draw() {
 		images[ current_sector->getBuildingEpoch() ]->draw(offset_land_x_c + building->getX(), offset_land_y_c + building->getY());
 		int offset_x = 0, offset_y = 0;
 		getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
-		game_g->flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
+		game_g->flags[ current_sector->getPlayer() ][game_g->getFrameCounter() % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
 	}
 
 	//Vector soldier_list(n_players_c * 250);
@@ -1669,10 +1669,10 @@ void PlayingGameState::draw() {
 		Soldier *soldier = soldier_list[i];
 		ASSERT(soldier->epoch != nuclear_epoch_c);
 		if( !isAirUnit(soldier->epoch) ) {
-			//int frame = soldier->dir * 4 + ( frame_counter % 3 );
+			//int frame = soldier->dir * 4 + ( game_g->getFrameCounter() % 3 );
 			//Image *image = attackers_walking[soldier->player][soldier->epoch][frame];
 			int n_frames = game_g->n_attacker_frames[soldier->epoch][soldier->dir];
-			Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][frame_counter % n_frames];
+			Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][game_g->getFrameCounter() % n_frames];
 			image->draw(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
 		}
 	}
@@ -1712,7 +1712,7 @@ void PlayingGameState::draw() {
 				image = game_g->planes[soldier->player][soldier->epoch];
 			}
 			else if( soldier->epoch == 9 ) {
-				int frame = frame_counter % 3;
+				int frame = game_g->getFrameCounter() % 3;
 				image = game_g->saucers[soldier->player][frame];
 			}
 			ASSERT(image != NULL);
@@ -1743,7 +1743,7 @@ void PlayingGameState::draw() {
 	int nuke_defence_y = 0;
 	if( current_sector->hasNuclearDefenceAnimation(&nuke_defence_time, &nuke_defence_x, &nuke_defence_y) ) {
 		ASSERT( nuke_defence_time != -1 );
-		float alpha = ((float)( getGameTime() - nuke_defence_time )) / (float)nuke_delay_c;
+		float alpha = ((float)( game_g->getGameTime() - nuke_defence_time )) / (float)nuke_delay_c;
 		ASSERT( alpha >= 0.0 );
 		if( alpha > 1.0 )
 			alpha = 1.0;
@@ -1950,33 +1950,33 @@ void PlayingGameState::update() {
 	int move_cannon_step_y = 0;
 	int move_air_step = 0;
 	// move twice as fast in x direction, to simulate 3D look
-	while( getGameTime() - soldier_last_time_moved_x > soldier_move_rate_c ) {
+	while( game_g->getGameTime() - soldier_last_time_moved_x > soldier_move_rate_c ) {
 		move_soldier_step_x++;
 		soldier_last_time_moved_x += soldier_move_rate_c;
 	}
-	while( getGameTime() - soldier_last_time_moved_y > 2*soldier_move_rate_c ) {
+	while( game_g->getGameTime() - soldier_last_time_moved_y > 2*soldier_move_rate_c ) {
 		move_soldier_step_y++;
 		soldier_last_time_moved_y += 2*soldier_move_rate_c;
 	}
-	while( getGameTime() - cannon_last_time_moved_x > cannon_move_rate_c ) {
+	while( game_g->getGameTime() - cannon_last_time_moved_x > cannon_move_rate_c ) {
 		move_cannon_step_x++;
 		cannon_last_time_moved_x += cannon_move_rate_c;
 	}
-	while( getGameTime() - cannon_last_time_moved_y > 2*cannon_move_rate_c ) {
+	while( game_g->getGameTime() - cannon_last_time_moved_y > 2*cannon_move_rate_c ) {
 		move_cannon_step_y++;
 		cannon_last_time_moved_y += 2*cannon_move_rate_c;
 	}
-	while( getGameTime() - air_last_time_moved > air_move_rate_c ) {
+	while( game_g->getGameTime() - air_last_time_moved > air_move_rate_c ) {
 		move_air_step++;
 		air_last_time_moved += air_move_rate_c;
 	}
-	/*bool move_soldiers = ( getGameTime() - soldiers_last_time_moved > soldier_move_rate_c );
-	bool move_air = ( getGameTime() - air_last_time_moved > air_move_rate_c );
+	/*bool move_soldiers = ( game_g->getGameTime() - soldiers_last_time_moved > soldier_move_rate_c );
+	bool move_air = ( game_g->getGameTime() - air_last_time_moved > air_move_rate_c );
 	if( move_soldiers )
-	soldiers_last_time_moved = getGameTime();
+	soldiers_last_time_moved = game_g->getGameTime();
 	if( move_air )
-	air_last_time_moved = getGameTime();*/
-	int time_interval = getLoopTime();
+	air_last_time_moved = game_g->getGameTime();*/
+	int time_interval = game_g->getLoopTime();
 
 	int n_armies = 0;
 	for(int i=0;i<n_players_c;i++) {
@@ -2331,22 +2331,8 @@ void PlayingGameState::cancelPlayerAskingAlliance() {
 	}
 }
 
-/*void PlayingGameState::buttonSpeedClick(void *data, int arg, bool m_left, bool m_middle, bool m_right) {
-	PlayingGameState *gamestate = static_cast<PlayingGameState *>(data);
-	if( m_left ) {
-		if( time_rate > 1 )
-			time_rate--;
-	}
-	else if( m_right ) {
-		if( time_rate < 3 )
-			time_rate++;
-	}
-	LOG("set time_rate to %d\n", time_rate);
-	gamestate->speed_button->setImage( icon_speeds[ time_rate-1 ] );
-}*/
-
 void PlayingGameState::refreshTimeRate() {
-	speed_button->setImage( game_g->icon_speeds[ time_rate-1 ] );
+	speed_button->setImage( game_g->icon_speeds[ game_g->getTimeRate()-1 ] );
 }
 
 void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
@@ -2472,21 +2458,17 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
         registerClick();
         if( game_g->oneMouseButtonMode() ) {
 			// cycle through the speeds
-			time_rate++;
-			if( time_rate > 3 )
-				time_rate = 1;
+			game_g->cycleTimeRate();
 		}
 		else {
 			if( m_left ) {
-				if( time_rate > 1 )
-					time_rate--;
+				game_g->increaseTimeRate();
 			}
 			else if( m_right ) {
-				if( time_rate < 3 )
-					time_rate++;
+				game_g->decreaseTimeRate();
 			}
 		}
-		LOG("set time_rate to %d\n", time_rate);
+		LOG("set time_rate to %d\n", game_g->getTimeRate());
 		refreshTimeRate();
 		//processClick(buttonSpeedClick, this->screen_page, this, 0, speed_button, m_left, m_middle, m_right);
 	}

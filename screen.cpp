@@ -346,10 +346,10 @@ void Application::runMainLoop() {
 		unsigned int new_time = game_g->getApplication()->getTicks();
 		//LOG("%d, %d\n", new_time, new_time - elapsed_time);
 		if( !game_g->isPaused() ) {
-			updateTime(new_time - elapsed_time);
+			game_g->updateTime(new_time - elapsed_time);
 		}
 		else
-			updateTime(0);
+			game_g->updateTime(0);
 		elapsed_time = new_time;
 
 		// user input

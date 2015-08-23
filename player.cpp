@@ -316,7 +316,7 @@ bool Player::askHuman() {
 	if( tutorial != NULL && !tutorial->aiAllowAskAlliance() ) {
 		return false;
 	}
-	int time = getGameTime();
+	int time = game_g->getGameTime();
 	if( alliance_last_asked_human == -1 ) {
 		// note - don't ask if alliance_last_asked_human==-1, to avoid being asked straight away
 		alliance_last_asked_human = time;
@@ -339,7 +339,7 @@ bool Player::requestAlliance(int player) {
 	//ASSERT(this->index != human_player);
 	ASSERT( !this->is_human );
 	int last_asked = Player::allianceLastAsked(index, player);
-	int time = getGameTime();
+	int time = game_g->getGameTime();
 	if( last_asked == -1 || time >= last_asked + wait_time_c ) {
 		Player::setAllianceLastAsked(index, player, time);
 		bool has_diplomatic_bonus = player == PlayerType::PLAYER_YELLOW;
@@ -990,7 +990,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 				if( strength + assembled_strength >= min_req || enemiesPresentWithBombardment ) {
 					ASSERT( !target_sector->isNuked() );
 					if( target_sector->getPlayer() == client_player && !target_sector->getArmy(this->index)->any(true) ) {
-						time_rate = 1; // auto-slow if attacking a player sector (but not if already being attacked by this player)
+						game_g->setTimeRate(1); // auto-slow if attacking a player sector (but not if already being attacked by this player)
 						gamestate->refreshTimeRate();
 					}
 					bool moved_all = target_sector->moveArmy(sector->getAssembledArmy());
@@ -1011,7 +1011,7 @@ void Player::doAIUpdate(int client_player, PlayingGameState *gamestate) {
 	}
 	//LOG("Player::doAIUpdate()\n");
 
-	int loop_time = getLoopTime();
+	int loop_time = game_g->getLoopTime();
 
 	// TODO: currently breaking/making alliances is entirely random, should improve this...
 
