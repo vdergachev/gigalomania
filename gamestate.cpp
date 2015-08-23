@@ -112,11 +112,11 @@ bool AmmoEffect::render() const {
 	else {
 		ASSERT(0);
 	}
-	Image *image = attackers_ammo[epoch][dir];
+	Image *image = game_g->attackers_ammo[epoch][dir];
 	if( dir == ATTACKER_AMMO_BOMB && dist > 24 ) {
-		if( explosions[0] != NULL ) {
+		if( game_g->explosions[0] != NULL ) {
 			int w = image->getScaledWidth();
-			int w2 = explosions[0]->getScaledWidth();
+			int w2 = game_g->explosions[0]->getScaledWidth();
 			gamestate->explosionEffect(offset_land_x_c + x + (w-w2)/2, offset_land_y_c + y);
 		}
 		return true;
@@ -125,7 +125,7 @@ bool AmmoEffect::render() const {
 		return true;
 	x += offset_land_x_c;
 	y += offset_land_y_c;
-	if( x + image->getScaledWidth() >= screen->getWidth() || y + image->getScaledHeight() >= screen->getHeight() )
+	if( x + image->getScaledWidth() >= game_g->getScreen()->getWidth() || y + image->getScaledHeight() >= game_g->getScreen()->getHeight() )
 		return true;
 	image->draw(x, y);
 	if( time > ammo_time_c )
@@ -140,7 +140,7 @@ FadeEffect::FadeEffect(bool white,bool out,int delay, void (*func_finish)()) : T
 	this->white = white;
 	this->out = out;
 #if SDL_MAJOR_VERSION == 1
-	this->image = Image::createBlankImage(screen->getWidth(), screen->getHeight(), 24);
+	this->image = Image::createBlankImage(game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), 24);
 	int r = 0, g = 0, b = 0;
 	if( white ) {
 		r = g = b = 255;
@@ -148,7 +148,7 @@ FadeEffect::FadeEffect(bool white,bool out,int delay, void (*func_finish)()) : T
 	else {
 		r = g = b = 0;
 	}
-	image->fillRect(0, 0, screen->getWidth(), screen->getHeight(), r, g, b);
+	image->fillRect(0, 0, game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), r, g, b);
 	this->image->convertToDisplayFormat();
 #else
 	image = NULL;
@@ -186,7 +186,7 @@ bool FadeEffect::render() const {
 	image->drawWithAlpha(0, 0, (unsigned char)(alpha * 255));
 #else
 	unsigned char value = white ? 255 : 0;
-	screen->fillRectWithAlpha(0, 0, screen->getWidth(), screen->getHeight(), value, value, value, (unsigned char)(alpha * 255));
+	game_g->getScreen()->fillRectWithAlpha(0, 0, game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), value, value, value, (unsigned char)(alpha * 255));
 #endif
 	if( time > length ) // we still need to draw the fade, on the last time
 		return true;
@@ -208,7 +208,7 @@ bool FlashingSquare::render() const {
 	if( flash ) {
 		int map_x = offset_map_x_c + 16 * this->xpos;
 		int map_y = offset_map_y_c + 16 * this->ypos;
-		flashingmapsquare->draw(map_x, map_y);
+		game_g->flashingmapsquare->draw(map_x, map_y);
 	}
 	return false;
 }
@@ -235,7 +235,7 @@ bool TextEffect::render() const {
 		return false;
 	else if( time > duration )
 		return true;
-	Image::write(xpos, ypos, letters_small, text.c_str(), Image::JUSTIFY_CENTRE);
+	Image::write(xpos, ypos, game_g->letters_small, text.c_str(), Image::JUSTIFY_CENTRE);
 	return false;
 }
 
@@ -274,24 +274,24 @@ void GameState::reset() {
 }
 
 void GameState::setDefaultMouseImage() {
-	if( isDemo() )
-		mouse_image = mouse_pointers[0];
+	if( game_g->isDemo() )
+		mouse_image = game_g->mouse_pointers[0];
 	else
-		mouse_image = mouse_pointers[client_player];
+		mouse_image = game_g->mouse_pointers[client_player];
 	mobile_ui_display_mouse = false;
 }
 
 void GameState::draw() {
 	if( mouse_image != NULL ) {
-		bool touch_mode = mobile_ui || application->isBlankMouse();
+		bool touch_mode = game_g->isMobileUI() || game_g->getApplication()->isBlankMouse();
 		if( touch_mode && mobile_ui_display_mouse ) {
 			mouse_image->draw(default_width_c - mouse_image->getScaledWidth(), 0);
 		}
 		else if( !touch_mode ) {
 			int m_x = 0, m_y = 0;
-			screen->getMouseCoords(&m_x, &m_y);
-			m_x = (int)(m_x / scale_width);
-			m_y = (int)(m_y / scale_height);
+			game_g->getScreen()->getMouseCoords(&m_x, &m_y);
+			m_x = (int)(m_x / game_g->getScaleWidth());
+			m_y = (int)(m_y / game_g->getScaleHeight());
 			m_x += mouse_off_x;
 			m_y += mouse_off_y;
 			mouse_image->draw(m_x, m_y);
@@ -315,23 +315,23 @@ void GameState::draw() {
 		}
 	}
 
-	if( isPaused() ) {
-		string str = mobile_ui ? "touch screen\nto unpause game" : "press p or click\nmouse to unpause game";
+	if( game_g->isPaused() ) {
+		string str = game_g->isMobileUI() ? "touch screen\nto unpause game" : "press p or click\nmouse to unpause game";
 		// n.b., don't use 120 for y pos, need to avoid collision with quit game message
 		// and offset x pos slightly, to avoid overlapping with GUI
-		Image::write(120, 100, letters_large, str.c_str(), Image::JUSTIFY_LEFT);
+		Image::write(120, 100, game_g->letters_large, str.c_str(), Image::JUSTIFY_LEFT);
 	}
 
-	if( application->hasFPS() ) {
-		float fps = application->getFPS();
+	if( game_g->getApplication()->hasFPS() ) {
+		float fps = game_g->getApplication()->getFPS();
 		if( fps > 0.0f ) {
 			stringstream str;
 			str << fps;
-			Image::writeMixedCase(4, default_height_c - 16, letters_large, letters_small, numbers_white, str.str().c_str(), Image::JUSTIFY_LEFT);
+			Image::writeMixedCase(4, default_height_c - 16, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_LEFT);
 		}
 	}
 
-	screen->refresh();
+	game_g->getScreen()->refresh();
 }
 
 void GameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
@@ -339,24 +339,24 @@ void GameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
 }
 
 void GameState::requestQuit() {
-	application->setQuit();
+	game_g->getApplication()->setQuit();
 }
 
 void GameState::createQuitWindow() {
-    if( confirm_window == NULL && !state_changed ) {
+    if( confirm_window == NULL && !game_g->isStateChanged() ) {
 		confirm_type = CONFIRMTYPE_QUITGAME;
 		confirm_window = new PanelPage(0, 0, default_width_c, default_height_c);
 		confirm_window->setBackground(0, 0, 0, 200);
 		const int offset_x_c = 120, offset_y_c = 120;
-		Button *text_button = new Button(offset_x_c, offset_y_c, "REALLY QUIT?", letters_large);
+		Button *text_button = new Button(offset_x_c, offset_y_c, "REALLY QUIT?", game_g->letters_large);
 		confirm_window->add(text_button);
-		confirm_button_1 = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
+		confirm_button_1 = new Button(offset_x_c, offset_y_c+16, "YES", game_g->letters_large);
 		confirm_window->add(confirm_button_1);
-		confirm_button_2 = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
+		confirm_button_2 = new Button(offset_x_c+32, offset_y_c+16, "NO", game_g->letters_large);
 		confirm_window->add(confirm_button_2);
 		screen_page->add(confirm_window);
 	}
-	else if( confirm_window != NULL && !state_changed ) {
+	else if( confirm_window != NULL && !game_g->isStateChanged() ) {
 		closeConfirmWindow();
 	}
 }
@@ -402,9 +402,9 @@ void ChooseGameTypeGameState::reset() {
 
 void ChooseGameTypeGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
-	background->draw(0, 0);
+	game_g->background->draw(0, 0);
 
 	this->choosegametypePanel->draw();
 
@@ -449,9 +449,9 @@ void ChooseDifficultyGameState::reset() {
 
 void ChooseDifficultyGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
-	background->draw(0, 0);
+	game_g->background->draw(0, 0);
 
 	this->choosedifficultyPanel->draw();
 
@@ -482,52 +482,52 @@ void ChoosePlayerGameState::reset() {
 	int ypos = 48;
 	const int ydiff = 48;
 	const int xindent = 8;
-	const int ylargediff = letters_large[0]->getScaledHeight() + 2;
-	const int ysmalldiff = letters_small[0]->getScaledHeight() + 2;
+	const int ylargediff = game_g->letters_large[0]->getScaledHeight() + 2;
+	const int ysmalldiff = game_g->letters_small[0]->getScaledHeight() + 2;
 	const int draw_offset_x = 32;
 
-	button_red = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL STRENGTH", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "UNARMED MEN ARE STRONGER IN COMBAT", letters_small));
+	button_red = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE RED PEOPLE", game_g->letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL STRENGTH", game_g->letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "UNARMED MEN ARE STRONGER IN COMBAT", game_g->letters_small));
 	ypos += ydiff;
 	screen_page->add(button_red);
 
-	button_green = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE GREEN PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL CONSTRUCTION", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "FASTER AT BUILDING NEW TOWERS", letters_small));
+	button_green = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE GREEN PEOPLE", game_g->letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL CONSTRUCTION", game_g->letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "FASTER AT BUILDING NEW TOWERS", game_g->letters_small));
 	ypos += ydiff;
 	screen_page->add(button_green);
 
-	button_yellow = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE YELLOW PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DIPLOMACY", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "EASIER TO FORM ALLIANCES", letters_small));
+	button_yellow = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE YELLOW PEOPLE", game_g->letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DIPLOMACY", game_g->letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "EASIER TO FORM ALLIANCES", game_g->letters_small));
 	ypos += ydiff;
 	screen_page->add(button_yellow);
 
-	button_blue = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE BLUE PEOPLE", letters_large);
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DEFENCE", letters_small));
-	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "BUILDINGS STRONGER AGAINST ATTACK", letters_small));
+	button_blue = new Button(xpos-draw_offset_x, ypos, draw_offset_x, ylargediff + 2*ysmalldiff, "CONTROLLER OF THE BLUE PEOPLE", game_g->letters_large);
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff, "SPECIAL SKILL DEFENCE", game_g->letters_small));
+	screen_page->add(new Button(xpos+xindent, ypos+ylargediff+ysmalldiff, "BUILDINGS STRONGER AGAINST ATTACK", game_g->letters_small));
 	ypos += ydiff;
 	screen_page->add(button_blue);
 }
 
 void ChoosePlayerGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
 	//player_select->draw(0, 0, false);
-	background->draw(0, 0);
-    Image::writeMixedCase(160, 16, letters_large, letters_small, NULL, "Select a Player", Image::JUSTIFY_CENTRE);
+	game_g->background->draw(0, 0);
+    Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Player", Image::JUSTIFY_CENTRE);
 
 	const int y_offset = 2; // must be even, otherwise we have graphical problems when running at 1280x1024 mode
-	if( player_heads_select[0] != NULL )
-		player_heads_select[0]->draw(button_red->getLeft(), button_red->getTop()+y_offset);
-	if( player_heads_select[1] != NULL )
-		player_heads_select[1]->draw(button_green->getLeft(), button_green->getTop()+y_offset);
-	if( player_heads_select[2] != NULL )
-		player_heads_select[2]->draw(button_yellow->getLeft(), button_yellow->getTop()+y_offset);
-	if( player_heads_select[3] != NULL )
-		player_heads_select[3]->draw(button_blue->getLeft(), button_blue->getTop()+y_offset);
+	if( game_g->player_heads_select[0] != NULL )
+		game_g->player_heads_select[0]->draw(button_red->getLeft(), button_red->getTop()+y_offset);
+	if( game_g->player_heads_select[1] != NULL )
+		game_g->player_heads_select[1]->draw(button_green->getLeft(), button_green->getTop()+y_offset);
+	if( game_g->player_heads_select[2] != NULL )
+		game_g->player_heads_select[2]->draw(button_yellow->getLeft(), button_yellow->getTop()+y_offset);
+	if( game_g->player_heads_select[3] != NULL )
+		game_g->player_heads_select[3]->draw(button_blue->getLeft(), button_blue->getTop()+y_offset);
 
 	this->screen_page->draw();
 
@@ -553,15 +553,13 @@ void ChoosePlayerGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 	}
 
 	if( player != -1 ) {
-		//human_player = player;
-		//human_player = PLAYER_DEMO; // force demo mode
-		::setClientPlayer(player);
-		if( gameType == GAMETYPE_TUTORIAL ) {
-			setGameStateID(GAMESTATEID_CHOOSETUTORIAL);
+		game_g->setClientPlayer(player);
+		if( game_g->getGameType() == GAMETYPE_TUTORIAL ) {
+			game_g->setGameStateID(GAMESTATEID_CHOOSETUTORIAL);
 		}
 		else {
-			setGameStateID(GAMESTATEID_PLACEMEN);
-			newGame();
+			game_g->setGameStateID(GAMESTATEID_PLACEMEN);
+			game_g->newGame();
 		}
 	}
 }
@@ -579,7 +577,7 @@ void ChooseTutorialGameState::reset() {
 	vector<TutorialInfo> infos = getTutorialInfo();
 	for(vector<TutorialInfo>::const_iterator iter = infos.begin(); iter != infos.end(); ++iter) {
 		TutorialInfo info = *iter;
-		Button *button = new Button(xpos, ypos, info.text.c_str(), letters_large);
+		Button *button = new Button(xpos, ypos, info.text.c_str(), game_g->letters_large);
 		button->setId(info.id);
 		ypos += ydiff;
 		screen_page->add(button);
@@ -589,10 +587,10 @@ void ChooseTutorialGameState::reset() {
 
 void ChooseTutorialGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
-	background->draw(0, 0);
-    Image::writeMixedCase(160, 16, letters_large, letters_small, NULL, "Select a Tutorial", Image::JUSTIFY_CENTRE);
+	game_g->background->draw(0, 0);
+    Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Tutorial", Image::JUSTIFY_CENTRE);
 
 	this->screen_page->draw();
 
@@ -607,11 +605,9 @@ void ChooseTutorialGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_midd
 		const Button *button = *iter;
 	    if( m_left && click && button->mouseOver(m_x, m_y) ) {
 			setupTutorial(button->getId());
-			start_epoch = tutorial->getStartEpoch();
-			selected_island = tutorial->getIsland();
-			map = maps[start_epoch][selected_island];
-			setupPlayers();
-			setGameStateID(GAMESTATEID_PLAYING);
+			game_g->setCurrentIsand(tutorial->getStartEpoch(), tutorial->getIsland());
+			game_g->setupPlayers();
+			game_g->setGameStateID(GAMESTATEID_PLAYING);
 			break;
 		}
 	}
@@ -669,7 +665,7 @@ void PlaceMenGameState::reset() {
 	for(int y=0;y<map_height_c;y++) {
 		for(int x=0;x<map_width_c;x++) {
 			map_panels[x][y] = NULL;
-			if( getMap()->isSectorAt(x, y) ) {
+			if( game_g->getMap()->isSectorAt(x, y) ) {
 				//int map_x = offset_map_x_c + 16 * x;
 				int map_x = this->off_x - 8 * map_width_c + 16 * x;
 				int map_y = this->off_y + 16 * y;
@@ -690,13 +686,13 @@ void PlaceMenGameState::draw() {
 	char buffer[256] = "";
 
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
-	background_islands->draw(0, 0);
+	game_g->background_islands->draw(0, 0);
 
-	if( !using_old_gfx ) {
+	if( !game_g->isUsingOldGfx() ) {
 		sprintf(buffer, "Gigalomania v%d.%d", majorVersion, minorVersion);
-	    Image::writeMixedCase(160, 228, letters_large, letters_small, numbers_white, buffer, Image::JUSTIFY_CENTRE);
+	    Image::writeMixedCase(160, 228, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Image::JUSTIFY_CENTRE);
 	}
 
     /*this->choosemenPanel->draw();
@@ -704,65 +700,65 @@ void PlaceMenGameState::draw() {
     GameState::draw();
     return;*/
 
-    int l_h = letters_large[0]->getScaledHeight();
-	int s_h = letters_small[0]->getScaledHeight();
+    int l_h = game_g->letters_large[0]->getScaledHeight();
+	int s_h = game_g->letters_small[0]->getScaledHeight();
 	const int cx = this->off_x;
     int cy = this->off_y + 104;
-    Image::writeMixedCase(cx, cy, letters_large, letters_small, NULL, map->getName(), Image::JUSTIFY_CENTRE);
+	Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, game_g->getMap()->getName(), Image::JUSTIFY_CENTRE);
 	cy += s_h + 2;
-	Image::writeMixedCase(cx, cy, letters_large, letters_small, NULL, "of the", Image::JUSTIFY_CENTRE);
+	Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, "of the", Image::JUSTIFY_CENTRE);
 	cy += l_h + 2;
-	sprintf(buffer, "%s AGE", epoch_names[start_epoch]);
-	Image::writeMixedCase(cx, cy, letters_large, letters_small, NULL, buffer, Image::JUSTIFY_CENTRE);
+	sprintf(buffer, "%s AGE", epoch_names[game_g->getStartEpoch()]);
+	Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, buffer, Image::JUSTIFY_CENTRE);
     cy += l_h + 2;
 
-	int year = epoch_dates[start_epoch];
-	bool shiny = start_epoch == n_epochs_c-1;
-	Image::writeNumbers(cx+8, cy, shiny ? numbers_largeshiny : numbers_largegrey, abs(year),Image::JUSTIFY_RIGHT);
-	Image *era = ( year < 0 ) ? icon_bc :
-		shiny ? icon_ad_shiny : icon_ad;
+	int year = epoch_dates[game_g->getStartEpoch()];
+	bool shiny = game_g->getStartEpoch() == n_epochs_c-1;
+	Image::writeNumbers(cx+8, cy, shiny ? game_g->numbers_largeshiny : game_g->numbers_largegrey, abs(year),Image::JUSTIFY_RIGHT);
+	Image *era = ( year < 0 ) ? game_g->icon_bc :
+		shiny ? game_g->icon_ad_shiny : game_g->icon_ad;
 	if( era != NULL )
 		era->draw(cx+8, cy);
 	else {
-		Image::write(cx+8, cy, letters_small, ( year < 0 ) ? "BC" : "AD", Image::JUSTIFY_LEFT);
+		Image::write(cx+8, cy, game_g->letters_small, ( year < 0 ) ? "BC" : "AD", Image::JUSTIFY_LEFT);
 	}
     cy += l_h + 2;
 
-    if( !isDemo() && gameType == GAMETYPE_ALLISLANDS ) {
-		int n_suspended = getNSuspended();
+	if( !game_g->isDemo() && game_g->getGameType() == GAMETYPE_ALLISLANDS ) {
+		int n_suspended = game_g->getNSuspended();
         if( n_suspended > 0 )
 		{
 			sprintf(buffer, "Saved Men %d", n_suspended);
-            Image::writeMixedCase(cx, cy, letters_large, letters_small, numbers_white, buffer, Image::JUSTIFY_CENTRE);
+            Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Image::JUSTIFY_CENTRE);
 		}
 	}
 
     /*cy += l_h + 2;
 	cy += l_h + 2;
 	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_LOADGAME ) {
-		Image::write(cx, cy, letters_large, "LOAD", Image::JUSTIFY_CENTRE, true);
+		Image::write(cx, cy, game_g->letters_large, "LOAD", Image::JUSTIFY_CENTRE, true);
 	}
 	else if( choosemenPanel->getPage() == ChooseMenPanel::STATE_SAVEGAME ) {
-		Image::write(cx, cy, letters_large, "SAVE", Image::JUSTIFY_CENTRE, true);
+		Image::write(cx, cy, game_g->letters_large, "SAVE", Image::JUSTIFY_CENTRE, true);
 	}
     cy += s_h + 2;*/
 
 	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN ) {
 		cy = 100;
 		const int xpos = 80;
-		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "Click on the icon below", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "Click on the icon below", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "to choose how many men", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to choose how many men", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "to play with", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to play with", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "then click on the map", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "then click on the map", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, letters_large, letters_small, NULL, "to the right", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to the right", Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
 	}
 
-	map->draw(cx - 8*map_width_c, off_y);
+	game_g->getMap()->draw(cx - 8*map_width_c, off_y);
 
 	this->choosemenPanel->draw();
 	//this->choosemenPanel->drawPopups();
@@ -776,11 +772,6 @@ void PlaceMenGameState::draw() {
 
 void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
 	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
-
-	//bool m_left = mouse_left(m_b);
-	//bool m_right = mouse_right(m_b);
-	/*int s_m_x = (int)(m_x / scale_width);
-	int s_m_y = (int)(m_y / scale_height);*/
 
     bool done = false;
     if( !done && m_left && click && confirm_button_1 != NULL && confirm_button_1->mouseOver(m_x, m_y) ) {
@@ -804,7 +795,7 @@ void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,boo
 		int map_y = -1;
 		for(int y=0;y<map_height_c && !found;y++) {
 			for(int x=0;x<map_width_c && !found;x++) {
-				if( map->isSectorAt(x, y) ) {
+				if( game_g->getMap()->isSectorAt(x, y) ) {
 					ASSERT( this->map_panels[x][y] != NULL );
 					if( this->map_panels[x][y]->mouseOver(m_x, m_y) ) {
 						found = true;
@@ -815,7 +806,7 @@ void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,boo
 			}
 		}
 		if( found ) {
-			LOG("starting epoch %d island %s at %d, %d\n", start_epoch, map->getName(), map_x, map_y);
+			LOG("starting epoch %d island %s at %d, %d\n", game_g->getStartEpoch(), game_g->getMap()->getName(), map_x, map_y);
 			this->setStartMapPos(map_x, map_y);
 			return;
 		}
@@ -826,7 +817,7 @@ void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,boo
 }
 
 void PlaceMenGameState::requestQuit() {
-	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN && !state_changed ) {
+	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN && !game_g->isStateChanged() ) {
 		choosemenPanel->setPage(ChooseMenPanel::STATE_CHOOSEISLAND);
 	}
 	else {
@@ -838,10 +829,10 @@ void PlaceMenGameState::requestConfirm() {
 	if( confirm_window != NULL ) {
         this->closeConfirmWindow();
 		if( confirm_type == CONFIRMTYPE_NEWGAME ) {
-			setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
+			game_g->setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
 		}
 		else if( confirm_type == CONFIRMTYPE_QUITGAME ) {
-	        application->setQuit();
+	        game_g->getApplication()->setQuit();
 		}
 		else {
 			T_ASSERT(false);
@@ -852,16 +843,16 @@ void PlaceMenGameState::requestConfirm() {
 void PlaceMenGameState::setStartMapPos(int start_map_x, int start_map_y ) {
 	this->start_map_x = start_map_x;
 	this->start_map_y = start_map_y;
-	if( !isDemo() ) {
-		players[client_player]->setNMenForThisIsland( this->choosemenPanel->getNMen() );
-		ASSERT( players[client_player]->getNMenForThisIsland() <= getMenAvailable() );
-		LOG("human is player %d, starting with %d men\n", client_player, players[client_player]->getNMenForThisIsland());
+	if( !game_g->isDemo() ) {
+		game_g->players[client_player]->setNMenForThisIsland( this->choosemenPanel->getNMen() );
+		ASSERT( game_g->players[client_player]->getNMenForThisIsland() <= game_g->getMenAvailable() );
+		LOG("human is player %d, starting with %d men\n", client_player, game_g->players[client_player]->getNMenForThisIsland());
 	}
 	else {
 		LOG("DEMO mode\n");
 		//placeTower(map_x, map_y, 0);
 	}
-	placeTower();
+	game_g->placeTower();
 }
 
 void PlaceMenGameState::requestNewGame() {
@@ -872,11 +863,11 @@ void PlaceMenGameState::requestNewGame() {
 	confirm_type = CONFIRMTYPE_NEWGAME;
 	confirm_window->setBackground(0, 0, 0, 200);
 	const int offset_x_c = 120, offset_y_c = 120;
-	Button *text_button = new Button(offset_x_c, offset_y_c, "NEW GAME?", letters_large);
+	Button *text_button = new Button(offset_x_c, offset_y_c, "NEW GAME?", game_g->letters_large);
 	confirm_window->add(text_button);
-	confirm_button_1 = new Button(offset_x_c, offset_y_c+16, "YES", letters_large);
+	confirm_button_1 = new Button(offset_x_c, offset_y_c+16, "YES", game_g->letters_large);
 	confirm_window->add(confirm_button_1);
-	confirm_button_2 = new Button(offset_x_c+32, offset_y_c+16, "NO", letters_large);
+	confirm_button_2 = new Button(offset_x_c+32, offset_y_c+16, "NO", game_g->letters_large);
 	confirm_window->add(confirm_button_2);
 	this->screen_page->add(confirm_window);
 }
@@ -926,10 +917,10 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
-	map->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
-	s_biplane->fadeOut(500);
-	s_jetplane->fadeOut(500);
-	s_spaceship->fadeOut(500);
+	game_g->getMap()->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
+	game_g->s_biplane->fadeOut(500);
+	game_g->s_jetplane->fadeOut(500);
+	game_g->s_spaceship->fadeOut(500);
 	for(size_t i=0;i<effects.size();i++) {
 		TimedEffect *effect = effects.at(i);
 		delete effect;
@@ -947,7 +938,7 @@ PlayingGameState::~PlayingGameState() {
 }
 
 void PlayingGameState::createQuitWindow() {
-    if( confirm_window == NULL && !state_changed ) {
+    if( confirm_window == NULL && !game_g->isStateChanged() ) {
 		confirm_type = CONFIRMTYPE_QUITGAME;
 		confirm_window = new PanelPage(0, 0, default_width_c, default_height_c);
 		confirm_window->setBackground(0, 0, 0, 200);
@@ -955,16 +946,16 @@ void PlayingGameState::createQuitWindow() {
 #if defined(__ANDROID__)
 		confirm_button_1 = NULL; // if user wants to exit to homescreen, they can just press the Home button
 #else
-		confirm_button_1 = new Button(offset_x_c, offset_y_c, "SAVE GAME AND QUIT TO DESKTOP", letters_large);
+		confirm_button_1 = new Button(offset_x_c, offset_y_c, "SAVE GAME AND QUIT TO DESKTOP", game_g->letters_large);
 		confirm_window->add(confirm_button_1);
 #endif
-		confirm_button_2 = new Button(offset_x_c, offset_y_c+16, "EXIT BATTLE", letters_large);
+		confirm_button_2 = new Button(offset_x_c, offset_y_c+16, "EXIT BATTLE", game_g->letters_large);
 		confirm_window->add(confirm_button_2);
-		confirm_button_3 = new Button(offset_x_c, offset_y_c+32, "CANCEL", letters_large);
+		confirm_button_3 = new Button(offset_x_c, offset_y_c+32, "CANCEL", game_g->letters_large);
 		confirm_window->add(confirm_button_3);
 		screen_page->add(confirm_window);
 	}
-	else if( confirm_window != NULL && !state_changed ) {
+	else if( confirm_window != NULL && !game_g->isStateChanged() ) {
 		closeConfirmWindow();
 	}
 }
@@ -1049,7 +1040,7 @@ bool PlayingGameState::readSectorsProcessLine(Map *map, char *line, bool *done_h
 
 			Id element = UNDEFINED;
 			for(int i=0;i<N_ID;i++) {
-				if( strcmp( elements[i]->getName(), elementname.c_str() ) == 0 ) {
+				if( strcmp( game_g->elements[i]->getName(), elementname.c_str() ) == 0 ) {
 					element = (Id)i;
 				}
 			}
@@ -1059,7 +1050,7 @@ bool PlayingGameState::readSectorsProcessLine(Map *map, char *line, bool *done_h
 				return ok;
 			}
 
-			map->getSector(*sec_x, *sec_y)->setElements(element, n_elements);
+			game_g->getMap()->getSector(*sec_x, *sec_y)->setElements(element, n_elements);
 		}
 		else {
 			LOG("unknown word: %s\n", ptr);
@@ -1078,7 +1069,7 @@ bool PlayingGameState::readSectors(Map *map) {
 	bool done_header = false;
 
     char fullname[4096] = "";
-	sprintf(fullname, "%s/%s", maps_dirname, map->getFilename());
+	sprintf(fullname, "%s/%s", maps_dirname, game_g->getMap()->getFilename());
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
@@ -1086,7 +1077,7 @@ bool PlayingGameState::readSectors(Map *map) {
 #if !defined(__ANDROID__) && defined(__linux)
 	if( file == NULL ) {
 		LOG("searching in /usr/share/gigalomania/ for islands folder\n");
-		sprintf(fullname, "%s/%s", alt_maps_dirname, map->getFilename());
+		sprintf(fullname, "%s/%s", alt_maps_dirname, game_g->getMap()->getFilename());
 		file = SDL_RWFromFile(fullname, "rb");
 	}
 #endif
@@ -1100,7 +1091,7 @@ bool PlayingGameState::readSectors(Map *map) {
 	bool reached_end = false;
 	int newline_index = 0;
 	while( ok ) {
-		bool done = readLineFromRWOps(ok, file, buffer, line, MAX_LINE, buffer_offset, newline_index, reached_end);
+		bool done = game_g->readLineFromRWOps(ok, file, buffer, line, MAX_LINE, buffer_offset, newline_index, reached_end);
 		if( !ok )  {
 			LOG("failed to read line\n");
 		}
@@ -1119,48 +1110,48 @@ bool PlayingGameState::readSectors(Map *map) {
 void PlayingGameState::createSectors(int x, int y, int n_men) {
 	LOG("PlayingGameState::createSectors(%d, %d, %d)\n", x, y, n_men);
 
-	map->createSectors(this, start_epoch);
-	Sector *sector = map->getSector(x, y);
+	game_g->getMap()->createSectors(this, game_g->getStartEpoch());
+	Sector *sector = game_g->getMap()->getSector(x, y);
 	current_sector = sector;
-	if( !isDemo() ) {
+	if( !game_g->isDemo() ) {
 		sector->createTower(client_player, n_men);
 	}
 	//current_sector->createTower(human_player, 10);
 
 	//current_sector->getArmy(enemy_player)->soldiers[10] = 0;
-	//map->sectors[2][2]->getArmy(enemy_player)->soldiers[0] = 10;
+	//game_g->getMap()->sectors[2][2]->getArmy(enemy_player)->soldiers[0] = 10;
 
-	//Sector *enemy_sector = map->sectors[1][2];
+	//Sector *enemy_sector = game_g->getMap()->sectors[1][2];
 
 	for(int i=0;i<n_players_c;i++) {
-		if( i == client_player || players[i] == NULL )
+		if( i == client_player || game_g->players[i] == NULL )
 			continue;
 		int ex = 0, ey = 0;
 		while( true ) {
-			map->findRandomSector(&ex, &ey);
-			ASSERT( map->isSectorAt(ex, ey) );
-			if( map->getSector(ex, ey)->getPlayer() == -1 && !map->isReserved(ex, ey) )
+			game_g->getMap()->findRandomSector(&ex, &ey);
+			ASSERT( game_g->getMap()->isSectorAt(ex, ey) );
+			if( game_g->getMap()->getSector(ex, ey)->getPlayer() == -1 && !game_g->getMap()->isReserved(ex, ey) )
 				break;
 		}
-		//Sector *enemy_sector = map->sectors[ex][ey];
-		Sector *enemy_sector = map->getSector(ex, ey);
+		//Sector *enemy_sector = game_g->getMap()->sectors[ex][ey];
+		Sector *enemy_sector = game_g->getMap()->getSector(ex, ey);
 		//enemy_sector->getArmy(enemy_player)->soldiers[10] = 30;
 		//enemy_sector->createTower(enemy_player, 12);
-		if( start_epoch == end_epoch_c ) {
-			//players[i]->n_men_for_this_island = n_suspended[i];
-			players[i]->setNMenForThisIsland(100);
+		if( game_g->getStartEpoch() == end_epoch_c ) {
+			//game_g->players[i]->n_men_for_this_island = n_suspended[i];
+			game_g->players[i]->setNMenForThisIsland(100);
 		}
 		else {
-			players[i]->setNMenForThisIsland(20 + 5*start_epoch);
+			game_g->players[i]->setNMenForThisIsland(20 + 5*game_g->getStartEpoch());
 			// total: 360*3 + 65 = 1145 men
 		}
 		LOG("Enemy %d created at %d , %d\n", i, ex, ey);
-		enemy_sector->createTower(i, players[i]->getNMenForThisIsland());
+		enemy_sector->createTower(i, game_g->players[i]->getNMenForThisIsland());
 		//enemy_sector->createTower(enemy_player, 20);
 		//enemy_sector->createTower(enemy_player, 200);
 	}
 
-	if( !readSectors(map) ) {
+	if( !readSectors(game_g->getMap()) ) {
 		LOG("failed to read map sector info!\n");
 		ASSERT(false);
 	}
@@ -1191,7 +1182,7 @@ bool PlayingGameState::openPitMine() {
 	if( current_sector->getActivePlayer() != -1 && current_sector->getBuilding(BUILDING_MINE) == NULL && current_sector->getEpoch() >= 1 ) {
 		for(int i=0;i<N_ID;i++) {
 			if( current_sector->anyElements((Id)i) ) {
-				Element *element = ::elements[i];
+				Element *element = game_g->elements[i];
 				if( element->getType() == Element::OPENPITMINE )
 					return true;
 			}
@@ -1218,24 +1209,24 @@ void PlayingGameState::setupMapGUI() {
 		}
 	}
 	if( this->player_asking_alliance != -1 ) {
-		alliance_yes = new Button(24, 82, "YES", letters_large);
+		alliance_yes = new Button(24, 82, "YES", game_g->letters_large);
 		alliance_yes->setInfoLMB("join the alliance");
 		screen_page->add(alliance_yes);
-		alliance_no = new Button(56, 82, "NO", letters_large);
+		alliance_no = new Button(56, 82, "NO", game_g->letters_large);
 		alliance_no->setInfoLMB("refuse the alliance");
 		screen_page->add(alliance_no);
 	}
 	else if( this->map_display == MAPDISPLAY_MAP ) {
 		for(int y=0;y<map_height_c;y++) {
 			for(int x=0;x<map_width_c;x++) {
-				if( map->isSectorAt(x, y) ) {
+				if( game_g->getMap()->isSectorAt(x, y) ) {
 					int map_x = offset_map_x_c + 16 * x;
 					int map_y = offset_map_y_c + 16 * y;
 					PanelPage *panel = new PanelPage(map_x, map_y, 16, 16);
 					panel->setTolerance(0); // since map sectors are aligned, better for touchscreens not to use the "tolerance"
 					panel->setInfoLMB("view this sector");
 					screen_page->add(panel);
-					//map->panels[x][y] = panel;
+					//game_g->getMap()->panels[x][y] = panel;
 					map_panels[x][y] = panel;
 					char buffer[256] = "";
 					sprintf(buffer, "map_%d_%d", x, y);
@@ -1277,10 +1268,10 @@ void PlayingGameState::reset() {
 	// setup screen_page buttons
 	this->setupMapGUI();
 
-	if( !isDemo() ) {
-		speed_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, 4, icon_speeds[time_rate-1]);
+	if( !game_g->isDemo() ) {
+		speed_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, 4, game_g->icon_speeds[time_rate-1]);
 		speed_button->setId("speed_button");
-		if( onemousebutton ) {
+		if( game_g->isOneMouseButton() ) {
 			speed_button->setInfoLMB("cycle through different time rates");
 		}
 		else {
@@ -1291,10 +1282,10 @@ void PlayingGameState::reset() {
 
 		//if( mobile_ui )
 		{
-			pause_button = new Button(default_width_c - 80, default_height_c - quit_button_offset_c, "PAUSE", letters_large);
+			pause_button = new Button(default_width_c - 80, default_height_c - quit_button_offset_c, "PAUSE", game_g->letters_large);
 			pause_button->setId("pause_button");
 			screen_page->add(pause_button);
-			quit_button = new Button(default_width_c - 32, default_height_c - quit_button_offset_c, "QUIT", letters_large);
+			quit_button = new Button(default_width_c - 32, default_height_c - quit_button_offset_c, "QUIT", game_g->letters_large);
 			quit_button->setId("quit_button");
 			screen_page->add(quit_button);
 		}
@@ -1372,7 +1363,7 @@ void PlayingGameState::resetShieldButtons() {
 	}
 	int n_sides = 0;
 	for(int i=0;i<n_players_c;i++) {
-		if( !done_shield[i] && players[i] != NULL && !players[i]->isDead() ) {
+		if( !done_shield[i] && game_g->players[i] != NULL && !game_g->players[i]->isDead() ) {
 			bool allied[n_players_c];
 			for(int j=0;j<n_players_c;j++)
 				allied[j] = false;
@@ -1380,21 +1371,21 @@ void PlayingGameState::resetShieldButtons() {
 			done_shield[i] = true;
 			for(int j=i+1;j<n_players_c;j++) {
 				if( Player::isAlliance(i, j) ) {
-					ASSERT( players[j] != NULL );
-					ASSERT( !players[j]->isDead() );
+					ASSERT( game_g->players[j] != NULL );
+					ASSERT( !game_g->players[j]->isDead() );
 					allied[j] = true;
 					done_shield[j] = true;
 				}
 			}
 			n_sides++;
-			shield_buttons[i] = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, offset_map_y_c + shield_step_y_c * i + 8, playershields[ Player::getShieldIndex(allied) ]);
+			shield_buttons[i] = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, offset_map_y_c + shield_step_y_c * i + 8, game_g->playershields[ Player::getShieldIndex(allied) ]);
 			screen_page->add(shield_buttons[i]);
 			//shield_number_panels[i] = new PanelPage(offset_map_x_c + 16 * map_width_c + 4 + 16, offset_map_y_c + shield_step_y_c * i + 8, 20, 10);
 			shield_number_panels[i] = new PanelPage(offset_map_x_c + 16 * map_width_c + 4 + 16, offset_map_y_c + shield_step_y_c * i + 8, 20, shield_step_y_c);
 			screen_page->add(shield_number_panels[i]);
 		}
 	}
-	if( !isDemo() && n_sides > 2 ) {
+	if( !game_g->isDemo() && n_sides > 2 ) {
 		for(int i=0;i<n_players_c;i++) {
 			if( shield_buttons[i] != NULL && i != client_player && !Player::isAlliance(i, client_player) ) {
 				shield_buttons[i]->setInfoLMB("make an alliance");
@@ -1402,15 +1393,15 @@ void PlayingGameState::resetShieldButtons() {
 		}
 	}
 	bool any_alliances = false;
-	for(int i=0;i<n_players_c && !any_alliances && !isDemo();i++) {
+	for(int i=0;i<n_players_c && !any_alliances && !game_g->isDemo();i++) {
 		if( i != client_player && Player::isAlliance(i, client_player) ) {
 			any_alliances = true;
-			ASSERT( players[i] != NULL );
-			ASSERT( !players[i]->isDead() );
+			ASSERT( game_g->players[i] != NULL );
+			ASSERT( !game_g->players[i]->isDead() );
 		}
 	}
 	if( any_alliances ) {
-		shield_blank_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, offset_map_y_c + 4*shield_step_y_c + 8, playershields[0]);
+		shield_blank_button = new ImageButton(offset_map_x_c + 16 * map_width_c + 4, offset_map_y_c + 4*shield_step_y_c + 8, game_g->playershields[0]);
 		shield_blank_button->setInfoLMB("break current alliance");
 		screen_page->add(shield_blank_button);
 	}
@@ -1436,7 +1427,7 @@ void PlayingGameState::setFlashingSquare(int xpos,int ypos) {
 void GameState::fadeScreen(bool out, int delay, void (*func_finish)()) {
     if( fade != NULL )
         delete fade;
-	if( is_testing ) {
+	if( game_g->isTesting() ) {
 		if( func_finish != NULL ) {
 			func_finish();
 		}
@@ -1450,13 +1441,13 @@ void GameState::whiteFlash() {
 	//ASSERT( whitefade == NULL );
     if( whitefade != NULL )
         delete whitefade;
-	if( !is_testing ) {
+	if( !game_g->isTesting() ) {
 	    whitefade = new FadeEffect(true, false, 0, NULL);
 	}
 }
 
 void PlayingGameState::getFlagOffset(int *offset_x, int *offset_y, int epoch) const {
-	if( using_old_gfx ) {
+	if( game_g->isUsingOldGfx() ) {
 		*offset_x = 22;
 		*offset_y = 6;
 	}
@@ -1473,10 +1464,10 @@ void PlayingGameState::getFlagOffset(int *offset_x, int *offset_y, int epoch) co
 
 void PlayingGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
 
-	background->draw(0, 0);
+	game_g->background->draw(0, 0);
 	//background->draw(0, 0, true);
 
 	bool no_armies = true;
@@ -1493,41 +1484,41 @@ void PlayingGameState::draw() {
 
 	if( this->player_asking_alliance != -1 ) {
 		// ask alliance
-		if( player_heads_alliance[player_asking_alliance] != NULL ) {
-			player_heads_alliance[player_asking_alliance]->draw(offset_map_x_c + 24, offset_map_y_c + 24);
+		if( game_g->player_heads_alliance[player_asking_alliance] != NULL ) {
+			game_g->player_heads_alliance[player_asking_alliance]->draw(offset_map_x_c + 24, offset_map_y_c + 24);
 		}
 		stringstream str;
 		str << PlayerType::getName((PlayerType::PlayerTypeID)player_asking_alliance);
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 0, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Image::write(offset_map_x_c + 8, offset_map_y_c + 0, game_g->letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
 		str.str("asks for an");
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 8, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Image::write(offset_map_x_c + 8, offset_map_y_c + 8, game_g->letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
 		str.str("alliance");
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 16, letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Image::write(offset_map_x_c + 8, offset_map_y_c + 16, game_g->letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
 	}
 	else if( this->map_display == MAPDISPLAY_MAP ) {
 		// map
 
-		map->draw(offset_map_x_c, offset_map_y_c);
+		game_g->getMap()->draw(offset_map_x_c, offset_map_y_c);
 		for(int y=0;y<map_height_c;y++) {
 			for(int x=0;x<map_width_c;x++) {
-				if( map->getSector(x, y) != NULL ) {
+				if( game_g->getMap()->getSector(x, y) != NULL ) {
 					int map_x = offset_map_x_c + 16 * x;
 					int map_y = offset_map_y_c + 16 * y;
 					//map_sq[15]->draw(map_x, map_y, true);
-					if( map->getSector(x, y)->getPlayer() != -1 ) {
-						icon_towers[ map->getSector(x, y)->getPlayer() ]->draw(map_x + 5, map_y + 5);
+					if( game_g->getMap()->getSector(x, y)->getPlayer() != -1 ) {
+						game_g->icon_towers[ game_g->getMap()->getSector(x, y)->getPlayer() ]->draw(map_x + 5, map_y + 5);
 					}
-					else if( map->getSector(x, y)->isNuked() ) {
-						icon_nuke_hole->draw(map_x + 4, map_y + 4);
+					else if( game_g->getMap()->getSector(x, y)->isNuked() ) {
+						game_g->icon_nuke_hole->draw(map_x + 4, map_y + 4);
 					}
 					for(int i=0;i<n_players_c;i++) {
-						Army *army = map->getSector(x, y)->getArmy(i);
+						Army *army = game_g->getMap()->getSector(x, y)->getArmy(i);
 						int n_army = army->getTotal();
 						if( n_army > 0 ) {
 							int off_step = 5;
 							int off_step_x = ( i == 0 || i == 2 ) ? -off_step : off_step;
 							int off_step_y = ( i == 0 || i == 1 ) ? -off_step : off_step;
-							icon_armies[i]->draw(map_x + 6 + off_step_x, map_y + 6 + off_step_y);
+							game_g->icon_armies[i]->draw(map_x + 6 + off_step_x, map_y + 6 + off_step_y);
 						}
 					}
 				}
@@ -1535,15 +1526,15 @@ void PlayingGameState::draw() {
 		}
 		int map_x = offset_map_x_c + 16 * current_sector->getXPos();
 		int map_y = offset_map_y_c + 16 * current_sector->getYPos();
-		mapsquare->draw(map_x, map_y);
+		game_g->mapsquare->draw(map_x, map_y);
 	}
 	else if( this->map_display == MAPDISPLAY_UNITS ) {
 		// unit stats
 		const int gap = 18;
 		const int extra = 0;
-		for(int i=0;i<=n_sub_epochs;i++) {
-			Image *image = (i==0) ? unarmed_man : numbered_weapons[start_epoch + i - 1];
-			//Image *image = (i==0) ? men[start_epoch] : numbered_weapons[start_epoch + i - 1];
+		for(int i=0;i<=game_g->getNSubEpochs();i++) {
+			Image *image = (i==0) ? game_g->unarmed_man : game_g->numbered_weapons[game_g->getStartEpoch() + i - 1];
+			//Image *image = (i==0) ? men[game_g->getStartEpoch()] : numbered_weapons[game_g->getStartEpoch() + i - 1];
 			image->draw(offset_map_x_c + gap * i + extra, offset_map_y_c + 2 - 16 + 8);
 		}
 		for(int i=0;i<n_players_c;i++) {
@@ -1555,12 +1546,12 @@ void PlayingGameState::draw() {
 				if( j == i || Player::isAlliance(i, j) ) {
 					const Army *army = current_sector->getArmy(j);
 					if( army->getTotal() > 0 ) {
-						for(int k=0;k<=n_sub_epochs;k++) {
-							int idx = (k==0) ? 10 : start_epoch + k - 1;
+						for(int k=0;k<=game_g->getNSubEpochs();k++) {
+							int idx = (k==0) ? 10 : game_g->getStartEpoch() + k - 1;
 							int n_men = army->getSoldiers(idx);
 							if( n_men > 0 ) {
-								//Image::writeNumbers(offset_map_x_c + 16 * k + 4, offset_map_y_c + 2 + 16 * i + 8 * off + 8, numbers_small[j], n_men, Image::JUSTIFY_LEFT, true);
-								Image::writeNumbers(offset_map_x_c + gap * k + extra, offset_map_y_c + 2 + 16 * i + 8 * off + 8, numbers_small[j], n_men, Image::JUSTIFY_LEFT);
+								//Image::writeNumbers(offset_map_x_c + 16 * k + 4, offset_map_y_c + 2 + 16 * i + 8 * off + 8, game_g->numbers_small[j], n_men, Image::JUSTIFY_LEFT, true);
+								Image::writeNumbers(offset_map_x_c + gap * k + extra, offset_map_y_c + 2 + 16 * i + 8 * off + 8, game_g->numbers_small[j], n_men, Image::JUSTIFY_LEFT);
 							}
 						}
 						off++;
@@ -1571,7 +1562,7 @@ void PlayingGameState::draw() {
 	}
 
 	// land area
-	land[map->getColour()]->draw(offset_land_x_c, offset_land_y_c);
+	game_g->land[game_g->getMap()->getColour()]->draw(offset_land_x_c, offset_land_y_c);
 
 	// trees etc (not at front)
 	for(int i=0;i<current_sector->getNFeatures();i++) {
@@ -1584,7 +1575,7 @@ void PlayingGameState::draw() {
 	if( current_sector->getActivePlayer() != -1 )
 	{
 		if( openPitMine() )
-			icon_openpitmine->draw(offset_land_x_c + offset_openpitmine_x_c, offset_land_y_c + offset_openpitmine_y_c);
+			game_g->icon_openpitmine->draw(offset_land_x_c + offset_openpitmine_x_c, offset_land_y_c + offset_openpitmine_y_c);
 
 		bool rotate_defenders = false;
 		if( getGameTime() - defenders_last_time_update > defenders_ticks_per_update_c ) {
@@ -1609,17 +1600,17 @@ void PlayingGameState::draw() {
 				// uncomment to draw turrent button regions:
 				/*{
 					PanelPage *button = building->getTurretButton(j);
-					screen->fillRectWithAlpha(scale_width*button->getLeft(), scale_height*button->getTop(), scale_width*button->getWidth(), scale_height*button->getHeight(), 255, 0, 0, 127);
+					game_g->getScreen()->fillRectWithAlpha(game_g->getScaleWidth()*button->getLeft(), game_g->getScaleHeight()*button->getTop(), game_g->getScaleWidth()*button->getWidth(), game_g->getScaleHeight()*button->getHeight(), 255, 0, 0, 127);
 				}*/
 
 				if( building->getTurretMan(j) != -1 ) {
 					Image *image = NULL;
 					int defender_epoch = building->getTurretMan(j);
 					if( defender_epoch == nuclear_epoch_c ) {
-						image = nuke_defences[current_sector->getPlayer()];
+						image = game_g->nuke_defences[current_sector->getPlayer()];
 					}
 					else {
-						image = defenders[current_sector->getPlayer()][defender_epoch][ building->getTurretManFrame(j) % n_defender_frames[defender_epoch] ];
+						image = game_g->defenders[current_sector->getPlayer()][defender_epoch][ building->getTurretManFrame(j) % game_g->n_defender_frames[defender_epoch] ];
 					}
 					image->draw(building->getTurretButton(j)->getLeft(), building->getTurretButton(j)->getTop() - 4);
 				}
@@ -1628,7 +1619,7 @@ void PlayingGameState::draw() {
 			if( i == BUILDING_TOWER ) {
 				int offset_x = 0, offset_y = 0;
 				getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
-				flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
+				game_g->flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
 			}
 
 			const int health_xpos = offset_land_x_c + building->getX() + 4;
@@ -1636,14 +1627,10 @@ void PlayingGameState::draw() {
 			const int health_ypos = offset_land_y_c + building->getY() + images[ current_sector->getBuildingEpoch() ]->getScaledHeight() + 2;
 			const int health_width = 36;
 			const int health_height = 4;
-			/*float health = (health_width-2) * ((float)building->getHealth()) / (float)building->getMaxHealth();
-			screen->fillRectWithAlpha(scale_width*health_xpos, scale_height*health_ypos, scale_width*health_width, scale_height*health_height, 255, 255, 255, 127);
-			screen->fillRectWithAlpha(scale_width*(health_xpos+1), scale_height*(health_ypos+1), scale_width*(health_width-2), scale_height*(health_height-2), 0, 0, 0, 127);
-			screen->fillRectWithAlpha(scale_width*(health_xpos+1), scale_height*(health_ypos+1), scale_width*health, scale_height*(health_height-2), 255, 0, 0, 127);*/
-			float health = (scale_width*health_width-2) * ((float)building->getHealth()) / (float)building->getMaxHealth();
-			screen->fillRect((short)(scale_width*health_xpos), (short)(scale_height*health_ypos), (short)(scale_width*health_width), (short)(scale_height*health_height), 255, 255, 255);
-			screen->fillRect((short)(scale_width*health_xpos+1), (short)(scale_height*health_ypos+1), (short)(scale_width*health_width-2), (short)(scale_height*health_height-2), 0, 0, 0);
-			screen->fillRect((short)(scale_width*health_xpos+1), (short)(scale_height*health_ypos+1), (short)health, (short)(scale_height*health_height-2), 244, 67, 54);
+			float health = (game_g->getScaleWidth()*health_width-2) * ((float)building->getHealth()) / (float)building->getMaxHealth();
+			game_g->getScreen()->fillRect((short)(game_g->getScaleWidth()*health_xpos), (short)(game_g->getScaleHeight()*health_ypos), (short)(game_g->getScaleWidth()*health_width), (short)(game_g->getScaleHeight()*health_height), 255, 255, 255);
+			game_g->getScreen()->fillRect((short)(game_g->getScaleWidth()*health_xpos+1), (short)(game_g->getScaleHeight()*health_ypos+1), (short)(game_g->getScaleWidth()*health_width-2), (short)(game_g->getScaleHeight()*health_height-2), 0, 0, 0);
+			game_g->getScreen()->fillRect((short)(game_g->getScaleWidth()*health_xpos+1), (short)(game_g->getScaleHeight()*health_ypos+1), (short)health, (short)(game_g->getScaleHeight()*health_height-2), 244, 67, 54);
 		}
 	}
 	else if( current_sector->getPlayer() != -1 ) {
@@ -1654,7 +1641,7 @@ void PlayingGameState::draw() {
 		images[ current_sector->getBuildingEpoch() ]->draw(offset_land_x_c + building->getX(), offset_land_y_c + building->getY());
 		int offset_x = 0, offset_y = 0;
 		getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
-		flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
+		game_g->flags[ current_sector->getPlayer() ][frame_counter % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
 	}
 
 	//Vector soldier_list(n_players_c * 250);
@@ -1684,8 +1671,8 @@ void PlayingGameState::draw() {
 		if( !isAirUnit(soldier->epoch) ) {
 			//int frame = soldier->dir * 4 + ( frame_counter % 3 );
 			//Image *image = attackers_walking[soldier->player][soldier->epoch][frame];
-			int n_frames = n_attacker_frames[soldier->epoch][soldier->dir];
-			Image *image = attackers_walking[soldier->player][soldier->epoch][soldier->dir][frame_counter % n_frames];
+			int n_frames = game_g->n_attacker_frames[soldier->epoch][soldier->dir];
+			Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][frame_counter % n_frames];
 			image->draw(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
 		}
 	}
@@ -1722,11 +1709,11 @@ void PlayingGameState::draw() {
 		if( isAirUnit(soldier->epoch) ) {
 			Image *image = NULL;
 			if( soldier->epoch == 6 || soldier->epoch == 7 ) {
-				image = planes[soldier->player][soldier->epoch];
+				image = game_g->planes[soldier->player][soldier->epoch];
 			}
 			else if( soldier->epoch == 9 ) {
 				int frame = frame_counter % 3;
-				image = saucers[soldier->player][frame];
+				image = game_g->saucers[soldier->player][frame];
 			}
 			ASSERT(image != NULL);
 			image->draw(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
@@ -1745,7 +1732,7 @@ void PlayingGameState::draw() {
 	if( nuke_by_player != -1 ) {
 		int xpos = -1, ypos = -1;
 		current_sector->getNukePos(&xpos, &ypos);
-		nukes[nuke_by_player][1]->draw(xpos, ypos);
+		game_g->nukes[nuke_by_player][1]->draw(xpos, ypos);
 		if( current_sector->getNukeParticleSystem() != NULL ) {
 			current_sector->getNukeParticleSystem()->draw(xpos + 23 - 4, ypos + 2 - 4);
 		}
@@ -1762,7 +1749,7 @@ void PlayingGameState::draw() {
 			alpha = 1.0;
 		int ey = nuke_defence_y - 200;
 		int ypos = (int)(alpha * ey + (1.0 - alpha) * nuke_defence_y);
-		nukes[current_sector->getPlayer()][0]->draw(nuke_defence_x, ypos);
+		game_g->nukes[current_sector->getPlayer()][0]->draw(nuke_defence_x, ypos);
 		if( current_sector->getNukeDefenceParticleSystem() != NULL ) {
 			current_sector->getNukeDefenceParticleSystem()->draw(nuke_defence_x + 4 - 4, ypos + 31 - 4);
 		}
@@ -1770,7 +1757,7 @@ void PlayingGameState::draw() {
 
 	// playershields etc
 	for(int i=0;i<n_players_c;i++) {
-		if( players[i] != NULL && !players[i]->isDead() ) {
+		if( game_g->players[i] != NULL && !game_g->players[i]->isDead() ) {
 			//ASSERT( shield_buttons[i] != NULL );
 			if( shield_buttons[i] == NULL ) {
 				continue;
@@ -1782,7 +1769,7 @@ void PlayingGameState::draw() {
 			n_allied++;
 			}
 			}*/
-			//playershields[ players[i]->getShieldIndex()  ]->draw(offset_map_x_c + 16 * map_width_c + 4, offset_map_y_c + shield_step_y_c * i + 8, true);
+			//playershields[ game_g->players[i]->getShieldIndex()  ]->draw(offset_map_x_c + 16 * map_width_c + 4, offset_map_y_c + shield_step_y_c * i + 8, true);
 			int off = 0;
 			for(int j=i;j<n_players_c;j++) {
 				if( j == i || Player::isAlliance(i, j) ) {
@@ -1790,8 +1777,8 @@ void PlayingGameState::draw() {
 					int n_army = army->getTotal();
 					if( n_army > 0 ) {
 						shield_number_panels[i]->setVisible(true);
-						//Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8, numbers_small[i], n_army, Image::JUSTIFY_LEFT, true);
-						Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8 * off + 8, numbers_small[j], n_army, Image::JUSTIFY_LEFT);
+						//Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8, game_g->numbers_small[i], n_army, Image::JUSTIFY_LEFT, true);
+						Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8 * off + 8, game_g->numbers_small[j], n_army, Image::JUSTIFY_LEFT);
 						off++;
 					}
 				}
@@ -1805,9 +1792,9 @@ void PlayingGameState::draw() {
 		if( card != NULL ) {
 			const unsigned char tutorial_alpha_c = 127;
 			int n_lines = 0, max_wid = 0;
-			int s_w = letters_small[0]->getScaledWidth();
-			int l_w = letters_large[0]->getScaledWidth();
-			int l_h = letters_large[0]->getScaledHeight();
+			int s_w = game_g->letters_small[0]->getScaledWidth();
+			int l_w = game_g->letters_large[0]->getScaledWidth();
+			int l_h = game_g->letters_large[0]->getScaledHeight();
 			textLines(&n_lines, &max_wid, card->getText().c_str(), s_w, l_w);
 
 			Rect2D rect;
@@ -1815,12 +1802,12 @@ void PlayingGameState::draw() {
 			rect.y = 130;
 			rect.w = max_wid;
 			rect.h = n_lines * (l_h + 2);
-			const Image *player_image = player_heads_alliance[client_player];
+			const Image *player_image = game_g->player_heads_alliance[client_player];
 			if( player_image != NULL ) {
 				player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
 			}
-			screen->fillRectWithAlpha(scale_width*rect.x, scale_height*rect.y, scale_width*rect.w, scale_height*rect.h, 0, 0, 0, tutorial_alpha_c);
-			Image::writeMixedCase(rect.x, rect.y, letters_large, letters_small, numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
+			game_g->getScreen()->fillRectWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 0, 0, 0, tutorial_alpha_c);
+			Image::writeMixedCase(rect.x, rect.y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
 			if( card->hasArrow(this) ) {
 				int arrow_x = card->getArrowX();
 				int arrow_y = card->getArrowY();
@@ -1838,13 +1825,13 @@ void PlayingGameState::draw() {
 						src_y = rect.y + rect.h + 4;
 					}
 				}
-				screen->drawLine(scale_width*src_x, scale_height*src_y, scale_width*arrow_x, scale_height*arrow_y, 255, 255, 255);
+				game_g->getScreen()->drawLine(game_g->getScaleWidth()*src_x, game_g->getScaleHeight()*src_y, game_g->getScaleWidth()*arrow_x, game_g->getScaleHeight()*arrow_y, 255, 255, 255);
 			}
 
 			if( !card->autoProceed() && card->canProceed(this) ) {
 				if( tutorial_next_button == NULL ) {
 					textLines(&n_lines, &max_wid, card->getNextText().c_str(), l_w, l_w);
-					tutorial_next_button = new Button(rect.x + rect.w - max_wid, rect.y + rect.h + 4, card->getNextText().c_str(), letters_large);
+					tutorial_next_button = new Button(rect.x + rect.w - max_wid, rect.y + rect.h + 4, card->getNextText().c_str(), game_g->letters_large);
 					tutorial_next_button->setBackground(0, 0, 0, tutorial_alpha_c);
 					screen_page->add(tutorial_next_button);
 				}
@@ -1896,14 +1883,10 @@ void PlayingGameState::draw() {
 	}
 
 	// mouse pointer
-	/*int m_x, m_y;
-	SDL_GetMouseState(&m_x, &m_y);
-	m_x /= scale_width;
-	m_y /= scale_height;*/
 	GameState::setDefaultMouseImage();
 	mouse_off_x = 0;
 	mouse_off_y = 0;
-	if( gameStateID == GAMESTATEID_PLAYING ) {
+	if( game_g->getGameStateID() == GAMESTATEID_PLAYING ) {
 		GamePanel::MouseState mousestate = gamePanel->getMouseState();
 		if( mousestate == GamePanel::MOUSESTATE_DEPLOY_WEAPON || selected_army != NULL ) {
 			ASSERT( mousestate != GamePanel::MOUSESTATE_DEPLOY_WEAPON || selected_army == NULL );
@@ -1920,13 +1903,13 @@ void PlayingGameState::draw() {
 				}
 			}
 			if( bloody )
-				mouse_image = panel_bloody_attack;
+				mouse_image = game_g->panel_bloody_attack;
 			else
-				mouse_image = panel_attack;
+				mouse_image = game_g->panel_attack;
 			mobile_ui_display_mouse = true;
 		}
 		else if( mousestate == GamePanel::MOUSESTATE_DEPLOY_DEFENCE ) {
-			mouse_image = panel_defence;
+			mouse_image = game_g->panel_defence;
 			//m_x -= mouse_image->getScaledWidth() / 2;
 			//m_y -= mouse_image->getScaledHeight() / 2;
 			mouse_off_x = - mouse_image->getScaledWidth() / 2;
@@ -1934,7 +1917,7 @@ void PlayingGameState::draw() {
 			mobile_ui_display_mouse = true;
 		}
 		else if( mousestate == GamePanel::MOUSESTATE_DEPLOY_SHIELD ) {
-			mouse_image = panel_shield;
+			mouse_image = game_g->panel_shield;
 			mobile_ui_display_mouse = true;
 			//m_x -= mouse_image->getScaledWidth() / 2;
 			//m_y -= mouse_image->getScaledHeight() / 2;
@@ -1942,7 +1925,7 @@ void PlayingGameState::draw() {
 			mouse_off_y = - mouse_image->getScaledHeight() / 2;
 		}
 		else if( mousestate == GamePanel::MOUSESTATE_SHUTDOWN ) {
-			mouse_image = men[n_epochs_c-1];
+			mouse_image = game_g->men[n_epochs_c-1];
 			mouse_off_x = - mouse_image->getScaledWidth() / 2;
 			mouse_off_y = - mouse_image->getScaledHeight() / 2;
 			mobile_ui_display_mouse = true;
@@ -2098,7 +2081,7 @@ void PlayingGameState::update() {
 					int fire_random = rand() % RAND_MAX;
 					if( fire_random <= fire_prob ) {
 						// fire!
-						Image *image = attackers_walking[soldier->player][soldier->epoch][soldier->dir][0];
+						Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][0];
 						int xpos = 0, ypos = 0;
 						if( soldier->epoch == cannon_epoch_c ) {
 							xpos = soldier->xpos;
@@ -2196,7 +2179,7 @@ bool PlayingGameState::buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m
 }
 
 void PlayingGameState::moveTo(int map_x,int map_y) {
-	current_sector = map->getSector(map_x, map_y);
+	current_sector = game_g->getMap()->getSector(map_x, map_y);
 	if( this->getGamePanel() != NULL )
 		this->getGamePanel()->setPage( GamePanel::STATE_SECTORCONTROL );
 	this->reset();
@@ -2214,12 +2197,12 @@ void PlayingGameState::moveTo(int map_x,int map_y) {
 
 bool PlayingGameState::canRequestAlliance(int player,int i) const {
 	ASSERT(player != i);
-	ASSERT(players[player] != NULL);
-	ASSERT(!players[player]->isDead());
+	ASSERT(game_g->players[player] != NULL);
+	ASSERT(!game_g->players[player]->isDead());
 	bool ok = true;
 	// check not already allied
 	for(int j=0;j<n_players_c && ok;j++) {
-		if( j == player || players[j] == NULL || players[j]->isDead() ) {
+		if( j == player || game_g->players[j] == NULL || game_g->players[j]->isDead() ) {
 		}
 		else if( j == i || Player::isAlliance(i, j) ) {
 			if( Player::isAlliance(player, j) )
@@ -2230,7 +2213,7 @@ bool PlayingGameState::canRequestAlliance(int player,int i) const {
 	// check still two sides
 	bool allied_all_others = ok;
 	for(int j=0;j<n_players_c && allied_all_others;j++) {
-		if( j == player || players[j] == NULL || players[j]->isDead() ) {
+		if( j == player || game_g->players[j] == NULL || game_g->players[j]->isDead() ) {
 		}
 		else if( j == i || Player::isAlliance(i, j) ) {
 			// player on the side that we are requesting an alliance with
@@ -2250,10 +2233,10 @@ void PlayingGameState::requestAlliance(int player,int i,bool human) {
 		// AIs only supported in non-player mode
 		ASSERT(gameMode == GAMEMODE_SINGLEPLAYER);
 	}*/
-	ASSERT(gameMode == GAMEMODE_SINGLEPLAYER); // blocked for now
+	ASSERT(game_g->getGameMode() == GAMEMODE_SINGLEPLAYER); // blocked for now
 	ASSERT(player != i);
-	ASSERT(players[player] != NULL);
-	ASSERT(!players[player]->isDead());
+	ASSERT(game_g->players[player] != NULL);
+	ASSERT(!game_g->players[player]->isDead());
 	//ASSERT(i != human_player); // todo: for requesting with human player
 	bool ok = true;
 	bool ask_human_player = false;
@@ -2262,40 +2245,40 @@ void PlayingGameState::requestAlliance(int player,int i,bool human) {
 	// okay to request?
 	// check i, and those who are allied with i
 	for(int j=0;j<n_players_c && ok;j++) {
-		if( j == player || players[j] == NULL || players[j]->isDead() ) {
+		if( j == player || game_g->players[j] == NULL || game_g->players[j]->isDead() ) {
 		}
 		else if( j == i || Player::isAlliance(i, j) ) {
 			//if( j == human_player ) {
-			if( players[j]->isHuman() ) {
+			if( game_g->players[j]->isHuman() ) {
 				// request if human is part of alliance
 				ask_human_player = true;
 				playing_asking_human = player;
 				human_player = j;
 			}
-			else if( !players[j]->requestAlliance(player) ) {
+			else if( !game_g->players[j]->requestAlliance(player) ) {
 				ok = false;
 				if( human )
-					playSample(s_alliance_no[j]);
+					playSample(game_g->s_alliance_no[j]);
 			}
 		}
 	}
 	// check those who are allied with player
 	for(int j=0;j<n_players_c && ok;j++) {
-		if( j == player || players[j] == NULL || players[j]->isDead() ) {
+		if( j == player || game_g->players[j] == NULL || game_g->players[j]->isDead() ) {
 		}
 		else if( Player::isAlliance(player, j) ) {
 			//if( j == human_player ) {
-			if( players[j]->isHuman() ) {
+			if( game_g->players[j]->isHuman() ) {
 				// request if human is part of alliance
 				//ok = false;
 				ask_human_player = true;
 				playing_asking_human = i;
 				human_player = j;
 			}
-			else if( !players[j]->requestAlliance(i) ) {
+			else if( !game_g->players[j]->requestAlliance(i) ) {
 				ok = false;
 				if( human )
-					playSample(s_alliance_no[j]);
+					playSample(game_g->s_alliance_no[j]);
 			}
 		}
 	}
@@ -2306,8 +2289,8 @@ void PlayingGameState::requestAlliance(int player,int i,bool human) {
 		}
 		else {
 			// askHuman() is called to avoid the cpu player repeatedly asking
-			if( players[playing_asking_human]->askHuman() && players[playing_asking_human]->requestAlliance(human_player) ) {
-				playSample(s_alliance_ask[playing_asking_human]);
+			if( game_g->players[playing_asking_human]->askHuman() && game_g->players[playing_asking_human]->requestAlliance(human_player) ) {
+				playSample(game_g->s_alliance_ask[playing_asking_human]);
 				this->player_asking_alliance = playing_asking_human;
 				//this->reset();
 				this->setupMapGUI(); // needed to change the map GUI to ask player; call this rather than reset(), to avoid resetting the entire GUI (which causes the GUI to return to main sector control)
@@ -2316,14 +2299,14 @@ void PlayingGameState::requestAlliance(int player,int i,bool human) {
 	}
 	else if( ok ) {
 		if( human )
-			playSample(s_alliance_yes[i]);
+			playSample(game_g->s_alliance_yes[i]);
 		makeAlliance(player, i);
 	}
 }
 
 void PlayingGameState::makeAlliance(int player,int i) {
 	for(int j=0;j<n_players_c;j++) {
-		if( j == player || players[j] == NULL || players[j]->isDead() ) {
+		if( j == player || game_g->players[j] == NULL || game_g->players[j]->isDead() ) {
 		}
 		else if( j == i || Player::isAlliance(i, j) ) {
 			// bring player j into the alliance
@@ -2363,19 +2346,19 @@ void PlayingGameState::cancelPlayerAskingAlliance() {
 }*/
 
 void PlayingGameState::refreshTimeRate() {
-	speed_button->setImage( icon_speeds[ time_rate-1 ] );
+	speed_button->setImage( game_g->icon_speeds[ time_rate-1 ] );
 }
 
 void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
-	if( !isDemo() && players[client_player]->isDead() ) {
+	if( !game_g->isDemo() && game_g->players[client_player]->isDead() ) {
 		return;
 	}
 	GameState::mouseClick(m_x, m_y, m_left, m_middle, m_right, click);
 
 	//bool m_left = mouse_left(m_b);
 	//bool m_right = mouse_right(m_b);
-	int s_m_x = (int)(m_x / scale_width);
-	int s_m_y = (int)(m_y / scale_height);
+	int s_m_x = (int)(m_x / game_g->getScaleWidth());
+	int s_m_y = (int)(m_y / game_g->getScaleHeight());
 
 	bool done = false;
 	bool clear_selected_army = true;
@@ -2390,8 +2373,8 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		ASSERT( this->alliance_yes != NULL );
 		ASSERT( this->alliance_no != NULL );
 		if( this->alliance_yes->mouseOver(m_x, m_y) ) {
-			ASSERT( players[player_asking_alliance] != NULL );
-			ASSERT( !players[player_asking_alliance]->isDead() );
+			ASSERT( game_g->players[player_asking_alliance] != NULL );
+			ASSERT( !game_g->players[player_asking_alliance]->isDead() );
 			this->makeAlliance(player_asking_alliance, client_player);
 			// makeAlliance also cancels
 			done = true;
@@ -2405,15 +2388,15 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		}
 	}
 	if( !done && click && map_x >= 0 && map_x < map_width_c && map_y >= 0 && map_y < map_height_c ) {
-		if( this->player_asking_alliance == -1 && map_display == MAPDISPLAY_MAP && map->isSectorAt(map_x, map_y) && this->map_panels[map_x][map_y]->mouseOver(m_x, m_y) ) {
+		if( this->player_asking_alliance == -1 && map_display == MAPDISPLAY_MAP && game_g->getMap()->isSectorAt(map_x, map_y) && this->map_panels[map_x][map_y]->mouseOver(m_x, m_y) ) {
 			// although the mouse should always be over the map square, we call mouseOver so that the enabled flag is checked
 			done = true;
 			if( m_left && selected_army != NULL ) {
-				if( selected_army->getSector() != map->getSector(map_x, map_y) ) {
+				if( selected_army->getSector() != game_g->getMap()->getSector(map_x, map_y) ) {
 					int n_nukes = selected_army->getSoldiers(nuclear_epoch_c);
 					ASSERT( n_nukes == 0 );
 					// move selected army
-					/*if( map->getSector(map_x, map_y)->moveArmy(selected_army) ) {
+					/*if( game_g->getMap()->getSector(map_x, map_y)->moveArmy(selected_army) ) {
 						this->moveTo(map_x,map_y);
 					}*/
 					if( this->moveArmyTo(selected_army->getSector()->getXPos(), selected_army->getSector()->getYPos(), map_x, map_y) ) {
@@ -2428,7 +2411,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 			else if( m_left && this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_DEPLOY_WEAPON ) {
 				// deploy assembled army
 				ASSERT( current_sector->getAssembledArmy() != NULL );
-				Sector *target_sector = map->getSector(map_x, map_y);
+				Sector *target_sector = game_g->getMap()->getSector(map_x, map_y);
 				if( target_sector->isNuked() ) {
 					//clear_selected_army = false;
 				}
@@ -2445,7 +2428,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 						else if( target_sector->getActivePlayer() != -1 && Player::isAlliance(current_sector->getPlayer(), target_sector->getPlayer()) ) {
 							// don't nuke allied sectors
 							LOG("don't nuke allied sector\n");
-							playSample(s_cant_nuke_ally);
+							playSample(game_g->s_cant_nuke_ally);
 						}
 						else {
 							if( this->nukeSector(current_sector->getXPos(), current_sector->getYPos(), map_x, map_y) ) {
@@ -2453,7 +2436,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 							}
 						}
 					}
-					//else if( map->getSector(map_x, map_y)->moveArmy(current_sector->getAssembledArmy() ) ) {
+					//else if( game_g->getMap()->getSector(map_x, map_y)->moveArmy(current_sector->getAssembledArmy() ) ) {
 					else if( this->moveAssembledArmyTo(current_sector->getXPos(), current_sector->getYPos(), map_x, map_y) ) {
 						this->getGamePanel()->setMouseState(GamePanel::MOUSESTATE_NORMAL);
 						this->moveTo(map_x,map_y);
@@ -2461,7 +2444,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 				}
 			}
 			else if( m_left ) {
-				//if( map->sectors[map_x][map_y] != current_sector )
+				//if( game_g->getMap()->sectors[map_x][map_y] != current_sector )
 				{
 					// move to viewing a different sector
 					if( current_sector->getPlayer() == client_player ) {
@@ -2472,9 +2455,9 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 					this->moveTo(map_x,map_y);
 				}
 			}
-			else if( m_right && !isDemo() ) {
+			else if( m_right && !game_g->isDemo() ) {
 				// select an army
-				Army *army = map->getSector(map_x, map_y)->getArmy(client_player);
+				Army *army = game_g->getMap()->getSector(map_x, map_y)->getArmy(client_player);
 				if( army->getTotal() > 0 ) {
 					done = true;
 					selected_army = army;
@@ -2487,7 +2470,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 	if( !done && ( m_left || m_right ) && click && speed_button != NULL && speed_button->mouseOver(m_x, m_y) ) {
         done = true;
         registerClick();
-        if( oneMouseButtonMode() ) {
+        if( game_g->oneMouseButtonMode() ) {
 			// cycle through the speeds
 			time_rate++;
 			if( time_rate > 3 )
@@ -2517,8 +2500,8 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
         done = true;
         registerClick();
         ASSERT( confirm_window != NULL );
-		::saveState();
-	    application->setQuit();
+		game_g->saveState();
+	    game_g->getApplication()->setQuit();
 	}
 	else if( !done && m_left && click && confirm_button_2 != NULL && confirm_button_2->mouseOver(m_x, m_y) ) {
 		// exit battle
@@ -2536,10 +2519,10 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
     }
 	else if( !done && m_left && click && pause_button != NULL && pause_button->mouseOver(m_x, m_y) ) {
 		// should always be non-paused if we are here!
-		if( !isPaused() ) {
+		if( !game_g->isPaused() ) {
             done = true;
             registerClick();
-			togglePause();
+			game_g->togglePause();
 		}
 	}
 	else if( !done && m_left && click && tutorial_next_button != NULL && tutorial_next_button->mouseOver(m_x, m_y) ) {
@@ -2591,8 +2574,8 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 	}
 
 	// alliances
-	for(int i=0;i<n_players_c && !done && m_left && click && !isDemo();i++) {
-		if( i != client_player && players[i] != NULL && !players[i]->isDead() ) {
+	for(int i=0;i<n_players_c && !done && m_left && click && !game_g->isDemo();i++) {
+		if( i != client_player && game_g->players[i] != NULL && !game_g->players[i]->isDead() ) {
 			if( shield_buttons[i] != NULL && shield_buttons[i]->mouseOver(m_x, m_y) ) {
 				if( this->player_asking_alliance != -1 && this->player_asking_alliance == i ) {
 					// automatically accept
@@ -2629,11 +2612,11 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 	}
 
 	//if( !done && s_m_x >= offset_land_x_c + 16 && s_m_y >= offset_land_y_c ) {
-	if( !done && click && !isDemo() && this->land_panel->mouseOver(m_x, m_y) ) {
+	if( !done && click && !game_g->isDemo() && this->land_panel->mouseOver(m_x, m_y) ) {
 		const Army *army_in_sector = current_sector->getArmy(client_player);
 		Building *building = current_sector->getBuilding(BUILDING_TOWER);
-		bool clicked_fortress = building != NULL && s_m_x >= offset_land_x_c + building->getX() && s_m_x < offset_land_x_c + building->getX() + fortress[ current_sector->getBuildingEpoch() ]->getScaledWidth() &&
-			s_m_y >= offset_land_y_c + building->getY() && s_m_y < offset_land_y_c + building->getY() + fortress[ current_sector->getBuildingEpoch() ]->getScaledHeight();
+		bool clicked_fortress = building != NULL && s_m_x >= offset_land_x_c + building->getX() && s_m_x < offset_land_x_c + building->getX() + game_g->fortress[ current_sector->getBuildingEpoch() ]->getScaledWidth() &&
+			s_m_y >= offset_land_y_c + building->getY() && s_m_y < offset_land_y_c + building->getY() + game_g->fortress[ current_sector->getBuildingEpoch() ]->getScaledHeight();
 		if( m_left ) {
             if( this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_DEPLOY_WEAPON ) {
                 ASSERT( current_sector->getAssembledArmy() != NULL );
@@ -2668,11 +2651,11 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 				}
 			}
 		}
-		if( !done && ( oneMouseButtonMode() ? m_left : m_right ) && !clicked_fortress && army_in_sector->getTotal() > 0 ) {
+		if( !done && ( game_g->oneMouseButtonMode() ? m_left : m_right ) && !clicked_fortress && army_in_sector->getTotal() > 0 ) {
 			done = true;
             registerClick();
             //selected_army = army_in_sector;
-			selected_army = map->getSector(current_sector->getXPos(), current_sector->getYPos())->getArmy(client_player);
+			selected_army = game_g->getMap()->getSector(current_sector->getXPos(), current_sector->getYPos())->getArmy(client_player);
 			clear_selected_army = false;
 			if( current_sector->getPlayer() == client_player ) {
 				//current_sector->returnAssembledArmy();
@@ -2704,11 +2687,11 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 void PlayingGameState::requestConfirm() {
 	if( confirm_window != NULL ) {
         this->closeConfirmWindow();
-        if( !state_changed ) {
-			gameResult = GAMERESULT_QUIT;
-			fadeMusic(1000);
-			state_changed = true;
-			this->fadeScreen(true, 0, endIsland);
+        if( !game_g->isStateChanged() ) {
+			game_g->setGameResult(GAMERESULT_QUIT);
+			game_g->fadeMusic(1000);
+			game_g->setStateChanged(true);
+			this->fadeScreen(true, 0, endIsland_g);
 		}
 	}
 }
@@ -2721,8 +2704,8 @@ bool PlayingGameState::validSoldierLocation(int epoch,int xpos,int ypos) {
 
 	//int size_x = attackers_walking[0][ epoch ][0]->getScaledWidth();
 	//int size_y = attackers_walking[0][ epoch ][0]->getScaledHeight();
-	int size_x = attackers_walking[0][ epoch ][0][0]->getScaledWidth();
-	int size_y = attackers_walking[0][ epoch ][0][0]->getScaledHeight();
+	int size_x = game_g->attackers_walking[0][ epoch ][0][0]->getScaledWidth();
+	int size_y = game_g->attackers_walking[0][ epoch ][0][0]->getScaledHeight();
 	if( xpos < 0 || xpos + size_x >= land_width_c || ypos < 0 || ypos + size_y >= land_height_c )
 		okay = false;
 	else if( current_sector->getPlayer() != -1 ) {
@@ -2735,8 +2718,8 @@ bool PlayingGameState::validSoldierLocation(int epoch,int xpos,int ypos) {
 				ypos + size_y >= building->getY() && ypos < building->getY() + image->getScaledHeight() )
 				okay = false;
 		}
-		if( okay && openPitMine() && xpos + size_x >= offset_openpitmine_x_c && xpos < offset_openpitmine_x_c + icon_openpitmine->getScaledWidth() &&
-			ypos + size_y >= offset_openpitmine_y_c && ypos < offset_openpitmine_y_c + icon_openpitmine->getScaledHeight() )
+		if( okay && openPitMine() && xpos + size_x >= offset_openpitmine_x_c && xpos < offset_openpitmine_x_c + game_g->icon_openpitmine->getScaledWidth() &&
+			ypos + size_y >= offset_openpitmine_y_c && ypos < offset_openpitmine_y_c + game_g->icon_openpitmine->getScaledHeight() )
 			okay = false;
 		/*Building *building = current_sector->getBuilding(BUILDING_TOWER);
 		Building *building_mine = current_sector->getBuilding(BUILDING_MINE);
@@ -2782,13 +2765,13 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 					}
 				}
 				if( j == biplane_epoch_c ) {
-					playSample(s_biplane, SOUND_CHANNEL_BIPLANE, -1); // n.b., doesn't matter if this restarts the currently playing sample
+					playSample(game_g->s_biplane, SOUND_CHANNEL_BIPLANE, -1); // n.b., doesn't matter if this restarts the currently playing sample
 				}
 				else if( j == jetplane_epoch_c ) {
-					playSample(s_jetplane, SOUND_CHANNEL_BOMBER, -1); // n.b., doesn't matter if this restarts the currently playing sample
+					playSample(game_g->s_jetplane, SOUND_CHANNEL_BOMBER, -1); // n.b., doesn't matter if this restarts the currently playing sample
 				}
 				else if( j == spaceship_epoch_c ) {
-					playSample(s_spaceship, SOUND_CHANNEL_SPACESHIP, -1); // n.b., doesn't matter if this restarts the currently playing sample
+					playSample(game_g->s_spaceship, SOUND_CHANNEL_SPACESHIP, -1); // n.b., doesn't matter if this restarts the currently playing sample
 				}
 			}
 			else if( diff < 0 ) {
@@ -2801,7 +2784,7 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 								deathEffect(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
 								if( !isPlaying(SOUND_CHANNEL_FX) ) {
 									// only play if sound fx channel is free, to avoid too many death samples sounding
-									playSample(s_scream, SOUND_CHANNEL_FX);
+									playSample(game_g->s_scream, SOUND_CHANNEL_FX);
 								}
 							}
 							n_deaths[i][j]--;
@@ -2820,13 +2803,13 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 				}
 				if( army->getSoldiers(j) == 0 ) {
 					if( j == biplane_epoch_c ) {
-						s_biplane->fadeOut(500);
+						game_g->s_biplane->fadeOut(500);
 					}
 					else if( j == jetplane_epoch_c ) {
-						s_jetplane->fadeOut(500);
+						game_g->s_jetplane->fadeOut(500);
 					}
 					else if( j == spaceship_epoch_c ) {
-						s_spaceship->fadeOut(500);
+						game_g->s_spaceship->fadeOut(500);
 					}
 				}
 			}
@@ -2843,18 +2826,18 @@ n_soldiers[i] = 0;
 }*/
 
 void PlayingGameState::deathEffect(int xpos,int ypos) {
-	AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, death_flashes, n_death_flashes_c, 100, true);
+	AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, game_g->death_flashes, n_death_flashes_c, 100, true);
 	this->effects.push_back(animationeffect);
 }
 
 void PlayingGameState::blueEffect(int xpos,int ypos,bool dir) {
-	AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, blue_flashes, n_blue_flashes_c, 50, dir);
+	AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, game_g->blue_flashes, n_blue_flashes_c, 50, dir);
 	this->effects.push_back(animationeffect);
 }
 
 void PlayingGameState::explosionEffect(int xpos,int ypos) {
-	if( explosions[0] != NULL ) { // not available with "old" graphics
-		AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, explosions, n_explosions_c, 50, true);
+	if( game_g->explosions[0] != NULL ) { // not available with "old" graphics
+		AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, game_g->explosions, n_explosions_c, 50, true);
 		this->effects.push_back(animationeffect);
 	}
 }
@@ -2899,9 +2882,9 @@ void PlayingGameState::refreshButtons() {
 		if( this->player_asking_alliance == -1 && this->map_display == MAPDISPLAY_MAP ) {
 			for(int y=0;y<map_height_c;y++) {
 				for(int x=0;x<map_width_c;x++) {
-					if( map->isSectorAt(x, y) ) {
+					if( game_g->getMap()->isSectorAt(x, y) ) {
 						if( is_nukes ) {
-							if( map->getSector(x, y)->getPlayer() == current_sector->getPlayer() || map->getSector(x, y)->isBeingNuked() || map->getSector(x, y)->isNuked() ) {
+							if( game_g->getMap()->getSector(x, y)->getPlayer() == current_sector->getPlayer() || game_g->getMap()->getSector(x, y)->isBeingNuked() || game_g->getMap()->getSector(x, y)->isNuked() ) {
 								map_panels[x][y]->setInfoLMB("");
 							}
 							else {
@@ -2911,7 +2894,7 @@ void PlayingGameState::refreshButtons() {
 						else {
 							map_panels[x][y]->setInfoLMB("move army to this sector");
 						}
-						//map_panels[x][y]->setInfoLMB(!is_nukes ? "move army to this sector" : map->getSector(x, y) == current_sector ? "" : "nuke sector");
+						//map_panels[x][y]->setInfoLMB(!is_nukes ? "move army to this sector" : game_g->getMap()->getSector(x, y) == current_sector ? "" : "nuke sector");
 					}
 				}
 			}
@@ -2922,7 +2905,7 @@ void PlayingGameState::refreshButtons() {
 		if( this->player_asking_alliance == -1 && this->map_display == MAPDISPLAY_MAP ) {
 			for(int y=0;y<map_height_c;y++) {
 				for(int x=0;x<map_width_c;x++) {
-					if( map->isSectorAt(x, y) ) {
+					if( game_g->getMap()->isSectorAt(x, y) ) {
 						map_panels[x][y]->setInfoLMB("view this sector");
 					}
 				}
@@ -2950,7 +2933,7 @@ void PlayingGameState::refreshShieldNumberPanels() {
 }
 
 void PlayingGameState::setNDesigners(int sector_x, int sector_y, int n_designers) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		if( sector->getCurrentDesign() != NULL ) {
@@ -2960,7 +2943,7 @@ void PlayingGameState::setNDesigners(int sector_x, int sector_y, int n_designers
 }
 
 void PlayingGameState::setNWorkers(int sector_x, int sector_y, int n_workers) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		if( sector->getCurrentManufacture() != NULL ) {
@@ -2970,7 +2953,7 @@ void PlayingGameState::setNWorkers(int sector_x, int sector_y, int n_workers) {
 }
 
 void PlayingGameState::setFAmount(int sector_x, int sector_y, int n_famount) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		if( sector->getCurrentManufacture() != NULL ) {
@@ -2980,7 +2963,7 @@ void PlayingGameState::setFAmount(int sector_x, int sector_y, int n_famount) {
 }
 
 void PlayingGameState::setNMiners(int sector_x, int sector_y, Id element, int n_miners) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		if( sector->canMine(element) ) {
@@ -2990,7 +2973,7 @@ void PlayingGameState::setNMiners(int sector_x, int sector_y, Id element, int n_
 }
 
 void PlayingGameState::setNBuilders(int sector_x, int sector_y, Type type, int n_builders) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		if( sector->canBuild(type) ) {
@@ -3000,7 +2983,7 @@ void PlayingGameState::setNBuilders(int sector_x, int sector_y, Type type, int n
 }
 
 void PlayingGameState::setCurrentDesign(int sector_x, int sector_y, Design *design) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->setCurrentDesign(design);
@@ -3008,7 +2991,7 @@ void PlayingGameState::setCurrentDesign(int sector_x, int sector_y, Design *desi
 }
 
 void PlayingGameState::setCurrentManufacture(int sector_x, int sector_y, Design *design) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->setCurrentManufacture(design);
@@ -3016,7 +2999,7 @@ void PlayingGameState::setCurrentManufacture(int sector_x, int sector_y, Design 
 }
 
 void PlayingGameState::assembledArmyEmpty(int sector_x, int sector_y) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->getAssembledArmy()->empty();
@@ -3024,7 +3007,7 @@ void PlayingGameState::assembledArmyEmpty(int sector_x, int sector_y) {
 }
 
 bool PlayingGameState::assembleArmyUnarmed(int sector_x, int sector_y, int n) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		int n_spare = sector->getAvailablePopulation();
@@ -3039,7 +3022,7 @@ bool PlayingGameState::assembleArmyUnarmed(int sector_x, int sector_y, int n) {
 }
 
 bool PlayingGameState::assembleArmy(int sector_x, int sector_y, int epoch, int n) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		if( sector->assembleArmy(epoch, n) ) {
@@ -3050,7 +3033,7 @@ bool PlayingGameState::assembleArmy(int sector_x, int sector_y, int epoch, int n
 }
 
 void PlayingGameState::returnAssembledArmy(int sector_x, int sector_y) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->returnAssembledArmy();
@@ -3058,10 +3041,10 @@ void PlayingGameState::returnAssembledArmy(int sector_x, int sector_y) {
 }
 
 bool PlayingGameState::returnArmy(int sector_x, int sector_y, int src_x, int src_y) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
-		Sector *src = map->getSector(src_x, src_y);
+		Sector *src = game_g->getMap()->getSector(src_x, src_y);
 		Army *army = src->getArmy(client_player);
 		return sector->returnArmy(army);
 	}
@@ -3069,8 +3052,8 @@ bool PlayingGameState::returnArmy(int sector_x, int sector_y, int src_x, int src
 }
 
 bool PlayingGameState::moveArmyTo(int src_x, int src_y, int target_x, int target_y) {
-	Sector *src = map->getSector(src_x, src_y);
-	Sector *target = map->getSector(target_x, target_y);
+	Sector *src = game_g->getMap()->getSector(src_x, src_y);
+	Sector *target = game_g->getMap()->getSector(target_x, target_y);
 	ASSERT(src != NULL);
 	ASSERT(target != NULL);
 	Army *army = src->getArmy(client_player);
@@ -3078,11 +3061,11 @@ bool PlayingGameState::moveArmyTo(int src_x, int src_y, int target_x, int target
 }
 
 bool PlayingGameState::moveAssembledArmyTo(int src_x, int src_y, int target_x, int target_y) {
-	Sector *src = map->getSector(src_x, src_y);
+	Sector *src = game_g->getMap()->getSector(src_x, src_y);
 	ASSERT(src != NULL);
 	if( src->getActivePlayer() == client_player ) {
 		Army *army = src->getAssembledArmy();
-		Sector *target = map->getSector(target_x, target_y);
+		Sector *target = game_g->getMap()->getSector(target_x, target_y);
 		ASSERT(target != NULL);
 		return target->moveArmy(army);
 	}
@@ -3090,8 +3073,8 @@ bool PlayingGameState::moveAssembledArmyTo(int src_x, int src_y, int target_x, i
 }
 
 bool PlayingGameState::nukeSector(int src_x, int src_y, int target_x, int target_y) {
-	Sector *src = map->getSector(src_x, src_y);
-	Sector *target = map->getSector(target_x, target_y);
+	Sector *src = game_g->getMap()->getSector(src_x, src_y);
+	Sector *target = game_g->getMap()->getSector(target_x, target_y);
 	ASSERT(src != NULL);
 	ASSERT(target != NULL);
 	if( src->getActivePlayer() == client_player ) {
@@ -3104,7 +3087,7 @@ bool PlayingGameState::nukeSector(int src_x, int src_y, int target_x, int target
 }
 
 void PlayingGameState::deployDefender(int sector_x, int sector_y, Type type, int turret, int epoch) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		Building *building = sector->getBuilding(type);
@@ -3115,7 +3098,7 @@ void PlayingGameState::deployDefender(int sector_x, int sector_y, Type type, int
 }
 
 void PlayingGameState::returnDefender(int sector_x, int sector_y, Type type, int turret) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		Building *building = sector->getBuilding(type);
@@ -3126,7 +3109,7 @@ void PlayingGameState::returnDefender(int sector_x, int sector_y, Type type, int
 }
 
 void PlayingGameState::useShield(int sector_x, int sector_y, Type type, int shield) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		Building *building = sector->getBuilding(type);
@@ -3137,7 +3120,7 @@ void PlayingGameState::useShield(int sector_x, int sector_y, Type type, int shie
 }
 
 void PlayingGameState::trashDesign(int sector_x, int sector_y, Invention *invention) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->trashDesign(invention);
@@ -3145,7 +3128,7 @@ void PlayingGameState::trashDesign(int sector_x, int sector_y, Invention *invent
 }
 
 void PlayingGameState::shutdown(int sector_x, int sector_y) {
-	Sector *sector = map->getSector(sector_x, sector_y);
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
 		sector->shutdown(client_player);
@@ -3154,7 +3137,7 @@ void PlayingGameState::shutdown(int sector_x, int sector_y) {
 
 void PlayingGameState::saveState(stringstream &stream) const {
 	stream << "<playing_gamestate>\n";
-	if( gameType == GAMETYPE_TUTORIAL ) {
+	if( game_g->getGameType() == GAMETYPE_TUTORIAL ) {
 		stream << "<tutorial ";
 		stream << "name=\"" << tutorial->getId().c_str() << "\" ";
 		if( tutorial->getCard() != NULL ) {
@@ -3167,8 +3150,8 @@ void PlayingGameState::saveState(stringstream &stream) const {
 	stream << "<player_asking_alliance player_id=\"" << player_asking_alliance << "\" />\n";
 
 	for(int i=0;i<n_players_c;i++) {
-		if( players[i] != NULL ) {
-			players[i]->saveState(stream);
+		if( game_g->players[i] != NULL ) {
+			game_g->players[i]->saveState(stream);
 		}
 	}
 	Player::saveStateAlliances(stream);
@@ -3177,7 +3160,7 @@ void PlayingGameState::saveState(stringstream &stream) const {
 			stream << "<n_deaths player_id=\"" << i << "\" epoch=\"" << j << "\" n=\"" << n_deaths[i][j] << "\" />\n";
 		}
 	}
-	map->saveStateSectors(stream);
+	game_g->getMap()->saveStateSectors(stream);
 	stream << "</playing_gamestate>\n";
 }
 
@@ -3200,7 +3183,7 @@ void PlayingGameState::loadStateParseXMLMapXY(int *map_x, int *map_y, const TiXm
 	if( *map_x < 0 || *map_x >= map_width_c || *map_y < 0 || *map_y >= map_height_c ) {
 		throw std::runtime_error("current_sector invalid map reference");
 	}
-	else if( !map->isSectorAt(*map_x, *map_y) ) {
+	else if( !game_g->getMap()->isSectorAt(*map_x, *map_y) ) {
 		throw std::runtime_error("current_sector map reference doesn't exist");
 	}
 }
@@ -3224,7 +3207,7 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					// handled entirely by caller
 				}
 				else if( strcmp(element_name, "tutorial") == 0 ) {
-					if( gameType != GAMETYPE_TUTORIAL ) {
+					if( game_g->getGameType() != GAMETYPE_TUTORIAL ) {
 						throw std::runtime_error("wrong game type for tutorial");
 					}
 					bool has_card_name = false;
@@ -3331,7 +3314,7 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 				else if( strcmp(element_name, "sector") == 0 ) {
 					int map_x = -1, map_y = -1;
 					loadStateParseXMLMapXY(&map_x, &map_y, attribute);
-					map->getSector(map_x, map_y)->loadStateParseXMLNode(parent);
+					game_g->getMap()->getSector(map_x, map_y)->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
 				else if( strcmp(element_name, "player") == 0 ) {
@@ -3349,8 +3332,8 @@ void PlayingGameState::loadStateParseXMLNode(const TiXmlNode *parent) {
 					if( player_id < 0 || player_id >= n_players_c ) {
 						throw std::runtime_error("player invalid player_id");
 					}
-					players[player_id] = new Player(player_id == this->client_player, player_id);
-					players[player_id]->loadStateParseXMLNode(parent);
+					game_g->players[player_id] = new Player(player_id == this->client_player, player_id);
+					game_g->players[player_id]->loadStateParseXMLNode(parent);
 					read_children = false;
 				}
 				else if( strcmp(element_name, "player_alliances") == 0 ) {
@@ -3397,105 +3380,100 @@ void EndIslandGameState::reset() {
 
 void EndIslandGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
-	background->draw(0, 0);
-	screen->fillRectWithAlpha(scale_width*40, scale_height*120, scale_width*240, scale_height*70, 0, 0, 0, 127);
+	game_g->background->draw(0, 0);
+	game_g->getScreen()->fillRectWithAlpha(game_g->getScaleWidth()*40, game_g->getScaleHeight()*120, game_g->getScaleWidth()*240, game_g->getScaleHeight()*70, 0, 0, 0, 127);
 	char text[4096] = "";
-	if( gameResult == GAMERESULT_QUIT )
+	if( game_g->getGameResult() == GAMERESULT_QUIT )
 		strcpy(text, "QUITTER!");
-	else if( gameResult == GAMERESULT_LOST )
+	else if( game_g->getGameResult() == GAMERESULT_LOST )
 		strcpy(text, "LOSER!");
-	else if( gameResult == GAMERESULT_WON )
+	else if( game_g->getGameResult() == GAMERESULT_WON )
 		strcpy(text, "CONGRATULATIONS!");
 	else {
 		ASSERT(false);
 	}
-	Image::write(160, 122, letters_large, text, Image::JUSTIFY_CENTRE);
+	Image::write(160, 122, game_g->letters_large, text, Image::JUSTIFY_CENTRE);
 
 	bool suspend = false;
-	if( start_epoch >= 6 && gameResult == GAMERESULT_WON )
+	if( game_g->getStartEpoch() >= 6 && game_g->getGameResult() == GAMERESULT_WON )
 		suspend = true;
 
-	if( !isDemo() ) {
-		if( player_heads_select[client_player] != NULL ) {
-			player_heads_select[client_player]->draw(40, 96);
-			if( gameResult == GAMERESULT_LOST ) {
-				grave->draw(42, 64);
+	if( !game_g->isDemo() ) {
+		if( game_g->player_heads_select[client_player] != NULL ) {
+			game_g->player_heads_select[client_player]->draw(40, 96);
+			if( game_g->getGameResult() == GAMERESULT_LOST ) {
+				game_g->grave->draw(42, 64);
 			}
 		}
 	}
 	const int xstep = 40;
 	for(int i=0,xpos=96;i<n_players_c;i++) {
-		if( i == client_player || players[i] == NULL )
+		if( i == client_player || game_g->players[i] == NULL )
 			continue;
-		if( player_heads_select[i] != NULL ) {
-			player_heads_select[i]->draw(xpos, 96);
-			if( gameResult == GAMERESULT_WON || players[i]->getFinalMen() == 0 ) {
-				grave->draw(xpos+2, 64);
+		if( game_g->player_heads_select[i] != NULL ) {
+			game_g->player_heads_select[i]->draw(xpos, 96);
+			if( game_g->getGameResult() == GAMERESULT_WON || game_g->players[i]->getFinalMen() == 0 ) {
+				game_g->grave->draw(xpos+2, 64);
 			}
 		}
 		xpos += xstep;
 	}
 
-	Image::write(40, 140, letters_small, "PLAYER", Image::JUSTIFY_LEFT);
-	Image::write(100, 140, letters_small, "START", Image::JUSTIFY_LEFT);
-	Image::write(140, 140, letters_small, "BIRTHS", Image::JUSTIFY_LEFT);
-	Image::write(180, 140, letters_small, "DEATHS", Image::JUSTIFY_LEFT);
-	Image::write(220, 140, letters_small, "END", Image::JUSTIFY_LEFT);
+	Image::write(40, 140, game_g->letters_small, "PLAYER", Image::JUSTIFY_LEFT);
+	Image::write(100, 140, game_g->letters_small, "START", Image::JUSTIFY_LEFT);
+	Image::write(140, 140, game_g->letters_small, "BIRTHS", Image::JUSTIFY_LEFT);
+	Image::write(180, 140, game_g->letters_small, "DEATHS", Image::JUSTIFY_LEFT);
+	Image::write(220, 140, game_g->letters_small, "END", Image::JUSTIFY_LEFT);
 	if( suspend )
-		Image::write(260, 140, letters_small, "SAVED", Image::JUSTIFY_LEFT);
+		Image::write(260, 140, game_g->letters_small, "SAVED", Image::JUSTIFY_LEFT);
 
 	int ypos = 150;
 	int rect_y_offset = 2;
 	//int r = 0, g = 0, b = 0, col = 0;
 	int r = 0, g = 0, b = 0;
-	/*SDL_Rect rect;
-	rect.x = (Sint16)(20 * scale_width);
-	rect.y = (Sint16)(ypos * scale_height);
-	rect.w = (Uint16)(16 * scale_width);
-	rect.h = (Uint16)(8 * scale_height);*/
-	int rect_x = (int)(20 * scale_width);
-	int rect_y = (int)((ypos-rect_y_offset) * scale_height);
-	int rect_w = (int)(16 * scale_width);
-	int rect_h = (int)(8 * scale_height);
+	int rect_x = (int)(20 * game_g->getScaleWidth());
+	int rect_y = (int)((ypos-rect_y_offset) * game_g->getScaleHeight());
+	int rect_w = (int)(16 * game_g->getScaleWidth());
+	int rect_h = (int)(8 * game_g->getScaleHeight());
 
-	if( !isDemo() ) {
+	if( !game_g->isDemo() ) {
 		PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)client_player);
-		/*col = SDL_MapRGB(screen->getSurface()->format, r, g, b);
-		SDL_FillRect(screen->getSurface(), &rect, col);*/
-		screen->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
+		/*col = SDL_MapRGB(game_g->getScreen()->getSurface()->format, r, g, b);
+		SDL_FillRect(game_g->getScreen()->getSurface(), &rect, col);*/
+		game_g->getScreen()->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
 
-		//Image::write(40, ypos, letters_small, "HUMAN", Image::JUSTIFY_LEFT, true);
-		Image::write(40, ypos, letters_small, PlayerType::getName((PlayerType::PlayerTypeID)client_player), Image::JUSTIFY_LEFT);
+		//Image::write(40, ypos, game_g->letters_small, "HUMAN", Image::JUSTIFY_LEFT, true);
+		Image::write(40, ypos, game_g->letters_small, PlayerType::getName((PlayerType::PlayerTypeID)client_player), Image::JUSTIFY_LEFT);
 
-		Image::writeNumbers(110, ypos, numbers_yellow, players[client_player]->getNMenForThisIsland(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(150, ypos, numbers_yellow, players[client_player]->getNBirths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(190, ypos, numbers_yellow, players[client_player]->getNDeaths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(230, ypos, numbers_yellow, players[client_player]->getFinalMen(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(110, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNMenForThisIsland(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(150, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNBirths(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(190, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNDeaths(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(230, ypos, game_g->numbers_yellow, game_g->players[client_player]->getFinalMen(), Image::JUSTIFY_LEFT);
 		if( suspend )
-			Image::writeNumbers(270, ypos, numbers_yellow, players[client_player]->getNSuspended(), Image::JUSTIFY_LEFT);
+			Image::writeNumbers(270, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNSuspended(), Image::JUSTIFY_LEFT);
 		ypos += 10;
 	}
 
 	for(int i=0;i<n_players_c;i++) {
-		if( i == client_player || players[i] == NULL )
+		if( i == client_player || game_g->players[i] == NULL )
 			continue;
 		PlayerType::getColour(&r, &g, &b, (PlayerType::PlayerTypeID)i);
-		/*col = SDL_MapRGB(screen->getSurface()->format, r, g, b);
-		rect.y = (Sint16)(ypos * scale_height);
-		SDL_FillRect(screen->getSurface(), &rect, col);*/
-		rect_y = (int)((ypos-rect_y_offset) * scale_height);
-		screen->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
+		/*col = SDL_MapRGB(game_g->getScreen()->getSurface()->format, r, g, b);
+		rect.y = (Sint16)(ypos * game_g->getScaleHeight());
+		SDL_FillRect(game_g->getScreen()->getSurface(), &rect, col);*/
+		rect_y = (int)((ypos-rect_y_offset) * game_g->getScaleHeight());
+		game_g->getScreen()->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
 
-		//Image::write(40, ypos, letters_small, "COMPUTER", Image::JUSTIFY_LEFT, true);
-		Image::write(40, ypos, letters_small, PlayerType::getName((PlayerType::PlayerTypeID)i), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(110, ypos, numbers_yellow, players[i]->getNMenForThisIsland(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(150, ypos, numbers_yellow, players[i]->getNBirths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(190, ypos, numbers_yellow, players[i]->getNDeaths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(230, ypos, numbers_yellow, players[i]->getFinalMen(), Image::JUSTIFY_LEFT);
+		//Image::write(40, ypos, game_g->letters_small, "COMPUTER", Image::JUSTIFY_LEFT, true);
+		Image::write(40, ypos, game_g->letters_small, PlayerType::getName((PlayerType::PlayerTypeID)i), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(110, ypos, game_g->numbers_yellow, game_g->players[i]->getNMenForThisIsland(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(150, ypos, game_g->numbers_yellow, game_g->players[i]->getNBirths(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(190, ypos, game_g->numbers_yellow, game_g->players[i]->getNDeaths(), Image::JUSTIFY_LEFT);
+		Image::writeNumbers(230, ypos, game_g->numbers_yellow, game_g->players[i]->getFinalMen(), Image::JUSTIFY_LEFT);
 		if( suspend )
-			Image::writeNumbers(270, ypos, numbers_yellow, players[i]->getNSuspended(), Image::JUSTIFY_LEFT);
+			Image::writeNumbers(270, ypos, game_g->numbers_yellow, game_g->players[i]->getNSuspended(), Image::JUSTIFY_LEFT);
 		ypos += 10;
 	}
 
@@ -3512,14 +3490,14 @@ void EndIslandGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bo
 	//bool m_left = mouse_left(m_b);
 	//bool m_right = mouse_right(m_b);
 
-	if( ( m_left || m_right ) && click && !state_changed ) {
+	if( ( m_left || m_right ) && click && !game_g->isStateChanged() ) {
 		this->requestQuit();
 	}
 }
 
 void EndIslandGameState::requestQuit() {
-	state_changed = true;
-	this->fadeScreen(true, 0, returnToChooseIsland);
+	game_g->setStateChanged(true);
+	this->fadeScreen(true, 0, returnToChooseIsland_g);
 }
 
 void GameCompleteGameState::reset() {
@@ -3529,48 +3507,48 @@ void GameCompleteGameState::reset() {
 
 void GameCompleteGameState::draw() {
 #if defined(__ANDROID__)
-	screen->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
+	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
-	background->draw(0, 0);
+	game_g->background->draw(0, 0);
 
 	this->screen_page->draw();
 	//this->screen_page->drawPopups();
 
-	if( !isDemo() ) {
+	if( !game_g->isDemo() ) {
 		stringstream str;
-		int l_h = letters_large[0]->getScaledHeight();
+		int l_h = game_g->letters_large[0]->getScaledHeight();
 		int y = 80;
 
-		Image::writeMixedCase(160, y, letters_large, letters_small, numbers_white, "GAME COMPLETE", Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, "GAME COMPLETE", Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
-		if( difficulty_level == DIFFICULTY_EASY )
+		if( game_g->getDifficultyLevel() == DIFFICULTY_EASY )
 			str.str("Easy");
-		else if( difficulty_level == DIFFICULTY_MEDIUM )
+		else if( game_g->getDifficultyLevel() == DIFFICULTY_MEDIUM )
 			str.str("Medium");
-		else if( difficulty_level == DIFFICULTY_HARD )
+		else if( game_g->getDifficultyLevel() == DIFFICULTY_HARD )
 			str.str("Hard");
 		else {
 			ASSERT(false);
 		}
-		Image::writeMixedCase(160, y, letters_large, letters_small, numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
 		y += l_h + 2;
 
-		str << "Men Remaining " << getMenAvailable();
-		Image::writeMixedCase(160, y, letters_large, letters_small, numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		str << "Men Remaining " << game_g->getMenAvailable();
+		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
 		str.str("");
-		str << "Men Saved " << getNSuspended();
-		Image::writeMixedCase(160, y, letters_large, letters_small, numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		str << "Men Saved " << game_g->getNSuspended();
+		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
-		int score = getMenAvailable() + getNSuspended();
+		int score = game_g->getMenAvailable() + game_g->getNSuspended();
 		str.str("");
 		str << "Total Score " << score;
-		Image::writeMixedCase(160, y, letters_large, letters_small, numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 	}
 
@@ -3584,12 +3562,12 @@ void GameCompleteGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 	//bool m_left = mouse_left(m_b);
 	//bool m_right = mouse_right(m_b);
 
-	if( ( m_left || m_right ) && click && !state_changed ) {
+	if( ( m_left || m_right ) && click && !game_g->isStateChanged() ) {
 		this->requestQuit();
 	}
 }
 
 void GameCompleteGameState::requestQuit() {
-	state_changed = true;
-	this->fadeScreen(true, 0, startNewGame);
+	game_g->setStateChanged(true);
+	this->fadeScreen(true, 0, startNewGame_g);
 }

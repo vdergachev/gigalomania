@@ -25,22 +25,11 @@ class PlayingGameState;
 class Player;
 class Application;
 class TextEffect;
+class Map;
 
 #include "common.h"
-
-extern bool onemousebutton;
-extern bool mobile_ui;
-bool oneMouseButtonMode();
-
-extern bool using_old_gfx;
-
-extern bool is_testing;
-extern Application *application;
-
-extern const char *maps_dirname;
-#if !defined(__ANDROID__) && defined(__linux)
-extern const char *alt_maps_dirname;
-#endif
+#include "image.h"
+#include "TinyXML/tinyxml.h"
 
 enum GameStateID {
 	GAMESTATEID_UNDEFINED = -1,
@@ -54,10 +43,6 @@ enum GameStateID {
 	GAMESTATEID_GAMECOMPLETE
 };
 
-extern GameStateID gameStateID;
-extern bool state_changed;
-//extern bool paused;
-
 enum GameResult {
 	GAMERESULT_UNDEFINED = 0,
 	GAMERESULT_WON,
@@ -65,21 +50,28 @@ enum GameResult {
 	GAMERESULT_LOST
 };
 
-extern GameResult gameResult;
+enum DifficultyLevel {
+	DIFFICULTY_EASY = 0,
+	DIFFICULTY_MEDIUM,
+	DIFFICULTY_HARD,
+	DIFFICULTY_N_LEVELS
+};
+
+enum GameMode {
+	GAMEMODE_SINGLEPLAYER = 0,
+	GAMEMODE_MULTIPLAYER_SERVER = 1,
+	GAMEMODE_MULTIPLAYER_CLIENT = 2
+};
+
+enum GameType {
+	// don't change the numbers, as will break saved state compatibility!
+	GAMETYPE_SINGLEISLAND = 0,
+	GAMETYPE_ALLISLANDS = 1,
+	GAMETYPE_TUTORIAL = 2
+};
 
 const int default_width_c = 320;
-//const int default_height_c = 256;
 const int default_height_c = 240;
-//extern int default_width_c;
-//extern int default_height_c;
-extern float scale_width;
-extern float scale_height;
-//extern int screen_width;
-//extern int screen_height;
-/*const int screen_width = scale_width * default_width_c;
-//const int screen_height = scale_height * default_height_c;
-const int screen_height = scale_height * 256;
-//const int screen_height = scale_height * 240;*/
 
 const int infinity_c = 31;
 //const int end_epoch_c = 9; // use this to have the last epoch game
@@ -105,184 +97,391 @@ const int n_blue_flashes_c = 7;
 const int n_explosions_c = 59;
 const int n_coast_c = 8;
 const int n_map_sq_c = 16;
+const int max_islands_per_epoch_c = 3;
 
-//extern Image *player_select;
-extern Image *background;
-extern Image *player_heads_select[];
-extern Image *player_heads_alliance[];
-extern Image *grave;
-extern Image *land[];
-extern Image *fortress[];
-extern Image *mine[];
-extern Image *factory[];
-extern Image *lab[];
-extern Image *men[];
-extern Image *unarmed_man;
-extern Image *flags[n_players_c][n_flag_frames_c];
-extern Image *panel_design;
-//extern Image *panel_design_dark;
-extern Image *panel_lab;
-extern Image *panel_factory;
-extern Image *panel_shield;
-extern Image *panel_defence;
-extern Image *panel_attack;
-extern Image *panel_bloody_attack;
-extern Image *panel_knowndesigns;
-extern Image *panel_twoattack;
-extern Image *panel_build[];
-extern Image *panel_building[];
-extern Image *panel_bigdesign;
-extern Image *panel_biglab;
-extern Image *panel_bigfactory;
-extern Image *panel_bigshield;
-extern Image *panel_bigdefence;
-extern Image *panel_bigattack;
-extern Image *panel_bigbuild;
-extern Image *panel_bigknowndesigns;
-extern Image *numbers_blue[];
-extern Image *numbers_grey[];
-extern Image *numbers_white[];
-extern Image *numbers_orange[];
-extern Image *numbers_yellow[];
-extern Image *numbers_largegrey[];
-extern Image *numbers_largeshiny[];
-extern Image *numbers_small[n_players_c][10];
-extern Image *numbers_half;
-extern Image *letters_large[];
-extern Image *letters_small[];
-extern Image *mouse_pointers[];
-extern Image *playershields[];
-extern Image *building_health;
-extern Image *dash_grey;
-extern Image *icon_shield;
-extern Image *icon_defence;
-extern Image *icon_weapon;
-extern Image *icon_shields[];
-extern Image *icon_defences[];
-extern Image *icon_weapons[];
-extern Image *numbered_defences[];
-extern Image *numbered_weapons[];
-extern Image *icon_elements[];
-extern Image *icon_clocks[];
-extern Image *icon_infinity;
-extern Image *icon_bc;
-extern Image *icon_ad;
-extern Image *icon_ad_shiny;
-extern Image *icon_towers[];
-extern Image *icon_armies[];
-extern Image *icon_nuke_hole;
-extern Image *mine_gatherable_small;
-extern Image *mine_gatherable_large;
-extern Image *icon_ergo;
-extern Image *icon_trash;
-//extern Image *coast_icons[n_coast_c];
-extern Image *map_sq[MAP_N_COLOURS][n_map_sq_c];
-extern int n_defender_frames[n_epochs_c];
-extern Image *defenders[n_players_c][n_epochs_c][max_defender_frames_c];
-extern Image *nuke_defences[]; // epoch 8
-//extern Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_frames_c]; // epochs 6-9 are special case!
-extern int n_attacker_frames[n_epochs_c+1][n_attacker_directions_c];
-extern Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_directions_c][max_attacker_frames_c]; // epochs 6-9 are special case!
-extern Image *planes[n_players_c][n_epochs_c]; // epochs 6,7 only
-extern Image *nukes[n_players_c][n_nuke_frames_c]; // epoch 8 (frame 0 is launched defence, frame 1 is launched weapon)
-extern Image *saucers[n_players_c][n_saucer_frames_c]; // epoch 9
-extern Image *attackers_ammo[n_epochs_c][N_ATTACKER_AMMO_DIRS];
-extern Image *icon_openpitmine;
-extern Image *icon_trees[n_trees_c][n_tree_frames_c];
-extern vector<Image *> icon_clutter;
-extern vector<Image *> icon_clutter_nuked;
-extern Image *flashingmapsquare;
-extern Image *mapsquare;
-extern Image *arrow_left;
-extern Image *arrow_right;
-extern Image *death_flashes[];
-extern Image *blue_flashes[];
-extern Image *explosions[];
-extern Image *icon_mice[];
-extern Image *icon_speeds[];
-extern Image *smoke_image;
+class Game {
+	float scale_factor_w; // how much the input graphics are scaled
+	float scale_factor_h;
+	float scale_width; // the scale of the logical resolution or graphics size wrt the default 320x240 coordinate system
+	float scale_height;
+	bool onemousebutton;
+	bool mobile_ui;
+	bool using_old_gfx;
+	bool is_testing;
 
-extern Image *background_islands;
+	Application *application;
+	Screen *screen;
+	bool paused;
+	GameState *gamestate;
+	GameState *dispose_gamestate;
+	unsigned int lastmousepress_time;
 
-extern Sample *s_design_is_ready;
-extern Sample *s_ergo;
-extern Sample *s_advanced_tech;
-extern Sample *s_fcompleted;
-extern Sample *s_on_hold;
-extern Sample *s_running_out_of_elements;
-extern Sample *s_tower_critical;
-extern Sample *s_sector_destroyed;
-extern Sample *s_mine_destroyed;
-extern Sample *s_factory_destroyed;
-extern Sample *s_lab_destroyed;
-extern Sample *s_itis_all_over;
-extern Sample *s_conquered;
-extern Sample *s_won;
-extern Sample *s_weve_nuked_them;
-extern Sample *s_weve_been_nuked;
-extern Sample *s_alliance_yes[n_players_c];
-extern Sample *s_alliance_no[n_players_c];
-extern Sample *s_alliance_ask[n_players_c];
-extern Sample *s_cant_nuke_ally;
+	bool pref_sound_on;
+	bool pref_music_on;
+	bool pref_disallow_nukes;
 
-extern Sample *s_explosion;
-extern Sample *s_scream;
-extern Sample *s_buildingdestroyed;
-extern Sample *s_guiclick;
-extern Sample *s_biplane;
-extern Sample *s_jetplane;
-extern Sample *s_spaceship;
+	GameMode gameMode;
+	GameType gameType;
+	DifficultyLevel difficulty_level;
+	int human_player;
+
+	GameStateID gameStateID;
+	bool state_changed;
+	GameResult gameResult;
+
+	int start_epoch;
+	int n_sub_epochs;
+	int selected_island;
+	bool completed_island[max_islands_per_epoch_c];
+	Map *maps[n_epochs_c][max_islands_per_epoch_c];
+	Map *map;
+	int n_men_store;
+	int n_player_suspended;
+
+	void calculateScale(const Image *image);
+	bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename);
+	bool readMap(const char *filename);
+public:
+	Image *background;
+	Image *player_heads_select[n_players_c];
+	Image *player_heads_alliance[n_players_c];
+	Image *grave;
+	Image *land[MAP_N_COLOURS];
+	Image *fortress[n_epochs_c];
+	Image *mine[n_epochs_c];
+	Image *factory[n_epochs_c];
+	Image *lab[n_epochs_c];
+	Image *men[n_epochs_c];
+	Image *unarmed_man;
+	Image *flags[n_players_c][n_flag_frames_c];
+	Image *panel_design;
+	Image *panel_lab;
+	Image *panel_factory;
+	Image *panel_shield;
+	Image *panel_defence;
+	Image *panel_attack;
+	Image *panel_bloody_attack;
+	Image *panel_twoattack;
+	Image *panel_build[N_BUILDINGS];
+	Image *panel_building[N_BUILDINGS];
+	Image *panel_knowndesigns;
+	Image *panel_bigdesign;
+	Image *panel_biglab;
+	Image *panel_bigfactory;
+	Image *panel_bigshield;
+	Image *panel_bigdefence;
+	Image *panel_bigattack;
+	Image *panel_bigbuild;
+	Image *panel_bigknowndesigns;
+	Image *numbers_blue[10];
+	Image *numbers_grey[10];
+	Image *numbers_white[10];
+	Image *numbers_orange[10];
+	Image *numbers_yellow[10];
+	Image *numbers_largegrey[10];
+	Image *numbers_largeshiny[10];
+	Image *numbers_small[n_players_c][10];
+	Image *numbers_half;
+	Image *letters_large[n_font_chars_c];
+	Image *letters_small[n_font_chars_c];
+	Image *mouse_pointers[n_players_c];
+	Image *playershields[n_playershields_c];
+	Image *building_health;
+	Image *dash_grey;
+	Image *icon_shield;
+	Image *icon_defence;
+	Image *icon_weapon;
+	Image *icon_shields[n_shields_c];
+	Image *icon_defences[n_epochs_c];
+	Image *icon_weapons[n_epochs_c];
+	Image *numbered_defences[n_epochs_c];
+	Image *numbered_weapons[n_epochs_c];
+	Image *icon_elements[N_ID];
+	Image *icon_clocks[13];
+	Image *icon_infinity;
+	Image *icon_bc;
+	Image *icon_ad;
+	Image *icon_ad_shiny;
+	Image *icon_towers[n_players_c];
+	Image *icon_armies[n_players_c];
+	Image *icon_nuke_hole;
+	Image *mine_gatherable_small;
+	Image *mine_gatherable_large;
+	Image *icon_ergo;
+	Image *icon_trash;
+	Image *coast_icons[n_coast_c];
+	int map_sq_offset, map_sq_coast_offset;
+	Image *map_sq[MAP_N_COLOURS][n_map_sq_c];
+	int n_defender_frames[n_epochs_c];
+	Image *defenders[n_players_c][n_epochs_c][max_defender_frames_c];
+	Image *nuke_defences[n_players_c];
+	int n_attacker_frames[n_epochs_c+1][n_attacker_directions_c];
+	Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_directions_c][max_attacker_frames_c]; // epochs 6-9 are special case!
+	Image *planes[n_players_c][n_epochs_c];
+	Image *nukes[n_players_c][n_nuke_frames_c];
+	Image *saucers[n_players_c][n_saucer_frames_c];
+	Image *attackers_ammo[n_epochs_c][N_ATTACKER_AMMO_DIRS];
+	Image *icon_openpitmine;
+	Image *icon_trees[n_trees_c][n_tree_frames_c];
+	vector<Image *> icon_clutter;
+	vector<Image *> icon_clutter_nuked;
+	Image *flashingmapsquare;
+	Image *mapsquare;
+	Image *arrow_left;
+	Image *arrow_right;
+	Image *death_flashes[n_death_flashes_c];
+	Image *blue_flashes[n_blue_flashes_c];
+	Image *explosions[n_explosions_c];
+	Image *icon_mice[2];
+	Image *icon_speeds[3];
+	Image *smoke_image;
+	Image *background_islands;
+
+	// speech
+	Sample *s_design_is_ready;
+	Sample *s_ergo;
+	Sample *s_advanced_tech;
+	Sample *s_fcompleted;
+	Sample *s_on_hold;
+	Sample *s_running_out_of_elements;
+	Sample *s_tower_critical;
+	Sample *s_sector_destroyed;
+	Sample *s_mine_destroyed;
+	Sample *s_factory_destroyed;
+	Sample *s_lab_destroyed;
+	Sample *s_itis_all_over;
+	Sample *s_conquered;
+	Sample *s_won;
+	Sample *s_weve_nuked_them;
+	Sample *s_weve_been_nuked;
+	Sample *s_alliance_yes[n_players_c];
+	Sample *s_alliance_no[n_players_c];
+	Sample *s_alliance_ask[n_players_c];
+	Sample *s_quit[n_players_c];
+	Sample *s_cant_nuke_ally;
+
+	// effects
+	Sample *s_explosion;
+	Sample *s_scream;
+	Sample *s_buildingdestroyed;
+	Sample *s_guiclick;
+	Sample *s_biplane;
+	Sample *s_jetplane;
+	Sample *s_spaceship;
+
+	Sample *music;
+
+	Invention *invention_shields[n_epochs_c];
+	Invention *invention_defences[n_epochs_c];
+	Weapon *invention_weapons[n_epochs_c];
+	Element *elements[N_ID];
+	Player *players[n_players_c];
+
+	Game();
+	~Game();
+
+	void convertToHiColor(Image *image) const;
+	void processImage(Image *image, bool old_smooth = true) const;
+	bool loadAttackersWalkingImages(const string &gfx_dir, int epoch);
+	bool loadOldImages();
+	bool loadImages();
+	bool loadSamples();
+	bool createMaps();
+	void cleanup();
+
+	float getScaleWidth() const {
+		return this->scale_width;
+	}
+	float getScaleHeight() const {
+		return this->scale_height;
+	}
+	void setOneMouseButton(bool onemousebutton) {
+		this->onemousebutton = onemousebutton;
+	}
+	bool isOneMouseButton() const {
+		return this->onemousebutton;
+	}
+	bool oneMouseButtonMode() const;
+	void setMobileUI(bool mobile_ui) {
+		this->mobile_ui = mobile_ui;
+	}
+	bool isMobileUI() const {
+		return this->mobile_ui;
+	}
+	bool isUsingOldGfx() const {
+		return this->using_old_gfx;
+	}
+	void setTesting(bool is_testing) {
+		this->is_testing = is_testing;
+	}
+	bool isTesting() const {
+		return this->is_testing;
+	}
+	
+	bool createApplication();
+	Application *getApplication() {
+		return this->application;
+	}
+	const Application *getApplication() const {
+		return this->application;
+	}
+	bool openScreen(bool fullscreen);
+	Screen *getScreen() {
+		return this->screen;
+	}
+	const Screen *getScreen() const {
+		return this->screen;
+	}
+	bool isPaused() const;
+	void setGameMode(GameMode gameMode) {
+		this->gameMode = gameMode;
+	}
+	GameMode getGameMode() const {
+		return this->gameMode;
+	}
+	void setGameType(GameType gameType) {
+		this->gameType = gameType;
+	}
+	GameType getGameType() const {
+		return this->gameType;
+	}
+	void setDifficultyLevel(DifficultyLevel difficulty_level) {
+		this->difficulty_level = difficulty_level;
+	}
+	DifficultyLevel getDifficultyLevel() const {
+		return this->difficulty_level;
+	}
+	void Game::disposeGameState();
+	void setGameStateID(GameStateID state, GameState *new_gamestate = NULL);
+	GameStateID getGameStateID() const {
+		return this->gameStateID;
+	}
+	void setStateChanged(bool state_changed) {
+		this->state_changed = state_changed;
+	}
+	bool isStateChanged() const {
+		return this->state_changed;
+	}
+	void setGameResult(GameResult gameResult) {
+		this->gameResult = gameResult;
+	}
+	GameResult getGameResult() const {
+		return this->gameResult;
+	}
+	void setCurrentMap() {
+		map = maps[start_epoch][selected_island];
+	}
+	void setCurrentIsand(int start_epoch, int selected_island) {
+		this->start_epoch = start_epoch;
+		this->selected_island = selected_island;
+		this->setCurrentMap();
+	}
+	const Map *getMap() const;
+	Map *getMap();
+	const Map *getMap(int i, int j) const {
+		return this->maps[i][j];
+	}
+	int getStartEpoch() const {
+		return this->start_epoch;
+	}
+	int getNSubEpochs() const {
+		return this->n_sub_epochs;
+	}
+	void setPrefSoundOn(bool pref_sound_on) {
+		this->pref_sound_on = pref_sound_on;
+	}
+	bool isPrefSoundOn() const {
+		return this->pref_sound_on;
+	}
+	void setPrefMusicOn(bool pref_music_on) {
+		this->pref_music_on = pref_music_on;
+	}
+	bool isPrefMusicOn() const {
+		return this->pref_music_on;
+	}
+	void setPrefDisallowNukes(bool pref_disallow_nukes) {
+		this->pref_disallow_nukes = pref_disallow_nukes;
+	}
+	bool isPrefDisallowNukes() const {
+		return this->pref_disallow_nukes;
+	}
+
+	int getMapSqOffset() const {
+		return map_sq_offset;
+	}
+	int getMapSqCoastOffset() const {
+		return map_sq_coast_offset;
+	}
+	void loadPrefs();
+	void savePrefs() const;
+	bool isDemo() const;
+
+	void saveState();
+	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
+	bool loadState();
+
+	int getMenPerEpoch() const;
+	int getMenAvailable() const;
+	int getNSuspended() const;
+	void updatedEpoch();
+	void setEpoch(int epoch);
+	void nextEpoch();
+	void nextIsland();
+	void startIsland();
+	void endIsland();
+	void returnToChooseIsland();
+	void startNewGame();
+	void placeTower();
+	void newGame();
+	void setClientPlayer(int set_client_player);
+	void keypressEscape();
+	void keypressReturn();
+	void togglePause();
+	void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click);
+	void updateGame();
+	void drawGame();
+	void addTextEffect(TextEffect *effect);
+	void drawProgress(int percentage);
+
+	bool readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
+	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename);
+	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot);
+	bool loadGame(const char *filename);
+	bool loadGame(int slot);
+	void saveGame(int slot);
+
+	void stopMusic();
+	void fadeMusic(int duration_ms);
+	void playMusic();
+
+	void cleanupPlayers();
+	void setupPlayers();
+	void setupInventions();
+	void setupElements();
+	bool playerAlive(int player);
+
+	void runTests();
+};
+
+extern Game *game_g;
+
+void startIsland_g();
+void endIsland_g();
+void returnToChooseIsland_g();
+void startNewGame_g();
+
+extern const char *maps_dirname;
+#if !defined(__ANDROID__) && defined(__linux)
+extern const char *alt_maps_dirname;
+#endif
 
 extern const int epoch_dates[];
 extern const char *epoch_names[];
 
-extern Invention *invention_shields[];
-extern Invention *invention_defences[];
-extern Weapon *invention_weapons[];
-
-extern Element *elements[];
-
-extern Player *players[];
-
-enum GameMode {
-	GAMEMODE_SINGLEPLAYER = 0,
-	GAMEMODE_MULTIPLAYER_SERVER = 1,
-	GAMEMODE_MULTIPLAYER_CLIENT = 2
-};
-extern GameMode gameMode;
-
-enum GameType {
-	// don't change the numbers, as will break saved state compatibility!
-	GAMETYPE_SINGLEISLAND = 0,
-	GAMETYPE_ALLISLANDS = 1,
-	GAMETYPE_TUTORIAL = 2
-};
-extern GameType gameType;
-
-enum DifficultyLevel {
-	DIFFICULTY_EASY = 0,
-	DIFFICULTY_MEDIUM,
-	DIFFICULTY_HARD,
-	DIFFICULTY_N_LEVELS
-};
-extern DifficultyLevel difficulty_level;
-
-int getMenAvailable();
-int getNSuspended();
-
-extern int start_epoch;
-extern int selected_island;
-extern int n_sub_epochs;
 enum PlayerMode {
 	PLAYER_DEMO = -2,
 	PLAYER_NONE = -1
 };
-bool isDemo();
-extern bool pref_sound_on;
-extern bool pref_music_on;
-extern bool pref_disallow_nukes;
-
-void savePrefs();
 
 class Map {
 	string name;
@@ -338,45 +537,11 @@ public:
 	void saveStateSectors(stringstream &stream) const;
 };
 
-extern Screen *screen;
-
-const int max_islands_per_epoch_c = 3;
-extern Map *maps[n_epochs_c][max_islands_per_epoch_c];
-extern Map *map;
-const Map *getMap();
-
-bool readLineFromRWOps(bool &ok, struct SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
-
-void keypressEscape();
-void keypressReturn();
-void togglePause();
-bool isPaused();
 void deleteState();
-void saveState();
-void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click);
-void updateGame();
-void drawGame();
 
-void fadeMusic(int duration_ms);
-void playMusic();
 void playGame(int n_args, char *args[]);
-void placeTower();
-bool playerAlive(int player);
 void quitGame();
-void setClientPlayer(int set_client_player);
-void newGame();
-void nextEpoch();
-void nextIsland();
-void returnToChooseIsland();
-void startNewGame();
-void setGameStateID(GameStateID state, GameState *new_gamestate = NULL);
-void endIsland();
-void setupPlayers();
-bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot);
-bool loadGame(int slot);
-void saveGame(int slot);
 bool validPlayer(int player);
-void addTextEffect(TextEffect *effect);
 
 #if defined(__ANDROID__)
 
@@ -399,9 +564,6 @@ const int factory_epoch_c = 4;
 const int lab_epoch_c = 5;
 //const int air_epoch_c = 6;
 
-/* These values have been checked to be correct (for Epoch 1, at least -
-* presumably this doesn't affect things?)
-*/
 const int DESIGNTIME_M3 = 20;
 const int DESIGNTIME_M2 = 30;
 const int DESIGNTIME_M1 = 40;
@@ -410,17 +572,11 @@ const int DESIGNTIME_1 = 100;
 const int DESIGNTIME_2 = 200;
 const int DESIGNTIME_3 = 400;
 
-/* These values have been checked to be correct (for Epoch 1, at least -
-* presumably this doesn't affect things?)
-*/
 const int MANUFACTURETIME_0 = 15;
 const int MANUFACTURETIME_1 = 30;
 const int MANUFACTURETIME_2 = 45;
-const int MANUFACTURETIME_3 = 60; // unknown
+const int MANUFACTURETIME_3 = 60;
 
-/* These values have been checked to be correct (for Epoch 1, at least -
-* presumably this doesn't affect things?)
-*/
 const int BUILDTIME_TOWER = 80;
 const int BUILDTIME_MINE = 40;
 const int BUILDTIME_FACTORY = 40;

@@ -146,8 +146,8 @@ bool TutorialCardWaitForDeployedArmy::canProceed(PlayingGameState *playing_games
 	else {
 		for(int y=0;y<map_height_c;y++) {
 			for(int x=0;x<map_width_c;x++) {
-				if( map->isSectorAt(x, y) ) {
-					const Sector *sector = map->getSector(x, y);
+				if( game_g->getMap()->isSectorAt(x, y) ) {
+					const Sector *sector = game_g->getMap()->getSector(x, y);
 					if( sector == deploy_sector )
 						continue;
 					if( require_unoccupied && sector->getPlayer() != PLAYER_NONE ) {
@@ -176,8 +176,8 @@ bool TutorialCardWaitForNewTower::canProceed(PlayingGameState *playing_gamestate
 	else {
 		for(int y=0;y<map_height_c;y++) {
 			for(int x=0;x<map_width_c;x++) {
-				if( map->isSectorAt(x, y) ) {
-					const Sector *sector = map->getSector(x, y);
+				if( game_g->getMap()->isSectorAt(x, y) ) {
+					const Sector *sector = game_g->getMap()->getSector(x, y);
 					if( sector == tower_sector )
 						continue;
 					bool has_tower = sector->getPlayer() == playing_gamestate->getClientPlayer();
@@ -222,9 +222,9 @@ Tutorial1::Tutorial1(const string &id) : Tutorial(id) {
 }
 
 void Tutorial1::initCards() {
-	Sector *start_sector = map->getSector(start_map_x, start_map_y);
+	Sector *start_sector = game_g->getMap()->getSector(start_map_x, start_map_y);
 	ASSERT(start_sector != NULL);
-	Sector *enemy_sector = map->getSector(2, 2);
+	Sector *enemy_sector = game_g->getMap()->getSector(2, 2);
 	ASSERT(enemy_sector != NULL);
 
 	TutorialCard *card = NULL;
@@ -277,7 +277,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	if( oneMouseButtonMode() ) {
+	if( game_g->isOneMouseButton() ) {
 		card = new TutorialCard("8", "Now put some of your people to work designing the weapon.\nClick here, then use the arrows to increase or decrease\nthe number of designers.");
 	}
 	else {
@@ -308,7 +308,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	if( oneMouseButtonMode() ) {
+	if( game_g->isOneMouseButton() ) {
 		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nClick this icon to cycle through different time rates.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
 	}
 	else {
@@ -417,7 +417,7 @@ Tutorial2::Tutorial2(const string &id) : Tutorial(id) {
 }
 
 void Tutorial2::initCards() {
-	Sector *start_sector = map->getSector(start_map_x, start_map_y);
+	Sector *start_sector = game_g->getMap()->getSector(start_map_x, start_map_y);
 	ASSERT(start_sector != NULL);
 
 	TutorialCard *card = NULL;
@@ -484,7 +484,7 @@ void Tutorial2::initCards() {
 		for(int y=0;y<map_height_c;y++) {
 			for(int x=0;x<map_width_c;x++) {
 				// enable the current square too, as we need to allow getting back if the user clicks another square without an assembled army!
-				if( map->isSectorAt(x, y) ) {
+				if( game_g->getMap()->isSectorAt(x, y) ) {
 					char buffer[256] = "";
 					sprintf(buffer, "map_%d_%d", x, y);
 					gui_handler->addException(buffer);
@@ -495,7 +495,7 @@ void Tutorial2::initCards() {
 	}
 	cards.push_back(card);
 
-	if( oneMouseButtonMode() ) {
+	if( game_g->isOneMouseButton() ) {
 		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by clicking,\neither on the current map square,\nor clicking on the main area to the right.");
 	}
 	else {
@@ -511,7 +511,7 @@ void Tutorial2::initCards() {
 
 	// return back home
 
-	if( oneMouseButtonMode() ) {
+	if( game_g->isOneMouseButton() ) {
 		card = new TutorialCardWaitForDeployedArmy("7", "Now let's return our men back to the tower.\nClick to select the army as before, then\nclick on your tower.", NULL, false);
 	}
 	else {
@@ -565,7 +565,7 @@ Tutorial3::Tutorial3(const string &id) : Tutorial(id) {
 }
 
 void Tutorial3::initCards() {
-	Sector *start_sector = map->getSector(start_map_x, start_map_y);
+	Sector *start_sector = game_g->getMap()->getSector(start_map_x, start_map_y);
 	ASSERT(start_sector != NULL);
 
 	TutorialCard *card = NULL;

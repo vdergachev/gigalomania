@@ -35,213 +35,320 @@ using std::stringstream;
 #include "image.h"
 #include "sound.h"
 
-//---------------------------------------------------------------------------
+const bool default_pref_sound_on_c = true;
+const bool default_pref_music_on_c = true;
+const bool default_pref_disallow_nukes_c = false;
 
-// onemousebutton means UI can be used with one mouse button only
+Game::Game() {
+	scale_factor_w = 1.0f;
+	scale_factor_h = 1.0f;
+	scale_width = 0.0f;
+	scale_height = 0.0f;
+	// onemousebutton means UI can be used with one mouse button only
 #if defined(__ANDROID__)
-bool onemousebutton = true;
+	onemousebutton = true;
 #else
-bool onemousebutton = false;
+	onemousebutton = false;
 #endif
+	// mobile_ui means no mouse pointer
+#if defined(__ANDROID__)
+	mobile_ui = true;
+#else
+	mobile_ui = false;
+#endif
+	using_old_gfx = false;
+	is_testing = false;
 
-bool oneMouseButtonMode() {
+	application = NULL;
+	screen = NULL;
+	paused = false;
+	gamestate = NULL;
+	dispose_gamestate = NULL;
+	lastmousepress_time = 0;
+
+	pref_sound_on = default_pref_sound_on_c;
+	pref_music_on = default_pref_music_on_c;
+	pref_disallow_nukes = default_pref_disallow_nukes_c;
+
+	gameMode = GAMEMODE_SINGLEPLAYER;
+	gameType = GAMETYPE_SINGLEISLAND;
+	difficulty_level = DIFFICULTY_EASY;
+	human_player = 0;
+
+	gameStateID = GAMESTATEID_UNDEFINED;
+	state_changed = false;
+	gameResult = GAMERESULT_UNDEFINED;
+
+	start_epoch = 0;
+	n_sub_epochs = 4;
+	selected_island = 0;
+	for(int i=0;i<max_islands_per_epoch_c;i++) {
+		completed_island[i] = NULL;
+		for(int j=0;j<n_epochs_c;j++) {
+			maps[j][i] = NULL;
+		}
+	}
+	map = NULL;
+	n_men_store = 0;
+	n_player_suspended = 0;
+
+	background = NULL;
+	for(int i=0;i<n_players_c;i++) {
+		player_heads_select[i] = NULL;
+		player_heads_alliance[i] = NULL;
+	}
+	grave = NULL;
+	for(int i=0;i<MAP_N_COLOURS;i++)
+		land[i] = NULL;
+	for(int i=0;i<n_epochs_c;i++) {
+		fortress[i] = NULL;
+		mine[i] = NULL;
+		factory[i] = NULL;
+		lab[i] = NULL;
+		men[i] = NULL;
+	}
+	unarmed_man = NULL;
+	for(int i=0;i<n_players_c;i++) {
+		for(int j=0;j<n_flag_frames_c;j++) {
+			flags[i][j] = NULL;
+		}
+	}
+	panel_design = NULL;
+	panel_lab = NULL;
+	panel_factory = NULL;
+	panel_shield = NULL;
+	panel_defence = NULL;
+	panel_attack = NULL;
+	panel_bloody_attack = NULL;
+	panel_twoattack = NULL;
+	for(int i=0;i<N_BUILDINGS;i++) {
+		panel_build[i] = NULL;
+		panel_building[i] = NULL;
+	}
+	panel_knowndesigns = NULL;
+	panel_bigdesign = NULL;
+	panel_biglab = NULL;
+	panel_bigfactory = NULL;
+	panel_bigshield = NULL;
+	panel_bigdefence = NULL;
+	panel_bigattack = NULL;
+	panel_bigbuild = NULL;
+	panel_bigknowndesigns = NULL;
+	for(int i=0;i<10;i++) {
+		numbers_blue[i] = NULL;
+		numbers_grey[i] = NULL;
+		numbers_white[i] = NULL;
+		numbers_orange[i] = NULL;
+		numbers_yellow[i] = NULL;
+		numbers_largegrey[i] = NULL;
+		numbers_largeshiny[i] = NULL;
+		for(int j=0;j<n_players_c;j++)
+			numbers_small[j][i] = NULL;
+	}
+	numbers_half = NULL;
+	for(int i=0;i<n_font_chars_c;i++) {
+		letters_large[i] = NULL;
+		letters_small[i] = NULL;
+	}
+	for(int i=0;i<n_players_c;i++)
+		mouse_pointers[i] = NULL;
+	for(int i=0;i<n_playershields_c;i++)
+		playershields[i] = NULL;
+	building_health = NULL;
+	dash_grey = NULL;
+	icon_shield = NULL;
+	icon_defence = NULL;
+	icon_weapon = NULL;
+	for(int i=0;i<n_shields_c;i++)
+		icon_shields[i] = NULL;
+	for(int i=0;i<n_epochs_c;i++) {
+		icon_defences[i] = NULL;
+		icon_weapons[i] = NULL;
+		numbered_defences[i] = NULL;
+		numbered_weapons[i] = NULL;
+	}
+	icon_elements[N_ID];
+	icon_clocks[13];
+	icon_infinity = NULL;
+	icon_bc = NULL;
+	icon_ad = NULL;
+	icon_ad_shiny = NULL;
+	for(int i=0;i<n_players_c;i++) {
+		icon_towers[i] = NULL;
+		icon_armies[i] = NULL;
+	}
+	icon_nuke_hole = NULL;
+	mine_gatherable_small = NULL;
+	mine_gatherable_large = NULL;
+	icon_ergo = NULL;
+	icon_trash = NULL;
+	for(int i=0;i<n_coast_c;i++)
+		coast_icons[i] = NULL;
+	map_sq_offset = 0;
+	map_sq_coast_offset = 0;
+	for(int i=0;i<MAP_N_COLOURS;i++) {
+		for(int j=0;j<n_map_sq_c;j++)
+			map_sq[i][j] = NULL;
+	}
+	for(int i=0;i<n_epochs_c;i++) {
+		n_defender_frames[i] = NULL;
+	}
+	for(int i=0;i<n_players_c;i++) {
+		for(int j=0;j<n_epochs_c;j++) {
+			for(int k=0;k<max_defender_frames_c;k++) {
+				defenders[i][j][k] = NULL;
+			}
+		}
+		nuke_defences[i] = NULL;
+	}
+	for(int i=0;i<n_epochs_c+1;i++) {
+		for(int j=0;j<n_attacker_directions_c;j++) {
+			n_attacker_frames[i][j] = NULL;
+		}
+	}
+	for(int i=0;i<n_players_c;i++) {
+		for(int j=0;j<n_epochs_c+1;j++) {
+			for(int k=0;k<n_attacker_directions_c;k++) {
+				for(int l=0;l<max_defender_frames_c;l++) {
+					attackers_walking[i][j][k][l] = NULL;
+				}
+			}
+		}
+		for(int j=0;j<n_epochs_c;j++) {
+			planes[i][j] = NULL;
+		}
+		for(int j=0;j<n_nuke_frames_c;j++) {
+			nukes[i][j] = NULL;
+			saucers[i][j] = NULL;
+		}
+	}
+	for(int i=0;i<n_epochs_c;i++) {
+		for(int j=0;j<N_ATTACKER_AMMO_DIRS;j++)
+			attackers_ammo[i][j] = NULL;
+	}
+	icon_openpitmine = NULL;
+	for(int i=0;i<n_trees_c;i++) {
+		for(int j=0;j<n_tree_frames_c;j++)
+			icon_trees[i][j] = NULL;
+	}
+	flashingmapsquare = NULL;
+	mapsquare = NULL;
+	arrow_left = NULL;
+	arrow_right = NULL;
+	for(int i=0;i<n_death_flashes_c;i++)
+		death_flashes[i] = NULL;
+	for(int i=0;i<n_blue_flashes_c;i++)
+		blue_flashes[i] = NULL;
+	for(int i=0;i<n_explosions_c;i++)
+		explosions[i] = NULL;
+	for(int i=0;i<2;i++)
+		icon_mice[i] = NULL;
+	for(int i=0;i<3;i++)
+		icon_speeds[i] = NULL;
+	smoke_image = NULL;
+	background_islands = NULL;
+
+	// speech
+	s_design_is_ready = NULL;
+	s_ergo = NULL;
+	s_advanced_tech = NULL;
+	s_fcompleted = NULL;
+	s_on_hold = NULL;
+	s_running_out_of_elements = NULL;
+	s_tower_critical = NULL;
+	s_sector_destroyed = NULL;
+	s_mine_destroyed = NULL;
+	s_factory_destroyed = NULL;
+	s_lab_destroyed = NULL;
+	s_itis_all_over = NULL;
+	s_conquered = NULL;
+	s_won = NULL;
+	s_weve_nuked_them = NULL;
+	s_weve_been_nuked = NULL;
+	for(int i=0;i<n_players_c;i++) {
+		s_alliance_yes[i] = NULL;
+		s_alliance_no[i] = NULL;
+		s_alliance_ask[i] = NULL;
+		s_quit[i] = NULL;
+	}
+	s_cant_nuke_ally = NULL;
+
+	// effects
+	s_explosion = NULL;
+	s_scream = NULL;
+	s_buildingdestroyed = NULL;
+	s_guiclick = NULL;
+	s_biplane = NULL;
+	s_jetplane = NULL;
+	s_spaceship = NULL;
+
+	music = NULL;
+
+	for(int i=0;i<n_epochs_c;i++) {
+		invention_shields[i];
+		invention_defences[i];
+		invention_weapons[i];
+	}
+	for(int i=0;i<N_ID;i++) {
+		elements[i] = NULL;
+	}
+	for(int i=0;i<n_players_c;i++) {
+		players[i] = NULL;
+	}
+}
+
+Game::~Game() {
+	if( gamestate != NULL ) {
+		LOG("delete gamestate %d\n", gamestate);
+		delete gamestate;
+		gamestate = NULL;
+	}
+	LOG("delete maps\n");
+	for(int i=0;i<n_epochs_c;i++) {
+		for(int j=0;j<max_islands_per_epoch_c;j++) {
+			if( maps[i][j] != NULL ) {
+				delete maps[i][j];
+				maps[i][j] = NULL;
+			}
+		}
+	}
+	map = NULL;
+	if( screen != NULL ) {
+		LOG("delete screen %d\n", screen);
+		delete screen;
+		screen = NULL;
+	}
+	LOG("clean up tracked objects\n");
+	TrackedObject::cleanup();
+	// no longer need to stop music, as it's deleted as a TrackedObject
+	//stopMusic();
+	LOG("free sound\n");
+	freeSound();
+	LOG("delete application %d\n", application);
+	delete application;
+}
+
+bool Game::oneMouseButtonMode() const {
 	return onemousebutton || application->isBlankMouse();
 }
 
-// mobile_ui means no mouse pointer
-#if defined(__ANDROID__)
-bool mobile_ui = true;
-#else
-bool mobile_ui = false;
-#endif
-
-bool using_old_gfx = false;
-
-bool is_testing = false;
-Application *application = NULL;
+Game *game_g = NULL;
 
 const char *maps_dirname = "islands";
 #if !defined(__ANDROID__) && defined(__linux)
 const char *alt_maps_dirname = "/usr/share/gigalomania/islands";
 #endif
 
-float scale_factor_w = 1.0f; // how much the input graphics are scaled
-float scale_factor_h = 1.0f;
-float scale_width = 0.0f; // the scale of the logical resolution or graphics size wrt the default 320x240 coordinate system
-float scale_height = 0.0f;
-
 bool use_amigadata = true;
-
-GameMode gameMode = GAMEMODE_SINGLEPLAYER;
-//GameMode gameMode = GAMEMODE_MULTIPLAYER_CLIENT;
-
-GameType gameType = GAMETYPE_SINGLEISLAND;
-//GameType gameType = GAMETYPE_ALLISLANDS;
-
-DifficultyLevel difficulty_level = DIFFICULTY_EASY;
-
-//Image *player_select = NULL;
-Image *background = NULL;
-Image *player_heads_select[n_players_c];
-Image *player_heads_alliance[n_players_c];
-Image *grave = NULL;
-Image *land[MAP_N_COLOURS];
-Image *fortress[n_epochs_c];
-Image *mine[n_epochs_c];
-Image *factory[n_epochs_c];
-Image *lab[n_epochs_c];
-Image *men[n_epochs_c];
-Image *unarmed_man = NULL;
-Image *flags[n_players_c][n_flag_frames_c];
-Image *panel_design = NULL;
-//Image *panel_design_dark = NULL;
-Image *panel_lab = NULL;
-Image *panel_factory = NULL;
-Image *panel_shield = NULL;
-Image *panel_defence = NULL;
-Image *panel_attack = NULL;
-Image *panel_bloody_attack = NULL;
-Image *panel_twoattack = NULL;
-Image *panel_build[N_BUILDINGS];
-Image *panel_building[N_BUILDINGS];
-Image *panel_knowndesigns = NULL;
-Image *panel_bigdesign = NULL;
-Image *panel_biglab = NULL;
-Image *panel_bigfactory = NULL;
-Image *panel_bigshield = NULL;
-Image *panel_bigdefence = NULL;
-Image *panel_bigattack = NULL;
-Image *panel_bigbuild = NULL;
-Image *panel_bigknowndesigns = NULL;
-Image *numbers_blue[10];
-Image *numbers_grey[10];
-Image *numbers_white[10];
-Image *numbers_orange[10];
-Image *numbers_yellow[10];
-Image *numbers_largegrey[10];
-Image *numbers_largeshiny[10];
-Image *numbers_small[n_players_c][10];
-Image *numbers_half = NULL;
-Image *letters_large[n_font_chars_c];
-Image *letters_small[n_font_chars_c];
-Image *mouse_pointers[n_players_c];
-Image *playershields[n_playershields_c];
-Image *building_health = NULL;
-Image *dash_grey = NULL;
-Image *icon_shield = NULL;
-Image *icon_defence = NULL;
-Image *icon_weapon = NULL;
-Image *icon_shields[n_shields_c];
-Image *icon_defences[n_epochs_c];
-Image *icon_weapons[n_epochs_c];
-Image *numbered_defences[n_epochs_c];
-Image *numbered_weapons[n_epochs_c];
-Image *icon_elements[N_ID];
-Image *icon_clocks[13];
-Image *icon_infinity = NULL;
-Image *icon_bc = NULL;
-Image *icon_ad = NULL;
-Image *icon_ad_shiny = NULL;
-Image *icon_towers[n_players_c];
-Image *icon_armies[n_players_c];
-Image *icon_nuke_hole = NULL;
-Image *mine_gatherable_small = NULL;
-Image *mine_gatherable_large = NULL;
-Image *icon_ergo = NULL;
-Image *icon_trash = NULL;
-Image *coast_icons[n_coast_c];
-int map_sq_offset = 0, map_sq_coast_offset = 0;
-Image *map_sq[MAP_N_COLOURS][n_map_sq_c];
-int n_defender_frames[n_epochs_c];
-Image *defenders[n_players_c][n_epochs_c][max_defender_frames_c];
-Image *nuke_defences[n_players_c];
-//Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_frames_c];
-int n_attacker_frames[n_epochs_c+1][n_attacker_directions_c];
-Image *attackers_walking[n_players_c][n_epochs_c+1][n_attacker_directions_c][max_attacker_frames_c]; // epochs 6-9 are special case!
-Image *planes[n_players_c][n_epochs_c];
-Image *nukes[n_players_c][n_nuke_frames_c];
-Image *saucers[n_players_c][n_saucer_frames_c];
-Image *attackers_ammo[n_epochs_c][N_ATTACKER_AMMO_DIRS];
-Image *icon_openpitmine = NULL;
-Image *icon_trees[n_trees_c][n_tree_frames_c];
-vector<Image *> icon_clutter;
-vector<Image *> icon_clutter_nuked;
-Image *flashingmapsquare = NULL;
-Image *mapsquare = NULL;
-Image *arrow_left = NULL;
-Image *arrow_right = NULL;
-Image *death_flashes[n_death_flashes_c];
-Image *blue_flashes[n_blue_flashes_c];
-Image *explosions[n_explosions_c];
-//Image *icon_mice[3];
-Image *icon_mice[2];
-Image *icon_speeds[3];
-Image *smoke_image = NULL;
-
-Image *background_islands = NULL;
-
-// speech
-Sample *s_design_is_ready = NULL;
-Sample *s_ergo = NULL;
-Sample *s_advanced_tech = NULL;
-Sample *s_fcompleted = NULL;
-Sample *s_on_hold = NULL;
-Sample *s_running_out_of_elements = NULL;
-Sample *s_tower_critical = NULL;
-Sample *s_sector_destroyed = NULL;
-Sample *s_mine_destroyed = NULL;
-Sample *s_factory_destroyed = NULL;
-Sample *s_lab_destroyed = NULL;
-Sample *s_itis_all_over = NULL;
-Sample *s_conquered = NULL;
-Sample *s_won = NULL;
-Sample *s_weve_nuked_them = NULL;
-Sample *s_weve_been_nuked = NULL;
-Sample *s_alliance_yes[n_players_c] = {NULL, NULL, NULL, NULL};
-Sample *s_alliance_no[n_players_c] = {NULL, NULL, NULL, NULL};
-Sample *s_alliance_ask[n_players_c] = {NULL, NULL, NULL, NULL};
-Sample *s_quit[n_players_c] = {NULL, NULL, NULL, NULL};
-Sample *s_cant_nuke_ally = NULL;
-
-// effects
-Sample *s_explosion = NULL;
-Sample *s_scream = NULL;
-Sample *s_buildingdestroyed = NULL;
-Sample *s_guiclick = NULL;
-Sample *s_biplane = NULL;
-Sample *s_jetplane = NULL;
-Sample *s_spaceship = NULL;
 
 const unsigned char shadow_alpha_c = (unsigned char)160;
 
 const int epoch_dates[n_epochs_c] = {-10000, -2000, 1, 900, 1400, 1850, 1914, 1950, 1980, 2100};
 const char *epoch_names[n_epochs_c] = { "FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH" };
 
-Invention *invention_shields[n_epochs_c];
-Invention *invention_defences[n_epochs_c];
-Weapon *invention_weapons[n_epochs_c];
-
-Element *elements[N_ID];
-
-Player *players[n_players_c];
-
-//bool player_won = false;
-GameResult gameResult = GAMERESULT_UNDEFINED;
-
-GameStateID gameStateID = GAMESTATEID_UNDEFINED;
-int human_player = 0;
-bool isDemo() {
+bool Game::isDemo() const {
 	return human_player == PLAYER_DEMO;
 }
-//int enemy_player = 1;
-//GameWon gameWon = GAME_PLAYING;
-bool state_changed = false;
-bool paused = false;
-
-//const int n_men_per_epoch_c = 33;
-int n_men_store = 0;
-int n_player_suspended = 0;
-//int n_men_for_this_island = 0;
 
 const char autosave_filename[] = "autosave.sav";
 const char autosave_bad_filename[] = "autosave_bad.sav";
@@ -251,7 +358,7 @@ bool validDifficulty(DifficultyLevel difficulty) {
 	return difficulty >= 0 && difficulty < DIFFICULTY_N_LEVELS;
 }
 
-int getMenPerEpoch() {
+int Game::getMenPerEpoch() const {
 	ASSERT( gameType == GAMETYPE_ALLISLANDS );
 	if( difficulty_level == DIFFICULTY_EASY )
 		return 150;
@@ -263,40 +370,23 @@ int getMenPerEpoch() {
 	return 0;
 }
 
-int getMenAvailable() {
+int Game::getMenAvailable() const {
 	if( start_epoch == end_epoch_c && gameType == GAMETYPE_ALLISLANDS )
 		return n_player_suspended;
 	return n_men_store;
 }
 
-int getNSuspended() {
+int Game::getNSuspended() const {
 	return n_player_suspended;
 }
 
-int start_epoch = 0;
-int n_sub_epochs = 4;
-int selected_island = 0;
-bool completed_island[max_islands_per_epoch_c];
-//const int n_islands_c = 10;
-Map *maps[n_epochs_c][max_islands_per_epoch_c];
-Map *map = NULL;
-
-const Map *getMap() {
+const Map *Game::getMap() const {
 	return map;
 }
 
-Screen *screen = NULL;
-GameState *gamestate = NULL;
-//Sector *current_sector = NULL;
-
-const bool default_pref_sound_on_c = true;
-const bool default_pref_music_on_c = true;
-const bool default_pref_disallow_nukes_c = false;
-bool pref_sound_on = default_pref_sound_on_c;
-bool pref_music_on = default_pref_music_on_c;
-bool pref_disallow_nukes = default_pref_disallow_nukes_c;
-
-Sample *music = NULL;
+Map *Game::getMap() {
+	return map;
+}
 
 Map::Map(MapColour colour,int n_opponents,const char *name) {
 	//*this->filename = '\0';
@@ -358,7 +448,7 @@ void Map::createSectors(PlayingGameState *gamestate, int epoch) {
 	for(int x=0;x<map_width_c;x++) {
 		for(int y=0;y<map_height_c;y++) {
 			if( sector_at[x][y] ) {
-				this->sectors[x][y] = new Sector(gamestate, epoch, x, y, map->getColour());
+				this->sectors[x][y] = new Sector(gamestate, epoch, x, y, this->getColour());
 				/*for(int i=0;i<N_ID;i++) {
 				this->sectors[x][y]->setElements(i, this->elements[i]);
 				}*/
@@ -474,25 +564,25 @@ void Map::canMoveTo(bool temp[map_width_c][map_height_c], int sx,int sy,int play
 void Map::calculateStats() const {
 	// deaths = start + births - remaining
 	for(int i=0;i<n_players_c;i++) {
-		if( players[i] != NULL ) {
-			players[i]->setNDeaths( players[i]->getNMenForThisIsland() + players[i]->getNBirths() );
-			players[i]->setNSuspended(0);
+		if( game_g->players[i] != NULL ) {
+			game_g->players[i]->setNDeaths( game_g->players[i]->getNMenForThisIsland() + game_g->players[i]->getNBirths() );
+			game_g->players[i]->setNSuspended(0);
 		}
 	}
 	for(int x=0;x<map_width_c;x++) {
 		for(int y=0;y<map_height_c;y++) {
 			if( this->sector_at[x][y] ) {
 				Sector *sector = this->sectors[x][y];
-				if( sector->getPlayer() != -1 && players[sector->getPlayer()] != NULL ) {
+				if( sector->getPlayer() != -1 && game_g->players[sector->getPlayer()] != NULL ) {
 					// check for players[sector->getPlayer()] not being NULL should be redundant, but just to be safe
-					players[sector->getPlayer()]->addNDeaths( - sector->getPopulation() );
-					if( sector->isShutdown() && gameResult == GAMERESULT_WON ) {
-						players[sector->getPlayer()]->addNSuspended(sector->getPopulation());
+					game_g->players[sector->getPlayer()]->addNDeaths( - sector->getPopulation() );
+					if( sector->isShutdown() && game_g->getGameResult() == GAMERESULT_WON ) {
+						game_g->players[sector->getPlayer()]->addNSuspended(sector->getPopulation());
 					}
 				}
 				for(int i=0;i<n_players_c;i++) {
-					if( players[i] != NULL ) {
-						players[i]->addNDeaths( - sector->getArmy(i)->getTotalMen() );
+					if( game_g->players[i] != NULL ) {
+						game_g->players[i]->addNDeaths( - sector->getArmy(i)->getTotalMen() );
 					}
 				}
 			}
@@ -535,53 +625,53 @@ int Map::getNSquares() const {
 void Map::draw(int offset_x, int offset_y) const {
     for(int y=0;y<map_height_c;y++) {
 		for(int x=0;x<map_width_c;x++) {
-			if( map->sector_at[x][y] ) {
+			if( this->sector_at[x][y] ) {
 				int icon = 0;
-				if( y > 0 && map->sector_at[x][y-1] )
+				if( y > 0 && this->sector_at[x][y-1] )
 					icon += 1;
-				if( x < map_width_c-1 && map->sector_at[x+1][y] )
+				if( x < map_width_c-1 && this->sector_at[x+1][y] )
 					icon += 2;
-				if( y < map_height_c-1 && map->sector_at[x][y+1] )
+				if( y < map_height_c-1 && this->sector_at[x][y+1] )
 					icon += 4;
-				if( x > 0 && map->sector_at[x-1][y] )
+				if( x > 0 && this->sector_at[x-1][y] )
 					icon += 8;
 				ASSERT( icon >= 0 && icon < 16 );
-				if( map_sq[colour][icon] == NULL ) {
-					LOG("map name: %s\n", map->getName());
+				if( game_g->map_sq[colour][icon] == NULL ) {
+					LOG("map name: %s\n", this->getName());
 					LOG("ERROR map icon not available [%d,%d]: %d, %d\n", x, y, colour, icon);
-					ASSERT( map_sq[colour][icon] != NULL );
+					ASSERT( game_g->map_sq[colour][icon] != NULL );
 				}
-				int map_x = offset_x - map_sq_offset + 16 * x;
-				int map_y = offset_y - map_sq_offset + 16 * y;
-				int coast_map_x = offset_x - map_sq_coast_offset + 16 * x;
-				int coast_map_y = offset_y - map_sq_coast_offset + 16 * y;
+				int map_x = offset_x - game_g->getMapSqOffset() + 16 * x;
+				int map_y = offset_y - game_g->getMapSqOffset() + 16 * y;
+				int coast_map_x = offset_x - game_g->getMapSqCoastOffset() + 16 * x;
+				int coast_map_y = offset_y - game_g->getMapSqCoastOffset() + 16 * y;
                 //LOG("draw at: %d, %d : %d, %d\n", x, y, map_sq[colour][icon]->getWidth(), map_sq[colour][icon]->getHeight());
-                map_sq[colour][icon]->draw(map_x, map_y);
+                game_g->map_sq[colour][icon]->draw(map_x, map_y);
 				//LOG(">>> %d %d %d\n", icon, icon & 1, 4 & 1);
-				if( (icon & 1) == 0 && coast_icons[0] != NULL )
-					coast_icons[0]->draw(coast_map_x, coast_map_y);
-				if( (icon & 2) == 0 && coast_icons[1] != NULL )
-					coast_icons[1]->draw(coast_map_x, coast_map_y);
-				if( (icon & 4) == 0 && coast_icons[2] != NULL )
-					coast_icons[2]->draw(coast_map_x, coast_map_y);
-				if( (icon & 8) == 0 && coast_icons[3] != NULL )
-					coast_icons[3]->draw(coast_map_x, coast_map_y);
+				if( (icon & 1) == 0 && game_g->coast_icons[0] != NULL )
+					game_g->coast_icons[0]->draw(coast_map_x, coast_map_y);
+				if( (icon & 2) == 0 && game_g->coast_icons[1] != NULL )
+					game_g->coast_icons[1]->draw(coast_map_x, coast_map_y);
+				if( (icon & 4) == 0 && game_g->coast_icons[2] != NULL )
+					game_g->coast_icons[2]->draw(coast_map_x, coast_map_y);
+				if( (icon & 8) == 0 && game_g->coast_icons[3] != NULL )
+					game_g->coast_icons[3]->draw(coast_map_x, coast_map_y);
 
 				// now do corners
-				if( x > 0 && y > 0 && map->sector_at[x-1][y] && map->sector_at[x][y-1] && !map->sector_at[x-1][y-1] && coast_icons[4] != NULL )
-					coast_icons[4]->draw(coast_map_x, coast_map_y);
-				if( x < map_width_c-1 && y > 0 && map->sector_at[x+1][y] && map->sector_at[x][y-1] && !map->sector_at[x+1][y-1] && coast_icons[5] != NULL )
-					coast_icons[5]->draw(coast_map_x, coast_map_y);
-				if( x > 0 && y < map_height_c-1 && map->sector_at[x-1][y] && map->sector_at[x][y+1] && !map->sector_at[x-1][y+1] && coast_icons[6] != NULL )
-					coast_icons[6]->draw(coast_map_x, coast_map_y);
-				if( x < map_width_c-1 && y < map_height_c-1 && map->sector_at[x+1][y] && map->sector_at[x][y+1] && !map->sector_at[x+1][y+1] && coast_icons[7] != NULL )
-					coast_icons[7]->draw(coast_map_x, coast_map_y);
+				if( x > 0 && y > 0 && this->sector_at[x-1][y] && this->sector_at[x][y-1] && !this->sector_at[x-1][y-1] && game_g->coast_icons[4] != NULL )
+					game_g->coast_icons[4]->draw(coast_map_x, coast_map_y);
+				if( x < map_width_c-1 && y > 0 && this->sector_at[x+1][y] && this->sector_at[x][y-1] && !this->sector_at[x+1][y-1] && game_g->coast_icons[5] != NULL )
+					game_g->coast_icons[5]->draw(coast_map_x, coast_map_y);
+				if( x > 0 && y < map_height_c-1 && this->sector_at[x-1][y] && this->sector_at[x][y+1] && !this->sector_at[x-1][y+1] && game_g->coast_icons[6] != NULL )
+					game_g->coast_icons[6]->draw(coast_map_x, coast_map_y);
+				if( x < map_width_c-1 && y < map_height_c-1 && this->sector_at[x+1][y] && this->sector_at[x][y+1] && !this->sector_at[x+1][y+1] && game_g->coast_icons[7] != NULL )
+					game_g->coast_icons[7]->draw(coast_map_x, coast_map_y);
 			}
 		}
 	}
 }
 
-void updatedEpoch() {
+void Game::updatedEpoch() {
 	// used directly when we've set epoch from loading state
 	ASSERT( start_epoch >= 0 && start_epoch < n_epochs_c );
 	n_sub_epochs = 4;
@@ -593,7 +683,7 @@ void updatedEpoch() {
 	}
 }
 
-void setEpoch(int epoch) {
+void Game::setEpoch(int epoch) {
 	LOG("set epoch %d\n", epoch);
 	ASSERT( epoch >= 0 && epoch < n_epochs_c );
 	start_epoch = epoch;
@@ -617,7 +707,7 @@ void setEpoch(int epoch) {
     gamestate->reset();
 }
 
-void drawProgress(int percentage) {
+void Game::drawProgress(int percentage) {
 	const int width = (int)(screen->getWidth() * 0.25f);
 	const int height = (int)(screen->getHeight()/15.0f);
 	const int xpos = (int)(screen->getWidth()*0.5f - width*0.5f);
@@ -631,7 +721,7 @@ void drawProgress(int percentage) {
 	screen->refresh();
 }
 
-void newGame() {
+void Game::newGame() {
 	gamestate->fadeScreen(false, 0, NULL);
 	LOG("newGame()\n");
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
@@ -652,14 +742,14 @@ void newGame() {
 	//setEpoch(9);
 }
 
-void setClientPlayer(int set_client_player) {
-	::human_player = set_client_player;
+void Game::setClientPlayer(int set_client_player) {
+	this->human_player = set_client_player;
 	if( gamestate != NULL ) {
 		gamestate->setClientPlayer(set_client_player);
 	}
 }
 
-void nextEpoch() {
+void Game::nextEpoch() {
 	LOG("nextEpoch()\n");
 	start_epoch++;
 	if( start_epoch == n_epochs_c ) {
@@ -671,7 +761,7 @@ void nextEpoch() {
 	setEpoch(start_epoch);
 }
 
-void nextIsland() {
+void Game::nextIsland() {
 	if( gameType == GAMETYPE_SINGLEISLAND ) {
 		selected_island++;
 		if( selected_island == max_islands_per_epoch_c || maps[start_epoch][selected_island] == NULL )
@@ -693,7 +783,7 @@ void nextIsland() {
     LOG("done reset\n");
 }
 
-bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) {
+bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) {
     //LOG("loadGameInfo(%d)\n",slot);
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 
@@ -767,7 +857,7 @@ bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int susp
 	return true;
 }
 
-bool loadGame(const char *filename) {
+bool Game::loadGame(const char *filename) {
 	LOG("loadGame(%s)\n",filename);
 	ASSERT( gameType == GAMETYPE_ALLISLANDS );
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
@@ -799,7 +889,7 @@ char *getFilename(int slot) {
 	return filename;
 }
 
-bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot) {
+bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot) {
 	ASSERT( slot >= 0 && slot < n_slots_c );
 	char *filename = getFilename(slot);
 	bool ok = loadGameInfo(difficulty, player, n_men, suspended, epoch, completed, filename);
@@ -807,7 +897,7 @@ bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int susp
 	return ok;
 }
 
-bool loadGame(int slot) {
+bool Game::loadGame(int slot) {
 	LOG("loadGame(%d)\n",slot);
 	ASSERT( slot >= 0 && slot < n_slots_c );
 	char *filename = getFilename(slot);
@@ -816,7 +906,7 @@ bool loadGame(int slot) {
 	return ok;
 }
 
-void saveGame(int slot) {
+void Game::saveGame(int slot) {
 	LOG("saveGame(%d)\n",slot);
 	ASSERT( gameType == GAMETYPE_ALLISLANDS );
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
@@ -893,24 +983,24 @@ bool validPlayer(int player) {
 	return valid;
 }
 
-void addTextEffect(TextEffect *effect) {
+void Game::addTextEffect(TextEffect *effect) {
 	gamestate->addTextEffect(effect);
 }
 
-void stopMusic() {
+void Game::stopMusic() {
 	if( music != NULL ) {
 		delete music;
 		music = NULL;
 	}
 }
 
-void fadeMusic(int duration_ms) {
+void Game::fadeMusic(int duration_ms) {
 	if( music != NULL ) {
 		music->fadeOut(duration_ms);
 	}
 }
 
-void playMusic() {
+void Game::playMusic() {
 	stopMusic();
 
 	if( !pref_music_on ) {
@@ -930,7 +1020,7 @@ void playMusic() {
 	}
 }
 
-bool loadSamples() {
+bool Game::loadSamples() {
 	string sound_dir = "sound/";
 
 	s_design_is_ready = Sample::loadSample(sound_dir + "the_design_is_finished.wav");
@@ -1109,7 +1199,7 @@ bool remapLand(Image *image,MapColour colour) {
 	return true;
 }
 
-void convertToHiColor(Image *image) {
+void Game::convertToHiColor(Image *image) const {
 	if( using_old_gfx ) {
 		// create alpha from color keys
 		image->createAlphaForColor(true, 255, 0, 255, 127, 0, 127, shadow_alpha_c);
@@ -1117,7 +1207,7 @@ void convertToHiColor(Image *image) {
 	image->convertToHiColor(false);
 }
 
-void processImage(Image *image, bool old_smooth = true) {
+void Game::processImage(Image *image, bool old_smooth) const {
     //LOG("    convert to hi color\n");
 	convertToHiColor(image);
     //LOG("    scale\n");
@@ -1133,7 +1223,7 @@ void processImage(Image *image, bool old_smooth = true) {
     //LOG("    done\n");
 }
 
-bool loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
+bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 	char filename[300] = "";
 	sprintf(filename, "attacker_walking_%d.png", epoch);
 	Image *gfx_image = Image::loadImage(gfx_dir + filename);
@@ -1182,7 +1272,7 @@ bool loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 	return true;
 }
 
-void calculateScale(const Image *image) {
+void Game::calculateScale(const Image *image) {
 #if SDL_MAJOR_VERSION == 1
 	scale_factor_w = ((float)(scale_width*default_width_c))/(float)image->getWidth();
 	scale_factor_h = ((float)(scale_height*default_height_c))/(float)image->getHeight();
@@ -1198,7 +1288,7 @@ void calculateScale(const Image *image) {
 #endif
 }
 
-bool loadOldImages() {
+bool Game::loadOldImages() {
 	// progress should go from 0 to 80%
 	LOG("try using old graphics\n");
 	using_old_gfx = true;
@@ -1787,7 +1877,7 @@ bool loadOldImages() {
 	return true;
 }
 
-bool loadImages() {
+bool Game::loadImages() {
     //int time_s = clock();
 	// progress should go from 0 to 80%
 	string gfx_dir = "gfx/";
@@ -2557,7 +2647,7 @@ bool loadImages() {
 	return true;
 }
 
-bool setupInventions() {
+void Game::setupInventions() {
 	/*for(int i=0;i<n_shields_c;i++)
 	invention_shields[i] = new Invention("SHIELD", Invention::SHIELD, start_epoch + i);*/
 	for(int i=0;i<n_epochs_c;i++)
@@ -2585,11 +2675,9 @@ bool setupInventions() {
 	invention_weapons[7] = new Weapon("BOMBER", 7, 3);
 	invention_weapons[8] = new Weapon("NUCLEAR MISSILE", 8, 0);
 	invention_weapons[9] = new Weapon("SPACESHIP", 9, 10);
-
-	return true;
 }
 
-bool setupElements() {
+void Game::setupElements() {
 	elements[WOOD] = new Element("WOOD", WOOD, Element::GATHERABLE);
 	elements[ROCK] = new Element("ROCK", ROCK, Element::GATHERABLE);
 	elements[BONE] = new Element("BONE", BONE, Element::GATHERABLE);
@@ -2610,10 +2698,9 @@ bool setupElements() {
 	elements[MORON] = new Element("MORON", MORON, Element::DEEPMINE);
 	elements[MARMITE] = new Element("MAAMITE", MARMITE, Element::DEEPMINE);
 	elements[ALIEN] = new Element("ALIEN", ALIEN, Element::DEEPMINE);
-	return true;
 }
 
-void cleanupPlayers() {
+void Game::cleanupPlayers() {
 	for(int i=0;i<n_players_c;i++) {
 		if( players[i] )
 			delete players[i];
@@ -2624,7 +2711,7 @@ void cleanupPlayers() {
 	Player::resetAllAlliances();
 }
 
-void setupPlayers() {
+void Game::setupPlayers() {
 	cleanupPlayers();
 
 	int seed = clock();
@@ -2666,7 +2753,7 @@ void setupPlayers() {
 
 }
 
-bool openScreen(bool fullscreen) {
+bool Game::openScreen(bool fullscreen) {
 	if( !fullscreen ) {
 		int user_width = 0, user_height = 0;
 #if defined(_WIN32)
@@ -2876,7 +2963,7 @@ bool openScreen(bool fullscreen) {
 	return true;
 }
 
-bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename) {
+bool Game::readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename) {
 	bool ok = true;
 	line[ strlen(line) - 1 ] = '\0'; // trim new line
 	line[ strlen(line) - 1 ] = '\0'; // trim carriage return
@@ -3015,7 +3102,7 @@ bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const i
 	return ok;
 }
 
-bool readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end) {
+bool Game::readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end) {
 	if( newline_index > 1 ) {
 		// not safe to use strcpy on overlapping strings (undefined behaviour)
 		int len = strlen(&buffer[newline_index-1]);
@@ -3065,7 +3152,7 @@ bool readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int 
 	return false;
 }
 
-bool readMap(const char *filename) {
+bool Game::readMap(const char *filename) {
 	//LOG("readMap: %s\n", filename); // disabled logging to improve performance on startup
 	bool ok = true;
 	const int MAX_LINE = 4096;
@@ -3131,7 +3218,7 @@ int sortMapsFunc(const void *a, const void *b) {
 	return strcmp(map_a->getName(), map_b->getName());
 }
 
-bool createMaps() {
+bool Game::createMaps() {
 	LOG("createMaps()...\n");
 #if defined(_WIN32)
     WIN32_FIND_DATAA findFileData;
@@ -3234,16 +3321,14 @@ bool createMaps() {
 	return true;
 }
 
-GameState *dispose_gamestate = NULL;
-
-void disposeGameState() {
+void Game::disposeGameState() {
 	ASSERT( dispose_gamestate == NULL );
 	LOG("disposeGameState: %d", gamestate);
 	dispose_gamestate = gamestate;
 	gamestate = NULL;
 }
 
-void setGameStateID(GameStateID state, GameState *new_gamestate) {
+void Game::setGameStateID(GameStateID state, GameState *new_gamestate) {
 	LOG("setGameStateID(%d, %d)\n", state, new_gamestate);
 	LOG("old gameStateID was %d\n", gameStateID);
 	gameStateID = state;
@@ -3334,7 +3419,7 @@ void setGameStateID(GameStateID state, GameState *new_gamestate) {
 	}*/
 }
 
-void startIsland() {
+void Game::startIsland() {
 	ASSERT(gameStateID == GAMESTATEID_PLACEMEN);
 	/*int map_x = static_cast<PlaceMenGameState *>(gamestate)->getStartMapX();
 	int map_y = static_cast<PlaceMenGameState *>(gamestate)->getStartMapY();*/
@@ -3347,7 +3432,12 @@ void startIsland() {
 	gameResult = GAMERESULT_UNDEFINED;
 }
 
-void endIsland() {
+void startIsland_g() {
+	// wrapper so we can pass as a function pointer
+	game_g->startIsland();
+}
+
+void Game::endIsland() {
 	ASSERT(gameStateID == GAMESTATEID_PLAYING);
 	map->calculateStats();
 	map->freeSectors(); // must do this here rather than waiting until deleting PlayingGameState, as by that time the "map" variable may have switched to a different island
@@ -3404,7 +3494,12 @@ void endIsland() {
 	}
 }
 
-void returnToChooseIsland() {
+void endIsland_g() {
+	// wrapper so we can pass as a function pointer
+	game_g->endIsland();
+}
+
+void Game::returnToChooseIsland() {
 	ASSERT(gameStateID == GAMESTATEID_ENDISLAND);
 	if( gameType == GAMETYPE_TUTORIAL ) {
 		LOG("delete tutorial %d\n", tutorial);
@@ -3432,71 +3527,55 @@ void returnToChooseIsland() {
 		players[human_player]->setNMenForThisIsland(0);
 }
 
-void startNewGame() {
+void returnToChooseIsland_g() {
+	// wrapper so we can pass as a function pointer
+	game_g->returnToChooseIsland();
+}
+
+void Game::startNewGame() {
 	ASSERT(gameStateID == GAMESTATEID_GAMECOMPLETE);
 	setGameStateID(GAMESTATEID_PLACEMEN);
 	//gamestate->fadeScreen(false, 0, NULL);
 	newGame();
 }
 
-void placeTower() {
+void startNewGame_g() {
+	// wrapper so we can pass as a function pointer
+	game_g->startNewGame();
+}
+
+void Game::placeTower() {
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 	if( !state_changed ) {
 		state_changed = true;
-		gamestate->fadeScreen(true, 0, startIsland);
+		gamestate->fadeScreen(true, 0, startIsland_g);
 	}
 }
 
 void cleanup() {
 	LOG("cleanup()\n");
-	if( gamestate != NULL ) {
-		LOG("delete gamestate %d\n", gamestate);
-		delete gamestate;
-		gamestate = NULL;
-	}
-	LOG("delete maps\n");
-	for(int i=0;i<n_epochs_c;i++) {
-		for(int j=0;j<max_islands_per_epoch_c;j++) {
-			if( maps[i][j] != NULL ) {
-				delete maps[i][j];
-				maps[i][j] = NULL;
-			}
-		}
-	}
-	map = NULL;
-	if( screen != NULL ) {
-		LOG("delete screen %d\n", screen);
-		delete screen;
-		screen = NULL;
-	}
-	LOG("clean up tracked objects\n");
-	TrackedObject::cleanup();
-	// no longer need to stop music, as it's deleted as a TrackedObject
-	//stopMusic();
-	LOG("free sound\n");
-	freeSound();
-	LOG("delete application %d\n", application);
-	delete application;
-	application = NULL;
+	LOG("delete game %d\n", game_g);
+	delete game_g;
+	game_g = NULL;
 	LOG("cleanup done\n");
 }
 
 //bool quit = false;
 bool debugwindow = false;
 
-void keypressEscape() {
+void Game::keypressEscape() {
     if( !state_changed ) {
 	    gamestate->requestQuit();
 	}
 }
 
-void keypressReturn() {
+void Game::keypressReturn() {
     if( !state_changed ) {
 	    gamestate->requestConfirm();
 	}
 }
 
-void togglePause() {
+void Game::togglePause() {
     if( gameStateID == GAMESTATEID_PLAYING ) {
         paused = !paused;
         if( paused ) {
@@ -3518,7 +3597,7 @@ void togglePause() {
     }
 }
 
-bool isPaused() {
+bool Game::isPaused() const {
 	return paused;
 }
 
@@ -3528,7 +3607,7 @@ void deleteState() {
 	delete [] save_fullfilename;
 }
 
-void saveState() {
+void Game::saveState() {
     if( gameStateID == GAMESTATEID_UNDEFINED || gameStateID == GAMESTATEID_CHOOSEGAMETYPE || gameStateID == GAMESTATEID_CHOOSEDIFFICULTY || gameStateID == GAMESTATEID_CHOOSEPLAYER || gameStateID == GAMESTATEID_CHOOSETUTORIAL || gameStateID == GAMESTATEID_GAMECOMPLETE ) {
 		// no need to save state
 	}
@@ -3577,7 +3656,7 @@ void saveState() {
 	}
 }
 
-GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
+GameState *Game::loadStateParseXMLNode(const TiXmlNode *parent) {
 	if( parent == NULL ) {
 		return NULL;
 	}
@@ -3778,7 +3857,7 @@ GameState *loadStateParseXMLNode(const TiXmlNode *parent) {
 	return new_gamestate;
 }
 
-bool loadState() {
+bool Game::loadState() {
 	bool ok = false;
 	stringstream stream;
 	char *save_fullfilename = getApplicationFilename(autosave_filename);
@@ -3854,9 +3933,8 @@ bool loadState() {
 	return ok;
 }
 
-void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click) {
+void Game::mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click) {
 	const int mousepress_delay = 100;
-	static unsigned int lastmousepress_time = 0;
 	T_ASSERT( m_left || m_middle || m_right );
 	if( click ) {
 		//LOG("mouse click\n");
@@ -3864,7 +3942,7 @@ void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool
 	}
 	else {
 		// use getTicks() not getRealTime(), as this function may be called at any occasion (due to mouse click events), so getRealTime() might not yet be updated!
-		unsigned int ticks = application->getTicks();
+		unsigned int ticks = game_g->getApplication()->getTicks();
 		if( ticks - lastmousepress_time >= mousepress_delay ) {
 			//LOG("mouse press: %d, %d\n", lastmousepress_time, ticks);
 			lastmousepress_time = ticks;
@@ -3876,13 +3954,13 @@ void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool
 	}
 }
 
-void updateGame() {
+void Game::updateGame() {
 	if( !paused ) {
 		int m_x = 0, m_y = 0;
 		bool m_left = false, m_middle = false, m_right = false;
 		bool m_res = screen->getMouseState(&m_x, &m_y, &m_left, &m_middle, &m_right);
 		/*screen->getMouseCoords(&m_x, &m_y);
-		application->getMousePressed(&m_left, &m_middle, &m_right);*/
+		game_g->getApplication()->getMousePressed(&m_left, &m_middle, &m_right);*/
 		if( m_res ) {
 			mouseClick(m_x, m_y, m_left, m_middle, m_right, false);
 		}
@@ -3919,7 +3997,7 @@ void updateGame() {
 			state_changed = true;
 			gameResult = GAMERESULT_LOST;
 			fadeMusic(SHORT_DELAY + 1000);
-			gamestate->fadeScreen(true, SHORT_DELAY, endIsland);
+			gamestate->fadeScreen(true, SHORT_DELAY, endIsland_g);
 		}
 		else {
 			bool all_dead = true;
@@ -3942,7 +4020,7 @@ void updateGame() {
 				state_changed = true;
 				gameResult = GAMERESULT_WON;
 				fadeMusic(SHORT_DELAY + 1000);
-				gamestate->fadeScreen(true, SHORT_DELAY, endIsland);
+				gamestate->fadeScreen(true, SHORT_DELAY, endIsland_g);
 			}
 		}
 	}
@@ -3955,7 +4033,7 @@ void updateGame() {
 	}
 }
 
-void drawGame() {
+void Game::drawGame() {
 	// we now redraw even when paused, to display paused message
 	gamestate->draw();
 }
@@ -3966,7 +4044,15 @@ const char sound_on_key[] = "sound_on";
 const char music_on_key[] = "music_on";
 const char disallow_nukes_key[] = "disallow_nukes";
 
-void loadPrefs() {
+bool Game::createApplication() {
+	application = new Application();
+	if( !application->init() ) {
+		return false;
+	}
+	return true;
+}
+
+void Game::loadPrefs() {
 	char *prefs_fullfilename = getApplicationFilename(prefs_filename);
 	SDL_RWops *prefs_file = SDL_RWFromFile(prefs_fullfilename, "rb");
 	if( prefs_file != NULL ) {
@@ -4021,7 +4107,7 @@ void loadPrefs() {
 	delete [] prefs_fullfilename;
 }
 
-void savePrefs() {
+void Game::savePrefs() const {
 	char *prefs_fullfilename = getApplicationFilename(prefs_filename);
 	SDL_RWops *prefs_file = SDL_RWFromFile(prefs_fullfilename, "wb+");
 	if( prefs_file == NULL ) {
@@ -4049,10 +4135,10 @@ void savePrefs() {
 	delete [] prefs_fullfilename;
 }
 
-void runTests() {
+void Game::runTests() {
 	// disabled for Android for now, due to needing exceptions
 #if !defined(__ANDROID__)
-	is_testing = true;
+	game_g->setTesting(true);
 
 	human_player = rand() % 4;
 	//human_player = 0;
@@ -4223,7 +4309,7 @@ void runTests() {
 			}
 			// test time with and without sleep for mining:
 			for(int type=0;type<2;type++) {
-				unsigned int time_s = application->getTicks();
+				unsigned int time_s = game_g->getApplication()->getTicks();
 				unsigned int elapsed_time = time_s;
 				int i_mined = 0, i_mined_fraction = 0;
 				start_sector->getElementStocks(&i_mined, &i_mined_fraction, ROCK);
@@ -4231,9 +4317,9 @@ void runTests() {
 				const int n_steps_c = 22; // must not be greater than element_multiplier_c*max_gatherables_stored_c/2
 				for(;;) {
 					if( type == 0 ) {
-						application->wait();
+						game_g->getApplication()->wait();
 					}
-					unsigned int new_time = application->getTicks();
+					unsigned int new_time = game_g->getApplication()->getTicks();
 					updateTime(new_time - elapsed_time);
 					elapsed_time = new_time;
 					updateGame();
@@ -4244,7 +4330,7 @@ void runTests() {
 						break;
 					}
 				}
-				int time = application->getTicks() - time_s;
+				int time = game_g->getApplication()->getTicks() - time_s;
 				int expected_time = (int)(( mine_rate_c * gameticks_per_hour_c * n_steps_c ) / ( element_multiplier_c * n_gatherable_rate_c * time_ratio_c ));
 				int allowed_error = 20;
 				if( abs(time - expected_time) > allowed_error ) {
@@ -4267,7 +4353,7 @@ void runTests() {
 			playingGameState->setNDesigners(sx, sy, 1);
 			// test time with and without sleep for designing:
 			for(int type=0;type<2;type++) {
-				unsigned int time_s = application->getTicks();
+				unsigned int time_s = game_g->getApplication()->getTicks();
 				unsigned int elapsed_time = time_s;
 				int i_halfdays = 0, i_hours = 0;
 				start_sector->inventionTimeLeft(&i_halfdays, &i_hours);
@@ -4275,9 +4361,9 @@ void runTests() {
 				const int n_steps_c = 3;
 				for(;;) {
 					if( type == 0 ) {
-						application->wait();
+						game_g->getApplication()->wait();
 					}
-					unsigned int new_time = application->getTicks();
+					unsigned int new_time = game_g->getApplication()->getTicks();
 					updateTime(new_time - elapsed_time);
 					elapsed_time = new_time;
 					updateGame();
@@ -4288,7 +4374,7 @@ void runTests() {
 						break;
 					}
 				}
-				int time = application->getTicks() - time_s;
+				int time = game_g->getApplication()->getTicks() - time_s;
 				int expected_time = (int)(( gameticks_per_hour_c * n_steps_c ) / time_ratio_c);
 				int allowed_error = 100;
 				if( abs(time - expected_time) > allowed_error ) {
@@ -4671,9 +4757,7 @@ void runTests() {
 void playGame(int n_args, char *args[]) {
     LOG("playGame()\n");
 
-	// initialise statics to default - this is needed on Android where exiting the native app and then restarting doesn't wipe the memory!
-	icon_clutter.clear();
-	icon_clutter_nuked.clear();
+	game_g = new Game();
 
 #ifdef _DEBUG
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );  // TEST!
@@ -4700,13 +4784,13 @@ void playGame(int n_args, char *args[]) {
 		else if( strcmp(args[i], "debugwindow") == 0 )
 			debugwindow = true;
 		else if( strcmp(args[i], "onemousebutton") == 0 )
-			onemousebutton = true;
+			game_g->setOneMouseButton(true);
 		else if( strcmp(args[i], "mobile_ui") == 0 )
-			mobile_ui = true;
+			game_g->setMobileUI(true);
 		else if( strcmp(args[i], "server") == 0 )
-			gameMode = GAMEMODE_MULTIPLAYER_SERVER;
+			game_g->setGameMode(GAMEMODE_MULTIPLAYER_SERVER);
 		else if( strcmp(args[i], "client") == 0 )
-			gameMode = GAMEMODE_MULTIPLAYER_CLIENT;
+			game_g->setGameMode(GAMEMODE_MULTIPLAYER_CLIENT);
 	}
 #endif
 
@@ -4722,8 +4806,8 @@ void playGame(int n_args, char *args[]) {
 
 	initLogFile();
 
-	//bool run_tests = true;
-	bool run_tests = false;
+	bool run_tests = true;
+	//bool run_tests = false;
 
         /*if( access("data", 0)==0 ) {
 	use_amigadata = true;
@@ -4735,25 +4819,15 @@ void playGame(int n_args, char *args[]) {
 	LOG("can't find data folder\n");
 	return;
 	}*/
-	LOG("onemousebutton?: %d\n", onemousebutton);
-	LOG("mobile_ui?: %d\n", mobile_ui);
+	LOG("onemousebutton?: %d\n", game_g->isOneMouseButton());
+	LOG("mobile_ui?: %d\n", game_g->isMobileUI());
 
 	if( !run_tests ) {
-		loadPrefs();
+		game_g->loadPrefs();
 	}
 
-	for(int i=0;i<n_epochs_c;i++)
-		for(int j=0;j<max_islands_per_epoch_c;j++)
-			maps[i][j] = NULL;
-
-	for(int i=0;i<max_islands_per_epoch_c;i++)
-		completed_island[i] = false;
-
-	n_player_suspended = 0;
-
 	// init application
-	application = new Application();
-	if( !application->init() ) {
+	if( !game_g->createApplication() ) {
 		LOG("failed to init application\n");
 	}
 	// init sound
@@ -4765,7 +4839,7 @@ void playGame(int n_args, char *args[]) {
 	LOG("successfully opened libraries\n");
 
 	bool ok = true;
-	if( !openScreen(fullscreen) ) {
+	if( !game_g->openScreen(fullscreen) ) {
 		LOG("failed to open screen\n");
 		ok = false;
 #ifdef _WIN32
@@ -4774,9 +4848,9 @@ void playGame(int n_args, char *args[]) {
 	}
 
     int time_s = clock();
-	drawProgress(0);
+	game_g->drawProgress(0);
 
-	if( ok && !loadImages() ) {
+	if( ok && !game_g->loadImages() ) {
 		LOG("failed to load images\n");
 		ok = false;
 #ifdef _WIN32
@@ -4791,7 +4865,7 @@ void playGame(int n_args, char *args[]) {
 	}
 
 	// n.b., still need to load samples even if sound failed to initialise, as we want the Sample objects for the textual display
-	if( !loadSamples() ) {
+	if( !game_g->loadSamples() ) {
 		// don't fail, just warn
 		LOG("warning - failed to load samples\n");
 		// no longer show message - no longer an error, as the default install won't have any samples!
@@ -4799,15 +4873,15 @@ void playGame(int n_args, char *args[]) {
 		MessageBoxA(NULL, "Failed to load all samples", "Warning", MB_OK|MB_ICONEXCLAMATION);
 #endif*/
 	}
-	drawProgress(85);
+	game_g->drawProgress(85);
 
-	setupInventions();
-	drawProgress(87);
-	setupElements();
-	drawProgress(89);
+	game_g->setupInventions();
+	game_g->drawProgress(87);
+	game_g->setupElements();
+	game_g->drawProgress(89);
 	Design::setupDesigns();
-	drawProgress(90);
-	if( !createMaps() ) {
+	game_g->drawProgress(90);
+	if( !game_g->createMaps() ) {
 		LOG("failed to create maps\n");
 		cleanup();
 #ifdef _WIN32
@@ -4815,7 +4889,7 @@ void playGame(int n_args, char *args[]) {
 #endif
 		return;
 	}
-	drawProgress(95);
+	game_g->drawProgress(95);
 
 	for(size_t i=0;i<TrackedObject::getNumTags();i++) {
 		TrackedObject *to = TrackedObject::getTag(i);
@@ -4832,27 +4906,27 @@ void playGame(int n_args, char *args[]) {
 		}
 	}
 
-	drawProgress(100);
+	game_g->drawProgress(100);
     int time_taken = clock() - time_s;
 	LOG("time taken to load data: %d\n", time_taken);
 
 	char buffer[256] = "";
 	sprintf(buffer, "Gigalomania, version %d.%d", majorVersion, minorVersion);
-	screen->setTitle(buffer);
+	game_g->getScreen()->setTitle(buffer);
 
     LOG("all done!\n");
 
 	if( run_tests ) {
-		runTests();
+		game_g->runTests();
 	}
 	else {
-		if( !loadState() ) {
-			map = maps[start_epoch][selected_island];
-			setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
+		if( !game_g->loadState() ) {
+			game_g->setCurrentMap();
+			game_g->setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
 			//setGameStateID(GAMESTATEID_CHOOSEPLAYER);
 		}
 
-		application->runMainLoop();
+		game_g->getApplication()->runMainLoop();
 	}
 
 	cleanup();
@@ -4861,10 +4935,10 @@ void playGame(int n_args, char *args[]) {
 
 void quitGame() {
 	//quit = true;
-	application->setQuit();
+	game_g->getApplication()->setQuit();
 }
 
-bool playerAlive(int player) {
+bool Game::playerAlive(int player) {
 	/*int n_player_sectors = 0;
 	int n_army = 0;
 	for(int x=0;x<map_width_c;x++) {

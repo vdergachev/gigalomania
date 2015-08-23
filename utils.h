@@ -55,7 +55,7 @@ bool log(const char *text,...);
 #endif
 
 #ifndef ASSERT_S_EPOCH
-#define ASSERT_S_EPOCH(epoch) ASSERT( epoch >= start_epoch && epoch <= n_epochs_c );
+#define ASSERT_S_EPOCH(epoch) ASSERT( epoch >= game_g->getStartEpoch() && epoch <= n_epochs_c );
 #endif
 
 #ifndef ASSERT_R_EPOCH

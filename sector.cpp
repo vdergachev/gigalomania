@@ -153,7 +153,7 @@ int Army::getTotalMen() const {
 	ASSERT_PLAYER(this->player);
 	int n = 0;
 	for(int i=0;i<n_epochs_c+1;i++) {
-		int n_men = ( i==n_epochs_c ? 1 : invention_weapons[i]->getNMen() );
+		int n_men = ( i==n_epochs_c ? 1 : game_g->invention_weapons[i]->getNMen() );
 		n += soldiers[i] * n_men;
 	}
 	return n;
@@ -292,7 +292,7 @@ int Army::getIndividualStrength(int player, int i) {
 	ASSERT_S_EPOCH(i);
 	ASSERT_PLAYER(player);
 	int str = 0;
-	if( i == n_epochs_c && start_epoch != end_epoch_c ) {
+	if( i == n_epochs_c && game_g->getStartEpoch() != end_epoch_c ) {
 		// unarmed
 		if( player == PlayerType::PLAYER_RED )
 			str = 2;
@@ -315,7 +315,7 @@ int Army::getIndividualStrength(int player, int i) {
 int Army::getIndividualBombardStrength(int i) {
 	ASSERT_S_EPOCH(i);
 	int str = 0;
-	if( start_epoch == end_epoch_c ) {
+	if( game_g->getStartEpoch() == end_epoch_c ) {
 		str = 1;
 	}
 	else if( i != n_epochs_c ) {
@@ -323,7 +323,7 @@ int Army::getIndividualBombardStrength(int i) {
 		/*int n_men = invention_weapons[i]->n_men;
 		str = (i+1) * n_men;*/
 		//str = i+1;
-		str = i - start_epoch + 1;
+		str = i - game_g->getStartEpoch() + 1;
 		/*str = 1;
 		for(int j=0;j<i;j++)
 		str *= 2;
@@ -420,7 +420,7 @@ Element::~Element() {
 }
 
 Image *Element::getImage() const {
-	return icon_elements[this->id];
+	return game_g->icon_elements[this->id];
 }
 
 Design::Design(Invention *invention,bool ergonomically_terrific) {
@@ -449,20 +449,13 @@ Invention::~Invention() {
 	}
 }
 
-/*int Invention::getRelativeEpoch() {
-if( this->type == SHIELD )
-return this->epoch;
-else
-return this->epoch - start_epoch;
-}*/
-
 Image *Invention::getImage() const {
 	if( this->type == SHIELD )
-		return icon_shields[this->epoch - start_epoch];
+		return game_g->icon_shields[this->epoch - game_g->getStartEpoch()];
 	else if( this->type == DEFENCE )
-		return icon_defences[this->epoch];
+		return game_g->icon_defences[this->epoch];
 	else if( this->type == WEAPON )
-		return icon_weapons[this->epoch];
+		return game_g->icon_weapons[this->epoch];
 	return NULL;
 }
 
@@ -491,12 +484,11 @@ Invention *Invention::getInvention(Invention::Type type,int epoch) {
 	ASSERT_EPOCH(epoch);
 	Invention *invention = NULL;
 	if( type == SHIELD )
-		invention = invention_shields[epoch];
-	//invention = invention_shields[epoch - start_epoch];
+		invention = game_g->invention_shields[epoch];
 	else if( type == DEFENCE )
-		invention = invention_defences[epoch];
+		invention = game_g->invention_defences[epoch];
 	else if( type == WEAPON )
-		invention = invention_weapons[epoch];
+		invention = game_g->invention_weapons[epoch];
 	ASSERT(invention != NULL);
 	return invention;
 }
@@ -522,7 +514,7 @@ type(type), sector(sector), health(0), max_health(0), pos_x(0), pos_y(0), n_turr
 		this->pos_x = offset_fortress_x_c;
 		this->pos_y = offset_fortress_y_c;
 		this->n_turrets = 4;
-		if( using_old_gfx ) {
+		if( game_g->isUsingOldGfx() ) {
 			turret_pos[0].set(0, 0, 15, 12);
 			turret_pos[1].set(27, 0, 15, 12);
 			turret_pos[2].set(0, 24, 15, 12);
@@ -539,7 +531,7 @@ type(type), sector(sector), health(0), max_health(0), pos_x(0), pos_y(0), n_turr
 		this->pos_x = offset_mine_x_c;
 		this->pos_y = offset_mine_y_c;
 		this->n_turrets = 2;
-		if( using_old_gfx ) {
+		if( game_g->isUsingOldGfx() ) {
 			turret_pos[0].set(0, 17, 15, 12);
 			turret_pos[1].set(27, 17, 15, 12);
 		}
@@ -552,7 +544,7 @@ type(type), sector(sector), health(0), max_health(0), pos_x(0), pos_y(0), n_turr
 		this->pos_x = offset_factory_x_c;
 		this->pos_y = offset_factory_y_c;
 		this->n_turrets = 3;
-		if( using_old_gfx ) {
+		if( game_g->isUsingOldGfx() ) {
 			turret_pos[0].set(1, 9, 15, 12);
 			turret_pos[1].set(33, 9, 15, 12);
 			turret_pos[2].set(16, 26, 15, 12);
@@ -567,7 +559,7 @@ type(type), sector(sector), health(0), max_health(0), pos_x(0), pos_y(0), n_turr
 		this->pos_x = offset_lab_x_c;
 		this->pos_y = offset_lab_y_c;
 		this->n_turrets = 1;
-		if( using_old_gfx ) {
+		if( game_g->isUsingOldGfx() ) {
 			turret_pos[0].set(10, 4, 15, 12);
 		}
 		else {
@@ -608,13 +600,13 @@ Building::~Building() {
 Image **Building::getImages() {
 	Image **images = NULL;
 	if( type == BUILDING_TOWER )
-		images = fortress;
+		images = game_g->fortress;
 	else if( type == BUILDING_MINE )
-		images = mine;
+		images = game_g->mine;
 	else if( type == BUILDING_FACTORY )
-		images = factory;
+		images = game_g->factory;
 	else if( type == BUILDING_LAB )
-		images = lab;
+		images = game_g->lab;
 	ASSERT(images != NULL);
 	return images;
 }
@@ -835,13 +827,13 @@ gamestate(gamestate)
 	}
 
 	// rocks etc
-	int n_clutter = icon_clutter.size() > 0 ? (1 + rand() % 4) : 0;
+	int n_clutter = game_g->icon_clutter.size() > 0 ? (1 + rand() % 4) : 0;
 	for(int i=0;i<n_clutter;i++) {
-		int land_width = land[(int)map_colour]->getScaledWidth() - 32;
-		int land_height = land[(int)map_colour]->getScaledHeight() - 32;
+		int land_width = game_g->land[(int)map_colour]->getScaledWidth() - 32;
+		int land_height = game_g->land[(int)map_colour]->getScaledHeight() - 32;
 		int xpos = offset_land_x_c + rand() % land_width;
 		int ypos = offset_land_y_c + rand() % land_height;
-		Image **image_ptr = &icon_clutter[rand() % icon_clutter.size()];
+		Image **image_ptr = &game_g->icon_clutter[rand() % game_g->icon_clutter.size()];
 		Feature *feature = new Feature(image_ptr, 1, xpos, ypos);
 		this->features.push_back(feature);
 	}
@@ -852,14 +844,14 @@ gamestate(gamestate)
 		if( treetype == 2 )
 			treetype = 3;
 		//Image *image = icon_trees[treetype];
-		Image *image = icon_trees[treetype][0];
+		Image *image = game_g->icon_trees[treetype][0];
 		cx += rand() % 16;
 		if( cx + image->getScaledWidth() > offset_land_x_c + land_width_c )
 			break;
 		//int ypos = offset_land_y_c - image->getScaledHeight() + 12 + rand() % 12;
 		int ypos = offset_land_y_c - image->getScaledHeight() + 16 + rand() % 8;
 		//Feature *feature = new Feature(icon_trees[treetype], cx, ypos);
-		Feature *feature = new Feature(icon_trees[treetype], n_tree_frames_c, cx, ypos);
+		Feature *feature = new Feature(game_g->icon_trees[treetype], n_tree_frames_c, cx, ypos);
 		//Feature *feature = new Feature(image, cx, ypos);
 		this->features.push_back(feature);
 		cx += image->getScaledWidth() - 8;
@@ -869,33 +861,33 @@ gamestate(gamestate)
 		int treetype = rand() % 3;
 		if( treetype == 2 )
 			treetype = 3;
-		Image *image = icon_trees[treetype][0];
+		Image *image = game_g->icon_trees[treetype][0];
 		cx += rand() % 32;
 		if( cx + image->getScaledWidth() > offset_land_x_c + land_width_c )
 			break;
-		int ypos = offset_land_y_c + land[(int)map_colour]->getScaledHeight() - image->getScaledHeight() - 8 - rand() % 4;
-		Feature *feature = new Feature(icon_trees[treetype], n_tree_frames_c, cx, ypos);
+		int ypos = offset_land_y_c + game_g->land[(int)map_colour]->getScaledHeight() - image->getScaledHeight() - 8 - rand() % 4;
+		Feature *feature = new Feature(game_g->icon_trees[treetype], n_tree_frames_c, cx, ypos);
 		feature->setAtFront(true);
 		this->features.push_back(feature);
 		cx += image->getScaledWidth() - 8;
 	}
 
-	if( smoke_image != NULL ) {
-		this->smokeParticleSystem = new SmokeParticleSystem(smoke_image);
+	if( game_g->smoke_image != NULL ) {
+		this->smokeParticleSystem = new SmokeParticleSystem(game_g->smoke_image);
 
-		this->jetParticleSystem = new SmokeParticleSystem(smoke_image);
+		this->jetParticleSystem = new SmokeParticleSystem(game_g->smoke_image);
 		this->jetParticleSystem->setMove(10.0f, 10.0f);
 		this->jetParticleSystem->setBirthRate(1.667f);
 		this->jetParticleSystem->setLifeExp(90);
 		this->jetParticleSystem->setSize(0.5f);
 
-		this->nukeParticleSystem = new SmokeParticleSystem(smoke_image);
+		this->nukeParticleSystem = new SmokeParticleSystem(game_g->smoke_image);
 		this->nukeParticleSystem->setMove(10.0f, -10.0f);
 		this->nukeParticleSystem->setBirthRate(1.667f);
 		this->nukeParticleSystem->setLifeExp(90);
 		this->nukeParticleSystem->setSize(0.5f);
 
-		this->nukeDefenceParticleSystem = new SmokeParticleSystem(smoke_image);
+		this->nukeDefenceParticleSystem = new SmokeParticleSystem(game_g->smoke_image);
 		this->nukeDefenceParticleSystem->setMove(0.0f, 10.0f);
 		this->nukeDefenceParticleSystem->setBirthRate(1.667f);
 		this->nukeDefenceParticleSystem->setLifeExp(90);
@@ -1027,23 +1019,23 @@ void Sector::destroyTower(bool nuked, int client_player) {
 	}
 	gamestate->getGamePanel()->refreshShutdown();
 
-	if( nuked || playerAlive(this_player) ) {
+	if( nuked || game_g->playerAlive(this_player) ) {
 		// player has other sectors
-		if( isDemo() ) {
+		if( game_g->isDemo() ) {
 		}
 		else if( this_player == client_player ) {
 			if( nuked )
-				playSample(s_weve_been_nuked);
+				playSample(game_g->s_weve_been_nuked);
 			else
-				playSample(s_sector_destroyed);
+				playSample(game_g->s_sector_destroyed);
 			//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 			gamestate->setFlashingSquare(this->xpos, this->ypos);
 		}
 		else if( ( nuked && nuke_by_player == client_player ) || ( !nuked && this->getArmy(client_player)->getTotal() > 0 ) ) {
 			if( nuked && nuke_by_player == client_player )
-				playSample(s_weve_nuked_them);
+				playSample(game_g->s_weve_nuked_them);
 			else
-				playSample(s_conquered);
+				playSample(game_g->s_conquered);
 			//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 			gamestate->setFlashingSquare(this->xpos, this->ypos);
 		}
@@ -1060,7 +1052,7 @@ void Sector::destroyBuilding(Type building_type,bool silent,int client_player) {
 	LOG("Sector::destroyBuilding(%d) [%d: %d, %d]\n", building_type, player, xpos, ypos);
 	ASSERT( buildings[(int)building_type] != NULL );
 	if( this == gamestate->getCurrentSector() && !silent ) {
-		playSample(s_buildingdestroyed, SOUND_CHANNEL_FX);
+		playSample(game_g->s_buildingdestroyed, SOUND_CHANNEL_FX);
 	}
 	if( building_type == BUILDING_TOWER ) {
 		this->destroyTower(false, client_player);
@@ -1068,7 +1060,7 @@ void Sector::destroyBuilding(Type building_type,bool silent,int client_player) {
 	}
 	else if( building_type == BUILDING_MINE ) {
 		if( this->player == client_player && !silent ) {
-			playSample(s_mine_destroyed);
+			playSample(game_g->s_mine_destroyed);
 			//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 			gamestate->setFlashingSquare(this->xpos, this->ypos);
 		}
@@ -1086,7 +1078,7 @@ void Sector::destroyBuilding(Type building_type,bool silent,int client_player) {
 	}
 	else if( building_type == BUILDING_FACTORY ) {
 		if( this->player == client_player && !silent ) {
-			playSample(s_factory_destroyed);
+			playSample(game_g->s_factory_destroyed);
 			//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 			gamestate->setFlashingSquare(this->xpos, this->ypos);
 		}
@@ -1100,7 +1092,7 @@ void Sector::destroyBuilding(Type building_type,bool silent,int client_player) {
 	}
 	else if( building_type == BUILDING_LAB ) {
 		if( this->player == client_player && !silent ) {
-			playSample(s_lab_destroyed);
+			playSample(game_g->s_lab_destroyed);
 			//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 			gamestate->setFlashingSquare(this->xpos, this->ypos);
 		}
@@ -1139,13 +1131,13 @@ bool Sector::canShutdown() const {
 	if( this->is_shutdown )
 		return false;
 
-	if( this->getEpoch() == n_epochs_c-1 && start_epoch != end_epoch_c ) // in 2100AD
+	if( this->getEpoch() == n_epochs_c-1 && game_g->getStartEpoch() != end_epoch_c ) // in 2100AD
 	{
 		for(int y=0;y<map_height_c;y++) {
 			for(int x=0;x<map_width_c;x++) {
-				//if( map->sector_at[x][y] ) {
-				if( getMap()->isSectorAt(x, y) ) {
-					const Sector *sector = getMap()->getSector(x, y);
+				//if( game_g->getMap()->sector_at[x][y] ) {
+				if( game_g->getMap()->isSectorAt(x, y) ) {
+					const Sector *sector = game_g->getMap()->getSector(x, y);
 					if( ( sector != gamestate->getCurrentSector() && sector->getPlayer() == this->getPlayer() )
 						|| sector->getArmy(this->getPlayer())->any(true) ) {
 							return true;
@@ -1231,7 +1223,7 @@ void Sector::killDefender(int index) {
 
 bool Sector::canBuild(Type type) const {
 	//LOG("Sector::canBuild(%d)\n",type);
-	if( start_epoch == end_epoch_c )
+	if( game_g->getStartEpoch() == end_epoch_c )
 		return false;
 
 	if( getBuilding(type) != NULL )
@@ -1256,15 +1248,15 @@ bool Sector::canMine(Id id) const {
 	if( !this->anyElements(id) )
 		return false;
 
-	if( ::elements[id]->getType() == Element::GATHERABLE )
+	if( game_g->elements[id]->getType() == Element::GATHERABLE )
 		return true;
-	else if( ::elements[id]->getType() == Element::OPENPITMINE )
+	else if( game_g->elements[id]->getType() == Element::OPENPITMINE )
 		return ( this->epoch >= 1 );
-	else if( ::elements[id]->getType() == Element::DEEPMINE )
+	else if( game_g->elements[id]->getType() == Element::DEEPMINE )
 		return (this->buildings[BUILDING_MINE] != NULL);
 
 	// error
-	LOG("###Didn't expect element id %d of type %d\n",id,::elements[id]->getType());
+	LOG("###Didn't expect element id %d of type %d\n",id,game_g->elements[id]->getType());
 	ASSERT(0);
 	return false;
 }
@@ -1272,7 +1264,7 @@ bool Sector::canMine(Id id) const {
 Design *Sector::canBuildDesign(Invention::Type type,int epoch) const {
 	//LOG("Sector::canBuildDesign(%d,%d)\n",type,epoch);
 	ASSERT_EPOCH(epoch);
-	if(epoch < start_epoch || epoch > start_epoch + 3 )
+	if(epoch < game_g->getStartEpoch() || epoch > game_g->getStartEpoch() + 3 )
 		return NULL; // can't build this
 	if( epoch >= factory_epoch_c && this->getBuilding(BUILDING_FACTORY) == NULL )
 		return NULL; // need a factory for this
@@ -1334,7 +1326,7 @@ void Sector::autoTrashDesigns() {
 bool Sector::tryMiningMore() const {
 	// todo: only check elements we can mine (we might not be able to advance to that epoch)
 	for(int i=0;i<N_ID;i++) {
-		//Element *element = ::elements[i];
+		//Element *element = game_g->elements[i];
 		if( this->elements[i] > 0 &&
 			this->elementstocks[i] < 6 * element_multiplier_c
 			//( element->type != Element::GATHERABLE || this->elementstocks[i] < max_gatherables_stored_c * element_multiplier_c )
@@ -1412,7 +1404,7 @@ Design *Sector::bestDesign(Invention::Type type,int epoch) const {
 		//Design *design = (Design *)invention->designs->elementAt(i);
 		Design *design = invention->getDesign(i);
 		bool ok = true;
-		if( pref_disallow_nukes && ( type == Invention::DEFENCE || type == Invention::WEAPON ) && epoch == nuclear_epoch_c ) {
+		if( game_g->isPrefDisallowNukes() && ( type == Invention::DEFENCE || type == Invention::WEAPON ) && epoch == nuclear_epoch_c ) {
 			ok = false;
 		}
 		for(int j=0;j<N_ID && ok;j++) {
@@ -1504,7 +1496,7 @@ bool Sector::nukeSector(Sector *source) {
 Design *Sector::canResearch(Invention::Type type,int epoch) const {
 	//LOG("Sector::canResearch(%d,%d)\n",type,epoch);
 	ASSERT_EPOCH(epoch);
-	if( epoch < start_epoch || epoch > start_epoch + 3 )
+	if( epoch < game_g->getStartEpoch() || epoch > game_g->getStartEpoch() + 3 )
 		return NULL; // can't research this
 	if( epoch > lab_epoch_c && this->getBuilding(BUILDING_LAB) == NULL )
 		return NULL; // need a lab for this
@@ -1538,7 +1530,7 @@ void Sector::buildDesign() {
 	//LOG("Sector::buildDesign(%d : %s) [%d: %d, %d]\n", this->current_manufacture, this->current_manufacture->getInvention()->getName(), player, xpos, ypos);
 /*#ifdef _DEBUG
 	LOG("### Sector::buildDesign a\n");
-	map->checkSectors();
+	game_g->getMap()->checkSectors();
 #endif*/
 	Invention *invention = this->current_manufacture->getInvention();
 	if( invention->getType() == Invention::WEAPON ) {
@@ -1548,7 +1540,7 @@ void Sector::buildDesign() {
 		this->stored_defenders[invention->getEpoch()]++;
 	}
 	else if( invention->getType() == Invention::SHIELD ) {
-		int shield = invention->getEpoch() - start_epoch;
+		int shield = invention->getEpoch() - game_g->getStartEpoch();
 		ASSERT_SHIELD(shield);
 		this->stored_shields[shield]++;
 	}
@@ -1557,7 +1549,7 @@ void Sector::buildDesign() {
 	}
 /*#ifdef _DEBUG
 	//LOG("### Sector::buildDesign b\n");
-	map->checkSectors();
+	game_g->getMap()->checkSectors();
 #endif*/
 }
 
@@ -1566,10 +1558,10 @@ bool Sector::assembleArmy(int epoch,int n) {
 	ASSERT_EPOCH(epoch);
 	int n_population = this->getPopulation();
 	int n_spare = this->getAvailablePopulation();
-	int n_men = invention_weapons[epoch]->getNMen() * n;
+	int n_men = game_g->invention_weapons[epoch]->getNMen() * n;
 	if( n_spare < n_men ) {
 		n = 1;
-		n_men = invention_weapons[epoch]->getNMen() * n;
+		n_men = game_g->invention_weapons[epoch]->getNMen() * n;
 	}
 	if( n_spare < n_men )
 		return false;
@@ -1592,7 +1584,7 @@ bool Sector::assembleArmy(int epoch,int n) {
 	if( n_make > 0 ) {
 		this->getAssembledArmy()->add(epoch, n_make);
 		this->getStoredArmy()->remove(epoch, n_make);
-		n_men = invention_weapons[epoch]->getNMen() * n_make;
+		n_men = game_g->invention_weapons[epoch]->getNMen() * n_make;
 		this->setPopulation( n_population - n_men );
 	}
 	return (n_make == n);
@@ -1657,10 +1649,10 @@ int Sector::getStoredDefenders(int epoch) const {
 bool Sector::useShield(Building *building,int shield) {
 	ASSERT_SHIELD(shield);
 	if( this->stored_shields[shield] == 0 ) {
-		if( start_epoch + shield >= factory_epoch_c )
+		if( game_g->getStartEpoch() + shield >= factory_epoch_c )
 			return false;
 		// not enough - try to make one
-		Design *design = this->canBuildDesign(Invention::SHIELD, start_epoch + shield);
+		Design *design = this->canBuildDesign(Invention::SHIELD, game_g->getStartEpoch() + shield);
 		if( design == NULL )
 			return false; // can't make a new one
 		this->consumeStocks(design);
@@ -1682,11 +1674,11 @@ float Sector::getDefenceStrength() const {
 	//LOG("Sector::getDefenceStrength() [%d: %d, %d]\n", player, xpos, ypos);
 	ASSERT_PLAYER(player);
 	float str = 0.0f;
-	if( start_epoch == end_epoch_c ) {
+	if( game_g->getStartEpoch() == end_epoch_c ) {
 		str = 4.0f;
 	}
 	else {
-		//str = ( this->epoch - start_epoch ) + 1;
+		//str = ( this->epoch - game_g->getStartEpoch() ) + 1;
 		str = 1.0f;
 	}
 	if( this->player == PlayerType::PLAYER_BLUE ) {
@@ -1806,7 +1798,7 @@ void Sector::doCombat(int client_player) {
 								destroyBuilding((Type)i, client_player);
 							}
 							else if( this->player == client_player && building->getHealth() == 10 && building->getType() == BUILDING_TOWER ) {
-								playSample(s_tower_critical);
+								playSample(game_g->s_tower_critical);
 								//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 								gamestate->setFlashingSquare(this->xpos, this->ypos);
 							}
@@ -1829,7 +1821,7 @@ void Sector::doPlayer(int client_player) {
 		this->smokeParticleSystem->update();
 	}
 
-	if( gameMode == GAMEMODE_MULTIPLAYER_CLIENT ) {
+	if( game_g->getGameMode() == GAMEMODE_MULTIPLAYER_CLIENT ) {
 		// rest of function is for game logic done by server
 		return;
 	}
@@ -1859,7 +1851,7 @@ void Sector::doPlayer(int client_player) {
 				// not enough elements
 				// therefore production run completed
 				if( this->player == client_player ) {
-					playSample(s_fcompleted);
+					playSample(game_g->s_fcompleted);
 					gamestate->setFlashingSquare(this->xpos, this->ypos);
 				}
 				this->setCurrentManufacture(NULL);
@@ -1892,7 +1884,7 @@ void Sector::doPlayer(int client_player) {
 				// production run completed
 				//LOG("production run completed\n");
 				if( this->player == client_player ) {
-					playSample(s_fcompleted);
+					playSample(game_g->s_fcompleted);
 					gamestate->setFlashingSquare(this->xpos, this->ypos);
 				}
 				this->setCurrentManufacture(NULL);
@@ -1909,7 +1901,7 @@ void Sector::doPlayer(int client_player) {
 		if( this->elements[i] == 0 ) {
 			continue; // no more of this element
 		}
-		Element *element = ::elements[i];
+		Element *element = game_g->elements[i];
 		if( element->getType() != Element::GATHERABLE || this->elementstocks[i] < max_gatherables_stored_c * element_multiplier_c )
 		{
 			int n_gatherers = 0;
@@ -1956,7 +1948,7 @@ void Sector::doPlayer(int client_player) {
 
 	if( this->growth_lasttime == -1 )
 		this->growth_lasttime = time;
-	else if( tutorial != NULL && !tutorial->aiAllowGrowth() && !players[this->player]->isHuman() ) {
+	else if( tutorial != NULL && !tutorial->aiAllowGrowth() && !game_g->players[this->player]->isHuman() ) {
 		// don't allow growth
 	}
 	else if( this->getSparePopulation() > 0 ) {
@@ -1986,8 +1978,8 @@ void Sector::doPlayer(int client_player) {
 			int births = this->population - old_pop;
 			//ASSERT(births >= 0);
 			if( births > 0 ) {
-				//players[this->player]->n_births += births;
-				players[this->player]->registerBirths(births);
+				//game_g->players[this->player]->n_births += births;
+				game_g->players[this->player]->registerBirths(births);
 			}
 		}
 	}
@@ -2012,7 +2004,7 @@ void Sector::getNukePos(int *nuke_x, int *nuke_y) const {
 
 void Sector::update(int client_player) {
 	//LOG("Sector::update()\n");
-	if( gameMode != GAMEMODE_MULTIPLAYER_CLIENT ) {
+	if( game_g->getGameMode() != GAMEMODE_MULTIPLAYER_CLIENT ) {
 		this->doCombat(client_player);
 	}
 
@@ -2031,7 +2023,7 @@ void Sector::update(int client_player) {
 		if( !this->is_shutdown )
 			this->doPlayer(client_player); // still call for clients, to update particle system
 	}
-	else if( gameMode != GAMEMODE_MULTIPLAYER_CLIENT ) {
+	else if( game_g->getGameMode() != GAMEMODE_MULTIPLAYER_CLIENT ) {
 		int time = getGameTime();
 		int n_players_in_sector = 0;
 		int player_in_sector = -1;
@@ -2073,7 +2065,7 @@ void Sector::update(int client_player) {
 		}
 	}
 
-	if( gameMode == GAMEMODE_MULTIPLAYER_CLIENT ) {
+	if( game_g->getGameMode() == GAMEMODE_MULTIPLAYER_CLIENT ) {
 		return;
 	}
 	// rest of function is done by server
@@ -2093,13 +2085,13 @@ void Sector::update(int client_player) {
 								this->buildings[i]->killIthDefender(j);
 								this->nuked = false;
 								if( this == gamestate->getCurrentSector() ) {
-									if( explosions[0] != NULL ) {
-										int w = explosions[0]->getScaledWidth();
-										int h = explosions[0]->getScaledHeight();
+									if( game_g->explosions[0] != NULL ) {
+										int w = game_g->explosions[0]->getScaledWidth();
+										int h = game_g->explosions[0]->getScaledHeight();
 										gamestate->explosionEffect( buildings[i]->getTurretButton(j)->getXCentre() - w/2, buildings[i]->getTurretButton(j)->getYCentre() - h/2);
 										int nuke_x = -1, nuke_y = -1;
 										this->getNukePos(&nuke_x, &nuke_y);
-										Image *nuke_image = nukes[this->nuke_by_player][1];
+										Image *nuke_image = game_g->nukes[this->nuke_by_player][1];
 										gamestate->explosionEffect( nuke_x + nuke_image->getScaledWidth()/2 - w/2, nuke_y + nuke_image->getScaledHeight()/2 - h/2);
 									}
 								}
@@ -2110,8 +2102,8 @@ void Sector::update(int client_player) {
 			}
 
 			if( this->nuked ) {
-				playSample(s_explosion, SOUND_CHANNEL_FX);
-				s_explosion->setVolume(0.25f); // needed so we can hear speech sample over the explosion
+				playSample(game_g->s_explosion, SOUND_CHANNEL_FX);
+				game_g->s_explosion->setVolume(0.25f); // needed so we can hear speech sample over the explosion
 				if( this->getActivePlayer() != -1 ) {
 					this->destroyTower(true, client_player);
 				}
@@ -2125,12 +2117,12 @@ void Sector::update(int client_player) {
 					// bit of a hacky way of finding trees...
 					bool is_tree = false;
 					for(int i=0;i<n_trees_c && !is_tree;i++) {
-						if( image == icon_trees[i][0] ) {
+						if( image == game_g->icon_trees[i][0] ) {
 							is_tree = true;
 						}
 					}
 					if( is_tree ) {
-						feature->setImage(icon_trees[2], 1);
+						feature->setImage(game_g->icon_trees[2], 1);
 						 ++iter;
 					}
 					else {
@@ -2138,13 +2130,13 @@ void Sector::update(int client_player) {
 					}
 				}
 				// now add some new features
-				int n_clutter = icon_clutter_nuked.size() > 0 ? (1 + rand() % 4) : 0;
+				int n_clutter = game_g->icon_clutter_nuked.size() > 0 ? (1 + rand() % 4) : 0;
 				for(int i=0;i<n_clutter;i++) {
-					int land_width = land[0]->getScaledWidth() - 32;
-					int land_height = land[0]->getScaledHeight() - 32;
+					int land_width = game_g->land[0]->getScaledWidth() - 32;
+					int land_height = game_g->land[0]->getScaledHeight() - 32;
 					int xpos = offset_land_x_c + rand() % land_width;
 					int ypos = offset_land_y_c + rand() % land_height;
-					Image **image_ptr = &icon_clutter_nuked[rand() % icon_clutter_nuked.size()];
+					Image **image_ptr = &game_g->icon_clutter_nuked[rand() % game_g->icon_clutter_nuked.size()];
 					Feature *feature = new Feature(image_ptr, 1, xpos, ypos);
 					this->features.push_back(feature);
 				}
@@ -2168,16 +2160,16 @@ void Sector::update(int client_player) {
 }
 
 bool Sector::mineElement(int client_player, Id i) {
-	Element *element = ::elements[(int)i];
+	Element *element = game_g->elements[(int)i];
 	ASSERT( this->elements[(int)i] > 0 );
 	this->elementstocks[(int)i]++;
 	this->elements[(int)i]--;
 	if( this->elements[(int)i] == 0 ) {
 		if( element->getType() != Element::GATHERABLE )
 			this->setMiners(i, 0);
-		LOG("Sector [%d: %d, %d] running out of element %d : %s\n", player, xpos, ypos, (int)i, ::elements[(int)i]->getName());
+		LOG("Sector [%d: %d, %d] running out of element %d : %s\n", player, xpos, ypos, (int)i, game_g->elements[(int)i]->getName());
 		if( this->player == client_player ) {
-			playSample(s_running_out_of_elements);
+			playSample(game_g->s_running_out_of_elements);
 			//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
 			gamestate->setFlashingSquare(this->xpos, this->ypos);
 		}
@@ -2195,14 +2187,14 @@ void Sector::invent(int client_player) {
 	this->inventions_known[ current_design->getInvention()->getType() ][ current_design->getInvention()->getEpoch() ] = true;
 	this->designs.push_back( current_design );
 
-	if( this->epoch < start_epoch + 3 && epoch < n_epochs_c-1 ) {
+	if( this->epoch < game_g->getStartEpoch() + 3 && epoch < n_epochs_c-1 ) {
 		//int levels[4] = {0, 0, 0, 0};
 		int score = 0;
 		for(int i=0;i<3;i++) {
 			int val = 1;
 			for(int j=0;j<4;j++) {
-				if( start_epoch+j < n_epochs_c ) {
-					if( this->inventions_known[i][start_epoch+j] ) {
+				if( game_g->getStartEpoch()+j < n_epochs_c ) {
+					if( this->inventions_known[i][game_g->getStartEpoch()+j] ) {
 						//levels[j]++;
 						score += val;
 					}
@@ -2211,7 +2203,7 @@ void Sector::invent(int client_player) {
 			}
 		}
 		score = ( score + 3 ) / 3;
-		int new_epoch = start_epoch;
+		int new_epoch = game_g->getStartEpoch();
 		while( score > 1 ) {
 			new_epoch++;
 			score /= 2;
@@ -2221,7 +2213,7 @@ void Sector::invent(int client_player) {
 			this->epoch = new_epoch;
 			LOG("Sector [%d: %d, %d] has advanced to tech level %d\n", player, xpos, ypos, epoch);
 			if( !done_sound ) {
-				playSample(s_advanced_tech);
+				playSample(game_g->s_advanced_tech);
 				done_sound = true;
 			}
 		}
@@ -2232,9 +2224,9 @@ void Sector::invent(int client_player) {
 	}
 	if( !done_sound ) {
 		if( current_design->isErgonomicallyTerrific() )
-			playSample(s_ergo);
+			playSample(game_g->s_ergo);
 		else
-			playSample(s_design_is_ready);
+			playSample(game_g->s_design_is_ready);
 	}
 	if( this->player == client_player ) {
 		//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
@@ -2369,13 +2361,13 @@ int Sector::getBuildingEpoch() const {
 	int eph = this->getEpoch();
 	/*if( this->is_shutdown )
 		eph = end_epoch_c;
-	else if( start_epoch == end_epoch_c )
+	else if( game_g->getStartEpoch() == end_epoch_c )
 		eph = end_epoch_c;
 	else if( eph == n_epochs_c-1 )
 		eph = n_epochs_c-2;*/
 	if( this->is_shutdown )
 		eph = n_epochs_c-1;
-	else if( start_epoch == end_epoch_c )
+	else if( game_g->getStartEpoch() == end_epoch_c )
 		eph = n_epochs_c-1;
 	else if( eph == n_epochs_c-1 )
 		eph = n_epochs_c-2;
@@ -2415,7 +2407,7 @@ void Sector::setCurrentManufacture(Design *current_manufacture) {
 	//LOG("Sector::setCurrentManufacture(%d : %s) [%d: %d, %d]\n", current_manufacture, current_manufacture==NULL?"NONE":current_manufacture->getInvention()->getName(), player, xpos, ypos);
 /*#ifdef _DEBUG
 	LOG("### Sector::setCurrentManufacture a\n");
-	map->checkSectors();
+	game_g->getMap()->checkSectors();
 #endif*/
 	ASSERT( current_manufacture == NULL || this->getBuilding(BUILDING_FACTORY ) != NULL );
 	ASSERT( current_manufacture == NULL || current_manufacture->getInvention()->getEpoch() >= factory_epoch_c );
@@ -2427,7 +2419,7 @@ void Sector::setCurrentManufacture(Design *current_manufacture) {
 	this->manufactured_lasttime = getGameTime();
 /*#ifdef _DEBUG
 	LOG("### Sector::setCurrentManufacture b\n");
-	map->checkSectors();
+	game_g->getMap()->checkSectors();
 #endif*/
 	if( this == gamestate->getCurrentSector() ) {
 		//((PlayingGameState *)gamestate)->getGamePanel()->refresh();
@@ -2435,7 +2427,7 @@ void Sector::setCurrentManufacture(Design *current_manufacture) {
 	}
 /*#ifdef _DEBUG
 	LOG("### Sector::setCurrentManufacture c\n");
-	map->checkSectors();
+	game_g->getMap()->checkSectors();
 #endif*/
 }
 
@@ -2590,7 +2582,7 @@ void Sector::setFAmount(int n_famount) {
 void Sector::setMiners(Id id,int n_miners) {
 	//LOG("Sector::setMiners(%d,%d)\n",id,n_miners);
 	ASSERT_ELEMENT_ID(id);
-	ASSERT( ::elements[id]->getType() != Element::GATHERABLE );
+	ASSERT( game_g->elements[id]->getType() != Element::GATHERABLE );
 	ASSERT( n_miners == 0 || canMine(id) );
 	if( this == gamestate->getCurrentSector() ) {
 		//((PlayingGameState *)gamestate)->getGamePanel()->refresh();
@@ -2720,8 +2712,8 @@ bool Sector::returnArmy(Army *army) {
 
 	Sector *src_sector = army->getSector();
 	bool temp[map_width_c][map_height_c];
-	getMap()->canMoveTo(temp, src_sector->xpos, src_sector->ypos, army->getPlayer());
-	//bool adj = map->temp[this->xpos][this->ypos];
+	game_g->getMap()->canMoveTo(temp, src_sector->xpos, src_sector->ypos, army->getPlayer());
+	//bool adj = game_g->getMap()->temp[this->xpos][this->ypos];
 	bool adj = temp[this->xpos][this->ypos];
 	bool moved_all = true;
 
@@ -2738,7 +2730,7 @@ bool Sector::returnArmy(Army *army) {
 				moved_all = false;
 			}
 			else {
-				int n_men = ( i==n_epochs_c ? 1 : invention_weapons[i]->getNMen() );
+				int n_men = ( i==n_epochs_c ? 1 : game_g->invention_weapons[i]->getNMen() );
 				this->population += army->getSoldiers(i) * n_men;
 				if( i != n_epochs_c ) {
 					// unarmed men are never stored in the stored_army (as not actually a weapon)
@@ -2766,8 +2758,8 @@ bool Sector::moveArmy(Army *army) {
 	}
 	Sector *src_sector = army->getSector();
 	bool temp[map_width_c][map_height_c];
-	getMap()->canMoveTo(temp, src_sector->xpos, src_sector->ypos, army->getPlayer());
-	//bool adj = map->temp[this->xpos][this->ypos];
+	game_g->getMap()->canMoveTo(temp, src_sector->xpos, src_sector->ypos, army->getPlayer());
+	//bool adj = game_g->getMap()->temp[this->xpos][this->ypos];
 	bool adj = temp[this->xpos][this->ypos];
 	bool moved_all = true;
 	if( !army->canLeaveSafely() ) {
@@ -2815,7 +2807,7 @@ void Sector::evacuate() {
 		this->n_miners[i] = 0;
 	}
 
-	for(int i=n_epochs_c-1;i>=start_epoch;i--) {
+	for(int i=n_epochs_c-1;i>=game_g->getStartEpoch();i--) {
 		if( i == nuclear_epoch_c )
 			continue;
 		while( this->assembleArmy(i, 1) ) {
@@ -3305,14 +3297,14 @@ void Sector::printDebugInfo() const {
 			printf("    manufacturing %s\n", current_manufacture->getInvention()->getName());
 		for(int i=0;i<N_ID;i++) {
 			if( this->canMine((Id)i) ) {
-				Element *element = ::elements[i];
+				Element *element = game_g->elements[i];
 				if( element->getType() != Element::GATHERABLE )
 					printf("   mining %s %d\n", element->getName(), this->getMiners((Id)i));
 			}
 		}
 		for(int i=0;i<N_ID;i++) {
 			int stocks = this->elementstocks[i];
-			Element *element = ::elements[i];
+			Element *element = game_g->elements[i];
 			if( stocks > 0 )
 				printf("stocks of %s: %d\n", element->getName(), stocks);
 		}
@@ -3324,6 +3316,9 @@ void Sector::printDebugInfo() const {
 
 bool Design::setupDesigns() {
 	Design *design = NULL;
+	Weapon **invention_weapons = game_g->invention_weapons;
+	Invention **invention_defences = game_g->invention_defences;
+	Invention **invention_shields = game_g->invention_shields;
 	// Weapons
 	// 0 - rock (1.5)
 	// rock, wood, bone, slate, herbirite, valium, bethlium, parasite, moonlite, aquarium, solarium, aruldite

@@ -68,7 +68,7 @@ bool Screen::open(int screen_width, int screen_height, bool fullscreen) {
 #endif
 	LOG("screen opened ok\n");
 
-	if( mobile_ui ) {
+	if( game_g->isMobileUI() ) {
 		SDL_ShowCursor(false); // comment out to test with system cursor, for testing purposes when ran on non-touchscreen devices
 	}
 	else {
@@ -295,7 +295,7 @@ void Application::delay(unsigned int time) {
 const int TICK_INTERVAL = 16; // 62.5 fps max
 
 void Application::wait() {
-	unsigned int now = application->getTicks();
+	unsigned int now = game_g->getApplication()->getTicks();
 	// use unsigned int and compare by subtraction to avoid overflow problems - see http://blogs.msdn.com/b/oldnewthing/archive/2005/05/31/423407.aspx, http://www.gammon.com.au/millis
 	unsigned int elapsed = now - last_time;
 	unsigned int delay = 0;
@@ -304,13 +304,13 @@ void Application::wait() {
 	}
 	else {
 		delay = TICK_INTERVAL - elapsed;
-		application->delay(delay);
+		game_g->getApplication()->delay(delay);
 	}
 	last_time = now + delay;
 }
 
 void Application::runMainLoop() {
-	unsigned int elapsed_time = application->getTicks();
+	unsigned int elapsed_time = game_g->getApplication()->getTicks();
 
 	SDL_Event event;
 	quit = false;
@@ -331,7 +331,7 @@ void Application::runMainLoop() {
 		updateSound();
 
 		// draw screen
-		drawGame();
+		game_g->drawGame();
 
 		/* wait() to avoid 100% CPU - it's debatable whether we should do this,
 		 * due to risk of SDL_Delay waiting too long, but since Gigalomania
@@ -343,9 +343,9 @@ void Application::runMainLoop() {
 		 */
 		wait();
 
-		unsigned int new_time = application->getTicks();
+		unsigned int new_time = game_g->getApplication()->getTicks();
 		//LOG("%d, %d\n", new_time, new_time - elapsed_time);
-		if( !isPaused() ) {
+		if( !game_g->isPaused() ) {
 			updateTime(new_time - elapsed_time);
 		}
 		else
@@ -357,7 +357,7 @@ void Application::runMainLoop() {
 			switch (event.type) {
 			case SDL_QUIT:
 				// same as pressing escape
-				keypressEscape();
+				game_g->keypressEscape();
 				break;
 			case SDL_KEYDOWN:
 				{
@@ -372,13 +372,13 @@ void Application::runMainLoop() {
 						|| key.sym == SDLK_AC_BACK // SDLK_AC_BACK required for Android
 #endif
 						) {
-						keypressEscape();
+						game_g->keypressEscape();
 					}
 					else if( key.sym == SDLK_p ) {
-						togglePause();
+						game_g->togglePause();
 					}
 					else if( key.sym == SDLK_RETURN ) {
-						keypressReturn();
+						game_g->keypressReturn();
 					}
 					break;
 				}
@@ -387,31 +387,31 @@ void Application::runMainLoop() {
 					//LOG("received mouse down\n");
 					int m_x = event.button.x;
 					int m_y = event.button.y;
-					screen->setMousePos(m_x, m_y);
+					game_g->getScreen()->setMousePos(m_x, m_y);
 					bool m_left = false, m_middle = false, m_right = false;
 					Uint8 button = event.button.button;
 					if( button == SDL_BUTTON_LEFT ) {
 						m_left = true;
-						screen->setMouseLeft(true);
+						game_g->getScreen()->setMouseLeft(true);
 					}
 					else if( button == SDL_BUTTON_MIDDLE ) {
 						m_middle = true;
-						screen->setMouseMiddle(true);
+						game_g->getScreen()->setMouseMiddle(true);
 					}
 					else if( button == SDL_BUTTON_RIGHT ) {
 						m_right = true;
-						screen->setMouseRight(true);
+						game_g->getScreen()->setMouseRight(true);
 					}
 
-					if( isPaused() ) {
+					if( game_g->isPaused() ) {
 						// click automatically unpaused (needed to work without keyboard!)
-						togglePause();
+						game_g->togglePause();
 					}
 					else if( m_left || m_middle || m_right ) {
 						/*int m_x = 0, m_y = 0;
-						screen->getMouseCoords(&m_x, &m_y);*/
+						game_g->getScreen()->getMouseCoords(&m_x, &m_y);*/
 						//LOG("received mouse click: %d, %d\n", m_x, m_y);
-						mouseClick(m_x, m_y, m_left, m_middle, m_right, true);
+						game_g->mouseClick(m_x, m_y, m_left, m_middle, m_right, true);
 					}
 
 					break;
@@ -421,20 +421,20 @@ void Application::runMainLoop() {
 					//LOG("received mouse up\n");
 					Uint8 button = event.button.button;
 					if( button == SDL_BUTTON_LEFT ) {
-						screen->setMouseLeft(false);
+						game_g->getScreen()->setMouseLeft(false);
 					}
 					else if( button == SDL_BUTTON_MIDDLE ) {
-						screen->setMouseMiddle(false);
+						game_g->getScreen()->setMouseMiddle(false);
 					}
 					else if( button == SDL_BUTTON_RIGHT ) {
-						screen->setMouseRight(false);
+						game_g->getScreen()->setMouseRight(false);
 					}
 					break;
 				}
 			case SDL_MOUSEMOTION:
 				{
 					int old_m_x = 0, old_m_y = 0;
-					screen->getMouseCoords(&old_m_x, &old_m_y);
+					game_g->getScreen()->getMouseCoords(&old_m_x, &old_m_y);
 					int m_x = event.motion.x;
 					int m_y = event.motion.y;
 					//LOG("    mouse motion %d, %d\n", m_x, m_y);
@@ -449,7 +449,7 @@ void Application::runMainLoop() {
 						//LOG("    old %d, %d\n", old_m_x, old_m_y);
 						this->blank_mouse = false;
 					}
-					screen->setMousePos(m_x, m_y);
+					game_g->getScreen()->setMousePos(m_x, m_y);
 					break;
 				}
 #if SDL_MAJOR_VERSION == 1
@@ -461,21 +461,21 @@ void Application::runMainLoop() {
 				{
 					//LOG("received fingerdown: %f , %f\n", event.tfinger.x, event.tfinger.y);
 					int window_width = 0, window_height = 0;
-					screen->getWindowSize(&window_width, &window_height);
+					game_g->getScreen()->getWindowSize(&window_width, &window_height);
 					int m_x = (int)(event.tfinger.x*window_width);
 					int m_y = (int)(event.tfinger.y*window_height);
 					//LOG("    %d, %d\n", m_x, m_y);
-					screen->convertWindowToLogical(&m_x, &m_y);
+					game_g->getScreen()->convertWindowToLogical(&m_x, &m_y);
 					//LOG("    logical %d, %d\n", m_x, m_y);
-					screen->setMousePos(m_x, m_y);
-					screen->setMouseLeft(true);
+					game_g->getScreen()->setMousePos(m_x, m_y);
+					game_g->getScreen()->setMouseLeft(true);
 					this->blank_mouse = true;
 					break;
 				}
 			case SDL_FINGERUP:
 				{
 					//LOG("received fingerup\n");
-					screen->setMouseLeft(false);
+					game_g->getScreen()->setMouseLeft(false);
 					this->blank_mouse = true;
 					// n.b., "click" is handled via SDL_MOUSEBUTTONUP
 					break;
@@ -484,13 +484,13 @@ void Application::runMainLoop() {
 				{
 					//LOG("received fingermotion: %f , %f\n", event.tfinger.x, event.tfinger.y);
 					int window_width = 0, window_height = 0;
-					screen->getWindowSize(&window_width, &window_height);
+					game_g->getScreen()->getWindowSize(&window_width, &window_height);
 					int m_x = (int)(event.tfinger.x*window_width);
 					int m_y = (int)(event.tfinger.y*window_height);
 					//LOG("    %d, %d\n", m_x, m_y);
-					screen->convertWindowToLogical(&m_x, &m_y);
+					game_g->getScreen()->convertWindowToLogical(&m_x, &m_y);
 					//LOG("    logical %d, %d\n", m_x, m_y);
-					screen->setMousePos(m_x, m_y);
+					game_g->getScreen()->setMousePos(m_x, m_y);
 					this->blank_mouse = true;
 					break;
 				}
@@ -518,10 +518,10 @@ void Application::runMainLoop() {
 				}
 				else if( event.window.event == SDL_WINDOWEVENT_HIDDEN || event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ) {
 					// inactive
-					if( !isPaused() ) {
-						togglePause(); // automatically pause when application goes inactive
+					if( !game_g->isPaused() ) {
+						game_g->togglePause(); // automatically pause when application goes inactive
 					}
-					saveState();
+					game_g->saveState();
 				}
 				break;
 #endif
@@ -529,7 +529,7 @@ void Application::runMainLoop() {
 		}
 		SDL_PumpEvents();
 
-		updateGame();
+		game_g->updateGame();
 	}
 }
 

@@ -65,7 +65,7 @@ Player::Player(bool is_human, int index) :
 index(index), dead(false), n_births(0), n_deaths(0), n_men_for_this_island(0), n_suspended(0), is_human(is_human), alliance_last_asked_human(-1)
 {
 	for(int i=0;i<n_players_c;i++) {
-		if( i != index && players[i] != NULL && !players[i]->isDead() ) {
+		if( i != index && game_g->players[i] != NULL && !game_g->players[i]->isDead() ) {
 			setAlliance(index, i, false);
 			setAllianceLastAsked(index, i, -1);
 		}
@@ -254,10 +254,6 @@ void Player::setAlliance(int a, int b, bool alliance) {
 	ASSERT(a != b);
 	ASSERT_PLAYER(a);
 	ASSERT_PLAYER(b);
-	/*ASSERT(players[a] != NULL);
-	ASSERT(players[b] != NULL);
-	ASSERT(!players[a]->isDead());
-	ASSERT(!players[b]->isDead());*/
 	if( a > b ) {
 		int dummy = a;
 		a = b;
@@ -270,10 +266,6 @@ bool Player::isAlliance(int a, int b) {
 	ASSERT(a != b);
 	ASSERT_PLAYER(a);
 	ASSERT_PLAYER(b);
-	/*ASSERT(players[a] != NULL);
-	ASSERT(players[b] != NULL);
-	ASSERT(!players[a]->isDead());
-	ASSERT(!players[b]->isDead());*/
 	if( a > b ) {
 		int dummy = a;
 		a = b;
@@ -440,9 +432,9 @@ void Player::kill(PlayingGameState *gamestate) {
 	// check for only being one side
 	bool one_side = true;
 	for(int i=0;i<n_players_c && one_side;i++) {
-		if( players[i] != NULL && !players[i]->isDead() ) {
+		if( game_g->players[i] != NULL && !game_g->players[i]->isDead() ) {
 			for(int j=0;j<n_players_c && one_side;j++) {
-				if( players[j] != NULL && !players[j]->isDead() ) {
+				if( game_g->players[j] != NULL && !game_g->players[j]->isDead() ) {
 					if( i != j && !Player::isAlliance(i,j) ) {
 						one_side = false;
 					}
@@ -453,9 +445,9 @@ void Player::kill(PlayingGameState *gamestate) {
 	if( one_side ) {
 		// break all alliances
 		for(int i=0;i<n_players_c;i++) {
-			if( players[i] != NULL && !players[i]->isDead() ) {
+			if( game_g->players[i] != NULL && !game_g->players[i]->isDead() ) {
 				for(int j=0;j<n_players_c && one_side;j++) {
-					if( players[j] != NULL && !players[j]->isDead() ) {
+					if( game_g->players[j] != NULL && !game_g->players[j]->isDead() ) {
 						if( i != j ) {
 							Player::setAlliance(i, j, false);
 						}
@@ -479,7 +471,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	// reset to zero
 	sector->setDesigners( 0 );
 	for(int i=0;i<N_ID;i++) {
-		if( elements[i]->getType() != Element::GATHERABLE )
+		if( game_g->elements[i]->getType() != Element::GATHERABLE )
 			sector->setMiners((Id)i, 0);
 	}
 	sector->setWorkers( 0 );
@@ -624,11 +616,11 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 
 	if( sector->getCurrentManufacture() == NULL ) {
 		// defences handled already, above
-		for(int i=n_sub_epochs-1;i>=0;i--) {
-			if( start_epoch + i == nuclear_epoch_c )
+		for(int i=game_g->getNSubEpochs()-1;i>=0;i--) {
+			if( game_g->getStartEpoch() + i == nuclear_epoch_c )
 				continue; // nuclear weapons handled later
-			if( start_epoch + i >= factory_epoch_c ) {
-				Design *design = sector->canBuildDesign(Invention::WEAPON, start_epoch + i);
+			if( game_g->getStartEpoch() + i >= factory_epoch_c ) {
+				Design *design = sector->canBuildDesign(Invention::WEAPON, game_g->getStartEpoch() + i);
 				if( design != NULL ) {
 					sector->setCurrentManufacture(design);
 					sector->setFAmount(1);
@@ -650,8 +642,8 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			}
 			if( !healed && sector->getCurrentManufacture() != NULL ) {
 				// manufacture a shield
-				for(int j=n_sub_epochs-1;j>=0;j--) {
-					Design *design = sector->canBuildDesign(Invention::SHIELD, start_epoch + j);
+				for(int j=game_g->getNSubEpochs()-1;j>=0;j--) {
+					Design *design = sector->canBuildDesign(Invention::SHIELD, game_g->getStartEpoch() + j);
 					if( design != NULL ) {
 						sector->setCurrentManufacture(design);
 						sector->setFAmount(1);
@@ -669,8 +661,8 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		bool found_tower = false;
 		for(int x=0;x<map_width_c;x++) {
 			for(int y=0;y<map_height_c;y++) {
-				if( map->isSectorAt(x, y) ) {
-					Sector *c_sector = map->getSector(x, y);
+				if( game_g->getMap()->isSectorAt(x, y) ) {
+					Sector *c_sector = game_g->getMap()->getSector(x, y);
 					int this_strength = c_sector->getArmy(sector->getPlayer())->getStrength();
 					if( this_strength > 0 && ( !enemiesPresentWithBombardment || sector->getBuilding(BUILDING_TOWER)->getHealth() > EVACUATE_LEVEL ) ) {
 						// only nuke our own men if this tower is under attack and nearly destroyed
@@ -721,13 +713,13 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		int best_weapon = -1;
 		int best_defence = -1;
 		int best_shield = -1;
-		for(int i=n_sub_epochs-1;i>=0;i--) {
-			if( best_weapon == -1 && sector->inventionKnown(Invention::WEAPON, start_epoch + i) )
-				best_weapon = start_epoch + i;
-			if( best_defence == -1 && sector->inventionKnown(Invention::DEFENCE, start_epoch + i) )
-				best_defence = start_epoch + i;
-			if( best_shield == -1 && sector->inventionKnown(Invention::SHIELD, start_epoch + i) )
-				best_shield = start_epoch + i;
+		for(int i=game_g->getNSubEpochs()-1;i>=0;i--) {
+			if( best_weapon == -1 && sector->inventionKnown(Invention::WEAPON, game_g->getStartEpoch() + i) )
+				best_weapon = game_g->getStartEpoch() + i;
+			if( best_defence == -1 && sector->inventionKnown(Invention::DEFENCE, game_g->getStartEpoch() + i) )
+				best_defence = game_g->getStartEpoch() + i;
+			if( best_shield == -1 && sector->inventionKnown(Invention::SHIELD, game_g->getStartEpoch() + i) )
+				best_shield = game_g->getStartEpoch() + i;
 		}
 		Design *design = NULL;
 		Design *reserve_design = NULL;
@@ -735,8 +727,8 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		design = sector->canResearch(Invention::WEAPON, nuclear_epoch_c);
 
 		bool try_mining_more = sector->tryMiningMore();
-		for(int i=0;i<n_sub_epochs && design == NULL;i++) {
-			int eph = start_epoch + i;
+		for(int i=0;i<game_g->getNSubEpochs() && design == NULL;i++) {
+			int eph = game_g->getStartEpoch() + i;
 			Design *this_design = NULL;
 
 			this_design = sector->canResearch(Invention::WEAPON, eph);
@@ -762,7 +754,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			}
 		}
 
-		if( design == NULL && sector->getEpoch() < start_epoch + 3 )
+		if( design == NULL && sector->getEpoch() < game_g->getStartEpoch() + 3 )
 			design = reserve_design;
 
 		if( design != NULL ) {
@@ -773,7 +765,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	bool can_design = sector->getCurrentDesign() != NULL;
 	bool can_mine = false;
 	for(int i=0;i<N_ID && !can_mine;i++) {
-		if( sector->canMine((Id)i) && ::elements[i]->getType() != Element::GATHERABLE )
+		if( sector->canMine((Id)i) && game_g->elements[i]->getType() != Element::GATHERABLE )
 			can_mine = true;
 	}
 	bool build_mine = sector->canBuild(BUILDING_MINE);
@@ -827,7 +819,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		int n_miners = 0;
 		while( n_miners < pop/split ) {
 			for(int i=0;i<N_ID && n_miners < pop/split;i++) {
-				if( sector->canMine((Id)i) && ::elements[i]->getType() != Element::GATHERABLE ) {
+				if( sector->canMine((Id)i) && game_g->elements[i]->getType() != Element::GATHERABLE ) {
 					int n = sector->getMiners((Id)i) + 1;
 					sector->setMiners((Id)i, n);
 					n_miners++;
@@ -854,19 +846,19 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	}
 	else if( sector->getCurrentDesign() == NULL || enemiesPresentWithBombardment ) {
 		//if( used_up || enemiesPresentWithBombardment ) {
-		bool used_up = start_epoch != end_epoch_c && sector->usedUp();
+		bool used_up = game_g->getStartEpoch() != end_epoch_c && sector->usedUp();
 		// think about attacking?
 		Sector *target_sector = NULL;
 		bool by_land = false;
 		bool new_sector = false;
 		int strength = 0;
 		bool temp[map_width_c][map_height_c];
-		map->canMoveTo(temp, sector->getXPos(),sector->getYPos(),sector->getPlayer());
+		game_g->getMap()->canMoveTo(temp, sector->getXPos(),sector->getYPos(),sector->getPlayer());
 		// if used up, look for a new sector
 		bool look_for_new_sector = used_up || ( rand() % 3 == 0 );
 		for(int x=0;x<map_width_c;x++) {
 			for(int y=0;y<map_height_c;y++) {
-				Sector *c_sector = map->getSector(x, y);
+				Sector *c_sector = game_g->getMap()->getSector(x, y);
 				if( c_sector == NULL )
 					continue;
 				//if( used_up && c_sector->getActivePlayer() == -1 ) {
@@ -884,7 +876,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		// look for tower to attack
 		for(int x=0;x<map_width_c;x++) {
 			for(int y=0;y<map_height_c;y++) {
-				Sector *c_sector = map->getSector(x, y);
+				Sector *c_sector = game_g->getMap()->getSector(x, y);
 				if( c_sector == NULL )
 					continue;
 				if( c_sector->getActivePlayer() != -1 && c_sector->getPlayer() != sector->getPlayer()
@@ -909,7 +901,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			// look for men to attack
 			for(int x=0;x<map_width_c;x++) {
 				for(int y=0;y<map_height_c;y++) {
-					Sector *c_sector = map->getSector(x, y);
+					Sector *c_sector = game_g->getMap()->getSector(x, y);
 					if( c_sector == NULL )
 						continue;
 					bool enemy = false;
@@ -944,7 +936,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			//if( enemiesPresent || new_sector )
 			if( enemiesPresent || used_up )
 				min_pop = 0;
-			for(int i=n_epochs_c-1;i>=start_epoch;i--) {
+			for(int i=n_epochs_c-1;i>=game_g->getStartEpoch();i--) {
 				if( i == nuclear_epoch_c )
 					continue;
 				if( !by_land && !isAirUnit(i) )
@@ -965,9 +957,9 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			//int assembled_strength = sector->getAssembledArmy()->getTotal();
 			int assembled_strength = sector->getAssembledArmy()->getStrength();
 			//int min_req = 8;
-			//int min_req = 4 * (start_epoch+1);
-			int min_req = 8 * (start_epoch+1);
-			for(int i=0;i<=start_epoch;i++)
+			//int min_req = 4 * (game_g->getStartEpoch()+1);
+			int min_req = 8 * (game_g->getStartEpoch()+1);
+			for(int i=0;i<=game_g->getStartEpoch();i++)
 				min_req *= 2;
 			if( used_up ) {
 				// no point waiting
@@ -975,12 +967,12 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			}
 
 			/*if( by_land && sector->getCurrentDesign() == NULL && sector->getCurrentManufacture() == NULL &&
-			( enemiesPresent || assembled_strength > min_req || start_epoch == end_epoch_c ) ) {
+			( enemiesPresent || assembled_strength > min_req || game_g->getStartEpoch() == end_epoch_c ) ) {
 			// only use unarmed men if we aren't designing or manufacturing anything
 			// and either we are under attack, or we are able to destroy enemy buildings, or moving to a new sector
 			// assemble unarmed men*/
 			if( by_land && sector->getCurrentDesign() == NULL && sector->getCurrentManufacture() == NULL &&
-				( enemiesPresentWithBombardment || start_epoch == end_epoch_c || new_sector ) ) {
+				( enemiesPresentWithBombardment || game_g->getStartEpoch() == end_epoch_c || new_sector ) ) {
 					// only use unarmed men if we aren't designing or manufacturing anything
 					// and either we are under attack, or we are able to destroy enemy buildings, or we are moving to a new sector
 					// assemble unarmed men
@@ -1014,7 +1006,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 
 
 void Player::doAIUpdate(int client_player, PlayingGameState *gamestate) {
-	if( players[index]->isDead() ) {
+	if( game_g->players[index]->isDead() ) {
 		return;
 	}
 	//LOG("Player::doAIUpdate()\n");
@@ -1042,7 +1034,7 @@ void Player::doAIUpdate(int client_player, PlayingGameState *gamestate) {
 
 	// make alliances
 	for(int i=0;i<n_players_c;i++) {
-		if( i != this->index && players[i] != NULL && !players[i]->isDead() /*&& i != human_player*/ ) {
+		if( i != this->index && game_g->players[i] != NULL && !game_g->players[i]->isDead() /*&& i != human_player*/ ) {
 			//if( this->index == ((PlayingGameState *)gamestate)->getPlayerAskingAlliance() || i == ((PlayingGameState *)gamestate)->getPlayerAskingAlliance() ) {
 			if( this->index == gamestate->getPlayerAskingAlliance() || i == gamestate->getPlayerAskingAlliance() ) {
 				// one of these AIs is asking the player, so don't request
@@ -1061,11 +1053,11 @@ void Player::doAIUpdate(int client_player, PlayingGameState *gamestate) {
 	// update sectors
 	for(int x=0;x<map_width_c;x++) {
 		for(int y=0;y<map_height_c;y++) {
-			Sector *sector = map->getSector(x, y);
+			Sector *sector = game_g->getMap()->getSector(x, y);
 			if( sector == NULL )
 				continue;
 			if( sector->getActivePlayer() == this->index ) {
-				//map->sectors[x][y]->doAIUpdate();
+				//game_g->getMap()->sectors[x][y]->doAIUpdate();
 				doSectorAI(client_player, gamestate, sector);
 			}
 			else {
@@ -1097,7 +1089,7 @@ void Player::doAIUpdate(int client_player, PlayingGameState *gamestate) {
 						bool done = false;
 						for(int cx=0;cx<map_width_c && !done;cx++) {
 							for(int cy=0;cy<map_height_c && !done;cy++) {
-								Sector *c_sector = map->getSector(cx, cy);
+								Sector *c_sector = game_g->getMap()->getSector(cx, cy);
 								if( c_sector != NULL && c_sector->getActivePlayer() == this->index ) {
 									ASSERT( c_sector != sector );
 									done = c_sector->moveArmy(army);

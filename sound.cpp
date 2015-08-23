@@ -101,14 +101,14 @@ Sample *Sample::loadMusic(const char *filename) {
 
 void Sample::play(int ch, int loops) {
 	if( have_sound ) {
-		if( is_music && pref_music_on ) {
+		if( is_music && game_g->isPrefMusicOn() ) {
 			if( Mix_PlayMusic(music, loops) == -1 ) {
 			//if( Mix_FadeInMusic(music, -1, 2000) == -1 ) {
 				LOG("Mix_PlayMusic failed: %s\n", Mix_GetError());
 			}
 			Mix_VolumeMusic(MIX_MAX_VOLUME);
 		}
-		else if( !is_music && pref_sound_on ) {
+		else if( !is_music && game_g->isPrefSoundOn() ) {
 			if( chunk != NULL ) {
 				bool done = false;
 				if( channel != -1 ) {
@@ -136,7 +136,7 @@ void Sample::play(int ch, int loops) {
 		//const int ypos = 216;
 		const int ypos = 224;
 		TextEffect *effect = new TextEffect(this->text, 160, ypos, 2000);
-		addTextEffect(effect);
+		game_g->addTextEffect(effect);
 	}
 }
 

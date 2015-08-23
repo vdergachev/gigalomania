@@ -16,8 +16,8 @@
 void registerClick() {
 	//LOG("registerClick()\n");
 	// call for gui items to be registered as a mouse click, rather than continuous press
-	playSample(s_guiclick, SOUND_CHANNEL_FX);
-    s_guiclick->setVolume(0.125f);
+	playSample(game_g->s_guiclick, SOUND_CHANNEL_FX);
+    game_g->s_guiclick->setVolume(0.125f);
 }
 
 PanelPage::PanelPage(int offset_x,int offset_y) {
@@ -58,7 +58,7 @@ void PanelPage::init_panelpage() {
 	this->has_background = false;
 	for(int i=0;i<4;i++)
 		this->background[i] = 0;
-	this->tolerance = mobile_ui ? 2 : 0;
+	this->tolerance = game_g->isMobileUI() ? 2 : 0;
 	this->visible = true;
 	this->enabled = true;
 	this->children = new vector<PanelPage *>();
@@ -189,19 +189,19 @@ void PanelPage::free(bool free_this) {
 }
 
 void PanelPage::drawPopups() {
-	if( mobile_ui ) {
+	if( game_g->isMobileUI() ) {
 		return;
 	}
 	/*if( owner != NULL )
     {
         // DEBUG
-        int sx = (int)((owner->getLeft() + offset_x - tolerance) * scale_width);
-        int sy = (int)((owner->getTop() + offset_y - tolerance) * scale_height);
-        screen->fillRect(sx, sy, (this->w+2*tolerance)*scale_width, (this->h+2*tolerance)*scale_height, 255, 0, 255);
+        int sx = (int)((owner->getLeft() + offset_x - tolerance) * game_g->getScaleWidth());
+        int sy = (int)((owner->getTop() + offset_y - tolerance) * game_g->getScaleHeight());
+        game_g->getScreen()->fillRect(sx, sy, (this->w+2*tolerance)*game_g->getScaleWidth(), (this->h+2*tolerance)*game_g->getScaleHeight(), 255, 0, 255);
     }*/
 	// popup text
 	int m_x = 0, m_y = 0;
-	screen->getMouseCoords(&m_x, &m_y);
+	game_g->getScreen()->getMouseCoords(&m_x, &m_y);
 	PanelPage *panel = this;
 	const char *lmb_text = panel->getInfoLMB();
 	const char *rmb_text = panel->getInfoRMB();
@@ -223,12 +223,10 @@ void PanelPage::drawPopups() {
 			if( !popup_item ) {
 				//LOG("create popup\n");
 				popup_item = true;
-				popup_x = (int)(m_x/scale_width);
-				popup_y = (int)(m_y/scale_height);
-				/*popup_x *= scale_width;
-				popup_y *= scale_height;*/
-				popup_x = (int)(popup_x*scale_width);
-				popup_y = (int)(popup_y*scale_height);
+				popup_x = (int)(m_x/game_g->getScaleWidth());
+				popup_y = (int)(m_y/game_g->getScaleHeight());
+				popup_x = (int)(popup_x*game_g->getScaleWidth());
+				popup_y = (int)(popup_y*game_g->getScaleHeight());
 			}
 			//LOG("draw popup\n");
 			{
@@ -252,9 +250,9 @@ void PanelPage::drawPopups() {
 					mice_indx[n_texts] = 2;
 					n_texts++;
 				}*/
-				int w = letters_small[0]->getScaledWidth();
-				int h = letters_small[0]->getScaledHeight() + 2;
-				int off_x = (int)(popup_x/scale_width + 24);
+				int w = game_g->letters_small[0]->getScaledWidth();
+				int h = game_g->letters_small[0]->getScaledHeight() + 2;
+				int off_x = (int)(popup_x/game_g->getScaleWidth() + 24);
 				int gap_left = 20;
 				int gap_right = 4;
 				int gap_y = 4;
@@ -275,25 +273,25 @@ void PanelPage::drawPopups() {
 					total_lines += n_lines[j];
 				}
 
-				int rect_x = (int)(off_x * scale_width);
-				int rect_y = (int)(popup_y - gap_y * scale_height);
-				int rect_w = (int)(( max_wid + gap_left + gap_right ) * scale_width);
+				int rect_x = (int)(off_x * game_g->getScaleWidth());
+				int rect_y = (int)(popup_y - gap_y * game_g->getScaleHeight());
+				int rect_w = (int)(( max_wid + gap_left + gap_right ) * game_g->getScaleWidth());
 				int rect_h = (int)(( 2 * gap_y + h * total_lines +
 					between_lines_y * ( total_lines - 1 ) +
-					( between_texts_y - between_lines_y ) * ( n_texts - 1 ) ) * scale_height);
-				if( rect_x + rect_w >= default_width_c * scale_width ) {
-					off_x = (int)(default_width_c - 8 - rect_w/scale_width);
-					rect_x = (int)(off_x * scale_width);
+					( between_texts_y - between_lines_y ) * ( n_texts - 1 ) ) * game_g->getScaleHeight());
+				if( rect_x + rect_w >= default_width_c * game_g->getScaleWidth() ) {
+					off_x = (int)(default_width_c - 8 - rect_w/game_g->getScaleWidth());
+					rect_x = (int)(off_x * game_g->getScaleWidth());
 					// also adjust y
-					int new_y = (int)(panel->getBottom() * scale_height);
-					if( new_y + rect_h >= default_height_c * scale_height ) {
-						new_y = (int)(panel->getTop() * scale_height - rect_h);
+					int new_y = (int)(panel->getBottom() * game_g->getScaleHeight());
+					if( new_y + rect_h >= default_height_c * game_g->getScaleHeight() ) {
+						new_y = (int)(panel->getTop() * game_g->getScaleHeight() - rect_h);
 					}
 					popup_y += new_y - rect_y;
 					rect_y = new_y;
 				}
-				else if( rect_y + rect_h >= default_height_c * scale_height ) {
-					int new_y = (int)(( default_height_c - 1 ) * scale_height - rect_h);
+				else if( rect_y + rect_h >= default_height_c * game_g->getScaleHeight() ) {
+					int new_y = (int)(( default_height_c - 1 ) * game_g->getScaleHeight() - rect_h);
 					popup_y += new_y - rect_y;
 					rect_y = new_y;
 				}
@@ -308,13 +306,13 @@ void PanelPage::drawPopups() {
 				fill_rect->drawWithAlpha(rect_x, rect_y, 160);
 				delete fill_rect;
 #else
-				screen->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, 128, 128, 128, 160);
+				game_g->getScreen()->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, 128, 128, 128, 160);
 #endif
 
-				int py = (int)(popup_y/scale_height);
+				int py = (int)(popup_y/game_g->getScaleHeight());
 				for(int j=0;j<n_texts;j++) {
-					icon_mice[mice_indx[j]]->draw(off_x + 4, py);
-					Image::write(off_x + gap_left, py + (one_line[j] ? h/2 : 0), letters_small, text[j], Image::JUSTIFY_LEFT);
+					game_g->icon_mice[mice_indx[j]]->draw(off_x + 4, py);
+					Image::write(off_x + gap_left, py + (one_line[j] ? h/2 : 0), game_g->letters_small, text[j], Image::JUSTIFY_LEFT);
 					py += n_lines[j] * h + between_texts_y;
 				}
 			}
@@ -334,7 +332,7 @@ void PanelPage::drawPopups() {
 
 void PanelPage::drawBackground() {
 	if( this->has_background && this->visible ) {
-		screen->fillRectWithAlpha((short)(scale_width*(owner->getLeft() + offset_x)), (short)(scale_width*(owner->getTop() + offset_y)), (short)(scale_width*this->w), (short)(scale_height*this->h), background[0], background[1], background[2], background[3]);
+		game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*(owner->getLeft() + offset_x)), (short)(game_g->getScaleWidth()*(owner->getTop() + offset_y)), (short)(game_g->getScaleWidth()*this->w), (short)(game_g->getScaleHeight()*this->h), background[0], background[1], background[2], background[3]);
 	}
 }
 
@@ -354,10 +352,10 @@ void PanelPage::draw() {
 
 bool PanelPage::mouseOver(int m_x,int m_y) const {
 	if( visible && enabled &&
-        m_x >= ( this->getLeft() - tolerance ) * scale_width &&
-        m_x < ( this->getLeft() + w + tolerance ) * scale_width &&
-        m_y >= ( this->getTop() - tolerance ) * scale_height &&
-        m_y < ( this->getTop() + h + tolerance ) * scale_height ) {
+        m_x >= ( this->getLeft() - tolerance ) * game_g->getScaleWidth() &&
+        m_x < ( this->getLeft() + w + tolerance ) * game_g->getScaleWidth() &&
+        m_y >= ( this->getTop() - tolerance ) * game_g->getScaleHeight() &&
+        m_y < ( this->getTop() + h + tolerance ) * game_g->getScaleHeight() ) {
 			return true;
 	}
 	return false;
@@ -405,7 +403,7 @@ Button::Button(int x,int y,const char *text,Image *font[]) : PanelPage(x, y) {
 	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
 	this->h = font[0]->getScaledHeight() + 2;
 	this->draw_offset_x = 0;
-	if( mobile_ui ) {
+	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
@@ -417,7 +415,7 @@ Button::Button(int x,int y,int h,const char *text,Image *font[]) : PanelPage(x, 
 	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
 	this->h = h;
 	this->draw_offset_x = 0;
-	if( mobile_ui ) {
+	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
@@ -429,7 +427,7 @@ Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[
 	this->w = draw_offset_x + font[0]->getScaledWidth() * this->text.length() + 2;
 	this->h = h;
 	this->draw_offset_x = draw_offset_x;
-	if( mobile_ui ) {
+	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
@@ -444,11 +442,11 @@ void Button::draw() {
         //LOG("write: %s\n", this->text.c_str());
        /*{
             // DEBUG
-            int sx = (int)((owner->getLeft() + offset_x - tolerance) * scale_width);
-            int sy = (int)((owner->getTop() + offset_y - tolerance) * scale_height);
-            screen->fillRect(sx, sy, (this->w+2*tolerance)*scale_width, (this->h+2*tolerance)*scale_height, 255, 0, 255);
+            int sx = (int)((owner->getLeft() + offset_x - tolerance) * game_g->getScaleWidth());
+            int sy = (int)((owner->getTop() + offset_y - tolerance) * game_g->getScaleHeight());
+            game_g->getScreen()->fillRect(sx, sy, (this->w+2*tolerance)*game_g->getScaleWidth(), (this->h+2*tolerance)*game_g->getScaleHeight(), 255, 0, 255);
         }*/
-		Image::writeMixedCase(owner->getLeft() + offset_x  + draw_offset_x + 1, owner->getTop() + offset_y + 1, this->font, this->font, numbers_yellow, this->text.c_str(), Image::JUSTIFY_LEFT);
+		Image::writeMixedCase(owner->getLeft() + offset_x  + draw_offset_x + 1, owner->getTop() + offset_y + 1, this->font, this->font, game_g->numbers_yellow, this->text.c_str(), Image::JUSTIFY_LEFT);
 	}
 	this->drawForeground();
 }
@@ -498,9 +496,9 @@ void ImageButton::draw() {
         //LOG("imagebutton: %d, %d\n", owner->getLeft() + offset_x, owner->getTop() + offset_y);
         /*{
             // DEBUG
-            int sx = (int)((owner->getLeft() + offset_x - tolerance) * scale_width);
-            int sy = (int)((owner->getTop() + offset_y - tolerance) * scale_height);
-            screen->fillRect(sx, sy, (this->w+2*tolerance)*scale_width, (this->h+2*tolerance)*scale_height, 255, 0, 255);
+            int sx = (int)((owner->getLeft() + offset_x - tolerance) * game_g->getScaleWidth());
+            int sy = (int)((owner->getTop() + offset_y - tolerance) * game_g->getScaleHeight());
+            game_g->getScreen()->fillRect(sx, sy, (this->w+2*tolerance)*game_g->getScaleWidth(), (this->h+2*tolerance)*game_g->getScaleHeight(), 255, 0, 255);
         }*/
         /*if( has_alpha ) {
             image->drawWithAlpha(owner->getLeft() + offset_x, owner->getTop() + offset_y, alpha);
@@ -530,7 +528,7 @@ CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Image *font
 	this->w = font[0]->getScaledWidth() * max_len + 2;
 	this->h = font[0]->getScaledHeight() + 2;
 	this->active = 0;
-	if( mobile_ui ) {
+	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
 		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
@@ -548,9 +546,9 @@ void CycleButton::draw() {
 	if( visible ) {
        /*{
             // DEBUG
-            int sx = (int)((owner->getLeft() + offset_x - tolerance) * scale_width);
-            int sy = (int)((owner->getTop() + offset_y - tolerance) * scale_height);
-            screen->fillRect(sx, sy, (this->w+2*tolerance)*scale_width, (this->h+2*tolerance)*scale_height, 255, 0, 255);
+            int sx = (int)((owner->getLeft() + offset_x - tolerance) * game_g->getScaleWidth());
+            int sy = (int)((owner->getTop() + offset_y - tolerance) * game_g->getScaleHeight());
+            game_g->getScreen()->fillRect(sx, sy, (this->w+2*tolerance)*game_g->getScaleWidth(), (this->h+2*tolerance)*game_g->getScaleHeight(), 255, 0, 255);
         }*/
 		Image::write(owner->getLeft() + offset_x + 1, owner->getTop() + offset_y + 1, this->font, this->texts[ this->active ], Image::JUSTIFY_LEFT);
 	}
