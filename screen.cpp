@@ -505,7 +505,9 @@ void Application::runMainLoop() {
 					}
 					else if( event.active.gain == 0 ) {
 						// inactive
-						togglePause(); // automatically pause when application goes inactive
+						if( !game_g->isPaused() ) {
+							togglePause(); // automatically pause when application goes inactive
+						}
 					}
 				}
 #endif
