@@ -150,9 +150,24 @@ class Game {
 	int n_player_suspended;
 
 	void calculateScale(const Image *image);
+	void convertToHiColor(Image *image) const;
+	void processImage(Image *image, bool old_smooth = true) const;
+	bool loadAttackersWalkingImages(const string &gfx_dir, int epoch);
+	bool loadOldImages();
+
 	char *getFilename(int slot) const;
 	bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename);
 	bool readMap(const char *filename);
+	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename);
+	bool loadGame(const char *filename);
+	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
+
+	void disposeGameState();
+
+	int getMenPerEpoch() const;
+	void updatedEpoch();
+	void setEpoch(int epoch);
+	void cleanupPlayers();
 public:
 	Image *background;
 	Image *player_heads_select[n_players_c];
@@ -292,14 +307,9 @@ public:
 	Game();
 	~Game();
 
-	void convertToHiColor(Image *image) const;
-	void processImage(Image *image, bool old_smooth = true) const;
-	bool loadAttackersWalkingImages(const string &gfx_dir, int epoch);
-	bool loadOldImages();
 	bool loadImages();
 	bool loadSamples();
 	bool createMaps();
-	void cleanup();
 
 	float getScaleWidth() const {
 		return this->scale_width;
@@ -396,7 +406,6 @@ public:
 	DifficultyLevel getDifficultyLevel() const {
 		return this->difficulty_level;
 	}
-	void disposeGameState();
 	void setGameStateID(GameStateID state, GameState *new_gamestate = NULL);
 	GameStateID getGameStateID() const {
 		return this->gameStateID;
@@ -470,14 +479,10 @@ public:
 
 	void deleteState() const;
 	void saveState() const;
-	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
 	bool loadState();
 
-	int getMenPerEpoch() const;
 	int getMenAvailable() const;
 	int getNSuspended() const;
-	void updatedEpoch();
-	void setEpoch(int epoch);
 	void nextEpoch();
 	void nextIsland();
 	void startIsland();
@@ -498,9 +503,7 @@ public:
 	void drawProgress(int percentage);
 
 	bool readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
-	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename);
 	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot);
-	bool loadGame(const char *filename);
 	bool loadGame(int slot);
 	void saveGame(int slot);
 
@@ -508,7 +511,6 @@ public:
 	void fadeMusic(int duration_ms);
 	void playMusic();
 
-	void cleanupPlayers();
 	void setupPlayers();
 	void setupInventions();
 	void setupElements();
