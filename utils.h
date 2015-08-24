@@ -72,7 +72,7 @@ bool log(const char *text,...);
 
 #ifndef ASSERT_PLAYER
 //#define ASSERT_PLAYER(player) ASSERT( player >= 0 && player < n_players_c && players[player] != NULL );
-#define ASSERT_PLAYER(player) ASSERT( validPlayer(player) );
+#define ASSERT_PLAYER(player) ASSERT( game_g->validPlayer(player) );
 #endif
 
 #ifndef ASSERT_DIFFICULTY

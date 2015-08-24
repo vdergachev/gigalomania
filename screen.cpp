@@ -514,7 +514,7 @@ void Application::runMainLoop() {
 			case SDL_WINDOWEVENT:
 				if( event.window.event == SDL_WINDOWEVENT_SHOWN || event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ) {
 					// activate
-					deleteState();
+					game_g->deleteState();
 				}
 				else if( event.window.event == SDL_WINDOWEVENT_HIDDEN || event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ) {
 					// inactive

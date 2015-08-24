@@ -150,6 +150,7 @@ class Game {
 	int n_player_suspended;
 
 	void calculateScale(const Image *image);
+	char *getFilename(int slot) const;
 	bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename);
 	bool readMap(const char *filename);
 public:
@@ -467,7 +468,8 @@ public:
 	void savePrefs() const;
 	bool isDemo() const;
 
-	void saveState();
+	void deleteState() const;
+	void saveState() const;
 	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
 	bool loadState();
 
@@ -485,6 +487,7 @@ public:
 	void placeTower();
 	void newGame();
 	void setClientPlayer(int set_client_player);
+	bool validPlayer(int player) const;
 	void keypressEscape();
 	void keypressReturn();
 	void togglePause();
@@ -588,11 +591,7 @@ public:
 	void saveStateSectors(stringstream &stream) const;
 };
 
-void deleteState();
-
 void playGame(int n_args, char *args[]);
-void quitGame();
-bool validPlayer(int player);
 
 #if defined(__ANDROID__)
 

@@ -898,7 +898,7 @@ bool Game::loadGame(const char *filename) {
 	return false;
 }
 
-char *getFilename(int slot) {
+char *Game::getFilename(int slot) const {
 	char name[300] = "";
 	sprintf(name, "game_%d.SAV", slot);
 	char *filename = getApplicationFilename(name);
@@ -992,7 +992,7 @@ void Game::saveGame(int slot) {
 	fclose(file);
 }
 
-bool validPlayer(int player) {
+bool Game::validPlayer(int player) const {
 	bool valid = player >= 0 && player < n_players_c;
 	if( !valid ) {
 		LOG("ERROR invalid player %d\n", player);
@@ -3574,14 +3574,6 @@ void Game::placeTower() {
 	}
 }
 
-void cleanup() {
-	LOG("cleanup()\n");
-	LOG("delete game %d\n", game_g);
-	delete game_g;
-	game_g = NULL;
-	LOG("cleanup done\n");
-}
-
 //bool quit = false;
 bool debugwindow = false;
 
@@ -3682,13 +3674,13 @@ int Game::getNClicks() {
 	return 3;
 }
 
-void deleteState() {
+void Game::deleteState() const {
 	char *save_fullfilename = getApplicationFilename(autosave_filename);
 	remove(save_fullfilename);
 	delete [] save_fullfilename;
 }
 
-void Game::saveState() {
+void Game::saveState() const {
     if( gameStateID == GAMESTATEID_UNDEFINED || gameStateID == GAMESTATEID_CHOOSEGAMETYPE || gameStateID == GAMESTATEID_CHOOSEDIFFICULTY || gameStateID == GAMESTATEID_CHOOSEPLAYER || gameStateID == GAMESTATEID_CHOOSETUTORIAL || gameStateID == GAMESTATEID_GAMECOMPLETE ) {
 		// no need to save state
 	}
@@ -4941,7 +4933,9 @@ void playGame(int n_args, char *args[]) {
 	LOG("time taken to load images: %d\n", clock() - time_s);
 	// loadImages takes progress up to 80%
 	if( !ok ) {
-		cleanup();
+		LOG("delete game %d\n", game_g);
+		delete game_g;
+		game_g = NULL;
 		return;
 	}
 
@@ -4964,7 +4958,9 @@ void playGame(int n_args, char *args[]) {
 	game_g->drawProgress(90);
 	if( !game_g->createMaps() ) {
 		LOG("failed to create maps\n");
-		cleanup();
+		LOG("delete game %d\n", game_g);
+		delete game_g;
+		game_g = NULL;
 #ifdef _WIN32
 		MessageBoxA(NULL, "Failed to create maps", "Error", MB_OK|MB_ICONEXCLAMATION);
 #endif
@@ -4978,7 +4974,9 @@ void playGame(int n_args, char *args[]) {
 			Image *image = (Image *)to;
 			if( !image->convertToDisplayFormat() ) {
 				LOG("failed to convertToDisplayFormat\n");
-				cleanup();
+				LOG("delete game %d\n", game_g);
+				delete game_g;
+				game_g = NULL;
 #ifdef _WIN32
 				MessageBoxA(NULL, "Failed to create texture images", "Error", MB_OK|MB_ICONEXCLAMATION);
 #endif
@@ -5010,13 +5008,10 @@ void playGame(int n_args, char *args[]) {
 		game_g->getApplication()->runMainLoop();
 	}
 
-	cleanup();
+	LOG("delete game %d\n", game_g);
+	delete game_g;
+	game_g = NULL;
 	LOG("exiting..\n");
-}
-
-void quitGame() {
-	//quit = true;
-	game_g->getApplication()->setQuit();
 }
 
 bool Game::playerAlive(int player) {
