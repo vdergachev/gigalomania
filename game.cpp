@@ -724,7 +724,7 @@ void Game::setEpoch(int epoch) {
     gamestate->reset();
 }
 
-void Game::drawProgress(int percentage) {
+void Game::drawProgress(int percentage) const {
 	const int width = (int)(screen->getWidth() * 0.25f);
 	const int height = (int)(screen->getHeight()/15.0f);
 	const int xpos = (int)(screen->getWidth()*0.5f - width*0.5f);
@@ -800,7 +800,7 @@ void Game::nextIsland() {
     LOG("done reset\n");
 }
 
-bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) {
+bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) const {
     //LOG("loadGameInfo(%d)\n",slot);
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 
@@ -923,7 +923,7 @@ bool Game::loadGame(int slot) {
 	return ok;
 }
 
-void Game::saveGame(int slot) {
+void Game::saveGame(int slot) const {
 	LOG("saveGame(%d)\n",slot);
 	ASSERT( gameType == GAMETYPE_ALLISLANDS );
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
@@ -1011,7 +1011,7 @@ void Game::stopMusic() {
 	}
 }
 
-void Game::fadeMusic(int duration_ms) {
+void Game::fadeMusic(int duration_ms) const {
 	if( music != NULL ) {
 		music->fadeOut(duration_ms);
 	}
@@ -4106,7 +4106,7 @@ void Game::updateGame() {
 	}
 }
 
-void Game::drawGame() {
+void Game::drawGame() const {
 	// we now redraw even when paused, to display paused message
 	gamestate->draw();
 }
@@ -5014,7 +5014,7 @@ void playGame(int n_args, char *args[]) {
 	LOG("exiting..\n");
 }
 
-bool Game::playerAlive(int player) {
+bool Game::playerAlive(int player) const {
 	/*int n_player_sectors = 0;
 	int n_army = 0;
 	for(int x=0;x<map_width_c;x++) {

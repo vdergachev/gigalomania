@@ -158,7 +158,7 @@ class Game {
 	char *getFilename(int slot) const;
 	bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename);
 	bool readMap(const char *filename);
-	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename);
+	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) const;
 	bool loadGame(const char *filename);
 	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
 
@@ -498,23 +498,23 @@ public:
 	void togglePause();
 	void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click);
 	void updateGame();
-	void drawGame();
+	void drawGame() const;
 	void addTextEffect(TextEffect *effect);
-	void drawProgress(int percentage);
+	void drawProgress(int percentage) const;
 
 	bool readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
 	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot);
 	bool loadGame(int slot);
-	void saveGame(int slot);
+	void saveGame(int slot) const;
 
 	void stopMusic();
-	void fadeMusic(int duration_ms);
+	void fadeMusic(int duration_ms) const;
 	void playMusic();
 
 	void setupPlayers();
 	void setupInventions();
 	void setupElements();
-	bool playerAlive(int player);
+	bool playerAlive(int player) const;
 
 	void runTests();
 };
