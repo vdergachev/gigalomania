@@ -3613,11 +3613,20 @@ void Game::togglePause() {
 
 void Game::activate() {
 	this->deleteState();
+    if( gameStateID != GAMESTATEID_PLAYING ) {
+		// when state is GAMESTATEID_PLAYING, we don't restart the music until the game is unpaused
+		Sample::unpauseMusic();
+	}
 }
 
 void Game::deactivate() {
-	if( !this->isPaused() ) {
-		this->togglePause(); // automatically pause when application goes inactive
+    if( gameStateID != GAMESTATEID_PLAYING ) {
+		Sample::pauseMusic();
+	}
+	else {
+		if( !this->isPaused() ) {
+			this->togglePause(); // automatically pause when application goes inactive
+		}
 	}
 	this->saveState();
 }
