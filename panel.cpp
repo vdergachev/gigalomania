@@ -405,7 +405,7 @@ Button::Button(int x,int y,const char *text,Image *font[]) : PanelPage(x, y) {
 	this->draw_offset_x = 0;
 	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
-		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
+		//this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
 }
 
@@ -417,7 +417,7 @@ Button::Button(int x,int y,int h,const char *text,Image *font[]) : PanelPage(x, 
 	this->draw_offset_x = 0;
 	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
-		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
+		//this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
 }
 
@@ -429,7 +429,7 @@ Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[
 	this->draw_offset_x = draw_offset_x;
 	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
-		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
+		//this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
 }
 
@@ -530,7 +530,7 @@ CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Image *font
 	this->active = 0;
 	if( game_g->isMobileUI() ) {
 		this->tolerance += 4;
-		this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
+		//this->h += 8; // useful for Android, where touches often seem to register lower than I seem to expect
 	}
 }
 
