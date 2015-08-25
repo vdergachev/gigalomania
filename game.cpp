@@ -3611,6 +3611,17 @@ void Game::togglePause() {
     }
 }
 
+void Game::activate() {
+	this->deleteState();
+}
+
+void Game::deactivate() {
+	if( !this->isPaused() ) {
+		this->togglePause(); // automatically pause when application goes inactive
+	}
+	this->saveState();
+}
+
 bool Game::isPaused() const {
 	return paused;
 }

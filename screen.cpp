@@ -502,12 +502,11 @@ void Application::runMainLoop() {
 				if( (event.active.state & SDL_APPINPUTFOCUS) != 0 || (event.active.state & SDL_APPACTIVE) != 0 ) {
 					if( event.active.gain == 1 ) {
 						// activate
+						game_g->activate();
 					}
 					else if( event.active.gain == 0 ) {
 						// inactive
-						if( !game_g->isPaused() ) {
-							togglePause(); // automatically pause when application goes inactive
-						}
+						game_g->deactivate();
 					}
 				}
 #endif
@@ -516,14 +515,11 @@ void Application::runMainLoop() {
 			case SDL_WINDOWEVENT:
 				if( event.window.event == SDL_WINDOWEVENT_SHOWN || event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ) {
 					// activate
-					game_g->deleteState();
+					game_g->activate();
 				}
 				else if( event.window.event == SDL_WINDOWEVENT_HIDDEN || event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ) {
 					// inactive
-					if( !game_g->isPaused() ) {
-						game_g->togglePause(); // automatically pause when application goes inactive
-					}
-					game_g->saveState();
+					game_g->deactivate();
 				}
 				break;
 #endif

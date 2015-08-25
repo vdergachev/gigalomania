@@ -496,6 +496,8 @@ public:
 	void keypressEscape();
 	void keypressReturn();
 	void togglePause();
+	void activate();
+	void deactivate();
 	void mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click);
 	void updateGame();
 	void drawGame() const;
