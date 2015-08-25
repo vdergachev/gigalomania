@@ -3376,6 +3376,7 @@ void Game::setGameStateID(GameStateID state, GameState *new_gamestate) {
 			map_x = tutorial->getStartMapX();
 			map_y = tutorial->getStartMapY();
 			n_men = tutorial->getNMen();
+			game_g->players[human_player]->setNMenForThisIsland( n_men ); // need to set this here - for non-tutorial, this is done in PlaceMenGameState::setStartMapPos()
 		}
 		else {
 			map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
