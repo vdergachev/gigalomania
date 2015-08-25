@@ -496,7 +496,7 @@ void Tutorial2::initCards() {
 	cards.push_back(card);
 
 	if( game_g->isOneMouseButton() ) {
-		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by clicking,\neither on the current map square,\nor clicking on the main area to the right.");
+		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by clicking\non the main area to the right of the map.");
 	}
 	else {
 		card = new TutorialCard("5", "Now see if you can return them to the home sector.\nYou can select an army by right clicking,\neither on the current map square,\nor right clicking on the main area to the right.");
@@ -504,7 +504,7 @@ void Tutorial2::initCards() {
 	card->setPlayerAllowBuildTower(false);
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForDeployedArmy("6", "When the army is selected, the shield icon will show.\nMove the army back home by clicking on the square of your sector", start_sector, false);
+	card = new TutorialCardWaitForDeployedArmy("6", "When the army is selected, the shield icon will show,\nor a bloody sword icon if retreating from an enemy sector.\nMove the army back home by clicking on the square of your sector", start_sector, false);
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(47, 54);
 	cards.push_back(card);
