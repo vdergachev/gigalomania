@@ -229,7 +229,11 @@ void Tutorial1::initCards() {
 
 	TutorialCard *card = NULL;
 
+#if defined(__ANDROID__)
+	card = new TutorialCard("0", "Welcome to Gigalomania!\nThis tutorial will introduce you to the game,\nand show you how to win your first island.\nUse the volume keys on your device to control the music volume.\nClick 'next' to continue when you're ready.");
+#else
 	card = new TutorialCard("0", "Welcome to Gigalomania!\nThis tutorial will introduce you to the game,\nand show you how to win your first island.\nClick 'next' to continue when you're ready.");
+#endif
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
