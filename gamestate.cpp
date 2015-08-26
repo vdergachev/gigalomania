@@ -942,7 +942,7 @@ void PlayingGameState::createQuitWindow() {
 		confirm_type = CONFIRMTYPE_QUITGAME;
 		confirm_window = new PanelPage(0, 0, default_width_c, default_height_c);
 		confirm_window->setBackground(0, 0, 0, 200);
-		const int offset_x_c = 80, offset_y_c = 120;
+		const int offset_x_c = 80, offset_y_c = 100;
 #if defined(__ANDROID__)
 		confirm_button_1 = NULL; // if user wants to exit to homescreen, they can just press the Home button
 #else
