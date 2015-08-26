@@ -261,7 +261,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCard("6", "This page allows you to design new inventions:\nThe left hand column shows shield, which are used to repair buildings.\nThe middle shows defences for your sector.\nThe right shows weapons to attack the enemy!");
+	card = new TutorialCard("6", "This page allows you to design new inventions:\nThe left hand column shows shields, which are used to repair buildings.\nThe middle shows defences for your sector.\nThe right shows weapons to attack the enemy!");
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
