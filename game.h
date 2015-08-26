@@ -432,11 +432,7 @@ public:
 	void setCurrentMap() {
 		map = maps[start_epoch][selected_island];
 	}
-	void setCurrentIsand(int start_epoch, int selected_island) {
-		this->start_epoch = start_epoch;
-		this->selected_island = selected_island;
-		this->setCurrentMap();
-	}
+	void setCurrentIsand(int start_epoch, int selected_island);
 	const Map *getMap() const;
 	Map *getMap();
 	const Map *getMap(int i, int j) const {

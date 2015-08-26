@@ -689,7 +689,6 @@ void Map::draw(int offset_x, int offset_y) const {
 }
 
 void Game::updatedEpoch() {
-	// used directly when we've set epoch from loading state
 	ASSERT( start_epoch >= 0 && start_epoch < n_epochs_c );
 	n_sub_epochs = 4;
 	//if( start_epoch == n_epochs_c-1 )
@@ -698,6 +697,13 @@ void Game::updatedEpoch() {
 	else if( start_epoch + n_sub_epochs > n_epochs_c ) {
 		n_sub_epochs = n_epochs_c - start_epoch;
 	}
+}
+
+void Game::setCurrentIsand(int start_epoch, int selected_island) {
+	this->start_epoch = start_epoch;
+	this->selected_island = selected_island;
+	this->updatedEpoch();
+	this->setCurrentMap();
 }
 
 void Game::setEpoch(int epoch) {
