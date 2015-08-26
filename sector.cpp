@@ -3440,10 +3440,6 @@ bool Design::setupDesigns() {
 	design = new Design(invention_weapons[1], false);
 	design->setCost(SOLARIUM, 0.5);
 	design->setCost(ARULDITE, 0.5);
-	// ***
-	/*design = new Design(invention_weapons[1], false);
-	design->setCost(BONE, 0.5);
-	design->setCost(PLANETARIUM, 0.5);*/
 	// 2 - pike (1.5)
 	// rock, wood, slate, bone, moonlite, bethlium, planetarium, solarium, moonlite, parasite, onion, tedium, valium, aruldite, aquarium, herbirite
 	// ergo: slate, solarium, moonlite, bethlium, slate+aruldite, planetarium+aruldite, planetarium+solarium
@@ -3451,8 +3447,8 @@ bool Design::setupDesigns() {
 	design = new Design(invention_weapons[2], false);
 	design->setCost(SLATE, 1.5);
 	design = new Design(invention_weapons[2], true);
-	design->setCost(MOONLITE, 1);
-	design->setCost(BETHLIUM, 0.5);
+	design->setCost(MOONLITE, 0.5);
+	design->setCost(BETHLIUM, 1);
 	design = new Design(invention_weapons[2], true);
 	design->setCost(MOONLITE, 1);
 	design->setCost(SOLARIUM, 0.5);
@@ -3463,8 +3459,8 @@ bool Design::setupDesigns() {
 	design->setCost(ROCK, 1);
 	design->setCost(SOLARIUM, 0.5);
 	design = new Design(invention_weapons[2], false);
-	design->setCost(MOONLITE, 1);
-	design->setCost(PARASITE, 0.5);
+	design->setCost(MOONLITE, 0.5);
+	design->setCost(PARASITE, 1);
 	design = new Design(invention_weapons[2], false);
 	design->setCost(WOOD, 0.5);
 	design->setCost(MOONLITE, 1);
@@ -3584,14 +3580,11 @@ bool Design::setupDesigns() {
 	design->setCost(PLANETARIUM, 1.5);
 	design->setCost(SOLARIUM, 0.5);
 	design = new Design(invention_weapons[3], false);
-	design->setCost(PLANETARIUM, 1.5);
-	design->setCost(ARULDITE, 0.5);
+	design->setCost(PLANETARIUM, 1);
+	design->setCost(ARULDITE, 1);
 	design = new Design(invention_weapons[3], false);
 	design->setCost(PLANETARIUM, 1.5);
 	design->setCost(HERBIRITE, 0.5);
-	design = new Design(invention_weapons[3], false);
-	design->setCost(SLATE, 1.5);
-	design->setCost(BETHLIUM, 0.5);
 	design = new Design(invention_weapons[3], false);
 	design->setCost(SLATE, 1);
 	design->setCost(BETHLIUM, 1);
@@ -3719,7 +3712,6 @@ bool Design::setupDesigns() {
 	design->setCost(MOONLITE, 1);
 	design->setCost(YERIDIUM, 0.5);
 	design->setCost(AQUARIUM, 0.5);
-	// ***
 	design = new Design(invention_weapons[3], false);
 	design->setCost(WOOD, 0.5);
 	design->setCost(PLANETARIUM, 0.5);
@@ -3752,9 +3744,6 @@ bool Design::setupDesigns() {
 	design->setCost(SLATE, 3.5);
 	design->setCost(BETHLIUM, 1);
 	design = new Design(invention_weapons[4], false);
-	design->setCost(SLATE, 3.5);
-	design->setCost(ARULDITE, 1);
-	design = new Design(invention_weapons[4], false);
 	design->setCost(SLATE, 3);
 	design->setCost(ARULDITE, 1.5);
 	design = new Design(invention_weapons[4], false);
@@ -3762,8 +3751,8 @@ bool Design::setupDesigns() {
 	design->setCost(SOLARIUM, 1.5);
 	design = new Design(invention_weapons[4], false);
 	design->setCost(BONE, 0.5);
-	design->setCost(MOONLITE, 3);
-	design->setCost(BETHLIUM, 1);
+	design->setCost(MOONLITE, 2.5);
+	design->setCost(BETHLIUM, 1.5);
 	design = new Design(invention_weapons[4], false);
 	design->setCost(BONE, 0.5);
 	design->setCost(PLANETARIUM, 3);
@@ -3771,9 +3760,6 @@ bool Design::setupDesigns() {
 	design = new Design(invention_weapons[4], false);
 	design->setCost(PLANETARIUM, 3);
 	design->setCost(ARULDITE, 1.5);
-	design = new Design(invention_weapons[4], false);
-	design->setCost(PLANETARIUM, 3.5);
-	design->setCost(ARULDITE, 1);
 	design = new Design(invention_weapons[4], false);
 	design->setCost(BETHLIUM, 1);
 	design->setCost(YERIDIUM, 0.5);
@@ -3906,19 +3892,6 @@ bool Design::setupDesigns() {
 	design->setCost(SOLARIUM, 3);
 	design->setCost(ARULDITE, 1);
 	design->setCost(HERBIRITE, 0.5);
-	// ***
-	/*design = new Design(invention_weapons[4], false);
-	design->setCost(MOONLITE, 1);*/
-	// ***
-	/*design = new Design(invention_weapons[4], false);
-	design->setCost(PLANETARIUM, 1.5);
-	design->setCost(HERBIRITE, 0.5);*/
-	// ***
-	/*design = new Design(invention_weapons[4], false);
-	design->setCost(HERBIRITE, 1.5);*/
-	// ***
-	/*design = new Design(invention_weapons[4], false);
-	design->setCost(YERIDIUM, 1.5);*/
 	// 5 - cannon (6)
 	// slate, bone, wood, bethlium, solarium, onion, tedium, aruldite, marmite, valium, planetarium, herbirite, aquarium, yeridium, paladium, moron
 	// ergo: bethlium, onion, aruldite
@@ -3954,11 +3927,11 @@ bool Design::setupDesigns() {
 	design->setCost(ROCK, 1);
 	design->setCost(ARULDITE, 5);
 	design = new Design(invention_weapons[5], false);
-	design->setCost(PLANETARIUM, 5);
-	design->setCost(TEDIUM, 1);
+	design->setCost(PLANETARIUM, 4.5);
+	design->setCost(TEDIUM, 1.5);
 	design = new Design(invention_weapons[5], true);
-	design->setCost(ARULDITE, 5);
-	design->setCost(TEDIUM, 1);
+	design->setCost(ARULDITE, 4);
+	design->setCost(TEDIUM, 2);
 	design = new Design(invention_weapons[5], true);
 	design->setCost(ARULDITE, 5);
 	design->setCost(ONION, 1);
@@ -3969,8 +3942,8 @@ bool Design::setupDesigns() {
 	design->setCost(ARULDITE, 5);
 	design->setCost(HERBIRITE, 1);
 	design = new Design(invention_weapons[5], false);
-	design->setCost(ARULDITE, 5);
-	design->setCost(PALADIUM, 1);
+	design->setCost(ARULDITE, 3);
+	design->setCost(PALADIUM, 3);
 	design = new Design(invention_weapons[5], false);
 	design->setCost(ARULDITE, 5);
 	design->setCost(MORON, 1);
@@ -3984,12 +3957,12 @@ bool Design::setupDesigns() {
 	design->setCost(PLANETARIUM, 5);
 	design->setCost(ONION, 1);
 	design = new Design(invention_weapons[5], false);
-	design->setCost(HERBIRITE, 5);
-	design->setCost(ONION, 1);
+	design->setCost(HERBIRITE, 3);
+	design->setCost(ONION, 3);
 	design = new Design(invention_weapons[5], false);
 	design->setCost(VALIUM, 5);
 	design->setCost(ONION, 1);
-	design = new Design(invention_weapons[5], true); // check always ergonomic? - Not in Junta!
+	design = new Design(invention_weapons[5], true);
 	design->setCost(ONION, 6);
 	design = new Design(invention_weapons[5], false);
 	design->setCost(TEDIUM, 6);
@@ -4081,8 +4054,8 @@ bool Design::setupDesigns() {
 	design->setCost(ONION, 0.5);
 	design->setCost(MORON, 4);
 	design = new Design(invention_weapons[6], false);
-	design->setCost(BETHLIUM, 1.5);
-	design->setCost(AQUARIUM, 4);
+	design->setCost(BETHLIUM, 2);
+	design->setCost(AQUARIUM, 3.5);
 	design->setCost(TEDIUM, 0.5);
 	design = new Design(invention_weapons[6], false);
 	design->setCost(BETHLIUM, 1.5);
@@ -4102,8 +4075,8 @@ bool Design::setupDesigns() {
 	design->setCost(MORON, 4);
 	design = new Design(invention_weapons[6], false);
 	design->setCost(PLANETARIUM, 4);
-	design->setCost(SOLARIUM, 1.5);
-	design->setCost(TEDIUM, 0.5);
+	design->setCost(SOLARIUM, 1);
+	design->setCost(TEDIUM, 1);
 	design = new Design(invention_weapons[6], false);
 	design->setCost(PLANETARIUM, 4);
 	design->setCost(ARULDITE, 1.5);
@@ -4180,11 +4153,8 @@ bool Design::setupDesigns() {
 	design->setCost(ARULDITE, 1.5);
 	design->setCost(TEDIUM, 4.5);
 	design = new Design(invention_weapons[6], false);
-	design->setCost(ARULDITE, 1.5);
-	design->setCost(MORON, 4.5);
-	design = new Design(invention_weapons[6], false);
-	design->setCost(ARULDITE, 2);
-	design->setCost(MORON, 4);
+	design->setCost(ARULDITE, 2.5);
+	design->setCost(MORON, 3.5);
 	design = new Design(invention_weapons[6], false);
 	design->setCost(ONION, 2);
 	design->setCost(MORON, 4);
@@ -4216,12 +4186,12 @@ bool Design::setupDesigns() {
 	design->setCost(TEDIUM, 5.5);
 	design = new Design(invention_weapons[7], true);
 	design->setCost(MOONLITE, 0.5);
-	design->setCost(AQUARIUM, 1.5);
-	design->setCost(TEDIUM, 5.5);
+	design->setCost(AQUARIUM, 2);
+	design->setCost(TEDIUM, 5);
 	design = new Design(invention_weapons[7], false);
-	design->setCost(MOONLITE, 0.5);
+	design->setCost(MOONLITE, 1);
 	design->setCost(YERIDIUM, 1.5);
-	design->setCost(TEDIUM, 5.5);
+	design->setCost(TEDIUM, 5);
 	design = new Design(invention_weapons[7], false);
 	design->setCost(SLATE, 0.5);
 	design->setCost(YERIDIUM, 5.5);
@@ -4231,8 +4201,8 @@ bool Design::setupDesigns() {
 	design->setCost(AQUARIUM, 1.5);
 	design->setCost(TEDIUM, 5.5);
 	design = new Design(invention_weapons[7], false);
-	design->setCost(PLANETARIUM, 0.5);
-	design->setCost(ONION, 7);
+	design->setCost(PLANETARIUM, 1);
+	design->setCost(ONION, 6.5);
 	design = new Design(invention_weapons[7], false);
 	design->setCost(PLANETARIUM, 2);
 	design->setCost(ONION, 5.5);
@@ -4252,9 +4222,6 @@ bool Design::setupDesigns() {
 	design = new Design(invention_weapons[7], false);
 	design->setCost(SLATE, 6);
 	design->setCost(PALADIUM, 1.5);
-	design = new Design(invention_weapons[7], false);
-	design->setCost(SLATE, 0.5);
-	design->setCost(TEDIUM, 7);
 	design = new Design(invention_weapons[7], false);
 	design->setCost(SLATE, 2);
 	design->setCost(TEDIUM, 5.5);
@@ -4372,18 +4339,15 @@ bool Design::setupDesigns() {
 	design->setCost(MARMITE, 3);
 	design = new Design(invention_weapons[8], false);
 	design->setCost(SLATE, 0.5);
-	design->setCost(AQUARIUM, 2);
-	design->setCost(MARMITE, 3);
+	design->setCost(AQUARIUM, 1.5);
+	design->setCost(MARMITE, 3.5);
 	design = new Design(invention_weapons[8], false);
 	design->setCost(PLANETARIUM, 0.5);
 	design->setCost(AQUARIUM, 2);
 	design->setCost(MARMITE, 3);
 	design = new Design(invention_weapons[8], false);
-	design->setCost(AQUARIUM, 2.5);
-	design->setCost(MARMITE, 3);
-	design = new Design(invention_weapons[8], false);
-	design->setCost(AQUARIUM, 2);
-	design->setCost(MARMITE, 3.5);
+	design->setCost(AQUARIUM, 3);
+	design->setCost(MARMITE, 2.5);
 	design = new Design(invention_weapons[8], false);
 	design->setCost(BETHLIUM, 2.5);
 	design->setCost(MARMITE, 3);
@@ -4509,11 +4473,8 @@ bool Design::setupDesigns() {
 	design->setCost(MORON, 7.5);
 	design->setCost(MARMITE, 0.5);
 	design = new Design(invention_weapons[9], false);
-	design->setCost(MORON, 2.5);
-	design->setCost(MARMITE, 5.5);
-	design = new Design(invention_weapons[9], false);
-	design->setCost(MORON, 2.5);
-	design->setCost(ALIEN, 5.5);
+	design->setCost(MORON, 2);
+	design->setCost(ALIEN, 6);
 	design = new Design(invention_weapons[9], true);
 	design->setCost(AQUARIUM, 2.5);
 	design->setCost(MARMITE, 0.5);
@@ -4527,11 +4488,11 @@ bool Design::setupDesigns() {
 	design->setCost(MORON, 2.5);
 	design->setCost(MARMITE, 0.5);
 	design = new Design(invention_weapons[9], false);
-	design->setCost(MARMITE, 0.5);
-	design->setCost(ALIEN, 7.5);
+	design->setCost(MARMITE, 1);
+	design->setCost(ALIEN, 7);
 	design = new Design(invention_weapons[9], false);
-	design->setCost(MARMITE, 3);
-	design->setCost(ALIEN, 5);
+	design->setCost(MARMITE, 4);
+	design->setCost(ALIEN, 4);
 
 	// Defences
 	// 0 - stick (1.5)
@@ -4914,9 +4875,6 @@ bool Design::setupDesigns() {
 	design->setCost(ROCK, 1);
 	design->setCost(ARULDITE, 0.5);
 	design = new Design(invention_defences[4], false);
-	design->setCost(ROCK, 0.5);
-	design->setCost(ARULDITE, 1);
-	design = new Design(invention_defences[4], false);
 	design->setCost(ROCK, 1);
 	design->setCost(SOLARIUM, 0.5);
 	design = new Design(invention_defences[4], false);
@@ -5048,15 +5006,6 @@ bool Design::setupDesigns() {
 	design->setCost(ROCK, 0.5);
 	design->setCost(SOLARIUM, 0.5);
 	design->setCost(VALIUM, 0.5);
-	// ***
-	/*design = new Design(invention_defences[4], false);
-	design->setCost(WOOD, 1);*/
-	// ***
-	/*design = new Design(invention_defences[4], false);
-	design->setCost(BONE, 1);*/
-	// ***
-	/*design = new Design(invention_defences[4], false);
-	design->setCost(ROCK, 1);*/
 	// 5 - musket (2)
 	// wood, bone, slate, moonlite, onion, planetarium, tedium, valium, onion, herbirite, parasite, yeridium
 	// ergo: ?
@@ -5108,8 +5057,8 @@ bool Design::setupDesigns() {
 	design->setCost(SLATE, 1.5);
 	design->setCost(VALIUM, 0.5);
 	design = new Design(invention_defences[5], false);
-	design->setCost(VALIUM, 0.5);
-	design->setCost(TEDIUM, 1.5);
+	design->setCost(VALIUM, 1);
+	design->setCost(TEDIUM, 1);
 	design = new Design(invention_defences[5], false);
 	design->setCost(SLATE, 1);
 	design->setCost(YERIDIUM, 0.5);
@@ -5603,8 +5552,8 @@ bool Design::setupDesigns() {
 	design->setCost(PALADIUM, 3.5);
 	design->setCost(MORON, 1.5);
 	design = new Design(invention_defences[9], false);
-	design->setCost(MORON, 1.5);
-	design->setCost(MARMITE, 3.5);
+	design->setCost(MORON, 1);
+	design->setCost(MARMITE, 4);
 	design = new Design(invention_defences[9], false);
 	design->setCost(MORON, 5);
 	design = new Design(invention_defences[9], false);
@@ -5862,8 +5811,8 @@ bool Design::setupDesigns() {
 	design->setCost(ROCK, 2);
 	design->setCost(VALIUM, 1);
 	design = new Design(invention_shields[3], false);
-	design->setCost(YERIDIUM, 2.5);
-	design->setCost(PARASITE, 0.5);
+	design->setCost(YERIDIUM, 2);
+	design->setCost(PARASITE, 1);
 	design = new Design(invention_shields[3], false);
 	design->setCost(YERIDIUM, 0.5);
 	design->setCost(PARASITE, 2.5);
@@ -6095,8 +6044,8 @@ bool Design::setupDesigns() {
 	design->setCost(BONE, 0.5);
 	design->setCost(ARULDITE, 2.5);
 	design = new Design(invention_shields[5], false);
-	design->setCost(SOLARIUM, 2);
-	design->setCost(AQUARIUM, 1);
+	design->setCost(SOLARIUM, 0.5);
+	design->setCost(AQUARIUM, 2.5);
 	design = new Design(invention_shields[5], false);
 	design->setCost(ARULDITE, 1.5);
 	design->setCost(AQUARIUM, 1.5);
