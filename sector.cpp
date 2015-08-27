@@ -2552,6 +2552,7 @@ void Sector::setWorkers(int n_workers) {
 		gamestate->getGamePanel()->refresh();
 	}
 	this->n_workers = n_workers;
+	this->updateWorkers();
 }
 
 void Sector::updateWorkers() {
