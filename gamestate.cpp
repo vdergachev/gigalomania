@@ -877,11 +877,11 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 	this->current_sector = NULL;
 	this->flag_frame_step = 0;
 	this->defenders_last_time_update = 0;
-	this->soldier_last_time_moved_x = 0;
-	this->soldier_last_time_moved_y = 0;
-	this->cannon_last_time_moved_x = 0;
-	this->cannon_last_time_moved_y = 0;
-	this->air_last_time_moved = 0;
+	this->soldier_last_time_moved_x = -1;
+	this->soldier_last_time_moved_y = -1;
+	this->cannon_last_time_moved_x = -1;
+	this->cannon_last_time_moved_y = -1;
+	this->air_last_time_moved = -1;
 	this->soldiers_last_time_turned = 0;
 
 	this->text_effect = NULL;
@@ -1949,6 +1949,16 @@ void PlayingGameState::update() {
 	int move_cannon_step_x = 0;
 	int move_cannon_step_y = 0;
 	int move_air_step = 0;
+	if( soldier_last_time_moved_x == -1 )
+		soldier_last_time_moved_x = game_g->getGameTime();
+	if( soldier_last_time_moved_y == -1 )
+		soldier_last_time_moved_y = game_g->getGameTime();
+	if( cannon_last_time_moved_x == -1 )
+		cannon_last_time_moved_x = game_g->getGameTime();
+	if( cannon_last_time_moved_y == -1 )
+		cannon_last_time_moved_y = game_g->getGameTime();
+	if( air_last_time_moved == -1 )
+		air_last_time_moved = game_g->getGameTime();
 	// move twice as fast in x direction, to simulate 3D look
 	while( game_g->getGameTime() - soldier_last_time_moved_x > soldier_move_rate_c ) {
 		move_soldier_step_x++;
@@ -2002,10 +2012,10 @@ void PlayingGameState::update() {
 				if( move_air_step > 0 ) {
 					soldier->xpos -= move_air_step;
 					soldier->ypos -= move_air_step;
-					if( soldier->xpos < -64 )
-						soldier->xpos = land_width_c + 64;
-					if( soldier->ypos < - offset_land_y_c - 32 )
-						soldier->ypos = land_height_c + 64;
+					while( soldier->xpos < - offset_land_x_c - 32 )
+						soldier->xpos += default_width_c + 64;
+					while( soldier->ypos < - offset_land_y_c - 32 )
+						soldier->ypos += default_height_c + 64;
 				}
 				if( combat ) {
 					int fire_random = rand() % RAND_MAX;
