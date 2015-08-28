@@ -214,7 +214,7 @@ public:
 	virtual void draw();
 	virtual void update() {};
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
-    virtual void requestQuit();
+    virtual void requestQuit(bool force_quit);
 	virtual void requestConfirm() {
 	}
 
@@ -299,7 +299,7 @@ public:
 	virtual void reset();
 	virtual void draw();
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
-    virtual void requestQuit();
+    virtual void requestQuit(bool force_quit);
 	virtual void requestConfirm();
 
 	ChooseMenPanel *getChooseMenPanel();
@@ -380,9 +380,7 @@ public:
 	virtual void draw();
 	virtual void update();
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
-    virtual void requestQuit() {
-		this->createQuitWindow();
-	}
+    virtual void requestQuit(bool force_quit);
 	virtual void requestConfirm();
 
 	GamePanel *getGamePanel();
@@ -464,7 +462,7 @@ public:
 	virtual void reset();
 	virtual void draw();
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
-    virtual void requestQuit();
+    virtual void requestQuit(bool force_quit);
 };
 
 class GameCompleteGameState : public GameState {
@@ -477,5 +475,5 @@ public:
 	virtual void reset();
 	virtual void draw();
 	virtual void mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
-    virtual void requestQuit();
+    virtual void requestQuit(bool force_quit);
 };

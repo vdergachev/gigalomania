@@ -489,7 +489,7 @@ public:
 	void newGame();
 	void setClientPlayer(int set_client_player);
 	bool validPlayer(int player) const;
-	void keypressEscape();
+	void requestQuit(bool force_quit);
 	void keypressReturn();
 	void togglePause();
 	void activate();

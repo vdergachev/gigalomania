@@ -338,7 +338,7 @@ void GameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
 	this->screen_page->input(m_x, m_y, m_left, m_middle, m_right, click);
 }
 
-void GameState::requestQuit() {
+void GameState::requestQuit(bool force_quit) {
 	game_g->getApplication()->setQuit();
 }
 
@@ -816,8 +816,12 @@ void PlaceMenGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,boo
         this->choosemenPanel->input(m_x, m_y, m_left, m_middle, m_right, click);
 }
 
-void PlaceMenGameState::requestQuit() {
-	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN && !game_g->isStateChanged() ) {
+void PlaceMenGameState::requestQuit(bool force_quit) {
+	if( force_quit ) {
+		game_g->saveState();
+	    game_g->getApplication()->setQuit();
+	}
+	else if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN && !game_g->isStateChanged() ) {
 		choosemenPanel->setPage(ChooseMenPanel::STATE_CHOOSEISLAND);
 	}
 	else {
@@ -2485,7 +2489,7 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 	else if( !done && m_left && click && quit_button != NULL && quit_button->mouseOver(m_x, m_y) ) {
         done = true;
         registerClick();
-        requestQuit();
+        requestQuit(false);
 	}
 	else if( !done && m_left && click && confirm_button_1 != NULL && confirm_button_1->mouseOver(m_x, m_y) ) {
 		// save game and quit to desktop
@@ -2674,6 +2678,16 @@ void PlayingGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bool
 		refreshButtons();
 	}
 
+}
+
+void PlayingGameState::requestQuit(bool force_quit) {
+	if( force_quit ) {
+		game_g->saveState();
+	    game_g->getApplication()->setQuit();
+	}
+	else {
+		this->createQuitWindow();
+	}
 }
 
 void PlayingGameState::requestConfirm() {
@@ -3483,13 +3497,19 @@ void EndIslandGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle,bo
 	//bool m_right = mouse_right(m_b);
 
 	if( ( m_left || m_right ) && click && !game_g->isStateChanged() ) {
-		this->requestQuit();
+		this->requestQuit(false);
 	}
 }
 
-void EndIslandGameState::requestQuit() {
-	game_g->setStateChanged(true);
-	this->fadeScreen(true, 0, returnToChooseIsland_g);
+void EndIslandGameState::requestQuit(bool force_quit) {
+	if( force_quit ) {
+		game_g->saveState();
+	    game_g->getApplication()->setQuit();
+	}
+	else {
+		game_g->setStateChanged(true);
+		this->fadeScreen(true, 0, returnToChooseIsland_g);
+	}
 }
 
 void GameCompleteGameState::reset() {
@@ -3555,11 +3575,17 @@ void GameCompleteGameState::mouseClick(int m_x,int m_y,bool m_left,bool m_middle
 	//bool m_right = mouse_right(m_b);
 
 	if( ( m_left || m_right ) && click && !game_g->isStateChanged() ) {
-		this->requestQuit();
+		this->requestQuit(false);
 	}
 }
 
-void GameCompleteGameState::requestQuit() {
-	game_g->setStateChanged(true);
-	this->fadeScreen(true, 0, startNewGame_g);
+void GameCompleteGameState::requestQuit(bool force_quit) {
+	if( force_quit ) {
+		game_g->saveState();
+	    game_g->getApplication()->setQuit();
+	}
+	else {
+		game_g->setStateChanged(true);
+		this->fadeScreen(true, 0, startNewGame_g);
+	}
 }

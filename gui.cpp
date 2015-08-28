@@ -473,7 +473,7 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
         else if( m_left && click && this->button_quit != NULL && this->button_quit->mouseOver(m_x, m_y) ) {
             done = true;
             //quitGame();
-            gamestate->requestQuit();
+            gamestate->requestQuit(false);
         }
     }
 	else if( this->c_page == STATE_CHOOSEMEN ) {
@@ -483,7 +483,7 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
 		}
 		else if( ( m_left || m_right ) && this->button_cancel->mouseOver(m_x, m_y) ) {
             done = true;
-			gamestate->requestQuit();
+			gamestate->requestQuit(false);
 		}
 	}
 	else if( this->c_page == STATE_OPTIONS ) {

@@ -356,8 +356,9 @@ void Application::runMainLoop() {
 		while( SDL_PollEvent(&event) == 1 ) {
 			switch (event.type) {
 			case SDL_QUIT:
-				// same as pressing escape
-				game_g->keypressEscape();
+				// SDL_QUIT may mean a message from the OS (e.g., OS shutting down) - so we quit immediately, saving the current state
+				// It will also be sent if the user clicks the window close button, but reasonable to also interpret this as "quit immediately"
+				game_g->requestQuit(true);
 				break;
 			case SDL_KEYDOWN:
 				{
@@ -372,7 +373,7 @@ void Application::runMainLoop() {
 						|| key.sym == SDLK_AC_BACK // SDLK_AC_BACK required for Android
 #endif
 						) {
-						game_g->keypressEscape();
+						game_g->requestQuit(false);
 					}
 					else if( key.sym == SDLK_p ) {
 						game_g->togglePause();

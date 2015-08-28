@@ -3584,9 +3584,9 @@ void Game::placeTower() {
 //bool quit = false;
 bool debugwindow = false;
 
-void Game::keypressEscape() {
+void Game::requestQuit(bool force_quit) {
     if( !state_changed ) {
-	    gamestate->requestQuit();
+	    gamestate->requestQuit(force_quit);
 	}
 }
 
