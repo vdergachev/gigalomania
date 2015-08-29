@@ -2914,11 +2914,9 @@ bool Game::openScreen(bool fullscreen) {
 #else
 		// with SDL2, we let SDL do the scaling via SDL_RenderSetLogicalSize, so we don't have to do the scaling ourselves, and can set the screen width/height to whatever we like
 		// for windowed mode, we pick a suitable size based on the available desktop space
-		int screen_width = 1280;
-		int screen_height = 960;
+		int screen_width = default_width_c;
+		int screen_height = default_height_c;
 
-		screen_width = default_width_c;
-		screen_height = default_height_c;
 		while( 2*screen_width <= user_width && 2*screen_height <= user_height ) {
 			screen_width *= 2;
 			screen_height *= 2;
