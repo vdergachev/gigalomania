@@ -154,6 +154,7 @@ class Game {
 	void processImage(Image *image, bool old_smooth = true) const;
 	bool loadAttackersWalkingImages(const string &gfx_dir, int epoch);
 	bool loadOldImages();
+	void getDesktopResolution(int *user_width, int *user_height) const;
 
 	char *getFilename(int slot) const;
 	bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename);

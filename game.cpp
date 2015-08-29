@@ -2778,12 +2778,44 @@ void Game::setupPlayers() {
 
 }
 
+// get the full desktop resolution
+void Game::getDesktopResolution(int *user_width, int *user_height) const {
+#if AROS
+		// AROS doesn't have latest SDL version with SDL_GetVideoInfo, so use native code!
+		getAROSScreenSize(user_width, user_height);
+#elif defined(__MORPHOS__)
+		// MorphOS doesn't have latest SDL version with SDL_GetVideoInfo, so use native code!
+		getAROSScreenSize(user_width, user_height);
+#else
+
+#if SDL_MAJOR_VERSION == 1
+		const SDL_VideoInfo *videoInfo = SDL_GetVideoInfo();
+		*user_width = videoInfo->current_w;
+		*user_height = videoInfo->current_h;
+		LOG("desktop is %d x %d\n", *user_width, *user_height);
+#else
+		SDL_DisplayMode displayMode;
+		if( SDL_GetDesktopDisplayMode(0, &displayMode) != 0 ) {
+			LOG("SDL_GetDesktopDisplayMode failed!");
+			*user_width = 640;
+			*user_height = 480;
+		}
+		else {
+			*user_width = displayMode.w;
+			*user_height = displayMode.h;
+			LOG("desktop is %d x %d\n", *user_width, *user_height);
+		}
+#endif
+
+#endif
+}
+
 bool Game::openScreen(bool fullscreen) {
 	if( !fullscreen ) {
 		int user_width = 0, user_height = 0;
 #if defined(_WIN32)
 		//#if 0
-		// we do it using system calls instead of SDL, to ignore the start bar (if showing)
+		// we do it using system calls instead of getDesktopResolution(), to ignore the start bar (if showing)
 		RECT rect;
 		SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
 		user_width = rect.right - rect.left;
@@ -2791,37 +2823,8 @@ bool Game::openScreen(bool fullscreen) {
 		LOG("desktop is %d x %d\n", user_width, user_height);
 		user_height -= GetSystemMetrics(SM_CYCAPTION); // also ignore the window height
 		LOG("available height is %d\n", user_height);
-		//user_width = 320;
-		//user_height = 240;
-		//user_width = 640;
-		//user_height = 480;
-#elif AROS
-		// AROS doesn't have latest SDL version with SDL_GetVideoInfo, so use native code!
-		getAROSScreenSize(&user_width, &user_height);
-#elif defined(__MORPHOS__)
-		// MorphOS doesn't have latest SDL version with SDL_GetVideoInfo, so use native code!
-		getAROSScreenSize(&user_width, &user_height);
 #else
-
-#if SDL_MAJOR_VERSION == 1
-		const SDL_VideoInfo *videoInfo = SDL_GetVideoInfo();
-		user_width = videoInfo->current_w;
-		user_height = videoInfo->current_h;
-		LOG("desktop is %d x %d\n", user_width, user_height);
-#else
-		SDL_DisplayMode displayMode;
-		if( SDL_GetDesktopDisplayMode(0, &displayMode) != 0 ) {
-			LOG("SDL_GetDesktopDisplayMode failed!");
-			user_width = 640;
-			user_height = 480;
-		}
-		else {
-			user_width = displayMode.w;
-			user_height = displayMode.h;
-			LOG("desktop is %d x %d\n", user_width, user_height);
-		}
-#endif
-
+		getDesktopResolution(&user_width, &user_height);
 #endif
 
 #if SDL_MAJOR_VERSION == 1
@@ -2970,10 +2973,13 @@ bool Game::openScreen(bool fullscreen) {
 			return false;
 		}
 #else
-		// with SDL2, we let SDL do the scaling via SDL_RenderSetLogicalSize, so we don't have to do the scaling ourselves
-		// for fullscreen, the supplied width/height is ignored, as we always run at the native resolution
-		if( !screen->open(0, 0, fullscreen) ) {
-			LOG("can't even open screen at 1x scale\n");
+		// With SDL2, we let SDL do the scaling via SDL_RenderSetLogicalSize, so we don't have to do the scaling ourselves
+		// for fullscreen, the supplied width/height is ignored, as we always run at the native resolution.
+		// However, on Windows 10, there is a bug in the task view that Gigalomania shows as a tiny window, unless we've opened the screen with the desktop resolution
+		int user_width = 0, user_height = 0;
+		getDesktopResolution(&user_width, &user_height);
+		if( !screen->open(user_width, user_height, fullscreen) ) {
+			LOG("can't open screen\n");
 			return false;
 		}
 #endif
