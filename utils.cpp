@@ -88,31 +88,111 @@ void textLines(int *n_lines,int *max_wid,const char *text, int lower_w, int uppe
 
 char application_name[] = "Gigalomania";
 
-FILE *logfile = NULL;
+char *logfilename = NULL;
+char *oldlogfilename = NULL;
 
 // Maemo/Meego treated as Linux as far as paths are concerned
 #if _WIN32
 char application_path[MAX_PATH] = "";
-char logfilename[MAX_PATH] = "";
-char oldlogfilename[MAX_PATH] = "";
 #elif defined(__ANDROID__)
 char application_path[] = "/sdcard/net.sourceforge.gigalomania";
-char *logfilename = NULL;
-char *oldlogfilename = NULL;
 #elif __linux
 char *application_path = NULL;
-char *logfilename = NULL;
-char *oldlogfilename = NULL;
 #else
 char application_path[] = "";
-char logfilename[] = "log.txt";
-char oldlogfilename[] = "log_old.txt";
 #endif
 
-/* Returns a full path for a filename in userspace (i.e., where we'll have read/write access).
+/* Determines location of the folders for storing userdata, creating the sub-folders if necessary.
  * For Windows, this is in %APPDATA%/application_name/
  * For Linux (including Maemo and Meego), this is in user's home/.config/application_name/ (note the '.', to make it a hidden folder)
  * If the folder can't be accessed (or running on a new operating system), the program folder is used.
+ * Must be called before getApplicationFilename() or initLogFile().
+ */
+void initFolderPaths() {
+    LOG("initFolderPaths()\n"); // n.b., at this stage logging will only go to console output, not to log file
+
+#if _WIN32
+	bool ok = true;
+	WCHAR application_path_w[MAX_PATH];
+    if ( SUCCEEDED( SHGetFolderPathW( NULL, CSIDL_APPDATA,
+                                     NULL, 0, application_path_w ) ) ) {
+		{
+			// handle unicode (e.g., for unicode user accounts)
+			int shortpath_length_w = GetShortPathNameW(application_path_w,0,0);
+			LPWSTR shortpath_w = new WCHAR[shortpath_length_w];
+			GetShortPathNameW(application_path_w,shortpath_w,shortpath_length_w);
+			int shortpath_length = WideCharToMultiByte(CP_OEMCP, WC_NO_BEST_FIT_CHARS, shortpath_w, shortpath_length_w, 0, 0, 0, 0);
+			WideCharToMultiByte(CP_OEMCP, WC_NO_BEST_FIT_CHARS, shortpath_w, shortpath_length_w, application_path, MAX_PATH, 0, 0);
+			delete [] shortpath_w;
+		}
+        PathAppendA(application_path, application_name);
+
+		if( access(application_path, 0) != 0 ) {
+			// folder doesn't seem to exist - try creating it
+			int res = mkdir(application_path);
+			//int res = 1; // test
+			if( res != 0 ) {
+				printf("Failed to create folder for application data!\n");
+				MessageBoxA(NULL, "Failed to create folder for application data - storing in local folder instead.\n", "Warning", MB_OK|MB_ICONEXCLAMATION);
+				ok = false;
+			}
+		}
+    }
+	else {
+		printf("Failed to obtain path for application folder!\n");
+		MessageBoxA(NULL, "Failed to obtain path for application folder - storing in local folder instead.\n", "Warning", MB_OK|MB_ICONEXCLAMATION);
+		ok = false;
+	}
+
+	if( !ok ) {
+		// just save in local directory and hope for the best!
+		strcpy(application_path, "");
+	}
+#elif defined(__ANDROID__)
+	// application_path already defined above
+	// create the folder if it doesn't already exist
+	bool ok = true;
+	if( access(application_path, 0) != 0 ) {
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "try to create data folder");
+		int res = mkdir(application_path, S_IRWXU | S_IRWXG | S_IRWXO);
+		if( res != 0 ) {
+			__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "failed to create data folder");
+			ok = false;
+		}
+	}
+
+	if( !ok ) {
+		// just save in local directory and hope for the best!
+		strcpy(application_path, "");
+	}
+#elif __linux
+	char *homedir = getenv("HOME");
+	//const char *subdir = "/.gigalomania";
+	const char *subdir = "/.config/gigalomania";
+	int len = strlen(homedir) + strlen(subdir);
+	application_path = new char[len+1];
+	sprintf(application_path, "%s%s", homedir, subdir);
+
+	// create the folder if it doesn't already exist
+	bool ok = true;
+	if( access(application_path, 0) != 0 ) {
+		int res = mkdir(application_path, S_IRWXU | S_IRWXG | S_IRWXO);
+		if( res != 0 ) {
+			ok = false;
+		}
+	}
+
+	if( !ok ) {
+		// just save in local directory and hope for the best!
+		strcpy(application_path, "");
+	}
+#else
+	// no need to do anything
+#endif
+}
+
+/* Returns a full path for a filename in userspace (i.e., where we'll have read/write access). See initFolderPaths() for details.
+ * Must be called after initFolderPaths().
  */
 char *getApplicationFilename(const char *name) {
     // not safe to use LOG here, as logfile may not have been initialised!
@@ -123,7 +203,7 @@ char *getApplicationFilename(const char *name) {
 	char *filename = new char[MAX_PATH];
 	strcpy(filename, application_path);
 	PathAppendA(filename, name);
-#elif __linux
+#elif __linux // also covers Maemo, Meego and Android
 	char *filename = NULL;
 	int application_path_len = strlen(application_path);
 	if( application_path_len == 0 || application_path[application_path_len-1] == '/' ) {
@@ -146,107 +226,13 @@ char *getApplicationFilename(const char *name) {
     return filename;
 }
 
+/* Initialises the log files.
+ * Must be called after initFolderPaths().
+ */
 void initLogFile() {
-    // first need to establish full path, and create folder if necessary
-    // Maemo/Meego treated as Linux as far as paths are concerned
     LOG("initLogFile()\n"); // n.b., at this stage logging will only go to console output, not to log file
-#if _WIN32
-	bool ok = true;
-	WCHAR logfilename_w[MAX_PATH];
-    if ( SUCCEEDED( SHGetFolderPathW( NULL, CSIDL_APPDATA,
-                                     NULL, 0, logfilename_w ) ) ) {
-		{
-			// handle unicode (e.g., for unicode user accounts)
-			int shortpath_length_w = GetShortPathNameW(logfilename_w,0,0);
-			LPWSTR shortpath_w = new WCHAR[shortpath_length_w];
-			GetShortPathNameW(logfilename_w,shortpath_w,shortpath_length_w);
-			int shortpath_length = WideCharToMultiByte(CP_OEMCP, WC_NO_BEST_FIT_CHARS, shortpath_w, shortpath_length_w, 0, 0, 0, 0);
-			WideCharToMultiByte(CP_OEMCP, WC_NO_BEST_FIT_CHARS, shortpath_w, shortpath_length_w, logfilename, MAX_PATH, 0, 0);
-			delete [] shortpath_w;
-		}
-        PathAppendA(logfilename, application_name);
-
-		if( access(logfilename, 0) != 0 ) {
-			// folder doesn't seem to exist - try creating it
-			int res = mkdir(logfilename);
-			//int res = 1; // test
-			if( res != 0 ) {
-				printf("Failed to create folder for application data!\n");
-				MessageBoxA(NULL, "Failed to create folder for application data - storing in local folder instead.\n", "Warning", MB_OK|MB_ICONEXCLAMATION);
-				ok = false;
-			}
-		}
-    }
-	else {
-		printf("Failed to obtain path for application folder!\n");
-		MessageBoxA(NULL, "Failed to obtain path for application folder - storing in local folder instead.\n", "Warning", MB_OK|MB_ICONEXCLAMATION);
-		ok = false;
-	}
-
-	if( ok ) {
-		strcpy(application_path, logfilename);
-		strcpy(oldlogfilename, logfilename);
-		PathAppendA(logfilename, "log.txt");
-		PathAppendA(oldlogfilename, "log_old.txt");
-	}
-	else {
-		// just save in local directory and hope for the best!
-		strcpy(application_path, "");
-		strcpy(logfilename, "log.txt");
-		strcpy(oldlogfilename, "log_old.txt");
-	}
-#elif defined(__ANDROID__)
-	// create the folder if it doesn't already exist
-	bool ok = true;
-	if( access(application_path, 0) != 0 ) {
-		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "try to create data folder");
-		int res = mkdir(application_path, S_IRWXU | S_IRWXG | S_IRWXO);
-		if( res != 0 ) {
-			__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "failed to create data folder");
-			ok = false;
-		}
-	}
-
-	if( ok ) {
-		logfilename = getApplicationFilename("log.txt");
-		oldlogfilename = getApplicationFilename("log_old.txt");
-	}
-	else {
-		// just save in local directory and hope for the best!
-		strcpy(application_path, "");
-		logfilename = getApplicationFilename("log.txt");
-		oldlogfilename = getApplicationFilename("log_old.txt");
-	}
-#elif __linux
-	char *homedir = getenv("HOME");
-	//const char *subdir = "/.gigalomania";
-	const char *subdir = "/.config/gigalomania";
-	int len = strlen(homedir) + strlen(subdir);
-	application_path = new char[len+1];
-	sprintf(application_path, "%s%s", homedir, subdir);
-
-	// create the folder if it doesn't already exist
-	bool ok = true;
-	if( access(application_path, 0) != 0 ) {
-		int res = mkdir(application_path, S_IRWXU | S_IRWXG | S_IRWXO);
-		if( res != 0 ) {
-			ok = false;
-		}
-	}
-
-	if( ok ) {
-		logfilename = getApplicationFilename("log.txt");
-		oldlogfilename = getApplicationFilename("log_old.txt");
-	}
-	else {
-		// just save in local directory and hope for the best!
-		strcpy(application_path, "");
-		logfilename = getApplicationFilename("log.txt");
-		oldlogfilename = getApplicationFilename("log_old.txt");
-	}
-#else
-	// no need to do anything
-#endif
+	logfilename = getApplicationFilename("log.txt");
+	oldlogfilename = getApplicationFilename("log_old.txt");
 
 	remove(oldlogfilename);
 	rename(logfilename, oldlogfilename);
@@ -286,9 +272,18 @@ void initLogFile() {
 	LOG("oldlogfilename: %s\n", oldlogfilename);
 }
 
+void cleanupLogFile() {
+    LOG("cleanupLogFile()\n");
+	if( logfilename != NULL ) {
+		delete [] logfilename;
+	}
+	if( oldlogfilename != NULL ) {
+		delete [] oldlogfilename;
+	}
+}
+
 bool log(const char *text,...) {
 	//return true;
-	logfile = fopen(logfilename,"at+");
 	// n.b., on Ubuntu Linux at least, need to have a separate va_list every time we use it
 #if defined(__ANDROID__)
 	if( debugwindow ) {
@@ -298,11 +293,16 @@ bool log(const char *text,...) {
 		va_end(vlist);
 	}
 #endif
-	if( logfile != NULL ) {
-		va_list vlist;
-		va_start(vlist, text);
-		vfprintf(logfile, text, vlist);
-		va_end(vlist);
+	if( logfilename != NULL ) {
+		FILE *logfile = fopen(logfilename,"at+");
+		if( logfile != NULL ) {
+			va_list vlist;
+			va_start(vlist, text);
+			vfprintf(logfile, text, vlist);
+			va_end(vlist);
+			fclose(logfile);
+			logfile = NULL;
+		}
 	}
 	if( debugwindow ) {
 		va_list vlist;
@@ -311,8 +311,6 @@ bool log(const char *text,...) {
 		va_end(vlist);
 	}
 
-	if( logfile != NULL )
-		fclose(logfile);
 	return true;
 }
 

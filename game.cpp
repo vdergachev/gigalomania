@@ -343,6 +343,8 @@ Game::~Game() {
 	freeSound();
 	LOG("delete application %d\n", application);
 	delete application;
+	LOG("exiting...\n");
+	cleanupLogFile();
 }
 
 bool Game::oneMouseButtonMode() const {
@@ -4901,6 +4903,7 @@ void playGame(int n_args, char *args[]) {
 	}
 #endif
 
+	initFolderPaths();
 	initLogFile();
 
 	//bool run_tests = true;
@@ -5035,7 +5038,6 @@ void playGame(int n_args, char *args[]) {
 	LOG("delete game %d\n", game_g);
 	delete game_g;
 	game_g = NULL;
-	LOG("exiting..\n");
 }
 
 bool Game::playerAlive(int player) const {

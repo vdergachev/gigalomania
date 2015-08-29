@@ -13,11 +13,10 @@ const bool LOGGING = true; // enable logging even for release builds, for now
 #define LOG if( !LOGGING ) ((void)0); else log
 #endif
 
-//extern const bool DEBUG;
-//extern const int DEBUGLEVEL;
-
+void initFolderPaths();
 char *getApplicationFilename(const char *name);
 void initLogFile();
+void cleanupLogFile();
 bool log(const char *text,...);
 
 #ifndef ASSERT
