@@ -14,7 +14,7 @@ const bool LOGGING = true; // enable logging even for release builds, for now
 #endif
 
 void initFolderPaths();
-char *getApplicationFilename(const char *name);
+const char *getApplicationFilename(const char *name, bool survive_uninstall);
 void initLogFile();
 void cleanupLogFile();
 bool log(const char *text,...);

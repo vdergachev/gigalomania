@@ -156,7 +156,7 @@ class Game {
 	bool loadOldImages();
 	void getDesktopResolution(int *user_width, int *user_height) const;
 
-	char *getFilename(int slot) const;
+	const char *getFilename(int slot) const;
 	bool readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename);
 	bool readMap(const char *filename);
 	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) const;

@@ -372,6 +372,7 @@ bool Game::isDemo() const {
 const char autosave_filename[] = "autosave.sav";
 const char autosave_bad_filename[] = "autosave_bad.sav";
 const char autosave_old_filename[] = "autosave_old.sav";
+const bool autosave_survive_uninstall = false; // important for autosave state to be deleted upon uninstall if possible, so that any problems can be fixed by a reinstall
 
 bool validDifficulty(DifficultyLevel difficulty) {
 	return difficulty >= 0 && difficulty < DIFFICULTY_N_LEVELS;
@@ -906,17 +907,17 @@ bool Game::loadGame(const char *filename) {
 	return false;
 }
 
-char *Game::getFilename(int slot) const {
+const char *Game::getFilename(int slot) const {
 	char name[300] = "";
 	sprintf(name, "game_%d.SAV", slot);
-	char *filename = getApplicationFilename(name);
+	const char *filename = getApplicationFilename(name, true); // important for save game files to survive an uninstall
     //LOG("filename: %s\n", filename);
 	return filename;
 }
 
 bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot) {
 	ASSERT( slot >= 0 && slot < n_slots_c );
-	char *filename = getFilename(slot);
+	const char *filename = getFilename(slot);
 	bool ok = loadGameInfo(difficulty, player, n_men, suspended, epoch, completed, filename);
 	delete [] filename;
 	return ok;
@@ -925,7 +926,7 @@ bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, in
 bool Game::loadGame(int slot) {
 	LOG("loadGame(%d)\n",slot);
 	ASSERT( slot >= 0 && slot < n_slots_c );
-	char *filename = getFilename(slot);
+	const char *filename = getFilename(slot);
 	bool ok = loadGame(filename);
 	delete [] filename;
 	return ok;
@@ -937,7 +938,7 @@ void Game::saveGame(int slot) const {
 	ASSERT( gameStateID == GAMESTATEID_PLACEMEN );
 	ASSERT( slot >= 0 && slot < n_slots_c );
 
-	char *filename = getFilename(slot);
+	const char *filename = getFilename(slot);
 	FILE *file = fopen(filename, "wb+");
 	delete [] filename;
 	if( file == NULL ) {
@@ -3708,7 +3709,7 @@ int Game::getNClicks() {
 }
 
 void Game::deleteState() const {
-	char *save_fullfilename = getApplicationFilename(autosave_filename);
+	const char *save_fullfilename = getApplicationFilename(autosave_filename, autosave_survive_uninstall);
 	remove(save_fullfilename);
 	delete [] save_fullfilename;
 }
@@ -3745,7 +3746,7 @@ void Game::saveState() const {
 
 	    stream << "</savegame>\n";
 
-		char *save_fullfilename = getApplicationFilename(autosave_filename);
+		const char *save_fullfilename = getApplicationFilename(autosave_filename, autosave_survive_uninstall);
 		SDL_RWops *file = SDL_RWFromFile(save_fullfilename, "w+");
 		if( file == NULL ) {
 			LOG("failed to open: %s\n", save_fullfilename);
@@ -3966,7 +3967,7 @@ GameState *Game::loadStateParseXMLNode(const TiXmlNode *parent) {
 bool Game::loadState() {
 	bool ok = false;
 	stringstream stream;
-	char *save_fullfilename = getApplicationFilename(autosave_filename);
+	const char *save_fullfilename = getApplicationFilename(autosave_filename, autosave_survive_uninstall);
 	SDL_RWops *file = SDL_RWFromFile(save_fullfilename, "r");
 	if( file == NULL ) {
 		LOG("couldn't find or open saved state file: %s\n", save_fullfilename);
@@ -3978,7 +3979,7 @@ bool Game::loadState() {
 		if( file->read(file, buffer, 1, size) > 0 ) {
 			file->close(file);
 			// rename immediately so that if there's a crash while loading the saved state, the game doesn't repeatedly crash
-			char *save_old_fullfilename = getApplicationFilename(autosave_old_filename);
+			const char *save_old_fullfilename = getApplicationFilename(autosave_old_filename, autosave_survive_uninstall);
 			remove(save_old_fullfilename);
 			rename(save_fullfilename, save_old_fullfilename);
 
@@ -4011,7 +4012,7 @@ bool Game::loadState() {
 			}
 			if( !ok ) {
 				LOG("rename bad save file\n");
-				char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename);
+				const char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename, autosave_survive_uninstall);
 				remove(save_bad_fullfilename);
 				rename(save_old_fullfilename, save_bad_fullfilename);
 
@@ -4029,7 +4030,7 @@ bool Game::loadState() {
 		}
 		else {
 			file->close(file);
-			char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename);
+			const char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename, autosave_survive_uninstall);
 			remove(save_bad_fullfilename);
 			rename(save_fullfilename, save_bad_fullfilename);
 		}
@@ -4145,6 +4146,7 @@ void Game::drawGame() const {
 }
 
 const char prefs_filename[] = "prefs";
+const bool prefs_survive_uninstall = false; // no need for prefs file to save uninstall, and seems better to allow resetting to initial condition (especially on Android where this is typical behaviour)
 const char onemousebutton_key[] = "onemousebutton";
 const char sound_on_key[] = "sound_on";
 const char music_on_key[] = "music_on";
@@ -4159,7 +4161,7 @@ bool Game::createApplication() {
 }
 
 void Game::loadPrefs() {
-	char *prefs_fullfilename = getApplicationFilename(prefs_filename);
+	const char *prefs_fullfilename = getApplicationFilename(prefs_filename, prefs_survive_uninstall);
 	SDL_RWops *prefs_file = SDL_RWFromFile(prefs_fullfilename, "rb");
 	if( prefs_file != NULL ) {
 		// reset
@@ -4214,7 +4216,7 @@ void Game::loadPrefs() {
 }
 
 void Game::savePrefs() const {
-	char *prefs_fullfilename = getApplicationFilename(prefs_filename);
+	const char *prefs_fullfilename = getApplicationFilename(prefs_filename, prefs_survive_uninstall);
 	SDL_RWops *prefs_file = SDL_RWFromFile(prefs_fullfilename, "wb+");
 	if( prefs_file == NULL ) {
 		LOG("failed to open: %s\n", prefs_fullfilename);

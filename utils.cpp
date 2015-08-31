@@ -88,14 +88,15 @@ void textLines(int *n_lines,int *max_wid,const char *text, int lower_w, int uppe
 
 char application_name[] = "Gigalomania";
 
-char *logfilename = NULL;
-char *oldlogfilename = NULL;
+const char *logfilename = NULL;
+const char *oldlogfilename = NULL;
 
 // Maemo/Meego treated as Linux as far as paths are concerned
 #if _WIN32
 char application_path[MAX_PATH] = "";
 #elif defined(__ANDROID__)
 char application_path[] = "/sdcard/net.sourceforge.gigalomania";
+const char *application_path_uninstall = NULL; // path for folder that will be deleted upon uninstall
 #elif __linux
 char *application_path = NULL;
 #else
@@ -165,9 +166,18 @@ void initFolderPaths() {
 		// just save in local directory and hope for the best!
 		strcpy(application_path, "");
 	}
+
+	// find the folder that will be deleted upon uninstall - shouldn't need to create this folder
+	application_path_uninstall = SDL_AndroidGetExternalStoragePath();
+	if( application_path_uninstall == NULL ) {
+		// just save in local directory and hope for the best!
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "SDL_AndroidGetExternalStoragePath returned NULL");
+		char *path = new char[1];
+		strcpy(path, "");
+		application_path_uninstall = path;
+	}
 #elif __linux
 	char *homedir = getenv("HOME");
-	//const char *subdir = "/.gigalomania";
 	const char *subdir = "/.config/gigalomania";
 	int len = strlen(homedir) + strlen(subdir);
 	application_path = new char[len+1];
@@ -193,8 +203,9 @@ void initFolderPaths() {
 
 /* Returns a full path for a filename in userspace (i.e., where we'll have read/write access). See initFolderPaths() for details.
  * Must be called after initFolderPaths().
+ * If survive_uninstall is true, a path will be returned that survives uninstallation. This only makes a difference on Android.
  */
-char *getApplicationFilename(const char *name) {
+const char *getApplicationFilename(const char *name, bool survive_uninstall) {
     // not safe to use LOG here, as logfile may not have been initialised!
     //printf("getApplicationFilename: %s\n", name);
     //printf("application_path: %s\n", application_path);
@@ -204,19 +215,27 @@ char *getApplicationFilename(const char *name) {
 	strcpy(filename, application_path);
 	PathAppendA(filename, name);
 #elif __linux // also covers Maemo, Meego and Android
+	const char *path = application_path;
+#if defined(__ANDROID__)
+	// application_path already points to a folder that survives uninistallation, so only need to handle application_path being false
+	if( !survive_uninstall ) {
+		path = application_path_uninstall;
+	}
+#endif
+
 	char *filename = NULL;
-	int application_path_len = strlen(application_path);
-	if( application_path_len == 0 || application_path[application_path_len-1] == '/' ) {
+	int path_len = strlen(path);
+	if( path_len == 0 || path[path_len-1] == '/' ) {
 		// shouldn't add path separator
-		int len = application_path_len + strlen(name);
+		int len = path_len + strlen(name);
 		filename = new char[len+1];
-		sprintf(filename, "%s%s", application_path, name);
+		sprintf(filename, "%s%s", path, name);
 	}
 	else {
 		// should add path separator
-		int len = application_path_len + 1 + strlen(name);
+		int len = path_len + 1 + strlen(name);
 		filename = new char[len+1];
-		sprintf(filename, "%s/%s", application_path, name);
+		sprintf(filename, "%s/%s", path, name);
 	}
 #else
 	char *filename = new char[strlen(name)+1];
@@ -231,8 +250,8 @@ char *getApplicationFilename(const char *name) {
  */
 void initLogFile() {
     LOG("initLogFile()\n"); // n.b., at this stage logging will only go to console output, not to log file
-	logfilename = getApplicationFilename("log.txt");
-	oldlogfilename = getApplicationFilename("log_old.txt");
+	logfilename = getApplicationFilename("log.txt", false);
+	oldlogfilename = getApplicationFilename("log_old.txt", false);
 
 	remove(oldlogfilename);
 	rename(logfilename, oldlogfilename);
