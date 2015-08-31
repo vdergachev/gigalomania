@@ -7,6 +7,13 @@
 
 #include <stdexcept> // needed for Android at least
 
+#ifdef _WIN32
+#include <io.h> // for access
+#define access _access
+#elif __linux
+#include <unistd.h> // for access
+#endif
+
 #include <sstream>
 using std::stringstream;
 
@@ -4314,12 +4321,27 @@ void Game::runTests() {
 
 		// test saving state
 		saveState();
+		if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
+			throw string("save state file not created");
+		}
 
 		// test loading state
 		delete gamestate;
 		gamestate = NULL;
 		if( !loadState() ) {
 			throw string("failed to load state");
+		}
+		else if( gamestate == NULL ) {
+			throw string("failed to create new gamestate when loading state");
+		}
+		else if( gameStateID != GAMESTATEID_PLAYING ) {
+			throw string("expected playinggamestate when loading state");
+		}
+		else if( tutorial != NULL ) {
+			throw string("didn't expect tutorial when loading state");
+		}
+		else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
+			throw string("save state file should have been deleted");
 		}
 
 		PlayingGameState *playingGameState = static_cast<PlayingGameState *>(gamestate);
@@ -4857,6 +4879,105 @@ void Game::runTests() {
 	if( human_player != 2 ) {
 		throw string("didn't set human_player from saved game");
 	}
+
+	// now test loading saved states
+	delete gamestate;
+	gamestate = NULL;
+	copyFile("_test_savegames/autosave_bad.sav", getApplicationFilename(autosave_filename, autosave_survive_uninstall));
+	if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
+		throw string("failed to copy save state file");
+	}
+	if( loadState() ) {
+		throw string("didn't expect to load bad state");
+	}
+	else if( gamestate != NULL ) {
+		throw string("didn't expect to create a gamestate when loading bad state");
+	}
+	else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
+		throw string("save state file should have been deleted");
+	}
+
+	copyFile("_test_savegames/autosave_tutorial.sav", getApplicationFilename(autosave_filename, autosave_survive_uninstall));
+	if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
+		throw string("failed to copy save state file");
+	}
+	if( !loadState() ) {
+		throw string("failed to load state");
+	}
+	else if( gamestate == NULL ) {
+		throw string("failed to create new gamestate when loading state");
+	}
+	else if( gameStateID != GAMESTATEID_PLAYING ) {
+		throw string("expected playinggamestate when loading state");
+	}
+	else if( tutorial == NULL ) {
+		throw string("didn't create tutorial when loading state");
+	}
+	else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
+		throw string("save state file should have been deleted");
+	}
+
+	delete gamestate;
+	gamestate = NULL;
+	delete tutorial;
+	tutorial = NULL;
+	copyFile("_test_savegames/autosave_biplanes.sav", getApplicationFilename(autosave_filename, autosave_survive_uninstall));
+	if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
+		throw string("failed to copy save state file");
+	}
+	if( !loadState() ) {
+		throw string("failed to load state");
+	}
+	else if( gamestate == NULL ) {
+		throw string("failed to create new gamestate when loading state");
+	}
+	else if( gameStateID != GAMESTATEID_PLAYING ) {
+		throw string("expected playinggamestate when loading state");
+	}
+	else if( tutorial != NULL ) {
+		throw string("didn't expect tutorial when loading state");
+	}
+	else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
+		throw string("save state file should have been deleted");
+	}
+	{
+		if( !map->isSectorAt(1, 3) ) {
+			throw string("no sector");
+		}
+		const Sector *sector = map->getSector(1, 3);
+		if( sector->getArmy(0)->getSoldiers(6) != 4 ) {
+			throw string("unexpected number of biplanes");
+		}
+		else if( sector->getArmy(0)->getTotal() != 4 ) {
+			throw string("unexpected number of soldiers");
+		}
+		for(int i=1;i<4;i++) {
+			if( sector->getArmy(i)->getTotal() != 0 ) {
+				throw string("unexpected number of enemy soldiers");
+			}
+		}
+	}
+}
+
+void Game::copyFile(const char *src, const char *dst) const {
+	SDL_RWops *read_file = SDL_RWFromFile(src, "r");
+	if( read_file == NULL ) {
+		throw string("couldn't open test save state file");
+	}
+	SDL_RWops *save_file = SDL_RWFromFile(dst, "w");
+	if( save_file == NULL ) {
+		throw string("couldn't copy save state file");
+	}
+	int size = read_file->size(read_file);
+	char *buffer = new char[size+1];
+	if( read_file->read(read_file, buffer, 1, size) == 0 ) {
+		read_file->close(read_file);
+		throw string("failed to read from test save state file");
+	}
+	save_file->write(save_file, buffer, 1, size);
+	save_file->close(save_file);
+	read_file->close(read_file);
+	delete [] buffer;
 }
 
 void playGame(int n_args, char *args[]) {

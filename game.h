@@ -162,6 +162,7 @@ class Game {
 	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], const char *filename) const;
 	bool loadGame(const char *filename);
 	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
+	void copyFile(const char *src, const char *dst) const;
 
 	void disposeGameState();
 
