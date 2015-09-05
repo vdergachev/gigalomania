@@ -1051,6 +1051,14 @@ void Game::playMusic() {
 		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
 		music->play(SOUND_CHANNEL_MUSIC, -1);
 	}
+	else if( gameStateID == GAMESTATEID_ENDISLAND ) {
+		if( gameResult == GAMERESULT_WON )
+			music = Sample::loadMusic("music/victory.ogg");
+		else
+			music = Sample::loadMusic("music/defeat.ogg");
+		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
+		music->play(SOUND_CHANNEL_MUSIC, -1);
+	}
 }
 
 bool Game::loadSamples() {
