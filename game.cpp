@@ -186,8 +186,12 @@ Game::Game() {
 		numbered_defences[i] = NULL;
 		numbered_weapons[i] = NULL;
 	}
-	icon_elements[N_ID];
-	icon_clocks[13];
+	for(int i=0;i<N_ID;i++) {
+		icon_elements[i] = NULL;
+	}
+	for(int i=0;i<12;i++) {
+		icon_clocks[i] = NULL;
+	}
 	icon_infinity = NULL;
 	icon_bc = NULL;
 	icon_ad = NULL;
@@ -210,7 +214,7 @@ Game::Game() {
 			map_sq[i][j] = NULL;
 	}
 	for(int i=0;i<n_epochs_c;i++) {
-		n_defender_frames[i] = NULL;
+		n_defender_frames[i] = 0;
 	}
 	for(int i=0;i<n_players_c;i++) {
 		for(int j=0;j<n_epochs_c;j++) {
@@ -222,13 +226,13 @@ Game::Game() {
 	}
 	for(int i=0;i<n_epochs_c+1;i++) {
 		for(int j=0;j<n_attacker_directions_c;j++) {
-			n_attacker_frames[i][j] = NULL;
+			n_attacker_frames[i][j] = 0;
 		}
 	}
 	for(int i=0;i<n_players_c;i++) {
 		for(int j=0;j<n_epochs_c+1;j++) {
 			for(int k=0;k<n_attacker_directions_c;k++) {
-				for(int l=0;l<max_defender_frames_c;l++) {
+				for(int l=0;l<max_attacker_frames_c;l++) {
 					attackers_walking[i][j][k][l] = NULL;
 				}
 			}
@@ -304,9 +308,9 @@ Game::Game() {
 	music = NULL;
 
 	for(int i=0;i<n_epochs_c;i++) {
-		invention_shields[i];
-		invention_defences[i];
-		invention_weapons[i];
+		invention_shields[i] = NULL;
+		invention_defences[i] = NULL;
+		invention_weapons[i] = NULL;
 	}
 	for(int i=0;i<N_ID;i++) {
 		elements[i] = NULL;
@@ -2664,14 +2668,14 @@ bool Game::loadImages() {
 	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed02.png"));
 	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed03.png"));
 	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed04.png"));
-	for(int i=0;i<icon_clutter.size();i++) {
+	for(size_t i=0;i<icon_clutter.size();i++) {
 		if( icon_clutter[i] == NULL )
 			return false;
 		processImage(icon_clutter[i]);
 	}
 	icon_clutter_nuked.push_back(Image::loadImage(gfx_dir + "bones.png"));
 	icon_clutter_nuked.push_back(Image::loadImage(gfx_dir + "skulls.png"));
-	for(int i=0;i<icon_clutter_nuked.size();i++) {
+	for(size_t i=0;i<icon_clutter_nuked.size();i++) {
 		if( icon_clutter_nuked[i] == NULL )
 			return false;
 		processImage(icon_clutter_nuked[i]);

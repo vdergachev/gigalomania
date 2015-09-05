@@ -30,6 +30,9 @@ class GUIHandler {
 public:
 	virtual void setGUI(PlayingGameState *playing_gamestate) const {
 	}
+	virtual ~GUIHandler() {
+		// need a virtual destructor even though it doesn't do anything, to ensure that subclass destructors are called (see warning on Linux GCC)
+	}
 
 	static void resetGUI(PlayingGameState *playing_gamestate);
 };
