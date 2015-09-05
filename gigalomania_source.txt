@@ -31,11 +31,7 @@ It will also (at least in GNOME) add shortcuts to the menu Applications/Games/.
 
 Uninstallation can be done with: sudo make uninstall
 
-If SDL 2 isn't available on your distribution, you can also compile with SDL 1.2, though some changes are required:
-
-* The #include directories in stdafx.h, image.h, sound.h need to be changed from SDL2/ to SDL/ .
-
-* References to sdl2-config in the makefile should be changed to sdl-config, and should link to "-lSDL_image -lSDL_mixer" instead of "-lSDL2_image -lSDL2_mixer".
+If SDL 2 isn't available on your distribution, it should also be possible to compile with SDL 1.2, though this is no longer tested. You'll need to make some modifications to the code (changing includes from SDL2/ to SDL/ ). Also references to sdl2-config in the makefile should be changed to sdl-config, and should link to "-lSDL_image -lSDL_mixer" instead of "-lSDL2_image -lSDL2_mixer".
 
 On Ubuntu and Debian, you can install the required libraries for SDL 1.2 with:
 
