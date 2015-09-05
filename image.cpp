@@ -729,14 +729,14 @@ void Image::fadeAlpha(bool x_dir, bool fwd) {
 			Uint8 rgba[] = {0, 0, 0, 0};
 			SDL_GetRGBA(pixel, this->surface->format, &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
 			float frac = 0.0f;
-			float perp_frac = 0.0f;
+			//float perp_frac = 0.0f;
 			if( x_dir ) {
 				frac = ((float)x)/(float)(w-1.0f);
-				perp_frac = ((float)y)/(float)(h-1.0f);
+				//perp_frac = ((float)y)/(float)(h-1.0f);
 			}
 			else {
 				frac = ((float)y)/(float)(h-1.0f);
-				perp_frac = ((float)x)/(float)(w-1.0f);
+				//perp_frac = ((float)x)/(float)(w-1.0f);
 			}
 			if( !fwd ) {
 				frac = 1.0f - frac;
