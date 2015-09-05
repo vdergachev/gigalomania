@@ -917,6 +917,8 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 	}
 	alliance_yes = NULL;
 	alliance_no = NULL;
+
+	game_g->setTimeRate(client_player == PLAYER_DEMO ? 5 : 1);
 }
 
 PlayingGameState::~PlayingGameState() {

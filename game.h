@@ -371,9 +371,7 @@ public:
 		if( time_rate < 3 )
 			time_rate++;
 	}
-	void setTimeRate(int time_rate) {
-		this->time_rate = time_rate;
-	}
+	void setTimeRate(int time_rate);
 	int getTimeRate() const {
 		return this->time_rate;
 	}

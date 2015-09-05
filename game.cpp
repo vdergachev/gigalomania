@@ -3468,8 +3468,6 @@ void Game::startIsland() {
 	int map_y = static_cast<PlaceMenGameState *>(gamestate)->getStartMapY();*/
 
 	//setupPlayers();
-	time_rate = human_player == PLAYER_DEMO ? 5 : 1;
-	LOG("time_rate = %d\n", time_rate);
 	setGameStateID(GAMESTATEID_PLAYING);
 	gamestate->fadeScreen(false, 0, NULL);
 	gameResult = GAMERESULT_UNDEFINED;
@@ -3654,6 +3652,11 @@ void Game::deactivate() {
 
 bool Game::isPaused() const {
 	return paused;
+}
+
+void Game::setTimeRate(int time_rate) {
+	this->time_rate = time_rate;
+	LOG("time_rate = %d\n", time_rate);
 }
 
 void Game::setRealTime(int real_time) {
