@@ -160,7 +160,7 @@ SDL2_image: sdl_image2.lib . See http://www.libsdl.org/projects/SDL_image/ .
 
 SDL2_mixer: sdl_mixer2.lib . See http://www.libsdl.org/projects/SDL_mixer/ .
 
-I've tested this with version 2.0.3 of SDL, 2.0.0 of SDL_image and 2.0.0 of SDL_mixer.
+I've tested this with version 2.0.4 of SDL, 2.0.0 of SDL_image and 2.0.0 of SDL_mixer.
 
 See README-android.txt in the SDL source archive for some information. You need to obtain the Android SDK and Android NDK. Then create the Gigalomania folder as follows:
 
@@ -228,4 +228,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 22 August 2015
+Mark Harman 5 September 2015
