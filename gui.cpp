@@ -214,6 +214,9 @@ ChooseMenPanel::ChooseMenPanel(PlaceMenGameState *gamestate) : MultiPanel(N_STAT
 
     cy = start_y - 52;
     step_y = 26;
+	if( game_g->getGameType() != GAMETYPE_ALLISLANDS ) {
+		cy += 2*step_y; // so that options are aligned vertically better
+	}
     this->button_continue = new Button((int)(mx - 4.0*fw), cy, "CONTINUE", game_g->letters_large);
     cy += step_y;
     this->addToPanel(STATE_OPTIONS, button_continue);
