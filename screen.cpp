@@ -358,6 +358,8 @@ void Application::runMainLoop() {
 			case SDL_QUIT:
 				// SDL_QUIT may mean a message from the OS (e.g., OS shutting down) - so we quit immediately, saving the current state
 				// It will also be sent if the user clicks the window close button, but reasonable to also interpret this as "quit immediately"
+				// Also important for Android to quit immediately, as SDL_QUIT is sent when the screen is locked - if we don't quit immediately,
+				// the app hangs when the screen is unlocked.
 				game_g->requestQuit(true);
 				break;
 			case SDL_KEYDOWN:
