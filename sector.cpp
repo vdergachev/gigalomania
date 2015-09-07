@@ -1717,14 +1717,11 @@ void Sector::doCombat(int client_player) {
 		//LOG("    %d , %d\n", this_strength, this_total);
 		if( this_total > 0 ) {
 			int enemy_strength = 0;
-			int enemy_total = 0;
 			for(int j=0;j<n_players_c;j++) {
 				if( i != j && !Player::isAlliance(i,j) ) {
 					enemy_strength += this->getArmy(j)->getStrength();
-					enemy_total += this->getArmy(j)->getTotal();
 					if( this->player == j ) {
 						enemy_strength += this->getDefenderStrength();
-						enemy_total += this->getNDefenders();
 					}
 				}
 			}
@@ -1733,7 +1730,11 @@ void Sector::doCombat(int client_player) {
 				//int death_rate = ( combat_rate_c * gameticks_per_hour_c ) / enemy_strength;
 				//int death_rate = ( combat_rate_c * gameticks_per_hour_c * this_strength ) / ( enemy_total * enemy_strength );
 				// need to use floats, to avoid possible overflow!!!
-				float death_rate = ((float)this_strength) / ((float)enemy_total);
+				// lower death rate is faster - which is why we divide by the enemy strength
+				// but we multiply by the average strength of a soldier, because we need to convert a loss in terms of strength to a loss in terms of soldier numbers
+				// consider if we have: A=1*100 vs B=100*1 - we want this to be an even battle. But that means B should lose soldiers on average at 100 times the rate of A, in order for it to be even
+				// see docs/combat_logic.txt for more examples
+				float death_rate = ((float)this_strength) / ((float)this_total);
 				death_rate = death_rate * ((float)(combat_rate_c * gameticks_per_hour_c)) / ((float)enemy_strength);
 				int prob = poisson((int)death_rate, looptime);
 				int random = rand() % RAND_MAX;
@@ -1952,7 +1953,12 @@ void Sector::doPlayer(int client_player) {
 		// don't allow growth
 	}
 	else if( this->getSparePopulation() > 0 ) {
-		int delay = ( growth_rate_c * gameticks_per_hour_c ) / this->getSparePopulation();
+		int spare_pop = this->getSparePopulation();
+		if( spare_pop > max_grow_population_c/2 ) {
+			spare_pop = max_grow_population_c - spare_pop;
+			spare_pop = max(spare_pop, 0);
+		}
+		int delay = ( growth_rate_c * gameticks_per_hour_c ) / spare_pop;
 		/*if( delay == 0 )
 		delay = 1;
 		while( time - this->growth_lasttime > delay ) {

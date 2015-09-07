@@ -27,7 +27,7 @@ using std::stringstream;
 const int element_multiplier_c = 2;
 const int n_gatherable_rate_c = 500;
 const int max_grow_population_c = 500;
-const int growth_rate_c = 100; // higher is slower
+const int growth_rate_c = 200; // higher is slower; beware of having a growth rate too fast, as it means a killer strategy is just to wait around letting the population grow first
 const int mine_rate_c = 30; // higher is slower
 const int combat_rate_c = 50; // higher is slower combat
 const int bombard_rate_c = 5; // higher is slower damage
