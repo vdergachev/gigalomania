@@ -4998,6 +4998,7 @@ void Game::copyFile(const char *src, const char *dst) const {
 void playGame(int n_args, char *args[]) {
     LOG("playGame()\n");
 
+	Player::resetAllAlliances(); // need to reset for Android, where variables aren't reinitialised if the native app restarts!
 	game_g = new Game();
 
 #ifdef _DEBUG
