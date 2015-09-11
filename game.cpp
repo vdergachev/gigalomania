@@ -3372,7 +3372,7 @@ bool Game::createMaps() {
 
 void Game::disposeGameState() {
 	ASSERT( dispose_gamestate == NULL );
-	LOG("disposeGameState: %d", gamestate);
+	LOG("disposeGameState: %d\n", gamestate);
 	dispose_gamestate = gamestate;
 	gamestate = NULL;
 }
