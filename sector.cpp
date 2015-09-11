@@ -132,6 +132,9 @@ void SmokeParticleSystem::update() {
 			particles.push_back(particle);
 		}
 	}
+	if( this->birth_rate == 0.0f ) {
+		this->last_emit_time = game_g->getGameTime(); // prevent a big buildup of time when smoke system isn't active
+	}
 }
 
 Army::Army(PlayingGameState *gamestate, Sector *sector, int player) :
