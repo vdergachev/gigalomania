@@ -2817,6 +2817,12 @@ void Sector::evacuate() {
 		this->n_miners[i] = 0;
 	}
 
+	this->assembleAll();
+
+	this->getArmy(this->getPlayer())->add(this->getAssembledArmy());
+}
+
+void Sector::assembleAll() {
 	for(int i=n_epochs_c-1;i>=game_g->getStartEpoch();i--) {
 		if( i == nuclear_epoch_c )
 			continue;
@@ -2830,8 +2836,6 @@ void Sector::evacuate() {
 		int n_pop = this->getPopulation() - men;
 		this->setPopulation(n_pop);
 	}
-
-	this->getArmy(this->getPlayer())->add(this->getAssembledArmy());
 }
 
 void Sector::saveState(stringstream &stream) const {

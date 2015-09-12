@@ -823,6 +823,8 @@ void GamePanel::setup() {
 	this->button_return_attackers->setInfoLMB("return the assembled army");
 	this->button_return_attackers->setId("button_return_attackers");
 	this->addToPanel(STATE_ATTACK, button_return_attackers);
+	this->button_select_all = new Button(4, 96, "SELECT ALL", game_g->letters_small);
+	this->addToPanel(STATE_ATTACK, button_select_all);
 
 	// DESIGN
 	this->button_bigdesign = new ImageButton(33, 0, 32, 16, game_g->panel_bigdesign, "return to main screen");
@@ -1197,6 +1199,7 @@ void GamePanel::refresh() {
 
 	this->button_bigattack->setVisible(true);
 	this->button_return_attackers->setVisible(true);
+	this->button_select_all->setVisible(true);
 
 	this->refreshDeployInventions();
 
@@ -1930,6 +1933,13 @@ x		}*/
 			//gamestate->getCurrentSector()->returnAssembledArmy();
 			gamestate->returnAssembledArmy(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos());
 			setMouseState(MOUSESTATE_NORMAL);
+		}
+		else if( m_left && !click && this->button_select_all->mouseOver(m_x,m_y) && n_nukes == 0 ) {
+            done = true;
+			gamestate->assembleAll(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos());
+			if( gamestate->getCurrentSector()->getAssembledArmy()->any(true) ) {
+				setMouseState(MOUSESTATE_DEPLOY_WEAPON);
+			}
 		}
 		else if( m_left && !click && this->button_deploy_unarmedmen->mouseOver(m_x,m_y) && n_nukes == 0 ) {
             done = true;

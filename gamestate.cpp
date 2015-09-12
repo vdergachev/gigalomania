@@ -3040,6 +3040,15 @@ bool PlayingGameState::assembleArmy(int sector_x, int sector_y, int epoch, int n
 	return false;
 }
 
+bool PlayingGameState::assembleAll(int sector_x, int sector_y) {
+	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
+	ASSERT(sector != NULL);
+	if( sector->getActivePlayer() == client_player ) {
+		sector->assembleAll();
+	}
+	return false;
+}
+
 void PlayingGameState::returnAssembledArmy(int sector_x, int sector_y) {
 	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);

@@ -560,6 +560,7 @@ public:
 	bool returnArmy(Army *army);
 	bool moveArmy(Army *army);
 	void evacuate();
+	void assembleAll();
 	bool mineElement(int client_player, Id i);
 	void invent(int client_player);
 	void buildDesign();

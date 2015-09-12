@@ -175,6 +175,7 @@ private:
 	ImageButton *button_deploy_unarmedmen;
 	ImageButton *button_deploy_attackers[4];
 	ImageButton *button_return_attackers;
+	Button *button_select_all;
 
 	ImageButton *button_bigelementstocks;
 	PanelPage *button_elements2[4];
