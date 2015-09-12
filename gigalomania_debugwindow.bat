@@ -1,1 +1,1 @@
-start gigalomania.exe debugwindow
+start gigalomania.exe debugwindow windowed
