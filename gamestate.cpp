@@ -923,7 +923,9 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
-	game_g->getMap()->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
+	if( game_g->getMap() != NULL ) { // check needed if the current map failed to load, and we're resuming from saved state with that island
+		game_g->getMap()->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
+	}
 	game_g->s_biplane->fadeOut(500);
 	game_g->s_jetplane->fadeOut(500);
 	game_g->s_spaceship->fadeOut(500);
@@ -989,9 +991,7 @@ bool PlayingGameState::readSectorsProcessLine(Map *map, char *line, bool *done_h
 		}
 		char *ptr = strtok(line_ptr, " ");
 		if( ptr == NULL ) {
-			LOG("can't find first word\n");
-			ok = false;
-			return ok;
+			// this line may be a comment
 		}
 		else if( strcmp(ptr, "SECTOR") == 0 ) {
 			ptr = strtok(NULL, " ");

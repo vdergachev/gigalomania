@@ -3138,6 +3138,9 @@ bool Game::readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, c
 		else if( strcmp(ptr, "ELEMENT") == 0 ) {
 			// ignore for now
 		}
+		else if( ptr[0] == '#' ) {
+			// this line is a comment
+		}
 		else {
 			LOG("unknown word: %s\n", ptr);
 			ok = false;
