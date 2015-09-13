@@ -560,7 +560,10 @@ Version 0.28 (Work in progress)
 FIXED   Game hanged on some Android devices when screen was locked and
         unlocked.
 FIXED   AI no longer sends soldiers to build a tower in a sector occupied by an
-        ally (which would result in a loop of continually recalling and sending out the army).
+        ally (which would result in a loop of continually recalling and sending
+        out the army).
+FIXED   AI no longer keeps mining an element when nothing new could be designed
+        anyway (the sector is deemed "used up").
 FIXED   Soldier walking speed not in sync with animation.
 FIXED   Improved click/touch locations of building turrets for defenders.
 FIXED   Factory smoke no longer too heavy when factory first built.
@@ -583,8 +586,13 @@ UPDATED Slowed growth rate (so simply waiting until your population grows is
 UPDATED Population growth rate now slows from 250-500, rather than stopping
         abruptly.
 UPDATED Nuclear weapons now cost 7.5 elements instead of 5.5.
+UPDATED Spaceships now require 8 soldiers rather than 10.
 UPDATED Improved AI logic when looking for sectors to build new towers: pick
         more randomly, but prefer sectors that already have the AI's soldiers.
+UPDATED AI now prefers waiting for population to grow a bit more when
+        abandoning a "used up" sector, to avoid leaving weapons behind.
+UPDATED Lowered the minimum required attack strength needed by the AI for later
+        ages.
 UPDATED There are now four difficulty levels.
 UPDATED Tweaked some of the elements in islands for better play.
 UPDATED Current game state now saved on Android (when app is shutdown by

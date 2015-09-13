@@ -2721,7 +2721,7 @@ void Game::setupInventions() {
 	invention_weapons[6] = new Weapon("BIPLANE", 6, 2);
 	invention_weapons[7] = new Weapon("BOMBER", 7, 3);
 	invention_weapons[8] = new Weapon("NUCLEAR MISSILE", 8, 0);
-	invention_weapons[9] = new Weapon("SPACESHIP", 9, 10);
+	invention_weapons[9] = new Weapon("SPACESHIP", 9, 8);
 }
 
 void Game::setupElements() {

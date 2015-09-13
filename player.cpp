@@ -762,11 +762,16 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		}
 	}
 
+	bool used_up = game_g->getStartEpoch() != end_epoch_c && sector->usedUp();
 	bool can_design = sector->getCurrentDesign() != NULL;
 	bool can_mine = false;
-	for(int i=0;i<N_ID && !can_mine;i++) {
-		if( sector->canMine((Id)i) && game_g->elements[i]->getType() != Element::GATHERABLE )
-			can_mine = true;
+	if( !used_up ) {
+		// even if there are elements remaining to mine, we might still consider a sector "used up" if we've already mined at least 6 of that element, and we still can't design anything
+		//
+		for(int i=0;i<N_ID && !can_mine;i++) {
+			if( sector->canMine((Id)i) && game_g->elements[i]->getType() != Element::GATHERABLE )
+				can_mine = true;
+		}
 	}
 	bool build_mine = sector->canBuild(BUILDING_MINE);
 	bool build_factory = sector->canBuild(BUILDING_FACTORY);
@@ -846,7 +851,6 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 	}
 	else if( sector->getCurrentDesign() == NULL || enemiesPresentWithBombardment ) {
 		//if( used_up || enemiesPresentWithBombardment ) {
-		bool used_up = game_g->getStartEpoch() != end_epoch_c && sector->usedUp();
 		// think about attacking?
 		Sector *target_sector = NULL;
 		bool by_land = false;
@@ -986,6 +990,7 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			//int min_req = 8;
 			//int min_req = 4 * (game_g->getStartEpoch()+1);
 			int min_req = 8 * (game_g->getStartEpoch()+1);
+			min_req = std::min(min_req, 50);
 			for(int i=0;i<=game_g->getStartEpoch();i++)
 				min_req *= 2;
 			if( used_up ) {
@@ -1014,7 +1019,12 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 			if( sector->getAssembledArmy()->any(true) ) {
 				assembled_strength = sector->getAssembledArmy()->getStrength();
 
-				if( strength + assembled_strength >= min_req || enemiesPresentWithBombardment ) {
+				if( new_sector && used_up && sector->getStoredArmy()->any(false) && (sector->getSparePopulation() + sector->getAssembledArmy()->getTotalMen()) < 0.75f*max_grow_population_c ) {
+					// if moving to a new sector because the sector is used up, we don't want to leave weapons behind - if we didn't have enough men to use them, better to wait until the population grows
+					// however we need to have the population not too close to the max_grow_population_c (otherwise we'll no longer be growing very much)
+					sector->returnAssembledArmy();
+				}
+				else if( strength + assembled_strength >= min_req || enemiesPresentWithBombardment ) {
 					ASSERT( !target_sector->isNuked() );
 					if( target_sector->getPlayer() == client_player && !target_sector->getArmy(this->index)->any(true) ) {
 						game_g->setTimeRate(1); // auto-slow if attacking a player sector (but not if already being attacked by this player)
