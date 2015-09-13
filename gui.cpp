@@ -830,7 +830,7 @@ void GamePanel::setup() {
 	this->button_bigdesign = new ImageButton(33, 0, 32, 16, game_g->panel_bigdesign, "return to main screen");
 	this->button_bigdesign->setId("button_bigdesign");
 	this->addToPanel(STATE_DESIGN, button_bigdesign);
-	this->button_designers = new ImageButton(40, 16, 16, 40, game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()]);
+	this->button_designers = new ImageButton(40, 16, 16, 40, game_g->men[gamestate->getCurrentSector()->getEpoch()]);
 	this->button_designers->setId("button_designers");
 	if( game_g->isOneMouseButton() ) {
 		this->button_designers->setInfoLMB("change the number of designers");
@@ -970,7 +970,7 @@ void GamePanel::setup() {
 	this->button_bigfactory = new ImageButton(33, 0, 32, 16, game_g->panel_bigfactory, "return to main screen");
 	this->button_bigfactory->setId("button_bigfactory");
 	this->addToPanel(STATE_FACTORY, button_bigfactory);
-	this->button_workers = new ImageButton(40, 14, 16, 26, game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()]);
+	this->button_workers = new ImageButton(40, 14, 16, 26, game_g->men[gamestate->getCurrentSector()->getEpoch()]);
 	this->button_workers->setId("button_workers");
 	if( game_g->isOneMouseButton() ) {
 		this->button_workers->setInfoLMB("change the number of workers");
@@ -980,7 +980,7 @@ void GamePanel::setup() {
 		this->button_workers->setInfoRMB("increase the number of workers");
 	}
 	this->addToPanel(STATE_FACTORY, button_workers);
-	this->button_famount = new ImageButton(40, 40, 14, 28, game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()]);
+	this->button_famount = new ImageButton(40, 40, 14, 28, game_g->men[gamestate->getCurrentSector()->getEpoch()]);
 	this->button_famount->setId("button_famount");
 	if( game_g->isOneMouseButton() ) {
 		this->button_famount->setInfoLMB("change the number to produce");
@@ -1263,7 +1263,7 @@ void GamePanel::draw() {
 		if( gamestate->viewingActiveClientSector() ) {
 			const int xpos = 8, ypos = 18;
 			//const int xpos = 40, ypos = 40;
-			game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()]->draw(offset_panel_x_c + xpos, offset_panel_y_c + ypos);
+			game_g->men[gamestate->getCurrentSector()->getEpoch()]->draw(offset_panel_x_c + xpos, offset_panel_y_c + ypos);
 			Image::writeNumbers(offset_panel_x_c + xpos + 8, offset_panel_y_c + ypos + 18, game_g->numbers_grey, gamestate->getCurrentSector()->getSparePopulation(),Image::JUSTIFY_CENTRE);
 			if( gamestate->getCurrentSector()->getCurrentDesign() != NULL ) {
 				Image::writeNumbers( this->button_ndesigners->getXCentre(), this->button_ndesigners->getTop() + 2, game_g->numbers_white, gamestate->getCurrentSector()->getDesigners(),Image::JUSTIFY_CENTRE);
@@ -1309,7 +1309,7 @@ void GamePanel::draw() {
 		}
 	}
 	else if( this->c_page == STATE_DESIGN ) {
-		this->button_designers->setImage( game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()] );
+		this->button_designers->setImage( game_g->men[gamestate->getCurrentSector()->getEpoch()] );
 		if( gamestate->getCurrentSector()->getCurrentDesign() == NULL ) {
 			game_g->dash_grey->draw(offset_panel_x_c + 45, offset_panel_y_c + 36);
 		}
@@ -1370,8 +1370,7 @@ void GamePanel::draw() {
 		}
 	}
 	else if( this->c_page == STATE_DEFENCE ) {
-		//unarmed_man->draw(offset_panel_x_c + 8, offset_panel_y_c + 24, true);
-		game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()]->draw(offset_panel_x_c + 8, offset_panel_y_c + 24);
+		game_g->men[gamestate->getCurrentSector()->getEpoch()]->draw(offset_panel_x_c + 8, offset_panel_y_c + 24);
 		Image::writeNumbers(offset_panel_x_c + 16, offset_panel_y_c + 42, game_g->numbers_grey, gamestate->getCurrentSector()->getSparePopulation(), Image::JUSTIFY_CENTRE);
 		for(int i=0;i<game_g->getNSubEpochs();i++) {
 			if( this->button_deploy_defences[i]->isVisible() ) {
@@ -1493,7 +1492,7 @@ void GamePanel::draw() {
 		const int y1 = 40;
 		//const int y2 = 72;
 		const int y2 = 66;
-		this->button_workers->setImage( game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()] );
+		this->button_workers->setImage( game_g->men[gamestate->getCurrentSector()->getEpoch()] );
 		if( gamestate->getCurrentSector()->getCurrentManufacture() == NULL ) {
 			game_g->dash_grey->draw(offset_panel_x_c + 45, offset_panel_y_c + y0 + 20);
 			this->button_famount->setImage(NULL);
