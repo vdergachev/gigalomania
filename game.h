@@ -166,6 +166,8 @@ class Game {
 	GameState *loadStateParseXMLNode(const TiXmlNode *parent);
 	void copyFile(const char *src, const char *dst) const;
 
+	bool testFindSoldiersBuildingNewTower(const Sector *sector, int *total, int *squares) const;
+
 	void disposeGameState();
 
 	int getMenPerEpoch() const;

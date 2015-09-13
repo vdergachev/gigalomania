@@ -4241,6 +4241,33 @@ void Game::savePrefs() const {
 	delete [] prefs_fullfilename;
 }
 
+bool Game::testFindSoldiersBuildingNewTower(const Sector *sector, int *total, int *squares) const {
+	bool found = false;
+	*total = 0;
+	*squares = 0;
+	for(int cx=0;cx<map_width_c && !found;cx++) {
+		for(int cy=0;cy<map_height_c && !found;cy++) {
+			Sector *c_sector = game_g->getMap()->getSector(cx, cy);
+			if( sector != c_sector ) {
+				if( c_sector->getArmy(sector->getPlayer())->any(true) ) {
+					found = true;
+					*total = *total + c_sector->getArmy(sector->getPlayer())->getTotal();
+					*squares = *squares + 1;
+					if( c_sector->getPlayer() != -1 ) {
+						throw string("shouldn't have sent soldiers to another tower");
+					}
+					for(int i=0;i<n_players_c;i++) {
+						if( i != sector->getPlayer() && c_sector->getArmy(i)->any(true) ) {
+							throw string("shouldn't have sent soldiers to a sector with other soldiers");
+						}
+					}
+				}
+			}
+		}
+	}
+	return found;
+}
+
 void Game::runTests() {
 	game_g->setTesting(true);
 
@@ -4853,6 +4880,9 @@ void Game::runTests() {
 					throw string("didn't get rid of all elements");
 				}
 			}
+			// need to reset any design or manufacturer
+			sector->setCurrentDesign(NULL);
+			sector->setCurrentManufacture(NULL);
 			// now check we trash the designs, and check we can't research them again
 			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
 			for(int i=0;i<n_epochs_c;i++) {
@@ -4878,12 +4908,90 @@ void Game::runTests() {
 			}
 			// but if we have 6 or more stocks, then no need to mine after all
 			sector->reduceElementStocks(element, -6*element_multiplier_c);
+			int saved_population = sector->getPopulation();
 			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
 			if( !sector->usedUp() ) {
 				throw string("sector isn't deemed used up");
 			}
 			else if( sector->getMiners(element) > 0 ) {
 				throw string("shouldn't assign miners even though some remaining, as we already have stocks and the sector is deemed used up");
+			}
+			// check that the AI sent soldiers to a new empty sector
+			int total = 0, squares = 0;
+			bool found = testFindSoldiersBuildingNewTower(sector, &total, &squares);
+			if( !found ) {
+				throw string("didn't send soldiers to build another tower");
+			}
+			else if( squares != 1 ) {
+				throw string("didn't send soldiers to expected number of squares");
+			}
+			else if( total != saved_population-1 ) {
+				throw string("didn't send expected number of soldiers");
+			}
+			else if( sector->getPopulation() != 1 ) {
+				throw string("remaining population not as expected");
+			}
+			// now add some more men, but make sure we don't evacuate if it means leaving weapons behind
+			sector->setPopulation(40);
+			sector->getStoredArmy()->add(9, 6); // 6*8 needs 48 men
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			found = testFindSoldiersBuildingNewTower(sector, &total, &squares);
+			// should be unchanged from above
+			if( !found ) {
+				throw string("didn't send soldiers to build another tower");
+			}
+			else if( squares != 1 ) {
+				throw string("didn't send soldiers to expected number of squares");
+			}
+			else if( total != saved_population-1 ) {
+				throw string("didn't send expected number of soldiers");
+			}
+			else if( sector->getPopulation() != 40 ) {
+				throw string("remaining population not as expected");
+			}
+			else if( sector->getStoredArmy()->getSoldiers(9) != 6 ) {
+				throw string("unexpected number of remaining soldiers");
+			}
+			// now set enough
+			sector->setPopulation(50);
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			found = testFindSoldiersBuildingNewTower(sector, &total, &squares);
+			// should be sent to the same square
+			if( !found ) {
+				throw string("didn't send soldiers to build another tower");
+			}
+			else if( squares != 1 ) {
+				throw string("didn't send soldiers to expected number of squares");
+			}
+			else if( total != saved_population-1 + 6+1 ) {
+				throw string("didn't send expected number of soldiers");
+			}
+			else if( sector->getPopulation() != 1 ) {
+				throw string("remaining population not as expected");
+			}
+			else if( sector->getStoredArmy()->getSoldiers(9) != 0 ) {
+				throw string("unexpected number of remaining soldiers");
+			}
+			// now if we have more than 375, should still send men even if it means leaving weapons behind
+			sector->setPopulation(376);
+			sector->getStoredArmy()->add(9, 50); // 50*8 needs 400 men
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			found = testFindSoldiersBuildingNewTower(sector, &total, &squares);
+			// should be sent to the same square
+			if( !found ) {
+				throw string("didn't send soldiers to build another tower");
+			}
+			else if( squares != 1 ) {
+				throw string("didn't send soldiers to expected number of squares");
+			}
+			else if( total != saved_population-1 + 6+1 + 46+7 ) {
+				throw string("didn't send expected number of soldiers");
+			}
+			else if( sector->getPopulation() != 1 ) {
+				throw string("remaining population not as expected");
+			}
+			else if( sector->getStoredArmy()->getSoldiers(9) != 4 ) {
+				throw string("unexpected number of remaining soldiers");
 			}
 
 			// test player shutting down the sector
