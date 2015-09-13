@@ -2711,7 +2711,7 @@ void Sector::returnAssembledArmy() {
 }
 
 bool Sector::returnArmy() {
-	LOG("Sector::returnArmy() [%d: %d,%d]\n", player, xpos, ypos);
+	//LOG("Sector::returnArmy() [%d: %d,%d]\n", player, xpos, ypos);
 	ASSERT( this->player != -1 );
 	return this->returnArmy( this->getArmy( this->player ) );
 }
