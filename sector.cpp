@@ -1961,34 +1961,17 @@ void Sector::doPlayer(int client_player) {
 			spare_pop = max_grow_population_c - spare_pop;
 			spare_pop = max(spare_pop, 0);
 		}
-		int delay = ( growth_rate_c * gameticks_per_hour_c ) / spare_pop;
-		/*if( delay == 0 )
-		delay = 1;
-		while( time - this->growth_lasttime > delay ) {
-		this->population++;
-		if( this->population > max_population_c ) {
-		this->population = max_population_c;
-		break;
-		}
-		this->growth_lasttime += delay;
-		delay = ( growth_rate_c * gameticks_per_hour_c ) / this->getSparePopulation();
-		if( delay == 0 )
-		delay = 1;
-		}*/
-		if( time - this->growth_lasttime > delay ) {
-			int old_pop = this->population;
-			if( this->getSparePopulation() < max_grow_population_c )
-				this->population++;
-			this->growth_lasttime = time;
-			/*if( this->getSparePopulation() > max_population_c ) {
-			int diff = this->getSparePopulation() - max_population_c;
-			this->population -= diff;
-			}*/
-			int births = this->population - old_pop;
-			//ASSERT(births >= 0);
-			if( births > 0 ) {
-				//game_g->players[this->player]->n_births += births;
-				game_g->players[this->player]->registerBirths(births);
+		if( spare_pop > 0 ) {
+			int delay = ( growth_rate_c * gameticks_per_hour_c ) / spare_pop;
+			if( time - this->growth_lasttime > delay ) {
+				int old_pop = this->population;
+				if( this->getSparePopulation() < max_grow_population_c )
+					this->population++;
+				this->growth_lasttime = time;
+				int births = this->population - old_pop;
+				if( births > 0 ) {
+					game_g->players[this->player]->registerBirths(births);
+				}
 			}
 		}
 	}
