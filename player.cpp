@@ -858,6 +858,8 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		// if used up, look for a new sector
 		bool look_for_new_sector = used_up || ( rand() % 3 == 0 );
 		if( look_for_new_sector ) {
+			vector<Sector *> candidate_sectors;
+			int max_n_men = 0;
 			for(int x=0;x<map_width_c;x++) {
 				for(int y=0;y<map_height_c;y++) {
 					Sector *c_sector = game_g->getMap()->getSector(x, y);
@@ -875,13 +877,26 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 								}
 							}
 							if( !has_others ) {
-								target_sector = c_sector;
-								by_land = true;
-								new_sector = true;
+								int n_men = c_sector->getArmy(index)->getTotal();
+								// prefer sectors that already have our men - and pick the largest number
+								if( n_men >= max_n_men ) {
+									if( n_men > max_n_men ) {
+										candidate_sectors.clear();
+										max_n_men = n_men;
+									}
+									candidate_sectors.push_back(c_sector);
+								}
 							}
 						}
 					}
 				}
+			}
+			if( candidate_sectors.size() > 0 ) {
+				// randomly pick out of the candidate sectors
+				int r = rand() % candidate_sectors.size();
+				target_sector = candidate_sectors.at(r);
+				by_land = true;
+				new_sector = true;
 			}
 		}
 
