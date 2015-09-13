@@ -1,4 +1,5 @@
 #Toxic 6 2 ORANGE
+#This island should not have any sectors where nukes can be built
 SECTOR 0 1
 	ELEMENT MOONLITE 200
 	ELEMENT AQUARIUM 75
