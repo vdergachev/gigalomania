@@ -854,28 +854,31 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 		int strength = 0;
 		bool temp[map_width_c][map_height_c];
 		game_g->getMap()->canMoveTo(temp, sector->getXPos(),sector->getYPos(),sector->getPlayer());
+
 		// if used up, look for a new sector
 		bool look_for_new_sector = used_up || ( rand() % 3 == 0 );
-		for(int x=0;x<map_width_c;x++) {
-			for(int y=0;y<map_height_c;y++) {
-				Sector *c_sector = game_g->getMap()->getSector(x, y);
-				if( c_sector == NULL )
-					continue;
-				// Only worth moving to a sector that has no other players
-				// If we were to move to a sector with an ally army, the army would then be immediately moved back to the tower by code in Player::doSectorAI() (this bug was fixed in 0.28)
-				// No need to move to a sector with enemies - the decision to attack is done below
-				if( look_for_new_sector && c_sector->getActivePlayer() == -1 ) {
-					if( temp[x][y] ) {
-						bool has_others = false;
-						for(int i=0;i<n_players_c && !has_others;i++) {
-							if( i != index && c_sector->getArmy(i)->any(true) ) {
-								has_others = true;
+		if( look_for_new_sector ) {
+			for(int x=0;x<map_width_c;x++) {
+				for(int y=0;y<map_height_c;y++) {
+					Sector *c_sector = game_g->getMap()->getSector(x, y);
+					if( c_sector == NULL )
+						continue;
+					// Only worth moving to a sector that has no other players
+					// If we were to move to a sector with an ally army, the army would then be immediately moved back to the tower by code in Player::doSectorAI() (this bug was fixed in 0.28)
+					// No need to move to a sector with enemies - the decision to attack is done below
+					if( c_sector->getActivePlayer() == -1 ) {
+						if( temp[x][y] ) {
+							bool has_others = false;
+							for(int i=0;i<n_players_c && !has_others;i++) {
+								if( i != index && c_sector->getArmy(i)->any(true) ) {
+									has_others = true;
+								}
 							}
-						}
-						if( !has_others ) {
-							target_sector = c_sector;
-							by_land = true;
-							new_sector = true;
+							if( !has_others ) {
+								target_sector = c_sector;
+								by_land = true;
+								new_sector = true;
+							}
 						}
 					}
 				}
