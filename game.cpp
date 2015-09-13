@@ -2757,12 +2757,8 @@ void Game::cleanupPlayers() {
 }
 
 void Game::setupPlayers() {
+	LOG("Game::setupPlayers()");
 	cleanupPlayers();
-
-	int seed = clock();
-	//seed = 72638; // test
-	LOG("setupPlayers(): set random seed to %d\n", seed);
-	srand( seed );
 
 	//   0 - Red team
 	//   1 - Green team
@@ -5048,6 +5044,12 @@ void playGame(int n_args, char *args[]) {
 
 	initFolderPaths();
 	initLogFile();
+
+	// set random seed - recommended way to do it from http://stackoverflow.com/questions/322938/recommended-way-to-initialize-srand
+	int seed = time(NULL);
+	//seed = 72638; // test
+	LOG("set random seed to %d\n", seed);
+	srand( seed );
 
 	//bool run_tests = true;
 	bool run_tests = false;
