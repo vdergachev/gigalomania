@@ -1518,7 +1518,7 @@ void GamePanel::draw() {
 			int famount_x = offset_panel_x_c + 48;
 			int famount_y = offset_panel_y_c + y1 + 18;
 			if( famount == infinity_c ) {
-				game_g->icon_infinity->draw(famount_x - game_g->icon_infinity->getScaledWidth()/2, famount_y - 2);
+				game_g->icon_infinity->draw(famount_x - game_g->icon_infinity->getScaledWidth()/2 + 2, famount_y - 2);
 			}
 			else {
 				Image::writeNumbers(famount_x, famount_y, game_g->numbers_white, famount,Image::JUSTIFY_CENTRE);
