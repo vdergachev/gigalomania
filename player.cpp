@@ -861,13 +861,22 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 				Sector *c_sector = game_g->getMap()->getSector(x, y);
 				if( c_sector == NULL )
 					continue;
-				//if( used_up && c_sector->getActivePlayer() == -1 ) {
+				// Only worth moving to a sector that has no other players
+				// If we were to move to a sector with an ally army, the army would then be immediately moved back to the tower by code in Player::doSectorAI() (this bug was fixed in 0.28)
+				// No need to move to a sector with enemies - the decision to attack is done below
 				if( look_for_new_sector && c_sector->getActivePlayer() == -1 ) {
 					if( temp[x][y] ) {
-						// TODO: prefer sector not occupied by enemies
-						target_sector = c_sector;
-						by_land = true;
-						new_sector = true;
+						bool has_others = false;
+						for(int i=0;i<n_players_c && !has_others;i++) {
+							if( i != index && c_sector->getArmy(i)->any(true) ) {
+								has_others = true;
+							}
+						}
+						if( !has_others ) {
+							target_sector = c_sector;
+							by_land = true;
+							new_sector = true;
+						}
 					}
 				}
 			}
