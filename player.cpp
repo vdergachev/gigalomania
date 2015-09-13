@@ -1020,8 +1020,9 @@ void Player::doSectorAI(int client_player, PlayingGameState *gamestate, Sector *
 				assembled_strength = sector->getAssembledArmy()->getStrength();
 
 				if( new_sector && used_up && sector->getStoredArmy()->any(false) && (sector->getSparePopulation() + sector->getAssembledArmy()->getTotalMen()) < 0.75f*max_grow_population_c ) {
-					// if moving to a new sector because the sector is used up, we don't want to leave weapons behind - if we didn't have enough men to use them, better to wait until the population grows
-					// however we need to have the population not too close to the max_grow_population_c (otherwise we'll no longer be growing very much)
+					// If moving to a new sector because the sector is used up, we don't want to leave weapons behind - if we didn't have enough men to use them, better to wait until the population grows.
+					// However we need to have the population not too close to the max_grow_population_c (otherwise we'll no longer be growing very much)
+					// Arguably this logic should apply even if sending an army to attack (when not used up), but have to be careful - we don't want to make the AI take ages to decide to attack even though it has a reasonable strength.
 					sector->returnAssembledArmy();
 				}
 				else if( strength + assembled_strength >= min_req || enemiesPresentWithBombardment ) {
