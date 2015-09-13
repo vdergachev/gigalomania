@@ -43,6 +43,7 @@ void processClick(ClickFunc *clickFunc, PanelPage *panel, void *data, int arg, P
 		if( caller_button->getInfoLMB() != NULL && game_g->isMobileUI() ) {
 			game_g->addTextEffect(new TextEffect(caller_button->getInfoLMB(), 160, caller_button->getTop(), 3000));
 		}
+		LOG("open onemousebutton panel done\n");
 	}
 	else if( !game_g->oneMouseButtonMode() && !click ) {
 		//buttonNMenClick(panel, m_left, m_middle, m_right);
