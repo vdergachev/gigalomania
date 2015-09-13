@@ -131,10 +131,12 @@ ChooseDifficultyPanel::ChooseDifficultyPanel() : MultiPanel(1, 0, 0) {
 	this->addToPanel(0, new Button(105, 50, "CHOOSE DIFFICULTY", game_g->letters_large));
     this->button_easy = new Button(120, 90, "EASY", game_g->letters_large);
 	this->addToPanel(0, button_easy);
-    this->button_medium = new Button(120, 130, "MEDIUM", game_g->letters_large);
+    this->button_medium = new Button(120, 120, "MEDIUM", game_g->letters_large);
 	this->addToPanel(0, button_medium);
-    this->button_hard = new Button(120, 170, "HARD", game_g->letters_large);
+    this->button_hard = new Button(120, 150, "HARD", game_g->letters_large);
 	this->addToPanel(0, button_hard);
+    this->button_ultra = new Button(120, 180, "ULTRA", game_g->letters_large);
+	this->addToPanel(0, button_ultra);
 }
 
 void ChooseDifficultyPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
@@ -158,6 +160,11 @@ void ChooseDifficultyPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool
 	else if( m_left && click && this->button_hard->mouseOver(m_x, m_y) ) {
         registerClick();
 		game_g->setDifficultyLevel(DIFFICULTY_HARD);
+		game_g->setGameStateID(GAMESTATEID_CHOOSEPLAYER);
+	}
+	else if( m_left && click && this->button_ultra->mouseOver(m_x, m_y) ) {
+        registerClick();
+		game_g->setDifficultyLevel(DIFFICULTY_ULTRA);
 		game_g->setGameStateID(GAMESTATEID_CHOOSEPLAYER);
 	}
 }
@@ -312,6 +319,8 @@ void ChooseMenPanel::refreshLoadSaveButtons() {
 				diff_ch = 'M';
 			else if( difficulty == DIFFICULTY_HARD )
 				diff_ch = 'H';
+			else if( difficulty == DIFFICULTY_ULTRA )
+				diff_ch = 'U';
 			else {
 				ASSERT(false);
 			}
@@ -347,6 +356,8 @@ void ChooseMenPanel::refreshLoadSaveButtons() {
 				diff_ch = 'M';
 			else if( difficulty == DIFFICULTY_HARD )
 				diff_ch = 'H';
+			else if( difficulty == DIFFICULTY_ULTRA )
+				diff_ch = 'U';
 			else {
 				ASSERT(false);
 			}

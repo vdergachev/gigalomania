@@ -394,8 +394,10 @@ int Game::getMenPerEpoch() const {
 	if( difficulty_level == DIFFICULTY_EASY )
 		return 150;
 	else if( difficulty_level == DIFFICULTY_MEDIUM )
-		return 100;
+		return 120;
 	else if( difficulty_level == DIFFICULTY_HARD )
+		return 100;
+	else if( difficulty_level == DIFFICULTY_ULTRA )
 		return 75;
 	ASSERT(false);
 	return 0;

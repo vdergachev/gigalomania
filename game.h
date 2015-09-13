@@ -52,10 +52,12 @@ enum GameResult {
 };
 
 enum DifficultyLevel {
+	// don't change the numbers, as will break saved state and saved game compatibility!
 	DIFFICULTY_EASY = 0,
-	DIFFICULTY_MEDIUM,
-	DIFFICULTY_HARD,
-	DIFFICULTY_N_LEVELS
+	DIFFICULTY_MEDIUM = 1,
+	DIFFICULTY_HARD = 2,
+	DIFFICULTY_ULTRA = 3,
+	DIFFICULTY_N_LEVELS = 4
 };
 
 enum GameMode {

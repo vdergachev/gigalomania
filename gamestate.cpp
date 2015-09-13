@@ -3551,6 +3551,8 @@ void GameCompleteGameState::draw() {
 			str.str("Medium");
 		else if( game_g->getDifficultyLevel() == DIFFICULTY_HARD )
 			str.str("Hard");
+		else if( game_g->getDifficultyLevel() == DIFFICULTY_ULTRA )
+			str.str("Ultra");
 		else {
 			ASSERT(false);
 		}

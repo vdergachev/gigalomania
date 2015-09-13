@@ -50,6 +50,7 @@ class ChooseDifficultyPanel : public MultiPanel {
 	Button *button_easy;
 	Button *button_medium;
 	Button *button_hard;
+	Button *button_ultra;
 
 public:
 	ChooseDifficultyPanel();
