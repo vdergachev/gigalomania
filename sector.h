@@ -427,6 +427,7 @@ public:
 	void autoTrashDesigns();
 	bool tryMiningMore() const;
 	bool usedUp() const;
+	void cheat(int client_player); // for testing
 	Design *knownDesign(Invention::Type type,int epoch) const;
 	Design *bestDesign(Invention::Type type,int epoch) const;
 	Design *canResearch(Invention::Type type,int epoch) const;

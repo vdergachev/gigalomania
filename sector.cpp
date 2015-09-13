@@ -1317,11 +1317,15 @@ bool Sector::canEverBuildDesign(Design *design) const {
 }
 
 void Sector::autoTrashDesigns() {
-	for(size_t i=0;i<this->designs.size();i++) {
+	for(size_t i=0;i<this->designs.size();) {
 		Design *design = this->designs.at(i);
 		if( !canEverBuildDesign(design) ) {
 			// trash
 			this->trashDesign(design);
+			// don't increment i, as this will remove the design
+		}
+		else {
+			i++;
 		}
 	}
 }
@@ -1375,6 +1379,40 @@ bool Sector::usedUp() const {
 		return false;
 	}
 	return true;
+}
+
+void Sector::cheat(int client_player) {
+	if( this->canBuild(BUILDING_MINE) ) {
+		this->buildBuilding(BUILDING_MINE);
+	}
+	if( this->canBuild(BUILDING_FACTORY) ) {
+		this->buildBuilding(BUILDING_FACTORY);
+	}
+	if( this->canBuild(BUILDING_LAB) ) {
+		this->buildBuilding(BUILDING_LAB);
+	}
+	for(int i=0;i<N_ID;i++) {
+		while( this->canMine((Id)i) && this->anyElements((Id)i) ) {
+			this->mineElement(client_player, (Id)i);
+		}
+	}
+	for(int i=0;i<n_epochs_c;i++) {
+		Design *design = this->canResearch(Invention::WEAPON, i);
+		if( design != NULL ) {
+			this->setCurrentDesign(design);
+			this->invent(client_player);
+		}
+		design = this->canResearch(Invention::DEFENCE, i);
+		if( design != NULL ) {
+			this->setCurrentDesign(design);
+			this->invent(client_player);
+		}
+		design = this->canResearch(Invention::SHIELD, i);
+		if( design != NULL ) {
+			this->setCurrentDesign(design);
+			this->invent(client_player);
+		}
+	}
 }
 
 Design *Sector::knownDesign(Invention::Type type,int epoch) const {

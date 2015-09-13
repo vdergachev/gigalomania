@@ -3441,32 +3441,7 @@ void Game::setGameStateID(GameStateID state, GameState *new_gamestate) {
 		int map_x = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapX();
 		int map_y = static_cast<PlaceMenGameState *>(old_gamestate)->getStartMapY();
 		Sector *start_sector = map->getSector(map_x, map_y);
-		if( start_sector->canBuild(BUILDING_MINE) ) {
-			start_sector->buildBuilding(BUILDING_MINE);
-		}
-		if( start_sector->canBuild(BUILDING_FACTORY) ) {
-			start_sector->buildBuilding(BUILDING_FACTORY);
-		}
-		if( start_sector->canBuild(BUILDING_LAB) ) {
-			start_sector->buildBuilding(BUILDING_LAB);
-		}
-		for(int i=0;i<N_ID;i++) {
-			while( start_sector->canMine((Id)i) && start_sector->anyElements((Id)i) ) {
-				start_sector->mineElement(human_player, (Id)i);
-			}
-		}
-		for(int i=0;i<n_epochs_c;i++) {
-			Design *design = start_sector->canResearch(Invention::WEAPON, i);
-			if( design != NULL ) {
-				static_cast<PlayingGameState *>(gamestate)->setCurrentDesign(map_x, map_y, design);
-				start_sector->invent(human_player);
-			}
-			design = start_sector->canResearch(Invention::DEFENCE, i);
-			if( design != NULL ) {
-				static_cast<PlayingGameState *>(gamestate)->setCurrentDesign(map_x, map_y, design);
-				start_sector->invent(human_player);
-			}
-		}
+		start_sector->cheat(human_player);
 	}*/
 }
 
@@ -4335,6 +4310,22 @@ void Game::runTests() {
 		placeMenGameState->setStartMapPos(sx, sy); // will automatically switch to playing gamestate
 		updateGame(); // needed to dispose the gamestate
 
+		int ex = -1, ey = -1;
+		for(int y=0;y<map_height_c && ex==-1;y++) {
+			for(int x=0;x<map_width_c && ex==-1;x++) {
+				Sector *sector = map->getSector(x, y);
+				if( sector != NULL ) {
+					if( sector->getPlayer() != -1 && sector->getPlayer() != human_player ) {
+						ex = x;
+						ey = y;
+					}
+				}
+			}
+		}
+		if( ex == -1 || ey == -1 ) {
+			throw string("couldn't find ai player");
+		}
+
 		// test saving state
 		saveState();
 		if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
@@ -4584,21 +4575,6 @@ void Game::runTests() {
 			}
 		}
 		else if( start_epoch == 1 && selected_island == 0 ) {
-			int ex = -1, ey = -1;
-			for(int y=0;y<map_height_c && ex==-1;y++) {
-				for(int x=0;x<map_width_c && ex==-1;x++) {
-					Sector *sector = map->getSector(x, y);
-					if( sector != NULL ) {
-						if( sector->getPlayer() != -1 && sector->getPlayer() != human_player ) {
-							ex = x;
-							ey = y;
-						}
-					}
-				}
-			}
-			if( ex == -1 || ey == -1 ) {
-				throw string("couldn't find ai player");
-			}
 			Sector *sector = map->getSector(ex, ey);
 			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
 			if( sector->getCurrentDesign() != NULL ) {
@@ -4850,7 +4826,67 @@ void Game::runTests() {
 			}
 		}
 		else if( start_epoch == 9 && selected_island == 0 ) {
-			// test shutting down the sector
+			// test AI behaviour
+			Sector *sector = map->getSector(ex, ey);
+			sector->cheat(human_player);
+			// make sure we don't mine when no unmined elements remaining
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			Id element = MOONLITE; // should be a non-gatherable, that on its own can't be used to invent something on this island
+			for(int i=0;i<N_ID;i++) {
+				if( sector->getMiners((Id)i) > 0 ) {
+					throw string("didn't expect miners when sector is used up");
+				}
+			}
+			// now check we mine if there is some element present
+			sector->setElements(element, 5*element_multiplier_c);
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			if( sector->getMiners(element) == 0 ) {
+				throw string("didn't assign miners");
+			}
+			// now use up the element stocks
+			for(int i=0;i<N_ID;i++) {
+				int n = 0, fraction = 0;
+				sector->getElementStocks(&n, &fraction, (Id)i);
+				sector->reduceElementStocks((Id)i, n*element_multiplier_c+fraction);
+				sector->getElementStocks(&n, &fraction, (Id)i);
+				if( n > 0 || fraction > 0 ) {
+					throw string("didn't get rid of all elements");
+				}
+			}
+			// now check we trash the designs, and check we can't research them again
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			for(int i=0;i<n_epochs_c;i++) {
+				if( sector->inventionKnown(Invention::WEAPON, i) )
+					throw string("didn't expect invention to still be known");
+				else if( sector->canResearch(Invention::WEAPON, i) )
+					throw string("didn't expect to be able to research invention again");
+				if( sector->inventionKnown(Invention::DEFENCE, i) )
+					throw string("didn't expect invention to still be known");
+				else if( sector->canResearch(Invention::DEFENCE, i) )
+					throw string("didn't expect to be able to research invention again");
+				if( sector->inventionKnown(Invention::SHIELD, i) )
+					throw string("didn't expect invention to still be known");
+				else if( sector->canResearch(Invention::SHIELD, i) )
+					throw string("didn't expect to be able to research invention again");
+			}
+			// should have set miners, in case we can research something again
+			if( sector->usedUp() ) {
+				throw string("sector is deemed used up even though elements remain");
+			}
+			else if( sector->getMiners(element) == 0 ) {
+				throw string("didn't assign miners after trashing designs");
+			}
+			// but if we have 6 or more stocks, then no need to mine after all
+			sector->reduceElementStocks(element, -6*element_multiplier_c);
+			players[sector->getPlayer()]->doAIUpdate(human_player, playingGameState);
+			if( !sector->usedUp() ) {
+				throw string("sector isn't deemed used up");
+			}
+			else if( sector->getMiners(element) > 0 ) {
+				throw string("shouldn't assign miners even though some remaining, as we already have stocks and the sector is deemed used up");
+			}
+
+			// test player shutting down the sector
 			Sector *start_sector = map->getSector(sx, sy);
 			if( start_sector->canShutdown() ) {
 				throw string("shouldn't be able to shutdown the sector yet");
