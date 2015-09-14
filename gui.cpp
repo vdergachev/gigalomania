@@ -835,7 +835,7 @@ void GamePanel::setup() {
 	this->button_return_attackers->setInfoLMB("return the assembled army");
 	this->button_return_attackers->setId("button_return_attackers");
 	this->addToPanel(STATE_ATTACK, button_return_attackers);
-	this->button_select_all = new Button(4, 96, "SELECT ALL", game_g->letters_small);
+	this->button_select_all = new Button(4, 96, "SELECT ALL WEAPONS", game_g->letters_small);
 	this->addToPanel(STATE_ATTACK, button_select_all);
 
 	// DESIGN
@@ -1947,7 +1947,9 @@ x		}*/
 		}
 		else if( m_left && !click && this->button_select_all->mouseOver(m_x,m_y) && n_nukes == 0 ) {
             done = true;
-			gamestate->assembleAll(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos());
+			// note that we don't include unarmed men - otherwise this causes a problem with non-manufacture weapons that are made of gatherables
+			// it might be that we can quickly make more a moment later, but not if we've selected the remaining men as unarmed!
+			gamestate->assembleAll(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos(), false);
 			if( gamestate->getCurrentSector()->getAssembledArmy()->any(true) ) {
 				setMouseState(MOUSESTATE_DEPLOY_WEAPON);
 			}

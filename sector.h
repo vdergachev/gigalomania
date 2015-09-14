@@ -561,7 +561,7 @@ public:
 	bool returnArmy(Army *army);
 	bool moveArmy(Army *army);
 	void evacuate();
-	void assembleAll();
+	void assembleAll(bool include_unarmed);
 	bool mineElement(int client_player, Id i);
 	void invent(int client_player);
 	void buildDesign();

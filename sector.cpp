@@ -2838,12 +2838,12 @@ void Sector::evacuate() {
 		this->n_miners[i] = 0;
 	}
 
-	this->assembleAll();
+	this->assembleAll(true);
 
 	this->getArmy(this->getPlayer())->add(this->getAssembledArmy());
 }
 
-void Sector::assembleAll() {
+void Sector::assembleAll(bool include_unarmed) {
 	for(int i=n_epochs_c-1;i>=game_g->getStartEpoch();i--) {
 		if( i == nuclear_epoch_c )
 			continue;
@@ -2851,11 +2851,13 @@ void Sector::assembleAll() {
 		}
 	}
 
-	int men = this->getAvailablePopulation();
-	if( men > 0 ) {
-		this->getAssembledArmy()->add(n_epochs_c, men);
-		int n_pop = this->getPopulation() - men;
-		this->setPopulation(n_pop);
+	if( include_unarmed ) {
+		int men = this->getAvailablePopulation();
+		if( men > 0 ) {
+			this->getAssembledArmy()->add(n_epochs_c, men);
+			int n_pop = this->getPopulation() - men;
+			this->setPopulation(n_pop);
+		}
 	}
 }
 

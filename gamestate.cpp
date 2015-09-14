@@ -3040,11 +3040,11 @@ bool PlayingGameState::assembleArmy(int sector_x, int sector_y, int epoch, int n
 	return false;
 }
 
-bool PlayingGameState::assembleAll(int sector_x, int sector_y) {
+bool PlayingGameState::assembleAll(int sector_x, int sector_y, bool include_unarmed) {
 	Sector *sector = game_g->getMap()->getSector(sector_x, sector_y);
 	ASSERT(sector != NULL);
 	if( sector->getActivePlayer() == client_player ) {
-		sector->assembleAll();
+		sector->assembleAll(include_unarmed);
 	}
 	return false;
 }
