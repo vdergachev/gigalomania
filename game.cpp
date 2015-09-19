@@ -2396,7 +2396,6 @@ bool Game::loadImages() {
         map_sq[MAP_GREY][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
 	}
 	for(int i=0;i<MAP_N_COLOURS;i++) {
-        convertToHiColor(map_sq[i][0]);
         map_sq[i][0]->setScale(scale_width, scale_height);
         for(int j=1;j<n_map_sq_c;j++) {
 			map_sq[i][j] = map_sq[i][0]->copy(0, 0, 16, 16);
@@ -2409,33 +2408,29 @@ bool Game::loadImages() {
 	unsigned char filter_min_ocean[3] = {60, 95, 115};
 	coast_icons[0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[0]->fadeAlpha(false, false);
-	processImage(coast_icons[0]);
 	coast_icons[1] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[1]->fadeAlpha(true, true);
-	processImage(coast_icons[1]);
 	coast_icons[2] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[2]->fadeAlpha(false, true);
-	processImage(coast_icons[2]);
 	coast_icons[3] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[3]->fadeAlpha(true, false);
-	processImage(coast_icons[3]);
 
 	coast_icons[4] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[4]->fadeAlpha(true, false);
 	coast_icons[4]->fadeAlpha(false, false);
-	processImage(coast_icons[4]);
 	coast_icons[5] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[5]->fadeAlpha(true, true);
 	coast_icons[5]->fadeAlpha(false, false);
-	processImage(coast_icons[5]);
 	coast_icons[6] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[6]->fadeAlpha(true, false);
 	coast_icons[6]->fadeAlpha(false, true);
-	processImage(coast_icons[6]);
 	coast_icons[7] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
 	coast_icons[7]->fadeAlpha(true, true);
 	coast_icons[7]->fadeAlpha(false, true);
-	processImage(coast_icons[7]);
+
+	for(int i=0;i<8;i++) {
+        coast_icons[i]->setScale(scale_width, scale_height);
+	}
 
 	drawProgress(55);
 
@@ -2848,8 +2843,6 @@ bool Game::openScreen(bool fullscreen) {
 #if SDL_MAJOR_VERSION == 1
 		// Ideally only multiples of 0.5 allowed, otherwise we get problems of fractional widths/heights/positioning
 		// (still works, though uneven spacings).
-		// We make an exception for height of 4/3, as a fairly common low end Android resolution is 480x320, and
-		// restricting to height 240 means a significant portion of wasted screen space!
 		//user_width = 1184;
 		//user_height = 720;
 
@@ -2910,11 +2903,6 @@ bool Game::openScreen(bool fullscreen) {
 			scale_height = 1.5f;
 			LOG("scale height 1.5x\n");
 		}
-		else if( user_height >= (4.0f/3.0f)*default_height_c ) {
-			// see comment above
-			scale_height = (4.0f/3.0f);
-			LOG("scale height 4/3x\n");
-		}
 		else if( user_height >= default_height_c ) {
 			scale_height = 1.0f;
 			LOG("scale height 1x\n");
@@ -2923,6 +2911,10 @@ bool Game::openScreen(bool fullscreen) {
 			LOG("desktop resolution too small even for 1x scale height\n");
 			return false;
 		}
+
+		// better to have uniform scaling, so we have 1:1 aspect ratio
+		scale_width = min(scale_width, scale_height);
+		scale_height = scale_width;
 
 		//scale_width = 2.0f; scale_height = 1.5f;
 		//scale_width = scale_height = 1.0f; // test
@@ -2942,6 +2934,8 @@ bool Game::openScreen(bool fullscreen) {
 			screen_width *= 2;
 			screen_height *= 2;
 		}
+		//screen_width = 480;
+		//screen_height = 320;
 #endif
 
 		screen = new Screen();
@@ -2962,21 +2956,9 @@ bool Game::openScreen(bool fullscreen) {
 			scale_width = scale_height = 3.0f;
 			LOG("scale 3x\n");
 		}
-		else if( screen->open(3*default_width_c, 2.5f*default_height_c, fullscreen) ) {
-			scale_width = 3.0f;
-			scale_height = 2.5f;
-			LOG("scale width 3x\n");
-			LOG("scale height 2.5x\n");
-		}
 		else if( screen->open(2.5f*default_width_c, 2.5f*default_height_c, fullscreen) ) {
 			scale_width = scale_height = 2.5f;
 			LOG("scale 2.5x\n");
-		}
-		else if( screen->open(2.5f*default_width_c, 2*default_height_c, fullscreen) ) {
-			scale_width = 2.5f;
-			scale_height = 2.0f;
-			LOG("scale width 2.5x\n");
-			LOG("scale height 2x\n");
 		}
 		else if( screen->open(2*default_width_c, 2*default_height_c, fullscreen) ) {
 			scale_width = scale_height = 2.0f;
@@ -4362,9 +4344,12 @@ void Game::runTests() {
 
 		// test saving state
 		saveState();
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+		// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 		if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
 			throw string("save state file not created");
 		}
+#endif
 
 		// test loading state
 		delete gamestate;
@@ -4381,9 +4366,12 @@ void Game::runTests() {
 		else if( tutorial != NULL ) {
 			throw string("didn't expect tutorial when loading state");
 		}
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+		// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 		else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
 			throw string("save state file should have been deleted");
 		}
+#endif
 
 		PlayingGameState *playingGameState = static_cast<PlayingGameState *>(gamestate);
 		// island specific testing
@@ -5051,23 +5039,32 @@ void Game::runTests() {
 	delete gamestate;
 	gamestate = NULL;
 	copyFile("_test_savegames/autosave_bad.sav", getApplicationFilename(autosave_filename, autosave_survive_uninstall));
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+	// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 	if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
 		throw string("failed to copy save state file");
 	}
+#endif
 	if( loadState() ) {
 		throw string("didn't expect to load bad state");
 	}
 	else if( gamestate != NULL ) {
 		throw string("didn't expect to create a gamestate when loading bad state");
 	}
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+	// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 	else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
 		throw string("save state file should have been deleted");
 	}
+#endif
 
 	copyFile("_test_savegames/autosave_tutorial.sav", getApplicationFilename(autosave_filename, autosave_survive_uninstall));
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+	// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 	if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
 		throw string("failed to copy save state file");
 	}
+#endif
 	if( !loadState() ) {
 		throw string("failed to load state");
 	}
@@ -5080,18 +5077,24 @@ void Game::runTests() {
 	else if( tutorial == NULL ) {
 		throw string("didn't create tutorial when loading state");
 	}
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+	// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 	else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
 		throw string("save state file should have been deleted");
 	}
+#endif
 
 	delete gamestate;
 	gamestate = NULL;
 	delete tutorial;
 	tutorial = NULL;
 	copyFile("_test_savegames/autosave_biplanes.sav", getApplicationFilename(autosave_filename, autosave_survive_uninstall));
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+	// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 	if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) != 0 ) {
 		throw string("failed to copy save state file");
 	}
+#endif
 	if( !loadState() ) {
 		throw string("failed to load state");
 	}
@@ -5104,9 +5107,12 @@ void Game::runTests() {
 	else if( tutorial != NULL ) {
 		throw string("didn't expect tutorial when loading state");
 	}
+#if defined(_WIN32) || defined(__linux) || (defined(__APPLE__) && defined(__MACH__))
+	// ensure on a platform where access() is defined (it isn't available on AROS etc - we could write platform specific code, but not really worth it for now)
 	else if( access(getApplicationFilename(autosave_filename, autosave_survive_uninstall), 0) == 0 ) {
 		throw string("save state file should have been deleted");
 	}
+#endif
 	{
 		if( !map->isSectorAt(1, 3) ) {
 			throw string("no sector");
