@@ -2951,9 +2951,11 @@ bool Game::openScreen(bool fullscreen) {
 #else
 		// With SDL2, we let SDL do the scaling via SDL_RenderSetLogicalSize, so we don't have to do the scaling ourselves
 		// for fullscreen, the supplied width/height is ignored, as we always run at the native resolution.
-		// However, on Windows 10, there is a bug in the task view that Gigalomania shows as a tiny window, unless we've opened the screen with the desktop resolution
 		int user_width = 0, user_height = 0;
+#ifdef _WIN32
+		// However, on Windows 10, there is a bug in the task view that Gigalomania shows as a tiny window, unless we've opened the screen with the desktop resolution
 		getDesktopResolution(&user_width, &user_height);
+#endif
 		if( !screen->open(user_width, user_height, fullscreen) ) {
 			LOG("can't open screen\n");
 			return false;
