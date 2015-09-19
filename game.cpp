@@ -3975,10 +3975,10 @@ bool Game::loadState() {
 #if SDL_MAJOR_VERSION == 1
 		// SDL 1 doesn't have a size parameter
 		SDL_RWseek(file, 0, RW_SEEK_END);
-		int size = SDL_RWtell(file);
+		size_t size = (size_t)SDL_RWtell(file);
 		SDL_RWseek(file, 0, RW_SEEK_SET);
 #else
-		int size = file->size(file);
+		size_t size = (size_t)file->size(file);
 #endif
 		char *buffer = new char[size+1];
 		if( file->read(file, buffer, 1, size) > 0 ) {
@@ -5136,12 +5136,12 @@ void Game::copyFile(const char *src, const char *dst) const {
 		throw string("couldn't copy save state file");
 	}
 #if SDL_MAJOR_VERSION == 1
-		// SDL 1 doesn't have a size parameter
-		SDL_RWseek(read_file, 0, RW_SEEK_END);
-		int size = SDL_RWtell(read_file);
-		SDL_RWseek(read_file, 0, RW_SEEK_SET);
+	// SDL 1 doesn't have a size parameter
+	SDL_RWseek(read_file, 0, RW_SEEK_END);
+	size_t size = (size_t)SDL_RWtell(read_file);
+	SDL_RWseek(read_file, 0, RW_SEEK_SET);
 #else
-	int size = read_file->size(read_file);
+	size_t size = (size_t)read_file->size(read_file);
 #endif
 	char *buffer = new char[size+1];
 	if( read_file->read(read_file, buffer, 1, size) == 0 ) {
@@ -5209,7 +5209,7 @@ void playGame(int n_args, char *args[]) {
 	initLogFile();
 
 	// set random seed - recommended way to do it from http://stackoverflow.com/questions/322938/recommended-way-to-initialize-srand
-	int seed = time(NULL);
+	unsigned int seed = (unsigned int)time(NULL);
 	//seed = 72638; // test
 	LOG("set random seed to %d\n", seed);
 	srand( seed );
