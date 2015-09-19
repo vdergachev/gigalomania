@@ -2844,8 +2844,7 @@ bool Game::openScreen(bool fullscreen) {
 #endif
 
 #if SDL_MAJOR_VERSION == 1
-		// Ideally only multiples of 0.5 allowed, otherwise we get problems of fractional widths/heights/positioning
-		// (still works, though uneven spacings).
+		// Only allow integer scaling, otherwise have poor quality scaling (especially for the font)
 		//user_width = 1184;
 		//user_height = 720;
 
@@ -2853,25 +2852,13 @@ bool Game::openScreen(bool fullscreen) {
 			scale_width = 4.0f;
 			LOG("scale width 4x\n");
 		}
-		else if( user_width >= 3.5f*default_width_c ) {
-			scale_width = 3.5f;
-			LOG("scale width 3.5x\n");
-		}
 		else if( user_width >= 3*default_width_c ) {
 			scale_width = 3.0f;
 			LOG("scale width 3x\n");
 		}
-		else if( user_width >= 2.5f*default_width_c ) {
-			scale_width = 2.5f;
-			LOG("scale width 2.5x\n");
-		}
 		else if( user_width >= 2*default_width_c ) {
 			scale_width = 2.0f;
 			LOG("scale width 2x\n");
-		}
-		else if( user_width >= 1.5*default_width_c ) {
-			scale_width = 1.5f;
-			LOG("scale width 1.5x\n");
 		}
 		else if( user_width >= default_width_c ) {
 			scale_width = 1.0f;
@@ -2886,25 +2873,13 @@ bool Game::openScreen(bool fullscreen) {
 			scale_height = 4.0f;
 			LOG("scale height 4x\n");
 		}
-		else if( user_height >= 3.5f*default_height_c ) {
-			scale_height = 3.5f;
-			LOG("scale height 3.5x\n");
-		}
 		else if( user_height >= 3*default_height_c ) {
 			scale_height = 3.0f;
 			LOG("scale height 3x\n");
 		}
-		else if( user_height >= 2.5f*default_height_c ) {
-			scale_height = 2.5f;
-			LOG("scale height 2.5x\n");
-		}
 		else if( user_height >= 2*default_height_c ) {
 			scale_height = 2.0f;
 			LOG("scale height 2x\n");
-		}
-		else if( user_height >= 1.5*default_height_c ) {
-			scale_height = 1.5f;
-			LOG("scale height 1.5x\n");
 		}
 		else if( user_height >= default_height_c ) {
 			scale_height = 1.0f;
@@ -2922,8 +2897,8 @@ bool Game::openScreen(bool fullscreen) {
 		//scale_width = 2.0f; scale_height = 1.5f;
 		//scale_width = scale_height = 1.0f; // test
 		//scale_width = scale_height = 2.0f; // test
-		//scale_width = 2.5f;
-		//scale_height = 2.0f;
+		//scale_width = 1.0f;
+		//scale_height = 1.0f;
 		
 		int screen_width = (int)(scale_width * default_width_c);
 		int screen_height = (int)(scale_height * default_height_c);
@@ -2939,6 +2914,8 @@ bool Game::openScreen(bool fullscreen) {
 		}
 		//screen_width = 480;
 		//screen_height = 320;
+		//screen_width = 640;
+		//screen_height = 480;
 #endif
 
 		screen = new Screen();
@@ -2958,10 +2935,6 @@ bool Game::openScreen(bool fullscreen) {
 		else if( screen->open(3*default_width_c, 3*default_height_c, fullscreen) ) {
 			scale_width = scale_height = 3.0f;
 			LOG("scale 3x\n");
-		}
-		else if( screen->open((int)(2.5f*default_width_c), (int)(2.5f*default_height_c), fullscreen) ) {
-			scale_width = scale_height = 2.5f;
-			LOG("scale 2.5x\n");
 		}
 		else if( screen->open(2*default_width_c, 2*default_height_c, fullscreen) ) {
 			scale_width = scale_height = 2.0f;
