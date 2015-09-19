@@ -1,4 +1,4 @@
-This source has been tested with Visual C++ Express 2012 for Desktop under Windows 8, GCC under Linux (Ubuntu 14.04 64 bit) and AROS x86 (Icaros 1.5), XCode under OS X, on a Nokia N900 for Maemo, and a Nokia N950 for Meego. Qt Creator can also be used as an IDE.
+This source has been tested with Visual C++ Express 2012 for Desktop under Windows 8, GCC under Linux (Ubuntu 14.04 64 bit) and AROS x86 (Icaros 2.0.3), XCode under OS X, on a Nokia N900 for Maemo, and a Nokia N950 for Meego. Qt Creator can also be used as an IDE.
 
 Linux
 =====
@@ -224,4 +224,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 5 September 2015
+Mark Harman 19 September 2015
