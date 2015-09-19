@@ -237,7 +237,7 @@ void Tutorial1::initCards() {
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
-	card = new TutorialCard("1", "Here you can see a map of the current island.\nThe island is split up into sectors.\nThe coloured squares represent sectors controlled by a player.");
+	card = new TutorialCard("1", "At the top left you can see a map of the current island.\nThe island is split up into sectors.\nThe coloured squares represent sectors controlled by a player.");
 	card->setArrow(40, 56);
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
@@ -251,7 +251,7 @@ void Tutorial1::initCards() {
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
-	card = new TutorialCard("4", "This shows the number of people in your sector that are available.\nThe population will grow gradually with time.");
+	card = new TutorialCard("4", "The number below the person icon shows the number of people in your\nsector that are available.\nThe population will grow gradually with time.");
 	card->setArrow(16, 136);
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
@@ -282,10 +282,10 @@ void Tutorial1::initCards() {
 	cards.push_back(card);
 
 	if( game_g->isOneMouseButton() ) {
-		card = new TutorialCard("8", "Now put some of your people to work designing the weapon.\nClick here, then use the arrows to increase or decrease\nthe number of designers.");
+		card = new TutorialCard("8", "Now put some of your people to work designing the weapon.\nClick on the number, then use the arrows to increase or decrease\nthe number of designers.");
 	}
 	else {
-		card = new TutorialCard("8", "Now put some of your people to work designing the weapon.\nUse the right mouse button to increase the number of designers,\nleft mouse button to decrease.");
+		card = new TutorialCard("8", "Now put some of your people to work designing the weapon.\nUsing the right mouse button, click on the number to increase\nthe number of designers, left mouse button to decrease.");
 	}
 	card->setArrow(50, 130);
 	{
@@ -313,10 +313,10 @@ void Tutorial1::initCards() {
 	cards.push_back(card);
 
 	if( game_g->isOneMouseButton() ) {
-		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nClick this icon to cycle through different time rates.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
+		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nClick the 1x icon to cycle through different time rates.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
 	}
 	else {
-		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nRight click on this icon to speed time up.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
+		card = new TutorialCardWaitForDesign("10", "To hurry things up, you can make time go faster.\nRight click on the 1x icon to speed time up.\nLeft click slows time back down.", start_sector, TutorialCardWaitForDesign::WAITTYPE_HAS_DESIGNED, true, Invention::WEAPON, false, -1);
 	}
 	card->setArrow(100, 10);
 	{
@@ -330,7 +330,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("11", "Great! Now click to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
+	card = new TutorialCardWaitForPanelPage("11", "Great! Now click on the lightbulb to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
 	card->setArrow(50, 110);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
@@ -344,7 +344,7 @@ void Tutorial1::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("11", "Time to attack our enemy. This button allows you to\nassemble your army.", (int)GamePanel::STATE_ATTACK);
+	card = new TutorialCardWaitForPanelPage("11", "Time to attack our enemy. The shield and sword icon allows you to\nassemble your army.", (int)GamePanel::STATE_ATTACK);
 	card->setArrow(80, 125);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
@@ -357,11 +357,11 @@ void Tutorial1::initCards() {
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
-	card = new TutorialCard("13", "Not only are armed soldiers stronger, but they are required to destory\nan enemy's buildings. Unarmed soldiers can fight other soldiers,\nbut won't knock down the enemy tower.");
+	card = new TutorialCard("13", "Not only are armed soldiers stronger, but they are required to destroy\nan enemy's buildings. Unarmed soldiers can fight other soldiers,\nbut won't knock down the enemy tower.");
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
-	card = new TutorialCard("14", "Click to assemble soldiers with the weapon you've just invented.\nAssemble as many soldiers as we have people available!");
+	card = new TutorialCard("14", "Click on the weapon icon to assemble soldiers with the weapon\nyou've just invented.\nAssemble as many soldiers as we have people available!");
 	card->setArrow(15, 170);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
@@ -426,7 +426,7 @@ void Tutorial2::initCards() {
 
 	TutorialCard *card = NULL;
 
-	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some army maneuvers.\nSelect the attack menu option to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
+	card = new TutorialCardWaitForPanelPage("0", "In this tutorial we'll learn some army maneuvers.\nSelect the shield and sword icon to deploy some soldiers.", (int)GamePanel::STATE_ATTACK);
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(80, 125);
 	{
@@ -456,7 +456,7 @@ void Tutorial2::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCard("3", "Note that if you make a mistake assembling your army,\nyou can cancel by clicking here.");
+	card = new TutorialCard("3", "Note that if you make a mistake assembling your army,\nyou can cancel by clicking the shield and sword icon at the bottom.");
 	card->setPlayerAllowBuildTower(false);
 	card->setArrow(87, 195);
 	{
@@ -578,7 +578,7 @@ void Tutorial3::initCards() {
 	card->setGUIHandler(new GUIHandlerBlockAll());
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("1", "From the fourth age onwards, you can construct an additional building\nin your sector - a mine.\nSelect the build option.", (int)GamePanel::STATE_BUILD);
+	card = new TutorialCardWaitForPanelPage("1", "From the fourth age onwards, you can construct an additional building\nin your sector - a mine.\nSelect the pickaxe icon at the bottom left to build a mine.", (int)GamePanel::STATE_BUILD);
 	card->setArrow(25, 210);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
@@ -596,7 +596,7 @@ void Tutorial3::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("3", "Now click to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
+	card = new TutorialCardWaitForPanelPage("3", "Now click the bricks icon to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_bigbuild");
@@ -622,7 +622,7 @@ void Tutorial3::initCards() {
 	card->setArrow(80, 150);
 	cards.push_back(card);
 
-	card = new TutorialCard("6", "But more advanced elements require you to assign miners to them.\nClick to add some miners now, and wait until we have at least 1 unit.\nOnly use a few of your men for this.");
+	card = new TutorialCard("6", "But more advanced elements require you to assign miners to them.\nClick on the 0 number to add some miners now, and wait\nuntil we have at least 1 unit.\nOnly use a few of your men for this.");
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_nminers2_0");
@@ -634,7 +634,7 @@ void Tutorial3::initCards() {
 	card->setArrow(52, 183);
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("7", "Now go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
+	card = new TutorialCardWaitForPanelPage("7", "Now click the pickaxe icon to go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_nminers2_0");
@@ -710,7 +710,7 @@ void Tutorial3::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("11", "Now go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
+	card = new TutorialCardWaitForPanelPage("11", "Now click the lightbulb icon to go back to the main screen.", (int)GamePanel::STATE_SECTORCONTROL);
 	card->setArrow(50, 110);
 	card->setArrowShowPage((int)GamePanel::STATE_DESIGN);
 	{
@@ -729,7 +729,7 @@ void Tutorial3::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("12", "As a result of your two inventions, we've moved forward to a new age.\nThis means we can build a factory, which is necessary to construct\ntrebuchets. Click here to build a factory.",  (int)GamePanel::STATE_BUILD);
+	card = new TutorialCardWaitForPanelPage("12", "As a result of your two inventions, we've moved forward to a new age.\nThis means we can build a factory, which is necessary to construct\ntrebuchets. Click the factory icon at the bottom to build a factory.",  (int)GamePanel::STATE_BUILD);
 	card->setArrow(45, 210);
 	card->setArrowShowPage((int)GamePanel::STATE_SECTORCONTROL);
 	{
@@ -769,7 +769,7 @@ void Tutorial3::initCards() {
 	}
 	cards.push_back(card);
 
-	card = new TutorialCardWaitForPanelPage("14", "Now click to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
+	card = new TutorialCardWaitForPanelPage("14", "Now click the bricks icon to go back to the main interface.", (int)GamePanel::STATE_SECTORCONTROL);
 	{
 		GUIHandlerBlockAll *gui_handler = new GUIHandlerBlockAll();
 		gui_handler->addException("button_elements_0");
