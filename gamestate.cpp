@@ -1819,19 +1819,19 @@ void PlayingGameState::draw() {
 			fill_rect->drawWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, tutorial_alpha_c);
 			delete fill_rect;
 #else
-			game_g->getScreen()->fillRectWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 0, 0, 0, tutorial_alpha_c);
+			game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*rect.x), (short)(game_g->getScaleHeight()*rect.y), (short)(game_g->getScaleWidth()*rect.w), (short)(game_g->getScaleHeight()*rect.h), 0, 0, 0, tutorial_alpha_c);
 #endif
 			Image::writeMixedCase(rect.x, rect.y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
 			if( card->hasArrow(this) ) {
 				int arrow_x = card->getArrowX();
 				int arrow_y = card->getArrowY();
 				int src_x = rect.x - 4;
-				int src_y = rect.y + 0.5*rect.h;
+				int src_y = (int)(rect.y + 0.5*rect.h);
 				if( arrow_x >= rect.x + rect.w ) {
 					src_x = rect.x + rect.w + 4;
 				}
 				else if( arrow_x >= rect.x && arrow_x < rect.x + rect.w ) {
-					src_x = rect.x + 0.5*rect.w;
+					src_x = (int)(rect.x + 0.5*rect.w);
 					if( arrow_y < src_y ) {
 						src_y = rect.y - 4;
 					}
@@ -1839,7 +1839,7 @@ void PlayingGameState::draw() {
 						src_y = rect.y + rect.h + 4;
 					}
 				}
-				game_g->getScreen()->drawLine(game_g->getScaleWidth()*src_x, game_g->getScaleHeight()*src_y, game_g->getScaleWidth()*arrow_x, game_g->getScaleHeight()*arrow_y, 255, 255, 255);
+				game_g->getScreen()->drawLine((short)(game_g->getScaleWidth()*src_x), (short)(game_g->getScaleHeight()*src_y), (short)(game_g->getScaleWidth()*arrow_x), (short)(game_g->getScaleHeight()*arrow_y), 255, 255, 255);
 			}
 
 			if( !card->autoProceed() && card->canProceed(this) ) {
@@ -3408,7 +3408,7 @@ void EndIslandGameState::draw() {
 	game_g->getScreen()->clear(); // SDL on Android requires screen be cleared (otherwise we get corrupt regions outside of the main area)
 #endif
 	game_g->background->draw(0, 0);
-	game_g->getScreen()->fillRectWithAlpha(game_g->getScaleWidth()*40, game_g->getScaleHeight()*120, game_g->getScaleWidth()*240, game_g->getScaleHeight()*70, 0, 0, 0, 127);
+	game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*40), (short)(game_g->getScaleHeight()*120), (short)(game_g->getScaleWidth()*240), (short)(game_g->getScaleHeight()*70), 0, 0, 0, 127);
 	char text[4096] = "";
 	if( game_g->getGameResult() == GAMERESULT_QUIT )
 		strcpy(text, "QUITTER!");

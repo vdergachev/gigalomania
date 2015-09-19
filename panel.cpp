@@ -336,10 +336,10 @@ void PanelPage::drawPopups() {
 
 void PanelPage::drawBackground() {
 	if( this->has_background && this->visible ) {
-		int rect_x = game_g->getScaleWidth()*(owner->getLeft() + offset_x);
-		int rect_y = game_g->getScaleWidth()*(owner->getTop() + offset_y);
-		int rect_w = game_g->getScaleWidth()*this->w;
-		int rect_h = game_g->getScaleHeight()*this->h;
+		int rect_x = (int)(game_g->getScaleWidth()*(owner->getLeft() + offset_x));
+		int rect_y = (int)(game_g->getScaleWidth()*(owner->getTop() + offset_y));
+		int rect_w = (int)(game_g->getScaleWidth()*this->w);
+		int rect_h = (int)(game_g->getScaleHeight()*this->h);
 #if SDL_MAJOR_VERSION == 1
 		Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
 		fill_rect->fillRect(0, 0, rect_w, rect_h, background[0], background[1], background[2]);

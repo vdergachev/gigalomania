@@ -14,6 +14,7 @@
 #include <io.h> // for access
 #include <direct.h> // for mkdir
 #define access _access
+#define mkdir _mkdir
 #elif __linux
 #include <sys/stat.h> // for mkdir
 #include <unistd.h> // for access
