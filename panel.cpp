@@ -299,14 +299,18 @@ void PanelPage::drawPopups() {
 				rect_y++;
 				rect_w -= 2;
 				rect_h -= 2;
+				const unsigned char panel_background_r = 128;
+				const unsigned char panel_background_g = 128;
+				const unsigned char panel_background_b = 128;
+				const unsigned char panel_background_a = 160;
 #if SDL_MAJOR_VERSION == 1
 				Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
-				fill_rect->fillRect(0, 0, rect_w, rect_h, 0, 0, 128);
+				fill_rect->fillRect(0, 0, rect_w, rect_h, panel_background_r, panel_background_g, panel_background_b);
 				fill_rect->convertToDisplayFormat();
-				fill_rect->drawWithAlpha(rect_x, rect_y, 160);
+				fill_rect->drawWithAlpha(rect_x, rect_y, panel_background_a);
 				delete fill_rect;
 #else
-				game_g->getScreen()->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, 128, 128, 128, 160);
+				game_g->getScreen()->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, panel_background_r, panel_background_g, panel_background_b, panel_background_a);
 #endif
 
 				int py = (int)(popup_y/game_g->getScaleHeight());
@@ -332,7 +336,19 @@ void PanelPage::drawPopups() {
 
 void PanelPage::drawBackground() {
 	if( this->has_background && this->visible ) {
-		game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*(owner->getLeft() + offset_x)), (short)(game_g->getScaleWidth()*(owner->getTop() + offset_y)), (short)(game_g->getScaleWidth()*this->w), (short)(game_g->getScaleHeight()*this->h), background[0], background[1], background[2], background[3]);
+		int rect_x = game_g->getScaleWidth()*(owner->getLeft() + offset_x);
+		int rect_y = game_g->getScaleWidth()*(owner->getTop() + offset_y);
+		int rect_w = game_g->getScaleWidth()*this->w;
+		int rect_h = game_g->getScaleHeight()*this->h;
+#if SDL_MAJOR_VERSION == 1
+		Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
+		fill_rect->fillRect(0, 0, rect_w, rect_h, background[0], background[1], background[2]);
+		fill_rect->convertToDisplayFormat();
+		fill_rect->drawWithAlpha(rect_x, rect_y, background[3]);
+		delete fill_rect;
+#else
+		game_g->getScreen()->fillRectWithAlpha((short)rect_x, (short)rect_y, (short)rect_w, (short)rect_h, background[0], background[1], background[2], background[3]);
+#endif
 	}
 }
 

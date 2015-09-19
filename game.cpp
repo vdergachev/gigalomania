@@ -3972,7 +3972,14 @@ bool Game::loadState() {
 	}
 	else {
 		LOG("found a saved state file: %s\n", save_fullfilename);
+#if SDL_MAJOR_VERSION == 1
+		// SDL 1 doesn't have a size parameter
+		SDL_RWseek(file, 0, RW_SEEK_END);
+		int size = SDL_RWtell(file);
+		SDL_RWseek(file, 0, RW_SEEK_SET);
+#else
 		int size = file->size(file);
+#endif
 		char *buffer = new char[size+1];
 		if( file->read(file, buffer, 1, size) > 0 ) {
 			file->close(file);
@@ -5128,7 +5135,14 @@ void Game::copyFile(const char *src, const char *dst) const {
 	if( save_file == NULL ) {
 		throw string("couldn't copy save state file");
 	}
+#if SDL_MAJOR_VERSION == 1
+		// SDL 1 doesn't have a size parameter
+		SDL_RWseek(read_file, 0, RW_SEEK_END);
+		int size = SDL_RWtell(read_file);
+		SDL_RWseek(read_file, 0, RW_SEEK_SET);
+#else
 	int size = read_file->size(read_file);
+#endif
 	char *buffer = new char[size+1];
 	if( read_file->read(read_file, buffer, 1, size) == 0 ) {
 		read_file->close(read_file);
