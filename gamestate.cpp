@@ -1812,7 +1812,15 @@ void PlayingGameState::draw() {
 			if( player_image != NULL ) {
 				player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
 			}
+#if SDL_MAJOR_VERSION == 1
+			Image *fill_rect = Image::createBlankImage(game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 24);
+			fill_rect->fillRect(0, 0, game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 0, 0, 0);
+			fill_rect->convertToDisplayFormat();
+			fill_rect->drawWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, tutorial_alpha_c);
+			delete fill_rect;
+#else
 			game_g->getScreen()->fillRectWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 0, 0, 0, tutorial_alpha_c);
+#endif
 			Image::writeMixedCase(rect.x, rect.y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
 			if( card->hasArrow(this) ) {
 				int arrow_x = card->getArrowX();
