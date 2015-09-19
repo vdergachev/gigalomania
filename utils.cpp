@@ -306,7 +306,7 @@ bool log(const char *text,...) {
 	//return true;
 	// n.b., on Ubuntu Linux at least, need to have a separate va_list every time we use it
 #if defined(__ANDROID__)
-	if( debugwindow ) {
+	{
 		va_list vlist;
 		va_start(vlist, text);
 		__android_log_vprint(ANDROID_LOG_INFO, "Gigalomania", text, vlist);
