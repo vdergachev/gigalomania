@@ -30,6 +30,9 @@ using std::stringstream;
 #include <proto/dos.h>
 #endif
 
+#undef min
+#undef max
+
 #include "game.h"
 #include "utils.h"
 #include "sector.h"
@@ -2913,7 +2916,7 @@ bool Game::openScreen(bool fullscreen) {
 		}
 
 		// better to have uniform scaling, so we have 1:1 aspect ratio
-		scale_width = min(scale_width, scale_height);
+		scale_width = std::min(scale_width, scale_height);
 		scale_height = scale_width;
 
 		//scale_width = 2.0f; scale_height = 1.5f;
@@ -2956,7 +2959,7 @@ bool Game::openScreen(bool fullscreen) {
 			scale_width = scale_height = 3.0f;
 			LOG("scale 3x\n");
 		}
-		else if( screen->open(2.5f*default_width_c, 2.5f*default_height_c, fullscreen) ) {
+		else if( screen->open((int)(2.5f*default_width_c), (int)(2.5f*default_height_c), fullscreen) ) {
 			scale_width = scale_height = 2.5f;
 			LOG("scale 2.5x\n");
 		}
