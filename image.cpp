@@ -116,12 +116,46 @@ void Image::draw(int x, int y) const {
 #endif
 }
 
+void Image::draw(int x, int y, int sw, int sh) const {
+	x += offset_x;
+	y += offset_y;
+	x = (int)(x * scale_x);
+	y = (int)(y * scale_y);
+	sw = (int)(sw * scale_x);
+	sh = (int)(sh * scale_y);
+#if SDL_MAJOR_VERSION == 1
+	SDL_Rect srcrect;
+	srcrect.x = 0;
+	srcrect.y = 0;
+	srcrect.w = sw;
+	srcrect.h = sh;
+	SDL_Rect dstrect;
+	dstrect.x = (short)x;
+	dstrect.y = (short)y;
+	dstrect.w = 0;
+	dstrect.h = 0;
+	SDL_BlitSurface(surface, &srcrect, dest_surf, &dstrect);
+#else
+	SDL_Rect srcrect;
+	srcrect.x = 0;
+	srcrect.y = 0;
+	srcrect.w = sw;
+	srcrect.h = sh;
+	SDL_Rect dstrect;
+	dstrect.x = (short)x;
+	dstrect.y = (short)y;
+	dstrect.w = sw;
+	dstrect.h = sh;
+	SDL_RenderCopy(sdlRenderer, texture, &srcrect, &dstrect);
+#endif
+}
+
 void Image::draw(int x, int y, float scale_w, float scale_h) const {
 	x = (int)(x * scale_x);
 	y = (int)(y * scale_y);
 #if SDL_MAJOR_VERSION == 1
 	// scaling only supported for SDL 2
-	if( scale_w == 1.0f & scale_h == 1.0f ) {
+	if( scale_w == 1.0f && scale_h == 1.0f ) {
 	SDL_Rect srcrect;
 	srcrect.x = 0;
 	srcrect.y = 0;

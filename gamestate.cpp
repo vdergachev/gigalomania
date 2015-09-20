@@ -1628,15 +1628,12 @@ void PlayingGameState::draw() {
 				game_g->flags[ current_sector->getPlayer() ][game_g->getFrameCounter() % n_flag_frames_c]->draw(offset_land_x_c + building->getX() + offset_x, offset_land_y_c + building->getY() + offset_y);
 			}
 
-			const int health_xpos = offset_land_x_c + building->getX() + 4;
-			//const int health_ypos = offset_land_y_c + building->getY() - 16;
-			const int health_ypos = offset_land_y_c + building->getY() + images[ current_sector->getBuildingEpoch() ]->getScaledHeight() + 2;
-			const int health_width = 36;
-			const int health_height = 4;
-			float health = (game_g->getScaleWidth()*health_width-2) * ((float)building->getHealth()) / (float)building->getMaxHealth();
-			game_g->getScreen()->fillRect((short)(game_g->getScaleWidth()*health_xpos), (short)(game_g->getScaleHeight()*health_ypos), (short)(game_g->getScaleWidth()*health_width), (short)(game_g->getScaleHeight()*health_height), 255, 255, 255);
-			game_g->getScreen()->fillRect((short)(game_g->getScaleWidth()*health_xpos+1), (short)(game_g->getScaleHeight()*health_ypos+1), (short)(game_g->getScaleWidth()*health_width-2), (short)(game_g->getScaleHeight()*health_height-2), 0, 0, 0);
-			game_g->getScreen()->fillRect((short)(game_g->getScaleWidth()*health_xpos+1), (short)(game_g->getScaleHeight()*health_ypos+1), (short)health, (short)(game_g->getScaleHeight()*health_height-2), 244, 67, 54);
+			int width = game_g->building_health->getScaledWidth();
+			int health = building->getHealth();
+			int max_health = building->getMaxHealth();
+			int offx = offset_land_x_c + building->getX() + 4;
+			int offy = offset_land_y_c + building->getY() + images[ current_sector->getBuildingEpoch() ]->getScaledHeight() + 2;
+			game_g->building_health->draw(offx, offy, (int)((width*health)/(float)max_health), game_g->building_health->getScaledHeight());
 		}
 	}
 	else if( current_sector->getPlayer() != -1 ) {
