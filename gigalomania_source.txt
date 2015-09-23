@@ -9,6 +9,7 @@ Note that since v0.27, Gigalomania uses SDL 2 rather than SDL 1.2.
 
 On Ubuntu and Debian, you can install the required libraries with:
 
+sudo apt-get install g++
 sudo apt-get install libsdl2-dev
 sudo apt-get install libsdl2-image-dev
 sudo apt-get install libsdl2-mixer-dev
@@ -224,4 +225,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 19 September 2015
+Mark Harman 23 September 2015
