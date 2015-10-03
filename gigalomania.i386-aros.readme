@@ -13,7 +13,7 @@ future. There are 28 different maps to play through. Also available for
 Windows, Linux, OS X, AmigaOS 4, MorphOS, Android, Nokia Symbian, Maemo,
 and Meego.
 
-This has been tested using Icaros 1.5. Note that Gigalomania requires a
+This has been tested using Icaros 2.0.3. Note that Gigalomania requires a
 large stack - it seems to work okay with the AROS Shell default of 1024000
 bytes.
 
