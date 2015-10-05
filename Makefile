@@ -26,8 +26,12 @@ install: $(APP)
 	cp -a islands/ $(DESTDIR)/opt/gigalomania
 	cp -a music/ $(DESTDIR)/opt/gigalomania
 	cp -a sound/ $(DESTDIR)/opt/gigalomania
+	# needed for DESTDIR option:
+	mkdir -p $(DESTDIR)/usr/share/applications
 	cp gigalomania.desktop $(DESTDIR)/usr/share/applications/
 	#cp gigalomania_fullscreen.desktop $(DESTDIR)/usr/share/applications/
+	# needed for DESTDIR option:
+	mkdir -p $(DESTDIR)/usr/share/pixmaps
 	cp gigalomania64.png $(DESTDIR)/usr/share/pixmaps/
 # REMEMBER to update debian/dirs if the system directories that we use are changed!!!
 
@@ -65,6 +69,7 @@ install_meego: $(APP)
 	cp -a islands/ $(DESTDIR)/opt/gigalomania
 	cp -a music/ $(DESTDIR)/opt/gigalomania
 	cp -a sound/ $(DESTDIR)/opt/gigalomania
+	mkdir -p $(DESTDIR)/usr/share/applications
 	cp gigalomania_maemo.desktop $(DESTDIR)/usr/share/applications/
 	mkdir -p $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/
 	cp gigalomania48.png $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/
