@@ -32,7 +32,7 @@ It will also (at least in GNOME) add shortcuts to the menu Applications/Games/.
 
 Uninstallation can be done with: sudo make uninstall
 
-If when compiling you set a #define of DATADIR, then Gigalomania will look there for data (note it will still try first in the same directory as the executable, but if the data isn't there, it will then check DATADIR). This can be useful for packaging, if you want to store the data in a different directory. E.g., pass the define in the makefile as:
+If when compiling you set a #define of DATADIR, then Gigalomania will look there for data (note it will still try first in the same directory as the executable, but if the data isn't there, it will then check DATADIR). This can be useful for packaging, if you want to store the data in a different directory. E.g., pass the define in the makefile as (note both single and double quotes):
 
 -DDATADIR='"/usr/share/games/gigalomania"'
 
