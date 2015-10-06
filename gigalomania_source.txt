@@ -32,6 +32,10 @@ It will also (at least in GNOME) add shortcuts to the menu Applications/Games/.
 
 Uninstallation can be done with: sudo make uninstall
 
+If when compiling you set a #define of DATADIR, then Gigalomania will look there for data (note it will still try first in the same directory as the executable, but if the data isn't there, it will then check DATADIR). This can be useful for packaging, if you want to store the data in a different directory. E.g., pass the define in the makefile as:
+
+-DDATADIR='"/usr/share/games/gigalomania"'
+
 If SDL 2 isn't available on your distribution, it should also be possible to compile with SDL 1.2, though this is no longer tested. You'll need to make some modifications to the code (changing includes from SDL2/ to SDL/ ). Also references to sdl2-config in the makefile should be changed to sdl-config, and should link to "-lSDL_image -lSDL_mixer" instead of "-lSDL2_image -lSDL2_mixer".
 
 On Ubuntu and Debian, you can install the required libraries for SDL 1.2 with:
@@ -225,4 +229,4 @@ Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
 
 More info on OS X port: http://www.herzig-net.de/prog/?page=prog-macgiga
 
-Mark Harman 23 September 2015
+Mark Harman 6 October 2015

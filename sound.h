@@ -54,6 +54,7 @@ namespace Gigalomania {
 		static Sample *loadSample(const char *filename, bool iff = false);
 		static Sample *loadSample(string filename, bool iff = false);
 		static Sample *loadMusic(const char *filename);
+		static Sample *loadMusic(string filename);
 	};
 }
 

@@ -1075,15 +1075,15 @@ bool PlayingGameState::readSectors(Map *map) {
 	bool done_header = false;
 
     char fullname[4096] = "";
-	sprintf(fullname, "%s/%s", maps_dirname, game_g->getMap()->getFilename());
+	sprintf(fullname, "%s/%s", maps_dirname.c_str(), game_g->getMap()->getFilename());
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
 	SDL_RWops *file = SDL_RWFromFile(fullname, "rb");
-#if !defined(__ANDROID__) && defined(__linux)
+#ifdef DATADIR
 	if( file == NULL ) {
 		LOG("searching in /usr/share/gigalomania/ for islands folder\n");
-		sprintf(fullname, "%s/%s", alt_maps_dirname, game_g->getMap()->getFilename());
+		sprintf(fullname, "%s/%s", alt_maps_dirname.c_str(), game_g->getMap()->getFilename());
 		file = SDL_RWFromFile(fullname, "rb");
 	}
 #endif

@@ -528,9 +528,12 @@ void endIsland_g();
 void returnToChooseIsland_g();
 void startNewGame_g();
 
-extern const char *maps_dirname;
-#if !defined(__ANDROID__) && defined(__linux)
-extern const char *alt_maps_dirname;
+// DATADIR is place to look if data not present in application's folder
+//#define DATADIR "C:/temp/glmdata" // test on Windows
+
+extern string maps_dirname;
+#ifdef DATADIR
+extern string alt_maps_dirname;
 #endif
 
 extern const int epoch_dates[];

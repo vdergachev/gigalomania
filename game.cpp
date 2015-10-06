@@ -367,9 +367,13 @@ bool Game::oneMouseButtonMode() const {
 
 Game *game_g = NULL;
 
-const char *maps_dirname = "islands";
-#if !defined(__ANDROID__) && defined(__linux)
-const char *alt_maps_dirname = "/usr/share/gigalomania/islands";
+#ifdef DATADIR
+string datadir = DATADIR;
+#endif
+
+string maps_dirname = "islands";
+#ifdef DATADIR
+string alt_maps_dirname = datadir + "/islands";
 #endif
 
 //bool use_amigadata = true;
@@ -1045,33 +1049,78 @@ void Game::fadeMusic(int duration_ms) const {
 void Game::playMusic() {
 	stopMusic();
 
+	bool new_music = false;
+	string music_filename;
+	bool loop = false;
 	if( !pref_music_on ) {
 		// don't play any music
 	}
 	else if( gameStateID == GAMESTATEID_CHOOSEPLAYER ) {
 	}
 	else if( gameStateID == GAMESTATEID_PLACEMEN ) {
-		music = Sample::loadMusic("music/mainscreen.ogg");
-		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
-		music->play(SOUND_CHANNEL_MUSIC, -1);
+		new_music = true;
+		music_filename = "mainscreen.ogg";
+		loop = true;
 	}
 	else if( gameStateID == GAMESTATEID_PLAYING ) {
-		music = Sample::loadMusic("music/gamemusic.ogg");
-		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
-		music->play(SOUND_CHANNEL_MUSIC, -1);
+		new_music = true;
+		music_filename = "gamemusic.ogg";
+		loop = true;
 	}
 	else if( gameStateID == GAMESTATEID_ENDISLAND ) {
+		new_music = true;
 		if( gameResult == GAMERESULT_WON )
-			music = Sample::loadMusic("music/victory.ogg");
+			music_filename = "victory.ogg";
 		else
-			music = Sample::loadMusic("music/defeat.ogg");
+			music_filename = "defeat.ogg";
+		loop = false;
+	}
+
+	if( new_music ) {
+		string music_dir = "music/";
+		music = Sample::loadMusic(music_dir + music_filename);
 		// n.b., a music structure is always created, even if we fail to load, so no need to check for NULL pointers here (though we do elsewhere, as music not created if pref_music_on is false)
-		music->play(SOUND_CHANNEL_MUSIC, 0); // don't loop
+#ifdef DATADIR
+	if( music == NULL || errorSound() ) {
+		if( music != NULL ) {
+			delete music;
+			music = NULL;
+		}
+		resetErrorSound();
+		music_dir = datadir + "/" + music_dir;
+		LOG("look in %s for music\n", music_dir.c_str());
+		music = Sample::loadMusic(music_dir + music_filename);
+	}
+#endif
+
+		music->play(SOUND_CHANNEL_MUSIC, loop ? -1 : 0);
 	}
 }
 
 bool Game::loadSamples() {
 	string sound_dir = "sound/";
+
+	// sound effects
+	s_explosion = Sample::loadSample(sound_dir + "bomb.wav");
+#ifdef DATADIR
+	if( s_explosion == NULL || errorSound() ) {
+		if( s_explosion != NULL ) {
+			delete s_explosion;
+			s_explosion = NULL;
+		}
+		resetErrorSound();
+		sound_dir = datadir + "/" + sound_dir;
+		LOG("look in %s for sound\n", sound_dir.c_str());
+        s_explosion = Sample::loadSample(sound_dir + "bomb.wav");
+	}
+#endif
+
+    s_scream = Sample::loadSample(sound_dir + "pain1.wav");
+	s_buildingdestroyed = Sample::loadSample(sound_dir + "woodbrk.wav");
+    s_guiclick = Sample::loadSample(sound_dir + "misc_menu_3.wav");
+    s_biplane = Sample::loadSample(sound_dir + "biplane.ogg");
+    s_jetplane = Sample::loadSample(sound_dir + "jetplane.ogg");
+    s_spaceship = Sample::loadSample(sound_dir + "spaceship.ogg");
 
 	s_design_is_ready = Sample::loadSample(sound_dir + "the_design_is_finished.wav");
 	s_design_is_ready->setText("the design is finished");
@@ -1140,28 +1189,6 @@ bool Game::loadSamples() {
 	s_quit[1] = new Sample();
 	s_quit[2] = new Sample();
 	s_quit[3] = new Sample();
-
-	// sound effects
-	s_explosion = Sample::loadSample(sound_dir + "bomb.wav");
-#if !defined(__ANDROID__) && defined(__linux)
-        if( s_explosion == NULL || errorSound() ) {
-            if( s_explosion != NULL ) {
-                delete s_explosion;
-                s_explosion = NULL;
-            }
-		resetErrorSound();
-		sound_dir = "/usr/share/gigalomania/" + sound_dir;
-		LOG("look in %s for sound\n", sound_dir.c_str());
-        s_explosion = Sample::loadSample(sound_dir + "bomb.wav");
-	}
-#endif
-
-    s_scream = Sample::loadSample(sound_dir + "pain1.wav");
-	s_buildingdestroyed = Sample::loadSample(sound_dir + "woodbrk.wav");
-    s_guiclick = Sample::loadSample(sound_dir + "misc_menu_3.wav");
-    s_biplane = Sample::loadSample(sound_dir + "biplane.ogg");
-    s_jetplane = Sample::loadSample(sound_dir + "jetplane.ogg");
-    s_spaceship = Sample::loadSample(sound_dir + "spaceship.ogg");
 
 	bool ok = !errorSound();
 	return ok;
@@ -1933,9 +1960,9 @@ bool Game::loadImages() {
 	string gfx_dir = "gfx/";
 
 	background = Image::loadImage(gfx_dir + "starfield.jpg");
-#if !defined(__ANDROID__) && defined(__linux)
+#ifdef DATADIR
 	if( background == NULL ) {
-		gfx_dir = "/usr/share/gigalomania/" + gfx_dir;
+		gfx_dir = datadir + "/" + gfx_dir;
 		LOG("look in %s for gfx\n", gfx_dir.c_str());
 		background = Image::loadImage(gfx_dir + "starfield.jpg");
 	}
@@ -3173,15 +3200,15 @@ bool Game::readMap(const char *filename) {
 	int index = -1;
 
     char fullname[4096] = "";
-	sprintf(fullname, "%s/%s", maps_dirname, filename);
+	sprintf(fullname, "%s/%s", maps_dirname.c_str(), filename);
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
 	SDL_RWops *file = SDL_RWFromFile(fullname, "rb");
-#if !defined(__ANDROID__) && defined(__linux)
+#ifdef DATADIR
 	if( file == NULL ) {
-		LOG("searching in /usr/share/gigalomania/ for islands folder\n");
-		sprintf(fullname, "%s/%s", alt_maps_dirname, filename);
+		LOG("searching in %s for islands\n", alt_maps_dirname.c_str());
+		sprintf(fullname, "%s/%s", alt_maps_dirname.c_str(), filename);
 		file = SDL_RWFromFile(fullname, "rb");
 	}
 #endif
@@ -3233,7 +3260,7 @@ bool Game::createMaps() {
 #if defined(_WIN32)
     WIN32_FIND_DATAA findFileData;
 	char maps_dirname_w[256];
-	sprintf(maps_dirname_w, "%s\\*", maps_dirname);
+	sprintf(maps_dirname_w, "%s\\*", maps_dirname.c_str());
 	HANDLE handle = FindFirstFileA(maps_dirname_w, &findFileData);
 	if( handle == INVALID_HANDLE_VALUE ) {
 		LOG("Invalid File Handle. GetLastError reports %d\n", GetLastError());
@@ -3286,16 +3313,16 @@ bool Game::createMaps() {
 	readMap("zinc.map");
 #else
 
-	DIR *dir = opendir(maps_dirname);
+	DIR *dir = opendir(maps_dirname.c_str());
 
-#if !defined(__ANDROID__) && defined(__linux)
+#ifdef DATADIR
 	if( dir == NULL ) {
-		LOG("searching in /usr/share/gigalomania/ for islands folder\n");
-		dir = opendir(alt_maps_dirname);
+		LOG("searching in %s for islands\n", alt_maps_dirname.c_str());
+		dir = opendir(alt_maps_dirname.c_str());
 	}
 #endif
 	if( dir == NULL ) {
-		LOG("failed to open directory: %s\n", maps_dirname);
+		LOG("failed to open directory: %s\n", maps_dirname.c_str());
 		LOG("error: %d\n", errno);
 		return false;
 	}

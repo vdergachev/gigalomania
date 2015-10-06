@@ -103,6 +103,10 @@ Sample *Sample::loadMusic(const char *filename) {
 	return sample;
 }
 
+Sample *Sample::loadMusic(string filename) {
+	return loadMusic(filename.c_str());
+}
+
 void Sample::play(int ch, int loops) {
 	if( have_sound ) {
 		if( is_music && game_g->isPrefMusicOn() ) {
