@@ -14,7 +14,7 @@ using std::string;
 #elif defined(__MORPHOS__)
 #include <SDL/SDL_image.h>
 #else
-#include <sdl_image.h>
+#include <SDL_image.h>
 #endif
 
 const int font_index_period_c = 26;
