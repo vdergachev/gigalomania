@@ -259,7 +259,7 @@ void initLogFile() {
 	remove(logfilename);
 
 	LOG("Initialising Log File...\n");
-	LOG("Version %d.%d\n", majorVersion, minorVersion);
+	LOG("Version %d.%d.%d\n", majorVersion, minorVersion, patchVersion);
 
 #ifdef _DEBUG
 	LOG("Running in Debug mode\n");

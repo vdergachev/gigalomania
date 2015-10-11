@@ -967,7 +967,7 @@ void Game::saveGame(int slot) const {
 	}
 
 	const int savVersion = 1;
-	fprintf(file, "GLMSAV%d.%d.%d\n", majorVersion, minorVersion, savVersion);
+	fprintf(file, "GLMSAV%d.%d.%d\n", majorVersion, minorVersion, savVersion); // don't write patchVersion, as save games should not break compatibility between a patch version
 
 	char buffer[256] = "";
 	char *ptr = buffer;
@@ -2992,7 +2992,7 @@ bool Game::openScreen(bool fullscreen) {
 	}
 
 	char buffer[256] = "";
-	sprintf(buffer, "Gigalomania, version %d.%d - Loading...", majorVersion, minorVersion);
+	sprintf(buffer, "Gigalomania, version %d.%d.%d - Loading...", majorVersion, minorVersion, patchVersion);
 	screen->setTitle(buffer);
 	return true;
 }
@@ -3710,7 +3710,7 @@ void Game::saveState() const {
 		stringstream stream;
 		const int savegame_version_c = 1;
 		stream << "<?xml version=\"1.0\" ?>\n";
-		stream << "<savegame major=\"" << majorVersion << "\" minor=\"" << minorVersion << "\" savegame_version=\"" << savegame_version_c << "\">\n";
+		stream << "<savegame major=\"" << majorVersion << "\" minor=\"" << minorVersion << "\" savegame_version=\"" << savegame_version_c << "\">\n"; // don't write patchVersion, as save games should not break compatibility between a patch version
 		stream << "<global ";
 		stream << "game_type=\"" << gameType << "\" ";
 		stream << "difficulty_level=\"" << difficulty_level << "\" ";
@@ -5336,7 +5336,7 @@ void playGame(int n_args, char *args[]) {
 	LOG("time taken to load data: %d\n", time_taken);
 
 	char buffer[256] = "";
-	sprintf(buffer, "Gigalomania, version %d.%d", majorVersion, minorVersion);
+	sprintf(buffer, "Gigalomania, version %d.%d.%d", majorVersion, minorVersion, patchVersion);
 	game_g->getScreen()->setTitle(buffer);
 
     LOG("all done!\n");
