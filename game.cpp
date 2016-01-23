@@ -105,7 +105,7 @@ Game::Game() {
 	n_sub_epochs = 4;
 	selected_island = 0;
 	for(int i=0;i<max_islands_per_epoch_c;i++) {
-		completed_island[i] = NULL;
+		completed_island[i] = false;
 		for(int j=0;j<n_epochs_c;j++) {
 			maps[j][i] = NULL;
 		}
@@ -413,7 +413,18 @@ int Game::getMenPerEpoch() const {
 int Game::getMenAvailable() const {
 	if( start_epoch == end_epoch_c && gameType == GAMETYPE_ALLISLANDS )
 		return n_player_suspended;
-	return n_men_store;
+	int n_men_available = n_men_store;
+	if( gameType == GAMETYPE_ALLISLANDS ) {
+		// force player to keep some in reserve for remaining uncompleted islands in this epoch
+		for(int i=0;i<max_islands_per_epoch_c;i++) {
+			if( maps[start_epoch][i] == NULL )
+				break; // reached number of islands for this epoch
+			if( i != selected_island && !completed_island[i] ) {
+				n_men_available--;
+			}
+		}
+	}
+	return n_men_available;
 }
 
 int Game::getNSuspended() const {
