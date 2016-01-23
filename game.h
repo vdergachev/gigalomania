@@ -176,6 +176,7 @@ class Game {
 	void cleanupPlayers();
 public:
 	Image *background;
+	Image *background_stars;
 	Image *player_heads_select[n_players_c];
 	Image *player_heads_alliance[n_players_c];
 	Image *grave;

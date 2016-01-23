@@ -115,6 +115,7 @@ Game::Game() {
 	n_player_suspended = 0;
 
 	background = NULL;
+	background_stars = NULL;
 	for(int i=0;i<n_players_c;i++) {
 		player_heads_select[i] = NULL;
 		player_heads_alliance[i] = NULL;
@@ -1381,7 +1382,7 @@ bool Game::loadOldImages() {
 	LOG("try using old graphics\n");
 	using_old_gfx = true;
 
-	background = Image::loadImage("data/mlm_sunrise");
+	background = Image::loadImage("data/mlm_starfield");
 
 	if( background == NULL )
 		return false;
@@ -1403,6 +1404,8 @@ bool Game::loadOldImages() {
 
 	// nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	processImage(background);
+
+	background_stars = background;
 
 	for(int i=0;i<n_players_c;i++) {
 		player_heads_select[i] = NULL;
@@ -1989,6 +1992,12 @@ bool Game::loadImages() {
 	calculateScale(background);
 	// nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	processImage(background);
+
+	background_stars = Image::loadImage(gfx_dir + "stars.jpg");
+	if( background_stars == NULL )
+		return false;
+	processImage(background_stars);
+
 	drawProgress(25);
 
 	Image *image_slabs = NULL;

@@ -1463,8 +1463,7 @@ void PlayingGameState::getFlagOffset(int *offset_x, int *offset_y, int epoch) co
 
 void PlayingGameState::draw() {
 	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
-	game_g->background->draw(0, 0);
-	//background->draw(0, 0, true);
+	game_g->background_stars->draw(0, 0);
 
 	bool no_armies = true;
 	for(int i=0;i<n_players_c && no_armies;i++) {
@@ -3392,7 +3391,7 @@ void EndIslandGameState::reset() {
 
 void EndIslandGameState::draw() {
 	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
-	game_g->background->draw(0, 0);
+	game_g->background_stars->draw(0, 0);
 	game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*40), (short)(game_g->getScaleHeight()*120), (short)(game_g->getScaleWidth()*240), (short)(game_g->getScaleHeight()*70), 0, 0, 0, 127);
 	char text[4096] = "";
 	if( game_g->getGameResult() == GAMERESULT_QUIT )
@@ -3523,7 +3522,7 @@ void GameCompleteGameState::reset() {
 
 void GameCompleteGameState::draw() {
 	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
-	game_g->background->draw(0, 0);
+	game_g->background_stars->draw(0, 0);
 
 	this->screen_page->draw();
 	//this->screen_page->drawPopups();
