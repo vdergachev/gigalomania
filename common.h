@@ -1,8 +1,8 @@
 #pragma once
 
 const int majorVersion = 0;
-const int minorVersion = 28;
-const int patchVersion = 1; // usually 0, but sometimes this is used for minor platform-specific fixes where we don't release on all platforms
+const int minorVersion = 29;
+const int patchVersion = 0; // usually 0, but sometimes this is used for minor platform-specific fixes where we don't release on all platforms
 
 extern bool debugwindow;
 

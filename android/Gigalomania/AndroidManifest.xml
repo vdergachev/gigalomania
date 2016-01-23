@@ -4,8 +4,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="net.sourceforge.gigalomania"
-      android:versionCode="5"
-      android:versionName="0.28"
+      android:versionCode="6"
+      android:versionName="0.29"
       android:installLocation="auto">
 
     <!-- Requires at least Android 2.3.3 -->
