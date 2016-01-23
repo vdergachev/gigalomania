@@ -401,9 +401,7 @@ void ChooseGameTypeGameState::reset() {
 }
 
 void ChooseGameTypeGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
 
 	this->choosegametypePanel->draw();
@@ -448,9 +446,7 @@ void ChooseDifficultyGameState::reset() {
 }
 
 void ChooseDifficultyGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
 
 	this->choosedifficultyPanel->draw();
@@ -512,9 +508,7 @@ void ChoosePlayerGameState::reset() {
 }
 
 void ChoosePlayerGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	//player_select->draw(0, 0, false);
 	game_g->background->draw(0, 0);
     Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Player", Image::JUSTIFY_CENTRE);
@@ -586,9 +580,7 @@ void ChooseTutorialGameState::reset() {
 }
 
 void ChooseTutorialGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
     Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Tutorial", Image::JUSTIFY_CENTRE);
 
@@ -685,9 +677,7 @@ void PlaceMenGameState::reset() {
 void PlaceMenGameState::draw() {
 	char buffer[256] = "";
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background_islands->draw(0, 0);
 
 	if( !game_g->isUsingOldGfx() ) {
@@ -1472,10 +1462,7 @@ void PlayingGameState::getFlagOffset(int *offset_x, int *offset_y, int epoch) co
 }
 
 void PlayingGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
-
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
 	//background->draw(0, 0, true);
 
@@ -3404,9 +3391,7 @@ void EndIslandGameState::reset() {
 }
 
 void EndIslandGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
 	game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*40), (short)(game_g->getScaleHeight()*120), (short)(game_g->getScaleWidth()*240), (short)(game_g->getScaleHeight()*70), 0, 0, 0, 127);
 	char text[4096] = "";
@@ -3537,9 +3522,7 @@ void GameCompleteGameState::reset() {
 }
 
 void GameCompleteGameState::draw() {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	game_g->getScreen()->clear(); // SDL on Android and OS X requires screen be cleared (otherwise we get corrupt regions outside of the main area)
-#endif
+	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
 
 	this->screen_page->draw();
