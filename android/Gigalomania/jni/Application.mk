@@ -6,9 +6,8 @@
 APP_STL := stlport_static 
 #APP_STL := gnustl_static
 
-# x86 not supported as SDL_image with JPEG support doesn't build
-#APP_ABI := armeabi-v7a armeabi x86
-APP_ABI := armeabi-v7a armeabi
+APP_ABI := armeabi-v7a armeabi x86
+#APP_ABI := armeabi-v7a armeabi
 #APP_ABI := armeabi
 
 # The NDK takes the APP_PLATFORM from project.properties by default, but I had to change
