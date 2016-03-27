@@ -477,7 +477,7 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
             done = true;
             registerClick();
             gamestate->closeConfirmWindow();
-			char help_url[] = "http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html";
+			char help_url[] = "http://gigalomania.sourceforge.net/";
 #if defined(_WIN32)
 			ShellExecute(0, 0, help_url, 0, 0 , SW_SHOW );
 #elif defined(__ANDROID__)
