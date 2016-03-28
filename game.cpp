@@ -2284,9 +2284,9 @@ bool Game::loadImages() {
 	mapsquare = icons->copy(0, 0, 17, 17);
 	flashingmapsquare = icons->copy(32, 0, 17, 17);
 	arrow_left = icons->copy(64, 0, 32, 32);
-	arrow_left->scaleAlpha(0.625f);
+	arrow_left->scaleAlpha(0.75f);
 	arrow_right = icons->copy(96, 0, 32, 32);
-	arrow_right->scaleAlpha(0.625f);
+	arrow_right->scaleAlpha(0.75f);
 
 	icons = Image::loadImage(gfx_dir + "font.png");
 	if( icons == NULL )
