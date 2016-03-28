@@ -189,7 +189,8 @@ void PanelPage::free(bool free_this) {
 }
 
 void PanelPage::drawPopups() {
-	if( game_g->isMobileUI() ) {
+	bool touch_mode = game_g->isMobileUI() || game_g->getApplication()->isBlankMouse();
+	if( touch_mode ) {
 		return;
 	}
 	/*if( owner != NULL )

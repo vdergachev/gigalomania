@@ -387,7 +387,12 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEBUTTONDOWN:
 				{
+					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
+						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
+						break;
+					}
 					//LOG("received mouse down\n");
+					// if this code is changed, consider whether SDL_FINGERDOWN also needs updating
 					int m_x = event.button.x;
 					int m_y = event.button.y;
 					game_g->getScreen()->setMousePos(m_x, m_y);
@@ -421,7 +426,12 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEBUTTONUP:
 				{
+					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
+						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
+						break;
+					}
 					//LOG("received mouse up\n");
+					// if this code is changed, consider whether SDL_FINGERUP also needs updating
 					Uint8 button = event.button.button;
 					if( button == SDL_BUTTON_LEFT ) {
 						game_g->getScreen()->setMouseLeft(false);
@@ -436,30 +446,20 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEMOTION:
 				{
-					int old_m_x = 0, old_m_y = 0;
-					game_g->getScreen()->getMouseCoords(&old_m_x, &old_m_y);
+					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
+						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
+						break;
+					}
+					// if this code is changed, consider whether SDL_FINGERMOTION also needs updating
 					int m_x = event.motion.x;
 					int m_y = event.motion.y;
-					//LOG("    mouse motion %d, %d\n", m_x, m_y);
-					//LOG("    old %d, %d\n", old_m_x, old_m_y);
-					// can't use SDL_TOUCH_MOUSEID, as event.motion.which doesn't seem to be supported for Windows 8
-					// need to allow some tolerance, as sometimes we get a rounding issue when calculating the coordinates from tfinger, when the window size isn't 1:1
-					int diff_x = abs(m_x - old_m_x);
-					int diff_y = abs(m_y - old_m_y);
-					if( diff_x > 1 || diff_y > 1 ) {
-						//LOG("    unblank\n");
-						//LOG("    mouse motion %d, %d\n", m_x, m_y);
-						//LOG("    old %d, %d\n", old_m_x, old_m_y);
-						this->blank_mouse = false;
-					}
+					this->blank_mouse = false;
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					break;
 				}
 #if SDL_MAJOR_VERSION == 1
 #else
 			// support for touchscreens
-			// when a touch even occurs, we receive SDL_FINGERDOWN
-			// when the touch is released, we receive SDL_FINGERUP, followed by SDL_MOUSEBUTTONDOWN then SDL_MOUSEBUTTONUP, then SDL_MOUSEMOTION
 			case SDL_FINGERDOWN:
 				{
 					//LOG("received fingerdown: %f , %f\n", event.tfinger.x, event.tfinger.y);
@@ -473,6 +473,12 @@ void Application::runMainLoop() {
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					game_g->getScreen()->setMouseLeft(true);
 					this->blank_mouse = true;
+
+					if( game_g->isPaused() ) {
+						// click automatically unpaused (needed to work without keyboard!)
+						game_g->togglePause();
+					}
+					game_g->mouseClick(m_x, m_y, true, false, false, true);
 					break;
 				}
 			case SDL_FINGERUP:
@@ -480,7 +486,6 @@ void Application::runMainLoop() {
 					//LOG("received fingerup\n");
 					game_g->getScreen()->setMouseLeft(false);
 					this->blank_mouse = true;
-					// n.b., "click" is handled via SDL_MOUSEBUTTONUP
 					break;
 				}
 			case SDL_FINGERMOTION:
