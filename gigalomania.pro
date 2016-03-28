@@ -7,12 +7,18 @@ DEFINES -= UNICODE
 
 SOURCES += game.cpp gamestate.cpp gui.cpp image.cpp main.cpp panel.cpp player.cpp resources.cpp screen.cpp sector.cpp sound.cpp tutorial.cpp utils.cpp TinyXML/tinyxml.cpp TinyXML/tinyxmlerror.cpp TinyXML/tinyxmlparser.cpp
 
-INCLUDEPATH += ../APIs/SDL2/include/
-INCLUDEPATH += ../APIs/SDL2_image/include/
-INCLUDEPATH += ../APIs/SDL2_mixer/include/
+win32 {
+    # update this to match where SDL2 includes are installed on your system
+    INCLUDEPATH += ../APIs/SDL2/include/
+    INCLUDEPATH += ../APIs/SDL2_image/include/
+    INCLUDEPATH += ../APIs/SDL2_mixer/include/
+}
 
 LIBS += -L$$PWD # add the source folder for libs
-LIBS += -lUser32 -lShell32 -lSDL2 -lSDL2main -lSDL2_image -lSDL2_mixer
+LIBS += -lSDL2 -lSDL2main -lSDL2_image -lSDL2_mixer
+win32 {
+    LIBS += -lUser32 -lShell32
+}
 
 dir1.source = gfx
 dir2.source = sound
