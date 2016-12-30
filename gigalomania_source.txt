@@ -169,17 +169,20 @@ SDL2_mixer: sdl_mixer2.lib . See http://www.libsdl.org/projects/SDL_mixer/ .
 
 I've tested this with version 2.0.4 of SDL, 2.0.1 of SDL_image and 2.0.1 of SDL_mixer.
 
-See README-android.txt in the SDL source archive for some information. You need to obtain the Android SDK and Android NDK. Then create the Gigalomania folder as follows:
+See README-android.txt in the SDL source archive for some information. You need to obtain the Android SDK (Android Studio). Then see instructions at https://developer.android.com/studio/projects/add-native-code.html for how to install/enable the NDK in Android Studio (note, Gigalomania/SDL uses ndk-build rather than CMake).
 
-1. Copy the android/Gigalomania project into your workspace.
-2. Copy the Gigalomania source files (*.cpp, *.h, and the TinyXML subfolder) into jni/src/
-3. Copy the gfx/, islands/, music/ and sound/ folders into assets/
-4. Copy the source from SDL2, SDL2_image, SDL2_mixer into jni/ (so you have folders jni/SDL/, jni/SDL_image/, jni/SDL_mixer/; each of these folders should be the root folder for the SDL sources - e.g., so inside jni/SDL/ will be folders such as acinclude/, include/, src/ etc). 
+Then create the Gigalomania folder as follows:
+
+1. Copy the android/Gigalomania project into your Android Studio projects folder.
+2. Copy the Gigalomania source files (*.cpp, *.h, and the TinyXML subfolder) into app/src/main/jni/src/ .
+3. Copy the source from SDL2, SDL2_image, SDL2_mixer into app/src/main/jni/ (so you have folders app/src/main/jni/SDL/, app/src/main/jni/SDL_image/, app/src/main/jni/SDL_mixer/; each of these folders should be the root folder for the SDL sources - e.g., so inside app/src/main/jni/SDL/ will be folders such as acinclude/, include/, src/ etc). 
+4. Copy the gfx/, islands/, music/ and sound/ folders into app/src/main/assets/ .
 5. You may need to configure the file jni/SDL_image/Android.mk: ensure that SUPPORT_WEBP is set to false (this is already the case for SDL_image 2.0.1 onwards).
 6. You need to configure the file jni/SDL_mixer/Android.mk: set SUPPORT_MOD_MODPLUG, SUPPORT_MOD_MIKMOD and SUPPORT_MP3_SMPEG to false.
-7. Before running from Eclipse, the native C++ files need to be compiled. On Windows, this can be done from the command prompt by cd-ing to the Gigalomania folder, and running the ndk-build.cmd command from the Android NDK (e.g.: C:\android-ndk-r9\ndk-build.cmd ). Note that this needs to be done every time you change one of the native C++ files.
 
-Note that versions 0.26 an earlier used Qt/necessitas for Android. Now Android is compiled using SDL 2.
+Then open the project in Android Studio. It will take some moments to initialise the project. When you run, the project will build - note that it can take several minutes to build the complete project.
+
+Note that versions 0.27 and 0.28 used Eclipse instead of Android Studio. Versions 0.26 and earlier used Qt/necessitas for Android instead of SDL 2.
 
 Symbian
 =======
@@ -191,7 +194,6 @@ Qt Creator
 
 Qt Creator can also be used as an IDE. (Note that this means using the Qt environment purely as an IDE, not for its APIs/libraries.)
 
-
 Source Control
 ==============
 
@@ -201,6 +203,8 @@ History
 =======
 
 Note, this history is only for changes related to the source code. See the Gigalomania readme or homepage for a full history.
+
+Version 0.29 uses Android Studio instead of Eclipse for Android.
 
 Version 0.28 adds support for Qt Creator as an IDE. Debian and Maemo/Meego packaging info was removed from main source archive.
 
