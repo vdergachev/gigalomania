@@ -9,6 +9,8 @@ APP_STL := stlport_static
 APP_ABI := armeabi-v7a armeabi x86
 #APP_ABI := armeabi-v7a armeabi
 #APP_ABI := armeabi
+# N.B., APP_ABI seems to be ignored in Android Studio, instead this is set via abiFilters in build.gradle
+# see https://code.google.com/p/android/issues/detail?id=225123
 
 # The NDK takes the APP_PLATFORM from project.properties by default, but I had to change
 # project.properties from API 12 to 15 (to work in Eclipse, as SDK 12 doesn't seem available anymore).

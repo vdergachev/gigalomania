@@ -8,6 +8,12 @@ android {
         applicationId "net.sourceforge.gigalomania"
         minSdkVersion 10
         targetSdkVersion 22
+
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'x86', 'armeabi', 'armeabi-v7a'
+        }
     }
 
     buildTypes {
