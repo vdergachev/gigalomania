@@ -167,7 +167,7 @@ SDL2_image: sdl_image2.lib . See http://www.libsdl.org/projects/SDL_image/ .
 
 SDL2_mixer: sdl_mixer2.lib . See http://www.libsdl.org/projects/SDL_mixer/ .
 
-I've tested this with version 2.0.4 of SDL, 2.0.1 of SDL_image and 2.0.1 of SDL_mixer.
+I've tested this with version 2.0.5 of SDL, 2.0.1 of SDL_image and 2.0.1 of SDL_mixer.
 
 See README-android.txt in the SDL source archive for some information. You need to obtain the Android SDK (Android Studio). Then see instructions at https://developer.android.com/studio/projects/add-native-code.html for how to install/enable the NDK in Android Studio (note, Gigalomania/SDL uses ndk-build rather than CMake).
 
