@@ -6,8 +6,10 @@ android {
 
     defaultConfig {
         applicationId "net.sourceforge.gigalomania"
+        // Requires at least Android 2.3.3
         minSdkVersion 10
-        targetSdkVersion 22
+        // Tested on Android 7.0
+        targetSdkVersion 24
 
         ndk {
             // Specifies the ABI configurations of your native
