@@ -9,7 +9,7 @@ namespace Gigalomania {
 	class Button;
 }
 
-using namespace Gigalomania;
+using Gigalomania::PanelPage;
 
 class Feature;
 class Sector;
@@ -60,11 +60,11 @@ public:
 class ParticleSystem {
 protected:
 	vector<Particle> particles;
-	const Image *image;
+	const Gigalomania::Image *image;
 	float size;
 
 public:
-	ParticleSystem(const Image *image) : image(image), size(1.0f) {
+	ParticleSystem(const Gigalomania::Image *image) : image(image), size(1.0f) {
 	}
 	virtual ~ParticleSystem() {
 	}
@@ -83,7 +83,7 @@ class SmokeParticleSystem : public ParticleSystem {
 	int last_emit_time;
 	float move_x, move_y;
 public:
-	SmokeParticleSystem(const Image *image);
+	SmokeParticleSystem(const Gigalomania::Image *image);
 	virtual ~SmokeParticleSystem() {
 	}
 
@@ -159,7 +159,7 @@ public:
 	Element(const char *name,Id id,Type type);
 	~Element();
 
-	Image *getImage() const;
+	Gigalomania::Image *getImage() const;
 	const char *getName() const {
 		return this->name.c_str();
 	}
@@ -221,7 +221,7 @@ public:
 	~Invention();
 
 	//int getRelativeEpoch();
-	Image *getImage() const;
+	Gigalomania::Image *getImage() const;
 	const char *getName() const {
 		return this->name.c_str();
 	}
@@ -296,7 +296,7 @@ public:
 		if( this->health > this->max_health )
 			this->health = this->max_health;
 	}
-	Image **getImages();
+	Gigalomania::Image **getImages();
 	void rotateDefenders();
 	int getNDefenders() const {
 		int n = 0;

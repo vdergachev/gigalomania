@@ -397,8 +397,8 @@ void ChooseMenPanel::draw() {
 	if( this->getPage() == STATE_CHOOSEMEN ) {
 		// draw this after the popups, so we can see it...
 		game_g->men[game_g->getStartEpoch()]->draw( this->button_nmen->getLeft() + 4, this->button_nmen->getTop() + 16);
-		Image::writeNumbers( this->button_nmen->getXCentre(), this->button_nmen->getTop() + 2, game_g->numbers_white, this->n_men,Image::JUSTIFY_CENTRE);
-		Image::writeNumbers( this->button_nmen->getXCentre(), this->button_nmen->getTop() + 36, game_g->numbers_white, game_g->getMenAvailable() - this->n_men,Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeNumbers( this->button_nmen->getXCentre(), this->button_nmen->getTop() + 2, game_g->numbers_white, this->n_men,Gigalomania::Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeNumbers( this->button_nmen->getXCentre(), this->button_nmen->getTop() + 36, game_g->numbers_white, game_g->getMenAvailable() - this->n_men,Gigalomania::Image::JUSTIFY_CENTRE);
 	}
 }
 
@@ -1258,17 +1258,17 @@ void GamePanel::setMouseState(MouseState mousestate) {
 
 void GamePanel::draw() {
 	if( this->c_page == STATE_SECTORCONTROL ) {
-		Image::writeMixedCase(offset_panel_x_c + 8, offset_panel_y_c - 1, game_g->letters_large, game_g->letters_small, NULL, game_g->getMap()->getName(), Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeMixedCase(offset_panel_x_c + 8, offset_panel_y_c - 1, game_g->letters_large, game_g->letters_small, NULL, game_g->getMap()->getName(), Gigalomania::Image::JUSTIFY_LEFT);
 		if( game_g->getStartEpoch() != end_epoch_c ) {
 			int year = epoch_dates[gamestate->getCurrentSector()->getEpoch()];
 			bool shiny = gamestate->getCurrentSector()->getEpoch() == n_epochs_c-1;
-			Image::writeNumbers(offset_panel_x_c + 96, offset_panel_y_c, shiny ? game_g->numbers_largeshiny : game_g->numbers_largegrey, abs(year),Image::JUSTIFY_RIGHT);
-			Image *era = ( year < 0 ) ? game_g->icon_bc :
+			Gigalomania::Image::writeNumbers(offset_panel_x_c + 96, offset_panel_y_c, shiny ? game_g->numbers_largeshiny : game_g->numbers_largegrey, abs(year),Gigalomania::Image::JUSTIFY_RIGHT);
+			Gigalomania::Image *era = ( year < 0 ) ? game_g->icon_bc :
 				shiny ? game_g->icon_ad_shiny : game_g->icon_ad;
 			if( era != NULL )
 				era->draw(offset_panel_x_c + 88, offset_panel_y_c + 7);
 			else {
-				Image::write(offset_panel_x_c + 88, offset_panel_y_c + 8, game_g->letters_small, ( year < 0 ) ? "BC" : "AD", Image::JUSTIFY_LEFT);
+				Gigalomania::Image::write(offset_panel_x_c + 88, offset_panel_y_c + 8, game_g->letters_small, ( year < 0 ) ? "BC" : "AD", Gigalomania::Image::JUSTIFY_LEFT);
 			}
 		}
 
@@ -1276,31 +1276,31 @@ void GamePanel::draw() {
 			const int xpos = 8, ypos = 18;
 			//const int xpos = 40, ypos = 40;
 			game_g->men[gamestate->getCurrentSector()->getEpoch()]->draw(offset_panel_x_c + xpos, offset_panel_y_c + ypos);
-			Image::writeNumbers(offset_panel_x_c + xpos + 8, offset_panel_y_c + ypos + 18, game_g->numbers_grey, gamestate->getCurrentSector()->getSparePopulation(),Image::JUSTIFY_CENTRE);
+			Gigalomania::Image::writeNumbers(offset_panel_x_c + xpos + 8, offset_panel_y_c + ypos + 18, game_g->numbers_grey, gamestate->getCurrentSector()->getSparePopulation(),Gigalomania::Image::JUSTIFY_CENTRE);
 			if( gamestate->getCurrentSector()->getCurrentDesign() != NULL ) {
-				Image::writeNumbers( this->button_ndesigners->getXCentre(), this->button_ndesigners->getTop() + 2, game_g->numbers_white, gamestate->getCurrentSector()->getDesigners(),Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers( this->button_ndesigners->getXCentre(), this->button_ndesigners->getTop() + 2, game_g->numbers_white, gamestate->getCurrentSector()->getDesigners(),Gigalomania::Image::JUSTIFY_CENTRE);
 			}
 			for(int i=0;i<4;i++) {
 				Id element = (Id)this->element_index[i];
 				if( this->button_nminers[i]->isVisible() ) {
 					ASSERT_ELEMENT_ID( this->element_index[i] );
 					int n_miners = gamestate->getCurrentSector()->getMiners( element );
-					Image::writeNumbers( this->button_nminers[i]->getXCentre(), this->button_nminers[i]->getTop() + 2, game_g->numbers_white, n_miners,Image::JUSTIFY_CENTRE);
+					Gigalomania::Image::writeNumbers( this->button_nminers[i]->getXCentre(), this->button_nminers[i]->getTop() + 2, game_g->numbers_white, n_miners,Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 			}
 			if( gamestate->getCurrentSector()->getCurrentManufacture() != NULL ) {
-				Image::writeNumbers( this->button_nworkers->getXCentre(), this->button_nworkers->getTop() + 2, game_g->numbers_white, gamestate->getCurrentSector()->getWorkers(),Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers( this->button_nworkers->getXCentre(), this->button_nworkers->getTop() + 2, game_g->numbers_white, gamestate->getCurrentSector()->getWorkers(),Gigalomania::Image::JUSTIFY_CENTRE);
 			}
 			for(int i=0;i<N_BUILDINGS;i++) {
 				if( this->button_nbuilders[i] != NULL && this->button_nbuilders[i]->isVisible() ) {
-					Image::writeNumbers( this->button_nbuilders[i]->getXCentre(), this->button_nbuilders[i]->getBottom() - 8, game_g->numbers_white, gamestate->getCurrentSector()->getBuilders((Type)i),Image::JUSTIFY_CENTRE);
+					Gigalomania::Image::writeNumbers( this->button_nbuilders[i]->getXCentre(), this->button_nbuilders[i]->getBottom() - 8, game_g->numbers_white, gamestate->getCurrentSector()->getBuilders((Type)i),Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 			}
 		}
 		else if( gamestate->viewingAnyClientSector() ) {
 			ASSERT( gamestate->getCurrentSector()->isShutdown() );
 			game_g->men[gamestate->getCurrentSector()->getBuildingEpoch()]->draw(offset_panel_x_c + 40, offset_panel_y_c + 40);
-			Image::writeNumbers(offset_panel_x_c + 48, offset_panel_y_c + 58, game_g->numbers_grey, gamestate->getCurrentSector()->getPopulation(),Image::JUSTIFY_CENTRE);
+			Gigalomania::Image::writeNumbers(offset_panel_x_c + 48, offset_panel_y_c + 58, game_g->numbers_grey, gamestate->getCurrentSector()->getPopulation(),Gigalomania::Image::JUSTIFY_CENTRE);
 		}
 		else if( gamestate->getCurrentSector()->getPlayer() == -1 ) {
 			int n_players_in_sector = 0;
@@ -1316,7 +1316,7 @@ void GamePanel::draw() {
 				gamestate->getCurrentSector()->buildingTowerTimeLeft(player_in_sector, &halfdays, &hours);
 				int clock_index = hours + 1;
 				game_g->icon_clocks[ clock_index ]->draw(offset_panel_x_c + 72, offset_panel_y_c + 16);
-				Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + 34, game_g->numbers_white, halfdays,Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + 34, game_g->numbers_white, halfdays,Gigalomania::Image::JUSTIFY_CENTRE);
 			}
 		}
 	}
@@ -1328,13 +1328,13 @@ void GamePanel::draw() {
 		else {
 			Invention *current_invention = gamestate->getCurrentSector()->getCurrentDesign()->getInvention();
 			current_invention->getImage()->draw(offset_panel_x_c + 8, offset_panel_y_c + 16);
-			Image::writeNumbers(offset_panel_x_c + 48, offset_panel_y_c + 34, game_g->numbers_white, gamestate->getCurrentSector()->getDesigners(),Image::JUSTIFY_CENTRE);
+			Gigalomania::Image::writeNumbers(offset_panel_x_c + 48, offset_panel_y_c + 34, game_g->numbers_white, gamestate->getCurrentSector()->getDesigners(),Gigalomania::Image::JUSTIFY_CENTRE);
 			if( gamestate->getCurrentSector()->getDesigners() > 0 ) {
 				int halfdays = 0, hours = 0;
 				gamestate->getCurrentSector()->inventionTimeLeft(&halfdays, &hours);
 				int clock_index = hours + 1;
 				game_g->icon_clocks[ clock_index ]->draw(offset_panel_x_c + 72, offset_panel_y_c + 16);
-				Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + 34, game_g->numbers_white, halfdays,Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + 34, game_g->numbers_white, halfdays,Gigalomania::Image::JUSTIFY_CENTRE);
 			}
 			else {
 				game_g->icon_clocks[ 0 ]->draw(offset_panel_x_c + 72, offset_panel_y_c + 16);
@@ -1371,9 +1371,9 @@ void GamePanel::draw() {
 				int pos_y = button_deploy_shields[i]->getBottom() + 2;
 				if( gamestate->getCurrentSector()->canBuildDesign(Invention::SHIELD, game_g->getStartEpoch()+i) || n_store > 0 ) {
 					if( n_store == 0 && game_g->getStartEpoch() + i < factory_epoch_c )
-						Image::write(pos_x, pos_y, game_g->letters_small, "OK", Image::JUSTIFY_CENTRE);
+						Gigalomania::Image::write(pos_x, pos_y, game_g->letters_small, "OK", Gigalomania::Image::JUSTIFY_CENTRE);
 					else
-						Image::writeNumbers(pos_x, pos_y, game_g->numbers_yellow, n_store, Image::JUSTIFY_CENTRE);
+						Gigalomania::Image::writeNumbers(pos_x, pos_y, game_g->numbers_yellow, n_store, Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 				else {
 					game_g->dash_grey->draw(pos_x - 4, pos_y + 4);
@@ -1383,7 +1383,7 @@ void GamePanel::draw() {
 	}
 	else if( this->c_page == STATE_DEFENCE ) {
 		game_g->men[gamestate->getCurrentSector()->getEpoch()]->draw(offset_panel_x_c + 8, offset_panel_y_c + 24);
-		Image::writeNumbers(offset_panel_x_c + 16, offset_panel_y_c + 42, game_g->numbers_grey, gamestate->getCurrentSector()->getSparePopulation(), Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeNumbers(offset_panel_x_c + 16, offset_panel_y_c + 42, game_g->numbers_grey, gamestate->getCurrentSector()->getSparePopulation(), Gigalomania::Image::JUSTIFY_CENTRE);
 		for(int i=0;i<game_g->getNSubEpochs();i++) {
 			if( this->button_deploy_defences[i]->isVisible() ) {
 				int n_store = gamestate->getCurrentSector()->getStoredDefenders(game_g->getStartEpoch()+i);
@@ -1391,9 +1391,9 @@ void GamePanel::draw() {
 				int pos_y = button_deploy_defences[i]->getBottom() + 2;
 				if( gamestate->getCurrentSector()->canBuildDesign(Invention::DEFENCE, game_g->getStartEpoch()+i) || n_store > 0 ) {
 					if( n_store == 0 && game_g->getStartEpoch() + i < factory_epoch_c )
-						Image::write(pos_x, pos_y, game_g->letters_small, "OK", Image::JUSTIFY_CENTRE);
+						Gigalomania::Image::write(pos_x, pos_y, game_g->letters_small, "OK", Gigalomania::Image::JUSTIFY_CENTRE);
 					else
-						Image::writeNumbers(pos_x, pos_y, game_g->numbers_yellow, n_store, Image::JUSTIFY_CENTRE);
+						Gigalomania::Image::writeNumbers(pos_x, pos_y, game_g->numbers_yellow, n_store, Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 				else {
 					game_g->dash_grey->draw(pos_x - 4, pos_y + 4);
@@ -1402,15 +1402,15 @@ void GamePanel::draw() {
 		}
 	}
 	else if( this->c_page == STATE_ATTACK ) {
-		Image::writeNumbers(offset_panel_x_c + offset_attack_x_c + 8, offset_panel_y_c + 42, game_g->numbers_yellow, gamestate->getCurrentSector()->getSparePopulation(), Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeNumbers(offset_panel_x_c + offset_attack_x_c + 8, offset_panel_y_c + 42, game_g->numbers_yellow, gamestate->getCurrentSector()->getSparePopulation(), Gigalomania::Image::JUSTIFY_CENTRE);
 		for(int i=0;i<game_g->getNSubEpochs();i++) {
 			if( this->button_deploy_attackers[i]->isVisible() ) {
 				int n_store = gamestate->getCurrentSector()->getStoredArmy()->getSoldiers(game_g->getStartEpoch()+i);
 				if( gamestate->getCurrentSector()->canBuildDesign(Invention::WEAPON, game_g->getStartEpoch()+i) || n_store > 0 ) {
 					if( n_store == 0 && game_g->getStartEpoch() + i < factory_epoch_c )
-						Image::write(offset_panel_x_c + offset_attack_x_c + 8 + space_attack_x_c*i, offset_panel_y_c + 74, game_g->letters_small, "OK", Image::JUSTIFY_CENTRE);
+						Gigalomania::Image::write(offset_panel_x_c + offset_attack_x_c + 8 + space_attack_x_c*i, offset_panel_y_c + 74, game_g->letters_small, "OK", Gigalomania::Image::JUSTIFY_CENTRE);
 					else
-						Image::writeNumbers(offset_panel_x_c + offset_attack_x_c + 8 + space_attack_x_c*i, offset_panel_y_c + 74, game_g->numbers_yellow, n_store, Image::JUSTIFY_CENTRE);
+						Gigalomania::Image::writeNumbers(offset_panel_x_c + offset_attack_x_c + 8 + space_attack_x_c*i, offset_panel_y_c + 74, game_g->numbers_yellow, n_store, Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 				else {
 					game_g->dash_grey->draw(offset_panel_x_c + offset_attack_x_c + 4 + space_attack_x_c*i, offset_panel_y_c + 78);
@@ -1422,7 +1422,7 @@ void GamePanel::draw() {
 		if( n_army == 0 )
 			game_g->dash_grey->draw(offset_panel_x_c + 84, offset_panel_y_c + 116);
 		else
-			Image::writeNumbers(offset_panel_x_c + 88, offset_panel_y_c + 116, game_g->numbers_orange, n_army, Image::JUSTIFY_CENTRE);
+			Gigalomania::Image::writeNumbers(offset_panel_x_c + 88, offset_panel_y_c + 116, game_g->numbers_orange, n_army, Gigalomania::Image::JUSTIFY_CENTRE);
 	}
 	else if( this->c_page == STATE_ELEMENTSTOCKS ) {
 		for(int i=0;i<4;i++) {
@@ -1435,7 +1435,7 @@ void GamePanel::draw() {
 			int off = 0;
 			int ypos = offset_panel_y_c + 42 + 28 * i;
 			if( n_elements > 0 ) {
-				Image::writeNumbers(offset_panel_x_c + 72, ypos, game_g->numbers_blue, n_elements, Image::JUSTIFY_LEFT);
+				Gigalomania::Image::writeNumbers(offset_panel_x_c + 72, ypos, game_g->numbers_blue, n_elements, Gigalomania::Image::JUSTIFY_LEFT);
 				off += game_g->numbers_blue[0]->getScaledWidth() * n_digits(n_elements);
 			}
 			if( fraction == 1 ) {
@@ -1443,7 +1443,7 @@ void GamePanel::draw() {
 			}
 			if( this->button_nminers2[i]->isVisible() ) {
 				int n_miners = gamestate->getCurrentSector()->getMiners( element );
-				Image::writeNumbers( this->button_nminers2[i]->getXCentre(), this->button_nminers2[i]->getTop() + 2, game_g->numbers_white, n_miners,Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers( this->button_nminers2[i]->getXCentre(), this->button_nminers2[i]->getTop() + 2, game_g->numbers_white, n_miners,Gigalomania::Image::JUSTIFY_CENTRE);
 			}
 		}
 	}
@@ -1451,13 +1451,13 @@ void GamePanel::draw() {
 		for(int i=0;i<N_BUILDINGS;i++)
 		{
 			if( this->button_nbuilders2[i] != NULL && this->button_nbuilders2[i]->isVisible() ) {
-				Image::writeNumbers( this->button_nbuilders2[i]->getXCentre(), this->button_nbuilders2[i]->getTop() + 20, game_g->numbers_white, gamestate->getCurrentSector()->getBuilders((Type)i),Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers( this->button_nbuilders2[i]->getXCentre(), this->button_nbuilders2[i]->getTop() + 20, game_g->numbers_white, gamestate->getCurrentSector()->getBuilders((Type)i),Gigalomania::Image::JUSTIFY_CENTRE);
 				if( gamestate->getCurrentSector()->getBuilders((Type)i) > 0 ) {
 					int halfdays = 0, hours = 0;
 					gamestate->getCurrentSector()->buildingTimeLeft((Type)i, &halfdays, &hours);
 					int clock_index = hours + 1;
 					game_g->icon_clocks[ clock_index ]->draw(offset_panel_x_c + 72, offset_panel_y_c + 16 + build_step_y_c*(i-1));
-					Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + 34 + build_step_y_c*(i-1), game_g->numbers_white, halfdays,Image::JUSTIFY_CENTRE);
+					Gigalomania::Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + 34 + build_step_y_c*(i-1), game_g->numbers_white, halfdays,Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 				else {
 					game_g->icon_clocks[ 0 ]->draw(offset_panel_x_c + 72, offset_panel_y_c + 16 + build_step_y_c*(i-1));
@@ -1484,7 +1484,7 @@ void GamePanel::draw() {
 				game_g->icon_elements[i]->draw(offset_panel_x_c + 16, offset_panel_y_c + 32 + 18 * cnt);
 				int off = 0;
 				if( whole > 0 ) {
-					Image::writeNumbers(offset_panel_x_c + 36, offset_panel_y_c + 34 + 18 * cnt, game_g->numbers_blue, whole, Image::JUSTIFY_LEFT);
+					Gigalomania::Image::writeNumbers(offset_panel_x_c + 36, offset_panel_y_c + 34 + 18 * cnt, game_g->numbers_blue, whole, Gigalomania::Image::JUSTIFY_LEFT);
 					off += game_g->numbers_blue[0]->getScaledWidth() * n_digits(whole);
 				}
 				if( frac == 1 ) {
@@ -1513,7 +1513,7 @@ void GamePanel::draw() {
 			Invention *current_manufacture = gamestate->getCurrentSector()->getCurrentManufacture()->getInvention();
 			this->button_famount->setImage( current_manufacture->getImage() );
 			//current_manufacture->getImage()->draw(offset_panel_x_c + 8, offset_panel_y_c + 16, true);
-			Image::writeNumbers(offset_panel_x_c + 48, offset_panel_y_c + y0 + 20, game_g->numbers_white, gamestate->getCurrentSector()->getWorkers(),Image::JUSTIFY_CENTRE);
+			Gigalomania::Image::writeNumbers(offset_panel_x_c + 48, offset_panel_y_c + y0 + 20, game_g->numbers_white, gamestate->getCurrentSector()->getWorkers(),Gigalomania::Image::JUSTIFY_CENTRE);
 			int famount = gamestate->getCurrentSector()->getFAmount();
 			int famount_x = offset_panel_x_c + 48;
 			int famount_y = offset_panel_y_c + y1 + 18;
@@ -1521,7 +1521,7 @@ void GamePanel::draw() {
 				game_g->icon_infinity->draw(famount_x - game_g->icon_infinity->getScaledWidth()/2 + 2, famount_y - 2);
 			}
 			else {
-				Image::writeNumbers(famount_x, famount_y, game_g->numbers_white, famount,Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers(famount_x, famount_y, game_g->numbers_white, famount,Gigalomania::Image::JUSTIFY_CENTRE);
 			}
 
 			if( gamestate->getCurrentSector()->getWorkers() > 0 ) {
@@ -1530,7 +1530,7 @@ void GamePanel::draw() {
 				gamestate->getCurrentSector()->manufactureTimeLeft(&halfdays, &hours);
 				gamestate->getCurrentSector()->manufactureTotalTime(&thalfdays, &thours);
 				game_g->icon_clocks[ hours+1 ]->draw(offset_panel_x_c + 72, offset_panel_y_c + y0);
-				Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + y0 + 18, game_g->numbers_white, halfdays,Image::JUSTIFY_CENTRE);
+				Gigalomania::Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + y0 + 18, game_g->numbers_white, halfdays,Gigalomania::Image::JUSTIFY_CENTRE);
 				int amount = gamestate->getCurrentSector()->getFAmount();
 				if( amount == infinity_c ) {
 					game_g->icon_clocks[ 0 ]->draw(offset_panel_x_c + 72, offset_panel_y_c + y1);
@@ -1544,7 +1544,7 @@ void GamePanel::draw() {
 					thalfdays += thours/12;
 					thours = thours % 12;
 					game_g->icon_clocks[ thours+1 ]->draw(offset_panel_x_c + 72, offset_panel_y_c + y1);
-					Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + y1 + 18, game_g->numbers_white, thalfdays, Image::JUSTIFY_CENTRE);
+					Gigalomania::Image::writeNumbers(offset_panel_x_c + 80, offset_panel_y_c + y1 + 18, game_g->numbers_white, thalfdays, Gigalomania::Image::JUSTIFY_CENTRE);
 				}
 			}
 			else {

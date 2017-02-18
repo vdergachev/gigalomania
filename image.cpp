@@ -45,15 +45,13 @@ inline void CreateMask( Uint32& rmask, Uint32& gmask, Uint32& bmask, Uint32& ama
 extern const bool DEBUG;
 extern const int DEBUGLEVEL;
 
-using namespace Gigalomania;
-
 #if SDL_MAJOR_VERSION == 1
-SDL_Surface *Image::dest_surf = NULL;
+SDL_Surface *Gigalomania::Image::dest_surf = NULL;
 #else
-SDL_Renderer *Image::sdlRenderer = NULL;
+SDL_Renderer *Gigalomania::Image::sdlRenderer = NULL;
 #endif
 
-Image::Image() {
+Gigalomania::Image::Image() {
 	this->data = NULL;
 	this->need_to_free_data = false;
 	this->surface = NULL;
@@ -67,11 +65,11 @@ Image::Image() {
 	this->offset_y = 0;
 }
 
-Image::~Image() {
+Gigalomania::Image::~Image() {
 	free();
 }
 
-void Image::free() {
+void Gigalomania::Image::free() {
 	if( this->surface != NULL ) {
 		SDL_FreeSurface(this->surface);
 		this->surface = NULL;
@@ -89,7 +87,7 @@ void Image::free() {
 	}
 }
 
-void Image::draw(int x, int y) const {
+void Gigalomania::Image::draw(int x, int y) const {
 	x += offset_x;
 	y += offset_y;
 	x = (int)(x * scale_x);
@@ -116,7 +114,7 @@ void Image::draw(int x, int y) const {
 #endif
 }
 
-void Image::draw(int x, int y, int sw, int sh) const {
+void Gigalomania::Image::draw(int x, int y, int sw, int sh) const {
 	x += offset_x;
 	y += offset_y;
 	x = (int)(x * scale_x);
@@ -150,7 +148,7 @@ void Image::draw(int x, int y, int sw, int sh) const {
 #endif
 }
 
-void Image::draw(int x, int y, float scale_w, float scale_h) const {
+void Gigalomania::Image::draw(int x, int y, float scale_w, float scale_h) const {
 	x = (int)(x * scale_x);
 	y = (int)(y * scale_y);
 #if SDL_MAJOR_VERSION == 1
@@ -178,7 +176,7 @@ void Image::draw(int x, int y, float scale_w, float scale_h) const {
 #endif
 }
 
-void Image::drawWithAlpha(int x, int y, unsigned char alpha) const {
+void Gigalomania::Image::drawWithAlpha(int x, int y, unsigned char alpha) const {
 	// n.b., only works if the image doesn't have per-pixel alpha channel
 #if SDL_MAJOR_VERSION == 1
 	SDL_SetAlpha(this->surface, SDL_SRCALPHA|SDL_RLEACCEL, alpha);
@@ -188,28 +186,28 @@ void Image::drawWithAlpha(int x, int y, unsigned char alpha) const {
 	this->draw(x, y);
 }
 
-int Image::getWidth() const {
+int Gigalomania::Image::getWidth() const {
 	return this->surface->w;
 }
 
-int Image::getHeight() const {
+int Gigalomania::Image::getHeight() const {
 	return this->surface->h;
 }
 
-void Image::setScale(float scale_x,float scale_y) {
+void Gigalomania::Image::setScale(float scale_x,float scale_y) {
 	this->scale_x = scale_x;
 	this->scale_y = scale_y;
 }
 
-bool Image::isPaletted() const {
+bool Gigalomania::Image::isPaletted() const {
 	return this->surface->format->palette != NULL;
 }
 
-int Image::getNColors() const {
+int Gigalomania::Image::getNColors() const {
 	return this->surface->format->palette->ncolors;
 }
 
-unsigned char Image::getPixelIndex(int x,int y) const {
+unsigned char Gigalomania::Image::getPixelIndex(int x,int y) const {
 	if( !isPaletted() )
 		return 0;
 
@@ -219,7 +217,7 @@ unsigned char Image::getPixelIndex(int x,int y) const {
 	return c;
 }
 
-bool Image::setPixelIndex(int x,int y,unsigned char c) {
+bool Gigalomania::Image::setPixelIndex(int x,int y,unsigned char c) {
 	if( !isPaletted() )
 		return false;
 
@@ -229,7 +227,7 @@ bool Image::setPixelIndex(int x,int y,unsigned char c) {
 	return true;
 }
 
-bool Image::setColor(int index,unsigned char r,unsigned char g,unsigned char b) {
+bool Gigalomania::Image::setColor(int index,unsigned char r,unsigned char g,unsigned char b) {
 	if( !isPaletted() )
 		return false;
 
@@ -309,7 +307,7 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
 }
 
 // Creates an alpha from the mask; also adds in shadow effect based on supplied ar/ag/ab colour
-bool Image::createAlphaForColor(bool mask, unsigned char mr, unsigned char mg, unsigned char mb, unsigned char ar, unsigned char ag, unsigned char ab, unsigned char alpha) {
+bool Gigalomania::Image::createAlphaForColor(bool mask, unsigned char mr, unsigned char mg, unsigned char mb, unsigned char ar, unsigned char ag, unsigned char ab, unsigned char alpha) {
 	int w = this->getWidth();
 	int h = this->getHeight();
 
@@ -356,7 +354,7 @@ bool Image::createAlphaForColor(bool mask, unsigned char mr, unsigned char mg, u
 	return true;
 }
 
-void Image::scaleAlpha(float scale) {
+void Gigalomania::Image::scaleAlpha(float scale) {
 	int bpp = this->surface->format->BitsPerPixel;
 	if( bpp != 32 )
 		return;
@@ -390,7 +388,7 @@ void Image::scaleAlpha(float scale) {
 #endif
 }
 
-bool Image::convertToHiColor(bool alpha) {
+bool Gigalomania::Image::convertToHiColor(bool alpha) {
 #ifdef TIMING
 	int time_s = clock();
 #endif
@@ -418,7 +416,7 @@ bool Image::convertToHiColor(bool alpha) {
 	return true;
 }
 
-bool Image::convertToDisplayFormat() {
+bool Gigalomania::Image::convertToDisplayFormat() {
 #if SDL_MAJOR_VERSION == 1
 	SDL_Surface *new_surf = NULL;
 	int bpp = this->surface->format->BitsPerPixel;
@@ -444,7 +442,7 @@ bool Image::convertToDisplayFormat() {
 	return true;
 }
 
-bool Image::copyPalette(const Image *image) {
+bool Gigalomania::Image::copyPalette(const Gigalomania::Image *image) {
 	if( this->surface->format->palette == NULL || image->surface->format->palette == NULL )
 		return false;
 
@@ -460,7 +458,7 @@ bool Image::copyPalette(const Image *image) {
 }
 
 // side-effect: also converts images with < 256 colours to have 256 colours, unless scaling is 1.0
-void Image::scale(float sx,float sy) {
+void Gigalomania::Image::scale(float sx,float sy) {
 	if( sx == 1.0f && sy == 1.0f ) {
 		//LOG("no need to scale\n");
 		return;
@@ -596,13 +594,13 @@ void Image::scale(float sx,float sy) {
 #endif
 }
 
-bool Image::scaleTo(int n_w) {
+bool Gigalomania::Image::scaleTo(int n_w) {
 	float scale_factor = ((float)n_w) / (float)this->getWidth();
 	this->scale(scale_factor, scale_factor); // nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	return true;
 }
 
-void Image::remap(unsigned char sr,unsigned char sg,unsigned char sb,unsigned char rr,unsigned char rg,unsigned char rb) {
+void Gigalomania::Image::remap(unsigned char sr,unsigned char sg,unsigned char sb,unsigned char rr,unsigned char rg,unsigned char rb) {
 	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
 		return;
 	}
@@ -665,7 +663,7 @@ void Image::remap(unsigned char sr,unsigned char sg,unsigned char sb,unsigned ch
 #endif
 }
 
-void Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
+void Gigalomania::Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
 	ASSERT(from >= 0 && from < 3);
 	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
 		return;
@@ -706,7 +704,7 @@ void Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
 	SDL_UnlockSurface(this->surface);
 }
 
-void Image::brighten(float sr, float sg, float sb) {
+void Gigalomania::Image::brighten(float sr, float sg, float sb) {
 	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
 		return;
 	}
@@ -746,7 +744,7 @@ void Image::brighten(float sr, float sg, float sb) {
 #endif
 }
 
-void Image::fadeAlpha(bool x_dir, bool fwd) {
+void Gigalomania::Image::fadeAlpha(bool x_dir, bool fwd) {
 	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
 		return;
 	}
@@ -798,7 +796,7 @@ void Image::fadeAlpha(bool x_dir, bool fwd) {
 #if SDL_MAJOR_VERSION == 1
 // If using SDL2, should just blit the rectangle directly with Screen::fillRect() or Screen::fillRectWithAlpha().
 // We need this for SDL1.2, as there Screen::fillRectWithAlpha() isn't supported (due to SDL_fillRect not supporting alpha blending in SDL 1.2)
-void Image::fillRect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b) {
+void Gigalomania::Image::fillRect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b) {
 	int col = SDL_MapRGB(this->surface->format, r, g, b);
 	SDL_Rect rect;
 	rect.x = x;
@@ -809,7 +807,7 @@ void Image::fillRect(int x, int y, int w, int h, unsigned char r, unsigned char 
 }
 #endif
 
-Image *Image::copy(int x, int y, int w, int h) const {
+Gigalomania::Image *Gigalomania::Image::copy(int x, int y, int w, int h) const {
 	//LOG("Image::copy(%d,%d,%d,%d)\n",x,y,w,h);
 #ifdef TIMING
 	int time_s = clock();
@@ -820,7 +818,7 @@ Image *Image::copy(int x, int y, int w, int h) const {
 	w = (int)(w * scale_x);
 	h = (int)(h * scale_y);
 
-	Image *copy_image = NULL;
+	Gigalomania::Image *copy_image = NULL;
 	{
 		SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, this->surface->format->BitsPerPixel, this->surface->format->Rmask, this->surface->format->Gmask, this->surface->format->Bmask, this->surface->format->Amask);
 		copy_image = new Image();
@@ -879,7 +877,7 @@ Image *Image::copy(int x, int y, int w, int h) const {
 	return copy_image;
 }
 
-Image *Image::loadImage(const char *filename) {
+Gigalomania::Image *Gigalomania::Image::loadImage(const char *filename) {
 #ifdef TIMING
 	int time_s = clock();
 #endif
@@ -889,7 +887,7 @@ Image *Image::loadImage(const char *filename) {
 		LOG("SDL_RWFromFile failed: %s\n", SDL_GetError());
 		return NULL;
 	}
-	Image *image = new Image();
+	Gigalomania::Image *image = new Image();
 	image->surface = IMG_Load_RW(src, 1);
 	if( image->surface == NULL ) {
 		LOG("IMG_Load_RW failed: %s\n", IMG_GetError());
@@ -918,13 +916,13 @@ Image *Image::loadImage(const char *filename) {
 	return image;
 }
 
-Image *Image::createBlankImage(int width,int height, int bpp) {
+Gigalomania::Image *Gigalomania::Image::createBlankImage(int width,int height, int bpp) {
 	Uint32 rmask, gmask, bmask, amask;
 	CreateMask(rmask, gmask, bmask, amask);
 
 	SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, bpp, rmask, gmask, bmask, amask);
 
-	Image *image = new Image();
+	Gigalomania::Image *image = new Image();
 	image->surface = surface;
 	image->data = (unsigned char *)image->surface->pixels;
 	image->need_to_free_data = false;
@@ -932,8 +930,8 @@ Image *Image::createBlankImage(int width,int height, int bpp) {
 	return image;
 }
 
-Image *Image::createNoise(int w,int h,float scale_u,float scale_v,const unsigned char filter_max[3],const unsigned char filter_min[3],NOISEMODE_t noisemode,int n_iterations) {
-	Image *image = Image::createBlankImage(w, h, 32);
+Gigalomania::Image *Gigalomania::Image::createNoise(int w,int h,float scale_u,float scale_v,const unsigned char filter_max[3],const unsigned char filter_min[3],NOISEMODE_t noisemode,int n_iterations) {
+	Gigalomania::Image *image = Gigalomania::Image::createBlankImage(w, h, 32);
 	SDL_LockSurface(image->surface);
 	float fvec[2] = {0.0f, 0.0f};
 	for(int y=0;y<h;y++) {
@@ -995,12 +993,12 @@ Image *Image::createNoise(int w,int h,float scale_u,float scale_v,const unsigned
 	return image;
 }
 
-Image * Image::createRadial(int w,int h,float alpha_scale) {
+Gigalomania::Image * Gigalomania::Image::createRadial(int w,int h,float alpha_scale) {
 	return createRadial(w, h, alpha_scale, 255, 255, 255);
 }
 
-Image * Image::createRadial(int w,int h,float alpha_scale, Uint8 r, Uint8 g, Uint8 b) {
-	Image *image = Image::createBlankImage(w, h, 32);
+Gigalomania::Image * Gigalomania::Image::createRadial(int w,int h,float alpha_scale, Uint8 r, Uint8 g, Uint8 b) {
+	Gigalomania::Image *image = Gigalomania::Image::createBlankImage(w, h, 32);
 	SDL_LockSurface(image->surface);
 	int radius = min(w/2, h/2);
 	for(int y=0;y<h;y++) {
@@ -1025,16 +1023,16 @@ Image * Image::createRadial(int w,int h,float alpha_scale, Uint8 r, Uint8 g, Uin
 }
 
 #if SDL_MAJOR_VERSION == 1
-void Image::setGraphicsOutput(SDL_Surface *dest_surf) {
-	Image::dest_surf = dest_surf;
+void Gigalomania::Image::setGraphicsOutput(SDL_Surface *dest_surf) {
+	Gigalomania::Image::dest_surf = dest_surf;
 }
 #else
-void Image::setGraphicsOutput(SDL_Renderer *sdlRenderer) {
-	Image::sdlRenderer = sdlRenderer;
+void Gigalomania::Image::setGraphicsOutput(SDL_Renderer *sdlRenderer) {
+	Gigalomania::Image::sdlRenderer = sdlRenderer;
 }
 #endif
 
-void Image::writeNumbers(int x,int y,Image *images[10],int number,Justify justify) {
+void Gigalomania::Image::writeNumbers(int x,int y,Gigalomania::Image *images[10],int number,Justify justify) {
 	char buffer[16] = "";
 	sprintf(buffer,"%d",number);
 	int len = strlen(buffer);
@@ -1053,11 +1051,11 @@ void Image::writeNumbers(int x,int y,Image *images[10],int number,Justify justif
 	}
 }
 
-void Image::write(int x,int y,Image *images[n_font_chars_c],const char *text,Justify justify) {
+void Gigalomania::Image::write(int x,int y,Gigalomania::Image *images[n_font_chars_c],const char *text,Justify justify) {
 	writeMixedCase(x, y, images, images, NULL, text, justify);
 }
 
-void Image::writeMixedCase(int x,int y,Image *large[n_font_chars_c],Image *little[n_font_chars_c],Image *numbers[10],const char *text,Justify justify) {
+void Gigalomania::Image::writeMixedCase(int x,int y,Gigalomania::Image *large[n_font_chars_c],Gigalomania::Image *little[n_font_chars_c],Gigalomania::Image *numbers[10],const char *text,Justify justify) {
 	int len = strlen(text);
 	int n_lines = 0;
 	int s_w = little[0]->getScaledWidth();
@@ -1148,7 +1146,7 @@ void Image::writeMixedCase(int x,int y,Image *large[n_font_chars_c],Image *littl
 	}
 }
 
-void Image::smooth() {
+void Gigalomania::Image::smooth() {
 	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
 		return;
 	}

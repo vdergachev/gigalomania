@@ -19,7 +19,9 @@ namespace Gigalomania {
 	class PanelPage;
 }
 
-using namespace Gigalomania;
+using Gigalomania::Button;
+using Gigalomania::ImageButton;
+using Gigalomania::PanelPage;
 
 class PlayingGameState;
 class ChooseGameTypePanel;
@@ -57,12 +59,12 @@ const int land_height_c = 160;
 
 class Feature {
 protected:
-	Image **image;
+	Gigalomania::Image **image;
 	int n_frames;
 	int xpos, ypos;
 	bool at_front;
 public:
-	Feature(Image *image[],int n_frames,int xpos,int ypos) {
+	Feature(Gigalomania::Image *image[],int n_frames,int xpos,int ypos) {
 		this->image = image;
 		this->n_frames = n_frames;
 		this->xpos = xpos;
@@ -70,10 +72,10 @@ public:
 		this->at_front = false;
 	}
 
-	const Image *getImage(int counter) const {
+	const Gigalomania::Image *getImage(int counter) const {
 		return this->image[counter % n_frames];
 	}
-	void setImage(Image *image[], int n_frames) {
+	void setImage(Gigalomania::Image *image[], int n_frames) {
 		this->image = image;
 		this->n_frames = n_frames;
 	}
@@ -126,7 +128,7 @@ public:
 };
 
 class FadeEffect : public TimedEffect {
-	Image *image; // used by SDL 1.2 (note, we still declare for SDL 2, to avoid having to include the SDL directories to find out the SDL_MAJOR_VERSION value)
+	Gigalomania::Image *image; // used by SDL 1.2 (note, we still declare for SDL 2, to avoid having to include the SDL directories to find out the SDL_MAJOR_VERSION value)
 	bool white;
 	bool out;
 public:
@@ -147,13 +149,13 @@ public:
 };
 
 class AnimationEffect : public TimedEffect {
-	Image **images;
+	Gigalomania::Image **images;
 	int n_images;
 	int xpos, ypos;
 	int time_per_frame;
 	bool dir;
 public:
-	AnimationEffect(int xpos, int ypos,Image **images, int n_images,int time_per_frame,bool dir) : TimedEffect() {
+	AnimationEffect(int xpos, int ypos,Gigalomania::Image **images, int n_images,int time_per_frame,bool dir) : TimedEffect() {
 		this->images = images;
 		this->n_images = n_images;
 		this->xpos = xpos;
@@ -181,7 +183,7 @@ protected:
 	FadeEffect *whitefade;
 	PanelPage *screen_page;
 	bool mobile_ui_display_mouse; // if mobile_ui is true, should we display the mouse icon?
-	Image *mouse_image;
+	Gigalomania::Image *mouse_image;
 	int mouse_off_x, mouse_off_y;
 	enum ConfirmType {
 		CONFIRMTYPE_UNKNOWN = -1,

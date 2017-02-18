@@ -45,6 +45,8 @@ using std::stringstream;
 #include "image.h"
 #include "sound.h"
 
+using Gigalomania::TrackedObject;
+
 const bool default_pref_sound_on_c = true;
 const bool default_pref_music_on_c = true;
 const bool default_pref_disallow_nukes_c = false;
@@ -1206,7 +1208,7 @@ bool Game::loadSamples() {
 	return ok;
 }
 
-bool remapLand(Image *image,MapColour colour) {
+bool remapLand(Gigalomania::Image *image,MapColour colour) {
 	for(int y=0;y<image->getHeight();y++) {
 		for(int x=0;x<image->getWidth();x++) {
 			unsigned char c = image->getPixelIndex(x,y);
@@ -1288,7 +1290,7 @@ bool remapLand(Image *image,MapColour colour) {
 	return true;
 }
 
-void Game::convertToHiColor(Image *image) const {
+void Game::convertToHiColor(Gigalomania::Image *image) const {
 	if( using_old_gfx ) {
 		// create alpha from color keys
 		image->createAlphaForColor(true, 255, 0, 255, 127, 0, 127, shadow_alpha_c);
@@ -1296,7 +1298,7 @@ void Game::convertToHiColor(Image *image) const {
 	image->convertToHiColor(false);
 }
 
-void Game::processImage(Image *image, bool old_smooth) const {
+void Game::processImage(Gigalomania::Image *image, bool old_smooth) const {
     //LOG("    convert to hi color\n");
 	convertToHiColor(image);
     //LOG("    scale\n");
@@ -1315,7 +1317,7 @@ void Game::processImage(Image *image, bool old_smooth) const {
 bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 	char filename[300] = "";
 	sprintf(filename, "attacker_walking_%d.png", epoch);
-	Image *gfx_image = Image::loadImage(gfx_dir + filename);
+	Gigalomania::Image *gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
 	// if NULL, look for direction specific graphics
 	if( gfx_image != NULL ) {
 	    gfx_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h); // so the copying will work at the right scale for the input image
@@ -1327,7 +1329,7 @@ bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 			//LOG("try loading direction specific images for epoch %d dir %d\n", epoch, dir);
 			direction_specific = true;
 			sprintf(filename, "attacker_walking_%d_%d.png", epoch, dir);
-			gfx_image = Image::loadImage(gfx_dir + filename);
+			gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
 			if( gfx_image == NULL ) {
 				LOG("failed to load attacker walking image for epoch %d dir %d\n", epoch, dir);
 				return false;
@@ -1361,7 +1363,7 @@ bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 	return true;
 }
 
-void Game::calculateScale(const Image *image) {
+void Game::calculateScale(const Gigalomania::Image *image) {
 #if SDL_MAJOR_VERSION == 1
 	scale_factor_w = ((float)(scale_width*default_width_c))/(float)image->getWidth();
 	scale_factor_h = ((float)(scale_height*default_height_c))/(float)image->getHeight();
@@ -1382,7 +1384,7 @@ bool Game::loadOldImages() {
 	LOG("try using old graphics\n");
 	using_old_gfx = true;
 
-	background = Image::loadImage("data/mlm_starfield");
+	background = Gigalomania::Image::loadImage("data/mlm_starfield");
 
 	if( background == NULL )
 		return false;
@@ -1413,7 +1415,7 @@ bool Game::loadOldImages() {
 	}
 	grave = NULL;
 
-	Image *image_slabs = Image::loadImage("data/mlm_slabs");
+	Gigalomania::Image *image_slabs = Gigalomania::Image::loadImage("data/mlm_slabs");
 	if( image_slabs == NULL )
 		return false;
 	drawProgress(30);
@@ -1464,7 +1466,7 @@ bool Game::loadOldImages() {
 		factory[i] = NULL;
 	}
 
-	Image *buildings = Image::loadImage("data/mlm_buildings");
+	Gigalomania::Image *buildings = Gigalomania::Image::loadImage("data/mlm_buildings");
 	if( buildings == NULL )
 		return false;
 	buildings->setColor(0, 255, 0, 255);
@@ -1480,7 +1482,7 @@ bool Game::loadOldImages() {
 	buildings = NULL;
 	drawProgress(40);
 
-	Image *icons = Image::loadImage("data/mlm_icons");
+	Gigalomania::Image *icons = Gigalomania::Image::loadImage("data/mlm_icons");
 	if( icons == NULL )
 		return false;
 	if( !icons->scaleTo((int)(scale_width*default_width_c)) ) // must use this method, as still using alongside the new gfx images
@@ -1660,7 +1662,7 @@ bool Game::loadOldImages() {
 	for(int i=0;i<n_coast_c;i++)
 		coast_icons[i] = NULL;
 
-	Image *smallmap = Image::loadImage("data/mlm_smallmap");
+	Gigalomania::Image *smallmap = Gigalomania::Image::loadImage("data/mlm_smallmap");
 	if( smallmap == NULL )
 		return false;
 	smallmap->setColor(0, 255, 0, 255);
@@ -1763,7 +1765,7 @@ bool Game::loadOldImages() {
 		for(int j=0;j<N_ATTACKER_AMMO_DIRS;j++)
 			attackers_ammo[i][j] = NULL;
 
-	Image *armies = Image::loadImage("data/mlm_armies");
+	Gigalomania::Image *armies = Gigalomania::Image::loadImage("data/mlm_armies");
 	if( armies == NULL ) {
 		return false;
 	}
@@ -1938,7 +1940,7 @@ bool Game::loadOldImages() {
     }
 	drawProgress(65);
 
-	Image *features = Image::loadImage("data/mlm_features");
+	Gigalomania::Image *features = Gigalomania::Image::loadImage("data/mlm_features");
 	if( features == NULL )
 		return false;
 	features->setColor(0, 255, 0, 255);
@@ -1958,7 +1960,7 @@ bool Game::loadOldImages() {
 
 	drawProgress(70);
 
-	background_islands = Image::loadImage("data/mlm_sunrise");
+	background_islands = Gigalomania::Image::loadImage("data/mlm_sunrise");
 	if( background_islands == NULL )
 		return false;
 	processImage(background_islands);
@@ -1973,12 +1975,12 @@ bool Game::loadImages() {
 	// progress should go from 0 to 80%
 	string gfx_dir = "gfx/";
 
-	background = Image::loadImage(gfx_dir + "starfield.jpg");
+	background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
 #ifdef DATADIR
 	if( background == NULL ) {
 		gfx_dir = datadir + "/" + gfx_dir;
 		LOG("look in %s for gfx\n", gfx_dir.c_str());
-		background = Image::loadImage(gfx_dir + "starfield.jpg");
+		background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
 	}
 #endif
 	if( background == NULL ) {
@@ -1993,15 +1995,15 @@ bool Game::loadImages() {
 	// nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	processImage(background);
 
-	background_stars = Image::loadImage(gfx_dir + "stars.jpg");
+	background_stars = Gigalomania::Image::loadImage(gfx_dir + "stars.jpg");
 	if( background_stars == NULL )
 		return false;
 	processImage(background_stars);
 
 	drawProgress(25);
 
-	Image *image_slabs = NULL;
-	image_slabs = Image::loadImage(gfx_dir + "slabs.png");
+	Gigalomania::Image *image_slabs = NULL;
+	image_slabs = Gigalomania::Image::loadImage(gfx_dir + "slabs.png");
 	if( image_slabs == NULL )
 		return false;
 	drawProgress(30);
@@ -2021,7 +2023,7 @@ bool Game::loadImages() {
 	delete image_slabs;
 	image_slabs = NULL;
 
-	Image *player_heads_select_all = Image::loadImage(gfx_dir + "player_heads_select.png");
+	Gigalomania::Image *player_heads_select_all = Gigalomania::Image::loadImage(gfx_dir + "player_heads_select.png");
 	if( player_heads_select_all == NULL )
 		return false;
 	processImage(player_heads_select_all);
@@ -2030,7 +2032,7 @@ bool Game::loadImages() {
 	}
 	delete player_heads_select_all;
 
-	Image *player_heads_alliance_all = Image::loadImage(gfx_dir + "player_heads_alliance.png");
+	Gigalomania::Image *player_heads_alliance_all = Gigalomania::Image::loadImage(gfx_dir + "player_heads_alliance.png");
 	processImage(player_heads_alliance_all);
 	if( player_heads_alliance_all == NULL )
 		return false;
@@ -2039,12 +2041,12 @@ bool Game::loadImages() {
 	}
 	delete player_heads_alliance_all;
 
-	grave = Image::loadImage(gfx_dir + "grave1.png");
+	grave = Gigalomania::Image::loadImage(gfx_dir + "grave1.png");
 	if( grave == NULL )
 		return false;
 	processImage(grave);
 
-	/*Image *buildings = Image::loadImage(gfx_dir + "buildings.png");
+	/*Gigalomania::Image *buildings = Gigalomania::Image::loadImage(gfx_dir + "buildings.png");
 	if( buildings != NULL ) {
 		buildings_shadow = false; // done using alpha channel
 		buildings->scale(scale_factor, scale_factor);
@@ -2064,7 +2066,7 @@ bool Game::loadImages() {
 	for(int i=0;i<n_epochs_c;i++) {
 		stringstream filename;
 		filename << gfx_dir << "building_tower_" << i << ".png";
-		Image *temp = Image::loadImage(filename.str().c_str());
+		Gigalomania::Image *temp = Gigalomania::Image::loadImage(filename.str().c_str());
 		if( temp == NULL ) {
 			return false;
 		}
@@ -2078,7 +2080,7 @@ bool Game::loadImages() {
 	for(int i=mine_epoch_c;i<n_epochs_c-1;i++) {
 		stringstream filename;
 		filename << gfx_dir << "building_mine_" << i << ".png";
-		Image *temp = Image::loadImage(filename.str().c_str());
+		Gigalomania::Image *temp = Gigalomania::Image::loadImage(filename.str().c_str());
 		if( temp == NULL ) {
 			return false;
 		}
@@ -2090,7 +2092,7 @@ bool Game::loadImages() {
 	for(int i=factory_epoch_c;i<n_epochs_c-1;i++) {
 		stringstream filename;
 		filename << gfx_dir << "building_factory_" << i << ".png";
-		Image *temp = Image::loadImage(filename.str().c_str());
+		Gigalomania::Image *temp = Gigalomania::Image::loadImage(filename.str().c_str());
 		if( temp == NULL ) {
 			return false;
 		}
@@ -2103,7 +2105,7 @@ bool Game::loadImages() {
 	for(int i=lab_epoch_c;i<n_epochs_c-1;i++) {
 		stringstream filename;
 		filename << gfx_dir << "building_lab_" << i << ".png";
-		Image *temp = Image::loadImage(filename.str().c_str());
+		Gigalomania::Image *temp = Gigalomania::Image::loadImage(filename.str().c_str());
 		if( temp == NULL ) {
 			return false;
 		}
@@ -2115,7 +2117,7 @@ bool Game::loadImages() {
 
 	drawProgress(40);
 
-	Image *icons = Image::loadImage(gfx_dir + "icons.png");
+	Gigalomania::Image *icons = Gigalomania::Image::loadImage(gfx_dir + "icons.png");
 	if( icons == NULL )
 		return false;
 	/*if( !icons->scaleTo(scale_width*default_width_c) )
@@ -2260,7 +2262,7 @@ bool Game::loadImages() {
 	icon_ergo = icons->copy(176, 112, 16, 16);
 	icon_trash = icons->copy(192, 112, 16, 16);
 
-	icons = Image::loadImage(gfx_dir + "explosions_test4.png");
+	icons = Gigalomania::Image::loadImage(gfx_dir + "explosions_test4.png");
 	if( icons == NULL )
 		return false;
 	drawProgress(42);
@@ -2272,7 +2274,7 @@ bool Game::loadImages() {
 		explosions[i] = icons->copy(x*w, y*h, w, h);
 	}
 
-	icons = Image::loadImage(gfx_dir + "icons64.png");
+	icons = Gigalomania::Image::loadImage(gfx_dir + "icons64.png");
 	if( icons == NULL )
 		return false;
 	drawProgress(45);
@@ -2288,7 +2290,7 @@ bool Game::loadImages() {
 	arrow_right = icons->copy(96, 0, 32, 32);
 	arrow_right->scaleAlpha(0.75f);
 
-	icons = Image::loadImage(gfx_dir + "font.png");
+	icons = Gigalomania::Image::loadImage(gfx_dir + "font.png");
 	if( icons == NULL )
 		return false;
 	drawProgress(48);
@@ -2364,7 +2366,7 @@ bool Game::loadImages() {
 	delete icons;
 	drawProgress(50);
 
-	icons = Image::loadImage(gfx_dir + "font_large.png");
+	icons = Gigalomania::Image::loadImage(gfx_dir + "font_large.png");
 	if( icons == NULL )
 		return false;
 	drawProgress(48);
@@ -2402,7 +2404,7 @@ bool Game::loadImages() {
 			processImage(letters_large[i]);
 	}
 
-    smoke_image = Image::createRadial((int)(scale_width * 16), (int)(scale_height * 16), 0.5f);
+    smoke_image = Gigalomania::Image::createRadial((int)(scale_width * 16), (int)(scale_height * 16), 0.5f);
 	processImage(smoke_image);
 
 	for(int i=0;i<n_coast_c;i++)
@@ -2413,37 +2415,37 @@ bool Game::loadImages() {
     {
 		unsigned char filter_max[3] = {255, 192, 84};
 		unsigned char filter_min[3] = {120, 0, 0};
-        map_sq[MAP_ORANGE][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_ORANGE][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	{
 		unsigned char filter_max[3] = {104, 255, 104};
 		unsigned char filter_min[3] = {0, 72, 0};
-        map_sq[MAP_GREEN][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_GREEN][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	{
 		unsigned char filter_max[3] = {216, 144, 72};
 		unsigned char filter_min[3] = {16, 0, 0};
-        map_sq[MAP_BROWN][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_BROWN][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	{
 		unsigned char filter_max[3] = {255, 255, 255};
 		unsigned char filter_min[3] = {72, 72, 72};
-        map_sq[MAP_WHITE][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_WHITE][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	{
 		unsigned char filter_max[3] = {224, 152, 116};
 		unsigned char filter_min[3] = {16, 0, 0};
-        map_sq[MAP_DBROWN][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_DBROWN][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	{
 		unsigned char filter_max[3] = {52, 232, 52};
 		unsigned char filter_min[3] = {0, 8, 0};
-        map_sq[MAP_DGREEN][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_DGREEN][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	{
 		unsigned char filter_max[3] = {188, 188, 188};
 		unsigned char filter_min[3] = {0, 0, 0};
-        map_sq[MAP_GREY][0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Image::NOISEMODE_PERLIN, 4);
+        map_sq[MAP_GREY][0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max, filter_min, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	}
 	for(int i=0;i<MAP_N_COLOURS;i++) {
         map_sq[i][0]->setScale(scale_width, scale_height);
@@ -2456,25 +2458,25 @@ bool Game::loadImages() {
 	map_sq_coast_offset = 0;
 	unsigned char filter_max_ocean[3] = {180, 215, 240};
 	unsigned char filter_min_ocean[3] = {60, 95, 115};
-	coast_icons[0] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[0] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[0]->fadeAlpha(false, false);
-	coast_icons[1] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[1] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[1]->fadeAlpha(true, true);
-	coast_icons[2] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[2] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[2]->fadeAlpha(false, true);
-	coast_icons[3] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[3] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[3]->fadeAlpha(true, false);
 
-	coast_icons[4] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[4] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[4]->fadeAlpha(true, false);
 	coast_icons[4]->fadeAlpha(false, false);
-	coast_icons[5] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[5] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[5]->fadeAlpha(true, true);
 	coast_icons[5]->fadeAlpha(false, false);
-	coast_icons[6] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[6] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[6]->fadeAlpha(true, false);
 	coast_icons[6]->fadeAlpha(false, true);
-	coast_icons[7] = Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Image::NOISEMODE_PERLIN, 4);
+	coast_icons[7] = Gigalomania::Image::createNoise(map_width, map_height, 4.0f, 4.0f, filter_max_ocean, filter_min_ocean, Gigalomania::Image::NOISEMODE_PERLIN, 4);
 	coast_icons[7]->fadeAlpha(true, true);
 	coast_icons[7]->fadeAlpha(false, true);
 
@@ -2504,7 +2506,7 @@ bool Game::loadImages() {
 			for(int j=0;j<N_ATTACKER_AMMO_DIRS;j++)
 				attackers_ammo[i][j] = NULL;
 
-		Image *gfx_def_image = Image::loadImage(gfx_dir + "defenders.png");
+		Gigalomania::Image *gfx_def_image = Gigalomania::Image::loadImage(gfx_dir + "defenders.png");
 		if( gfx_def_image == NULL )
 			return false;
 		drawProgress(58);
@@ -2527,7 +2529,7 @@ bool Game::loadImages() {
 		}
 		delete gfx_def_image;
 
-		gfx_def_image = Image::loadImage(gfx_dir + "defender_9.png");
+		gfx_def_image = Gigalomania::Image::loadImage(gfx_dir + "defender_9.png");
 		if( gfx_def_image == NULL )
 			return false;
         gfx_def_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h); // so the copying will work at the right scale for the input image
@@ -2557,7 +2559,7 @@ bool Game::loadImages() {
 		}
 		drawProgress(60);
 
-		Image *gfx_planes = Image::loadImage(gfx_dir + "attacker_flying.png");
+		Gigalomania::Image *gfx_planes = Gigalomania::Image::loadImage(gfx_dir + "attacker_flying.png");
 		if( gfx_planes == NULL )
 			return false;
 		drawProgress(62);
@@ -2597,7 +2599,7 @@ bool Game::loadImages() {
 		}
 		delete gfx_planes;
 
-		Image *gfx_ammo = Image::loadImage(gfx_dir + "attacker_ammo.png");
+		Gigalomania::Image *gfx_ammo = Gigalomania::Image::loadImage(gfx_dir + "attacker_ammo.png");
 		if( gfx_ammo == NULL )
 			return false;
 		drawProgress(65);
@@ -2623,7 +2625,7 @@ bool Game::loadImages() {
 		}
 
 		attackers_ammo[7][ATTACKER_AMMO_BOMB] = attackers_ammo[6][ATTACKER_AMMO_BOMB];
-		attackers_ammo[9][ATTACKER_AMMO_BOMB] = Image::createRadial((int)(scale_width * 16), (int)(scale_height * 16), 1.0f, 0, 255, 255);
+		attackers_ammo[9][ATTACKER_AMMO_BOMB] = Gigalomania::Image::createRadial((int)(scale_width * 16), (int)(scale_height * 16), 1.0f, 0, 255, 255);
 		processImage(attackers_ammo[9][ATTACKER_AMMO_BOMB]);
 
         for(int i=0;i<=n_epochs_c;i++) {
@@ -2662,7 +2664,7 @@ bool Game::loadImages() {
     }
 
 	// features
-	Image *gfx_features = Image::loadImage(gfx_dir + "features.png");
+	Gigalomania::Image *gfx_features = Gigalomania::Image::loadImage(gfx_dir + "features.png");
 	if( gfx_features == NULL )
 		return false;
 	/*if( !gfx_features->scaleTo(scale_width*default_width_c) )
@@ -2670,26 +2672,26 @@ bool Game::loadImages() {
 	processImage(gfx_features);
 	icon_openpitmine = gfx_features->copy(0, 0, 47, 24);
 
-	icon_trees[0][0] = Image::loadImage(gfx_dir + "tree2_00.png");
-	icon_trees[0][1] = Image::loadImage(gfx_dir + "tree2_01.png");
-	icon_trees[0][2] = Image::loadImage(gfx_dir + "tree2_02.png");
-	icon_trees[0][3] = Image::loadImage(gfx_dir + "tree2_03.png");
+	icon_trees[0][0] = Gigalomania::Image::loadImage(gfx_dir + "tree2_00.png");
+	icon_trees[0][1] = Gigalomania::Image::loadImage(gfx_dir + "tree2_01.png");
+	icon_trees[0][2] = Gigalomania::Image::loadImage(gfx_dir + "tree2_02.png");
+	icon_trees[0][3] = Gigalomania::Image::loadImage(gfx_dir + "tree2_03.png");
 
-	icon_trees[1][0] = Image::loadImage(gfx_dir + "tree3_00.png");
-	icon_trees[1][1] = Image::loadImage(gfx_dir + "tree3_01.png");
-	icon_trees[1][2] = Image::loadImage(gfx_dir + "tree3_02.png");
-	icon_trees[1][3] = Image::loadImage(gfx_dir + "tree3_03.png");
+	icon_trees[1][0] = Gigalomania::Image::loadImage(gfx_dir + "tree3_00.png");
+	icon_trees[1][1] = Gigalomania::Image::loadImage(gfx_dir + "tree3_01.png");
+	icon_trees[1][2] = Gigalomania::Image::loadImage(gfx_dir + "tree3_02.png");
+	icon_trees[1][3] = Gigalomania::Image::loadImage(gfx_dir + "tree3_03.png");
 
 	// [2][] is the nuked tree image
-	icon_trees[2][0] = Image::loadImage(gfx_dir + "deadtree1_00.png");
+	icon_trees[2][0] = Gigalomania::Image::loadImage(gfx_dir + "deadtree1_00.png");
 	for(int j=1;j<n_tree_frames_c;j++) {
 		icon_trees[2][j] = icon_trees[2][0]->copy(); // no animation for nuked tree
 	}
 
-	icon_trees[3][0] = Image::loadImage(gfx_dir + "tree5_00.png");
-	icon_trees[3][1] = Image::loadImage(gfx_dir + "tree5_01.png");
-	icon_trees[3][2] = Image::loadImage(gfx_dir + "tree5_02.png");
-	icon_trees[3][3] = Image::loadImage(gfx_dir + "tree5_03.png");
+	icon_trees[3][0] = Gigalomania::Image::loadImage(gfx_dir + "tree5_00.png");
+	icon_trees[3][1] = Gigalomania::Image::loadImage(gfx_dir + "tree5_01.png");
+	icon_trees[3][2] = Gigalomania::Image::loadImage(gfx_dir + "tree5_02.png");
+	icon_trees[3][3] = Gigalomania::Image::loadImage(gfx_dir + "tree5_03.png");
 
 	for(int i=0;i<n_trees_c;i++) {
 		for(int j=0;j<n_tree_frames_c;j++) {
@@ -2699,29 +2701,29 @@ bool Game::loadImages() {
 		}
 	}
 
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "boulders.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "boulders2.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "bigboulder.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "rocks.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "plant.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "grass.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses01.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses02.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses04.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "grasses05.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "shrub2-01.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "swirl01.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed01.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed02.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed03.png"));
-	icon_clutter.push_back(Image::loadImage(gfx_dir + "weed04.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "boulders.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "boulders2.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "bigboulder.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "rocks.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "plant.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "grass.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "grasses01.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "grasses02.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "grasses04.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "grasses05.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "shrub2-01.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "swirl01.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "weed01.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "weed02.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "weed03.png"));
+	icon_clutter.push_back(Gigalomania::Image::loadImage(gfx_dir + "weed04.png"));
 	for(size_t i=0;i<icon_clutter.size();i++) {
 		if( icon_clutter[i] == NULL )
 			return false;
 		processImage(icon_clutter[i]);
 	}
-	icon_clutter_nuked.push_back(Image::loadImage(gfx_dir + "bones.png"));
-	icon_clutter_nuked.push_back(Image::loadImage(gfx_dir + "skulls.png"));
+	icon_clutter_nuked.push_back(Gigalomania::Image::loadImage(gfx_dir + "bones.png"));
+	icon_clutter_nuked.push_back(Gigalomania::Image::loadImage(gfx_dir + "skulls.png"));
 	for(size_t i=0;i<icon_clutter_nuked.size();i++) {
 		if( icon_clutter_nuked[i] == NULL )
 			return false;
@@ -2965,14 +2967,14 @@ bool Game::openScreen(bool fullscreen) {
 		//screen_height = 480;
 #endif
 
-		screen = new Screen();
+		screen = new Gigalomania::Screen();
 		if( !screen->open(screen_width, screen_height, fullscreen) )
 			return false;
 
 	}
 	else {
 		// fullscreen
-		screen = new Screen();
+		screen = new Gigalomania::Screen();
 
 #if SDL_MAJOR_VERSION == 1
 		if( screen->open(4*default_width_c, 4*default_height_c, fullscreen) ) {
@@ -5337,7 +5339,7 @@ void playGame(int n_args, char *args[]) {
 	for(size_t i=0;i<TrackedObject::getNumTags();i++) {
 		TrackedObject *to = TrackedObject::getTag(i);
 		if( to != NULL && strcmp( to->getClass(), "CLASS_IMAGE" ) == 0 ) {
-			Image *image = (Image *)to;
+			Gigalomania::Image *image = (Gigalomania::Image *)to;
 			if( !image->convertToDisplayFormat() ) {
 				LOG("failed to convertToDisplayFormat\n");
 				LOG("delete game %d\n", game_g);

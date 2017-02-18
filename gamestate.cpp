@@ -112,7 +112,7 @@ bool AmmoEffect::render() const {
 	else {
 		ASSERT(0);
 	}
-	Image *image = game_g->attackers_ammo[epoch][dir];
+	Gigalomania::Image *image = game_g->attackers_ammo[epoch][dir];
 	if( dir == ATTACKER_AMMO_BOMB && dist > 24 ) {
 		if( game_g->explosions[0] != NULL ) {
 			int w = image->getScaledWidth();
@@ -140,7 +140,7 @@ FadeEffect::FadeEffect(bool white,bool out,int delay, void (*func_finish)()) : T
 	this->white = white;
 	this->out = out;
 #if SDL_MAJOR_VERSION == 1
-	this->image = Image::createBlankImage(game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), 24);
+	this->image = Gigalomania::Image::createBlankImage(game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), 24);
 	int r = 0, g = 0, b = 0;
 	if( white ) {
 		r = g = b = 255;
@@ -235,7 +235,7 @@ bool TextEffect::render() const {
 		return false;
 	else if( time > duration )
 		return true;
-	Image::write(xpos, ypos, game_g->letters_small, text.c_str(), Image::JUSTIFY_CENTRE);
+	Gigalomania::Image::write(xpos, ypos, game_g->letters_small, text.c_str(), Gigalomania::Image::JUSTIFY_CENTRE);
 	return false;
 }
 
@@ -319,7 +319,7 @@ void GameState::draw() {
 		string str = game_g->isMobileUI() ? "touch screen\nto unpause game" : "press p or click\nmouse to unpause game";
 		// n.b., don't use 120 for y pos, need to avoid collision with quit game message
 		// and offset x pos slightly, to avoid overlapping with GUI
-		Image::write(120, 100, game_g->letters_large, str.c_str(), Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(120, 100, game_g->letters_large, str.c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 	}
 
 	if( game_g->getApplication()->hasFPS() ) {
@@ -327,7 +327,7 @@ void GameState::draw() {
 		if( fps > 0.0f ) {
 			stringstream str;
 			str << fps;
-			Image::writeMixedCase(4, default_height_c - 16, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_LEFT);
+			Gigalomania::Image::writeMixedCase(4, default_height_c - 16, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 		}
 	}
 
@@ -511,7 +511,7 @@ void ChoosePlayerGameState::draw() {
 	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	//player_select->draw(0, 0, false);
 	game_g->background->draw(0, 0);
-    Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Player", Image::JUSTIFY_CENTRE);
+    Gigalomania::Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Player", Gigalomania::Image::JUSTIFY_CENTRE);
 
 	const int y_offset = 2; // must be even, otherwise we have graphical problems when running at 1280x1024 mode
 	if( game_g->player_heads_select[0] != NULL )
@@ -582,7 +582,7 @@ void ChooseTutorialGameState::reset() {
 void ChooseTutorialGameState::draw() {
 	game_g->getScreen()->clear(); // SDL on Android and OS X at least require screen to be cleared (otherwise we get corrupt regions outside of the main area)
 	game_g->background->draw(0, 0);
-    Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Tutorial", Image::JUSTIFY_CENTRE);
+    Gigalomania::Image::writeMixedCase(160, 16, game_g->letters_large, game_g->letters_small, NULL, "Select a Tutorial", Gigalomania::Image::JUSTIFY_CENTRE);
 
 	this->screen_page->draw();
 
@@ -685,7 +685,7 @@ void PlaceMenGameState::draw() {
 			sprintf(buffer, "Gigalomania v%d.%d", majorVersion, minorVersion);
 		else
 			sprintf(buffer, "Gigalomania v%d.%d.%d", majorVersion, minorVersion, patchVersion);
-	    Image::writeMixedCase(160, 228, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Image::JUSTIFY_CENTRE);
+	    Gigalomania::Image::writeMixedCase(160, 228, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Gigalomania::Image::JUSTIFY_CENTRE);
 	}
 
     /*this->choosemenPanel->draw();
@@ -697,23 +697,23 @@ void PlaceMenGameState::draw() {
 	int s_h = game_g->letters_small[0]->getScaledHeight();
 	const int cx = this->off_x;
     int cy = this->off_y + 104;
-	Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, game_g->getMap()->getName(), Image::JUSTIFY_CENTRE);
+	Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, game_g->getMap()->getName(), Gigalomania::Image::JUSTIFY_CENTRE);
 	cy += s_h + 2;
-	Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, "of the", Image::JUSTIFY_CENTRE);
+	Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, "of the", Gigalomania::Image::JUSTIFY_CENTRE);
 	cy += l_h + 2;
 	sprintf(buffer, "%s AGE", epoch_names[game_g->getStartEpoch()]);
-	Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, buffer, Image::JUSTIFY_CENTRE);
+	Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, buffer, Gigalomania::Image::JUSTIFY_CENTRE);
     cy += l_h + 2;
 
 	int year = epoch_dates[game_g->getStartEpoch()];
 	bool shiny = game_g->getStartEpoch() == n_epochs_c-1;
-	Image::writeNumbers(cx+8, cy, shiny ? game_g->numbers_largeshiny : game_g->numbers_largegrey, abs(year),Image::JUSTIFY_RIGHT);
-	Image *era = ( year < 0 ) ? game_g->icon_bc :
+	Gigalomania::Image::writeNumbers(cx+8, cy, shiny ? game_g->numbers_largeshiny : game_g->numbers_largegrey, abs(year),Gigalomania::Image::JUSTIFY_RIGHT);
+	Gigalomania::Image *era = ( year < 0 ) ? game_g->icon_bc :
 		shiny ? game_g->icon_ad_shiny : game_g->icon_ad;
 	if( era != NULL )
 		era->draw(cx+8, cy);
 	else {
-		Image::write(cx+8, cy, game_g->letters_small, ( year < 0 ) ? "BC" : "AD", Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(cx+8, cy, game_g->letters_small, ( year < 0 ) ? "BC" : "AD", Gigalomania::Image::JUSTIFY_LEFT);
 	}
     cy += l_h + 2;
 
@@ -722,32 +722,32 @@ void PlaceMenGameState::draw() {
         if( n_suspended > 0 )
 		{
 			sprintf(buffer, "Saved Men %d", n_suspended);
-            Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Image::JUSTIFY_CENTRE);
+            Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Gigalomania::Image::JUSTIFY_CENTRE);
 		}
 	}
 
     /*cy += l_h + 2;
 	cy += l_h + 2;
 	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_LOADGAME ) {
-		Image::write(cx, cy, game_g->letters_large, "LOAD", Image::JUSTIFY_CENTRE, true);
+		Gigalomania::Image::write(cx, cy, game_g->letters_large, "LOAD", Gigalomania::Image::JUSTIFY_CENTRE, true);
 	}
 	else if( choosemenPanel->getPage() == ChooseMenPanel::STATE_SAVEGAME ) {
-		Image::write(cx, cy, game_g->letters_large, "SAVE", Image::JUSTIFY_CENTRE, true);
+		Gigalomania::Image::write(cx, cy, game_g->letters_large, "SAVE", Gigalomania::Image::JUSTIFY_CENTRE, true);
 	}
     cy += s_h + 2;*/
 
 	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN ) {
 		cy = 100;
 		const int xpos = 80;
-		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "Click on the icon below", Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "Click on the icon below", Gigalomania::Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to choose how many men", Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to choose how many men", Gigalomania::Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to play with", Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to play with", Gigalomania::Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "then click on the map", Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "then click on the map", Gigalomania::Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
-		Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to the right", Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to the right", Gigalomania::Image::JUSTIFY_CENTRE);
 		cy += l_h + 2;
 	}
 
@@ -1484,11 +1484,11 @@ void PlayingGameState::draw() {
 		}
 		stringstream str;
 		str << PlayerType::getName((PlayerType::PlayerTypeID)player_asking_alliance);
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 0, game_g->letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(offset_map_x_c + 8, offset_map_y_c + 0, game_g->letters_small, str.str().c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 		str.str("asks for an");
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 8, game_g->letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(offset_map_x_c + 8, offset_map_y_c + 8, game_g->letters_small, str.str().c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 		str.str("alliance");
-		Image::write(offset_map_x_c + 8, offset_map_y_c + 16, game_g->letters_small, str.str().c_str(), Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(offset_map_x_c + 8, offset_map_y_c + 16, game_g->letters_small, str.str().c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 	}
 	else if( this->map_display == MAPDISPLAY_MAP ) {
 		// map
@@ -1528,8 +1528,8 @@ void PlayingGameState::draw() {
 		const int gap = 18;
 		const int extra = 0;
 		for(int i=0;i<=game_g->getNSubEpochs();i++) {
-			Image *image = (i==0) ? game_g->unarmed_man : game_g->numbered_weapons[game_g->getStartEpoch() + i - 1];
-			//Image *image = (i==0) ? men[game_g->getStartEpoch()] : numbered_weapons[game_g->getStartEpoch() + i - 1];
+			Gigalomania::Image *image = (i==0) ? game_g->unarmed_man : game_g->numbered_weapons[game_g->getStartEpoch() + i - 1];
+			//Gigalomania::Image *image = (i==0) ? men[game_g->getStartEpoch()] : numbered_weapons[game_g->getStartEpoch() + i - 1];
 			image->draw(offset_map_x_c + gap * i + extra, offset_map_y_c + 2 - 16 + 8);
 		}
 		for(int i=0;i<n_players_c;i++) {
@@ -1545,8 +1545,8 @@ void PlayingGameState::draw() {
 							int idx = (k==0) ? 10 : game_g->getStartEpoch() + k - 1;
 							int n_men = army->getSoldiers(idx);
 							if( n_men > 0 ) {
-								//Image::writeNumbers(offset_map_x_c + 16 * k + 4, offset_map_y_c + 2 + 16 * i + 8 * off + 8, game_g->numbers_small[j], n_men, Image::JUSTIFY_LEFT, true);
-								Image::writeNumbers(offset_map_x_c + gap * k + extra, offset_map_y_c + 2 + 16 * i + 8 * off + 8, game_g->numbers_small[j], n_men, Image::JUSTIFY_LEFT);
+								//Gigalomania::Image::writeNumbers(offset_map_x_c + 16 * k + 4, offset_map_y_c + 2 + 16 * i + 8 * off + 8, game_g->numbers_small[j], n_men, Gigalomania::Image::JUSTIFY_LEFT, true);
+								Gigalomania::Image::writeNumbers(offset_map_x_c + gap * k + extra, offset_map_y_c + 2 + 16 * i + 8 * off + 8, game_g->numbers_small[j], n_men, Gigalomania::Image::JUSTIFY_LEFT);
 							}
 						}
 						off++;
@@ -1584,7 +1584,7 @@ void PlayingGameState::draw() {
 				continue;
 
 			// draw building
-			Image **images = building->getImages();
+			Gigalomania::Image **images = building->getImages();
 			images[ current_sector->getBuildingEpoch() ]->draw(offset_land_x_c + building->getX(), offset_land_y_c + building->getY());
 
 			if( rotate_defenders )
@@ -1599,7 +1599,7 @@ void PlayingGameState::draw() {
 				}*/
 
 				if( building->getTurretMan(j) != -1 ) {
-					Image *image = NULL;
+					Gigalomania::Image *image = NULL;
 					int defender_epoch = building->getTurretMan(j);
 					if( defender_epoch == nuclear_epoch_c ) {
 						image = game_g->nuke_defences[current_sector->getPlayer()];
@@ -1629,7 +1629,7 @@ void PlayingGameState::draw() {
 		ASSERT( current_sector->isShutdown() );
 		Building *building = current_sector->getBuilding(BUILDING_TOWER);
 		ASSERT( building != NULL );
-		Image **images = building->getImages();
+		Gigalomania::Image **images = building->getImages();
 		images[ current_sector->getBuildingEpoch() ]->draw(offset_land_x_c + building->getX(), offset_land_y_c + building->getY());
 		int offset_x = 0, offset_y = 0;
 		getFlagOffset(&offset_x, &offset_y, current_sector->getBuildingEpoch());
@@ -1662,9 +1662,9 @@ void PlayingGameState::draw() {
 		ASSERT(soldier->epoch != nuclear_epoch_c);
 		if( !isAirUnit(soldier->epoch) ) {
 			//int frame = soldier->dir * 4 + ( game_g->getFrameCounter() % 3 );
-			//Image *image = attackers_walking[soldier->player][soldier->epoch][frame];
+			//Gigalomania::Image *image = attackers_walking[soldier->player][soldier->epoch][frame];
 			int n_frames = game_g->n_attacker_frames[soldier->epoch][soldier->dir];
-			Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][game_g->getFrameCounter() % n_frames];
+			Gigalomania::Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][game_g->getFrameCounter() % n_frames];
 			image->draw(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
 		}
 	}
@@ -1699,7 +1699,7 @@ void PlayingGameState::draw() {
 		Soldier *soldier = soldier_list[i];
 		ASSERT(soldier->epoch != nuclear_epoch_c);
 		if( isAirUnit(soldier->epoch) ) {
-			Image *image = NULL;
+			Gigalomania::Image *image = NULL;
 			if( soldier->epoch == 6 || soldier->epoch == 7 ) {
 				image = game_g->planes[soldier->player][soldier->epoch];
 			}
@@ -1769,8 +1769,8 @@ void PlayingGameState::draw() {
 					int n_army = army->getTotal();
 					if( n_army > 0 ) {
 						shield_number_panels[i]->setVisible(true);
-						//Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8, game_g->numbers_small[i], n_army, Image::JUSTIFY_LEFT, true);
-						Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8 * off + 8, game_g->numbers_small[j], n_army, Image::JUSTIFY_LEFT);
+						//Gigalomania::Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8, game_g->numbers_small[i], n_army, Gigalomania::Image::JUSTIFY_LEFT, true);
+						Gigalomania::Image::writeNumbers(offset_map_x_c + 16 * map_width_c + 20, offset_map_y_c + 2 + shield_step_y_c * i + 8 * off + 8, game_g->numbers_small[j], n_army, Gigalomania::Image::JUSTIFY_LEFT);
 						off++;
 					}
 				}
@@ -1794,12 +1794,12 @@ void PlayingGameState::draw() {
 			rect.y = 130;
 			rect.w = max_wid;
 			rect.h = n_lines * (l_h + 2);
-			const Image *player_image = game_g->player_heads_alliance[client_player];
+			const Gigalomania::Image *player_image = game_g->player_heads_alliance[client_player];
 			if( player_image != NULL ) {
 				player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
 			}
 #if SDL_MAJOR_VERSION == 1
-			Image *fill_rect = Image::createBlankImage(game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 24);
+			Gigalomania::Image *fill_rect = Gigalomania::Image::createBlankImage(game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 24);
 			fill_rect->fillRect(0, 0, game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 0, 0, 0);
 			fill_rect->convertToDisplayFormat();
 			fill_rect->drawWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, tutorial_alpha_c);
@@ -1807,7 +1807,7 @@ void PlayingGameState::draw() {
 #else
 			game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*rect.x), (short)(game_g->getScaleHeight()*rect.y), (short)(game_g->getScaleWidth()*rect.w), (short)(game_g->getScaleHeight()*rect.h), 0, 0, 0, tutorial_alpha_c);
 #endif
-			Image::writeMixedCase(rect.x, rect.y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, card->getText().c_str(), Image::JUSTIFY_LEFT);
+			Gigalomania::Image::writeMixedCase(rect.x, rect.y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, card->getText().c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 			if( card->hasArrow(this) ) {
 				int arrow_x = card->getArrowX();
 				int arrow_y = card->getArrowY();
@@ -2091,7 +2091,7 @@ void PlayingGameState::update() {
 					int fire_random = rand() % RAND_MAX;
 					if( fire_random <= fire_prob ) {
 						// fire!
-						Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][0];
+						Gigalomania::Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][0];
 						int xpos = 0, ypos = 0;
 						if( soldier->epoch == cannon_epoch_c ) {
 							xpos = soldier->xpos;
@@ -2133,8 +2133,8 @@ bool PlayingGameState::buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m
 	if( !m_left && !m_right )
 		return done;
 
-	//Image *base_image = building->getImages()[0];
-	Image *base_image = building->getImages()[current_sector->getBuildingEpoch()];
+	//Gigalomania::Image *base_image = building->getImages()[0];
+	Gigalomania::Image *base_image = building->getImages()[current_sector->getBuildingEpoch()];
 	ASSERT( base_image != NULL );
 	if( s_m_x < offset_land_x_c + building->getX() || s_m_x >= offset_land_x_c + building->getX() + base_image->getScaledWidth() ||
 		s_m_y < offset_land_y_c + building->getY() || s_m_y >= offset_land_y_c + building->getY() + base_image->getScaledHeight() ) {
@@ -2715,7 +2715,7 @@ bool PlayingGameState::validSoldierLocation(int epoch,int xpos,int ypos) {
 			Building *building = current_sector->getBuilding((Type)i);
 			if( building == NULL )
 				continue;
-			Image *image = building->getImages()[current_sector->getBuildingEpoch()];
+			Gigalomania::Image *image = building->getImages()[current_sector->getBuildingEpoch()];
 			if( xpos + size_x >= building->getX() && xpos < building->getX() + image->getScaledWidth() &&
 				ypos + size_y >= building->getY() && ypos < building->getY() + image->getScaledHeight() )
 				okay = false;
@@ -3403,7 +3403,7 @@ void EndIslandGameState::draw() {
 	else {
 		ASSERT(false);
 	}
-	Image::write(160, 122, game_g->letters_large, text, Image::JUSTIFY_CENTRE);
+	Gigalomania::Image::write(160, 122, game_g->letters_large, text, Gigalomania::Image::JUSTIFY_CENTRE);
 
 	bool suspend = false;
 	if( game_g->getStartEpoch() >= 6 && game_g->getGameResult() == GAMERESULT_WON )
@@ -3430,13 +3430,13 @@ void EndIslandGameState::draw() {
 		xpos += xstep;
 	}
 
-	Image::write(40, 140, game_g->letters_small, "PLAYER", Image::JUSTIFY_LEFT);
-	Image::write(100, 140, game_g->letters_small, "START", Image::JUSTIFY_LEFT);
-	Image::write(140, 140, game_g->letters_small, "BIRTHS", Image::JUSTIFY_LEFT);
-	Image::write(180, 140, game_g->letters_small, "DEATHS", Image::JUSTIFY_LEFT);
-	Image::write(220, 140, game_g->letters_small, "END", Image::JUSTIFY_LEFT);
+	Gigalomania::Image::write(40, 140, game_g->letters_small, "PLAYER", Gigalomania::Image::JUSTIFY_LEFT);
+	Gigalomania::Image::write(100, 140, game_g->letters_small, "START", Gigalomania::Image::JUSTIFY_LEFT);
+	Gigalomania::Image::write(140, 140, game_g->letters_small, "BIRTHS", Gigalomania::Image::JUSTIFY_LEFT);
+	Gigalomania::Image::write(180, 140, game_g->letters_small, "DEATHS", Gigalomania::Image::JUSTIFY_LEFT);
+	Gigalomania::Image::write(220, 140, game_g->letters_small, "END", Gigalomania::Image::JUSTIFY_LEFT);
 	if( suspend )
-		Image::write(260, 140, game_g->letters_small, "SAVED", Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(260, 140, game_g->letters_small, "SAVED", Gigalomania::Image::JUSTIFY_LEFT);
 
 	int ypos = 150;
 	int rect_y_offset = 2;
@@ -3453,15 +3453,15 @@ void EndIslandGameState::draw() {
 		SDL_FillRect(game_g->getScreen()->getSurface(), &rect, col);*/
 		game_g->getScreen()->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
 
-		//Image::write(40, ypos, game_g->letters_small, "HUMAN", Image::JUSTIFY_LEFT, true);
-		Image::write(40, ypos, game_g->letters_small, PlayerType::getName((PlayerType::PlayerTypeID)client_player), Image::JUSTIFY_LEFT);
+		//Gigalomania::Image::write(40, ypos, game_g->letters_small, "HUMAN", Gigalomania::Image::JUSTIFY_LEFT, true);
+		Gigalomania::Image::write(40, ypos, game_g->letters_small, PlayerType::getName((PlayerType::PlayerTypeID)client_player), Gigalomania::Image::JUSTIFY_LEFT);
 
-		Image::writeNumbers(110, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNMenForThisIsland(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(150, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNBirths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(190, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNDeaths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(230, ypos, game_g->numbers_yellow, game_g->players[client_player]->getFinalMen(), Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(110, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNMenForThisIsland(), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(150, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNBirths(), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(190, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNDeaths(), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(230, ypos, game_g->numbers_yellow, game_g->players[client_player]->getFinalMen(), Gigalomania::Image::JUSTIFY_LEFT);
 		if( suspend )
-			Image::writeNumbers(270, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNSuspended(), Image::JUSTIFY_LEFT);
+			Gigalomania::Image::writeNumbers(270, ypos, game_g->numbers_yellow, game_g->players[client_player]->getNSuspended(), Gigalomania::Image::JUSTIFY_LEFT);
 		ypos += 10;
 	}
 
@@ -3475,14 +3475,14 @@ void EndIslandGameState::draw() {
 		rect_y = (int)((ypos-rect_y_offset) * game_g->getScaleHeight());
 		game_g->getScreen()->fillRect(rect_x, rect_y, rect_w, rect_h, r, g, b);
 
-		//Image::write(40, ypos, game_g->letters_small, "COMPUTER", Image::JUSTIFY_LEFT, true);
-		Image::write(40, ypos, game_g->letters_small, PlayerType::getName((PlayerType::PlayerTypeID)i), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(110, ypos, game_g->numbers_yellow, game_g->players[i]->getNMenForThisIsland(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(150, ypos, game_g->numbers_yellow, game_g->players[i]->getNBirths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(190, ypos, game_g->numbers_yellow, game_g->players[i]->getNDeaths(), Image::JUSTIFY_LEFT);
-		Image::writeNumbers(230, ypos, game_g->numbers_yellow, game_g->players[i]->getFinalMen(), Image::JUSTIFY_LEFT);
+		//Gigalomania::Image::write(40, ypos, game_g->letters_small, "COMPUTER", Gigalomania::Image::JUSTIFY_LEFT, true);
+		Gigalomania::Image::write(40, ypos, game_g->letters_small, PlayerType::getName((PlayerType::PlayerTypeID)i), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(110, ypos, game_g->numbers_yellow, game_g->players[i]->getNMenForThisIsland(), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(150, ypos, game_g->numbers_yellow, game_g->players[i]->getNBirths(), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(190, ypos, game_g->numbers_yellow, game_g->players[i]->getNDeaths(), Gigalomania::Image::JUSTIFY_LEFT);
+		Gigalomania::Image::writeNumbers(230, ypos, game_g->numbers_yellow, game_g->players[i]->getFinalMen(), Gigalomania::Image::JUSTIFY_LEFT);
 		if( suspend )
-			Image::writeNumbers(270, ypos, game_g->numbers_yellow, game_g->players[i]->getNSuspended(), Image::JUSTIFY_LEFT);
+			Gigalomania::Image::writeNumbers(270, ypos, game_g->numbers_yellow, game_g->players[i]->getNSuspended(), Gigalomania::Image::JUSTIFY_LEFT);
 		ypos += 10;
 	}
 
@@ -3532,7 +3532,7 @@ void GameCompleteGameState::draw() {
 		int l_h = game_g->letters_large[0]->getScaledHeight();
 		int y = 80;
 
-		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, "GAME COMPLETE", Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, "GAME COMPLETE", Gigalomania::Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
 		if( game_g->getDifficultyLevel() == DIFFICULTY_EASY )
@@ -3546,24 +3546,24 @@ void GameCompleteGameState::draw() {
 		else {
 			ASSERT(false);
 		}
-		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Gigalomania::Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
 		y += l_h + 2;
 
 		str << "Men Remaining " << game_g->getMenAvailable();
-		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Gigalomania::Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
 		str.str("");
 		str << "Men Saved " << game_g->getNSuspended();
-		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Gigalomania::Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 
 		int score = game_g->getMenAvailable() + game_g->getNSuspended();
 		str.str("");
 		str << "Total Score " << score;
-		Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Image::JUSTIFY_CENTRE);
+		Gigalomania::Image::writeMixedCase(160, y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, str.str().c_str(), Gigalomania::Image::JUSTIFY_CENTRE);
 		y += l_h + 2;
 	}
 

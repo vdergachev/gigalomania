@@ -67,7 +67,7 @@ void ParticleSystem::draw(int xpos, int ypos) const {
 	}
 }
 
-SmokeParticleSystem::SmokeParticleSystem(const Image *image) : ParticleSystem(image),
+SmokeParticleSystem::SmokeParticleSystem(const Gigalomania::Image *image) : ParticleSystem(image),
 birth_rate(0.0f), life_exp(225), last_emit_time(0), move_x(0.0f), move_y(-6.667f) {
 	this->last_emit_time = game_g->getGameTime();
 }
@@ -422,7 +422,7 @@ Element::Element(const char *name,Id id,Type type) {
 Element::~Element() {
 }
 
-Image *Element::getImage() const {
+Gigalomania::Image *Element::getImage() const {
 	return game_g->icon_elements[this->id];
 }
 
@@ -452,7 +452,7 @@ Invention::~Invention() {
 	}
 }
 
-Image *Invention::getImage() const {
+Gigalomania::Image *Invention::getImage() const {
 	if( this->type == SHIELD )
 		return game_g->icon_shields[this->epoch - game_g->getStartEpoch()];
 	else if( this->type == DEFENCE )
@@ -600,8 +600,8 @@ Building::~Building() {
     //LOG("Building::~Building done\n");
 }
 
-Image **Building::getImages() {
-	Image **images = NULL;
+Gigalomania::Image **Building::getImages() {
+	Gigalomania::Image **images = NULL;
 	if( type == BUILDING_TOWER )
 		images = game_g->fortress;
 	else if( type == BUILDING_MINE )
@@ -836,7 +836,7 @@ gamestate(gamestate)
 		int land_height = game_g->land[(int)map_colour]->getScaledHeight() - 32;
 		int xpos = offset_land_x_c + rand() % land_width;
 		int ypos = offset_land_y_c + rand() % land_height;
-		Image **image_ptr = &game_g->icon_clutter[rand() % game_g->icon_clutter.size()];
+		Gigalomania::Image **image_ptr = &game_g->icon_clutter[rand() % game_g->icon_clutter.size()];
 		Feature *feature = new Feature(image_ptr, 1, xpos, ypos);
 		this->features.push_back(feature);
 	}
@@ -846,8 +846,8 @@ gamestate(gamestate)
 		int treetype = rand() % 3;
 		if( treetype == 2 )
 			treetype = 3;
-		//Image *image = icon_trees[treetype];
-		Image *image = game_g->icon_trees[treetype][0];
+		//Gigalomania::Image *image = icon_trees[treetype];
+		Gigalomania::Image *image = game_g->icon_trees[treetype][0];
 		cx += rand() % 16;
 		if( cx + image->getScaledWidth() > offset_land_x_c + land_width_c )
 			break;
@@ -864,7 +864,7 @@ gamestate(gamestate)
 		int treetype = rand() % 3;
 		if( treetype == 2 )
 			treetype = 3;
-		Image *image = game_g->icon_trees[treetype][0];
+		Gigalomania::Image *image = game_g->icon_trees[treetype][0];
 		cx += rand() % 32;
 		if( cx + image->getScaledWidth() > offset_land_x_c + land_width_c )
 			break;
@@ -2121,7 +2121,7 @@ void Sector::update(int client_player) {
 										gamestate->explosionEffect( buildings[i]->getTurretButton(j)->getXCentre() - w/2, buildings[i]->getTurretButton(j)->getYCentre() - h/2);
 										int nuke_x = -1, nuke_y = -1;
 										this->getNukePos(&nuke_x, &nuke_y);
-										Image *nuke_image = game_g->nukes[this->nuke_by_player][1];
+										Gigalomania::Image *nuke_image = game_g->nukes[this->nuke_by_player][1];
 										gamestate->explosionEffect( nuke_x + nuke_image->getScaledWidth()/2 - w/2, nuke_y + nuke_image->getScaledHeight()/2 - h/2);
 									}
 								}
@@ -2143,7 +2143,7 @@ void Sector::update(int client_player) {
 				// replace tree icons with burnt tree, and delete other features
 				for(vector<Feature *>::iterator iter = this->features.begin(); iter != this->features.end();) {
 					Feature *feature = *iter;
-					const Image *image = feature->getImage(0);
+					const Gigalomania::Image *image = feature->getImage(0);
 					// bit of a hacky way of finding trees...
 					bool is_tree = false;
 					for(int i=0;i<n_trees_c && !is_tree;i++) {
@@ -2166,7 +2166,7 @@ void Sector::update(int client_player) {
 					int land_height = game_g->land[0]->getScaledHeight() - 32;
 					int xpos = offset_land_x_c + rand() % land_width;
 					int ypos = offset_land_y_c + rand() % land_height;
-					Image **image_ptr = &game_g->icon_clutter_nuked[rand() % game_g->icon_clutter_nuked.size()];
+					Gigalomania::Image **image_ptr = &game_g->icon_clutter_nuked[rand() % game_g->icon_clutter_nuked.size()];
 					Feature *feature = new Feature(image_ptr, 1, xpos, ypos);
 					this->features.push_back(feature);
 				}

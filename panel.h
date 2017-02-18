@@ -10,8 +10,6 @@ namespace Gigalomania {
 	class Image;
 }
 
-using namespace Gigalomania;
-
 void registerClick();
 
 using std::vector;

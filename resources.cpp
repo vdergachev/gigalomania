@@ -6,12 +6,12 @@
 
 #include <cstring>
 
+using Gigalomania::TrackedObject;
+
 //---------------------------------------------------------------------------
 #ifndef NULL
 #define NULL 0
 #endif
-
-using namespace Gigalomania;
 
 vector<TrackedObject *> TrackedObject::tags;
 

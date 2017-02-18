@@ -11,6 +11,11 @@
 #include "image.h"
 #include "sound.h"
 
+using Gigalomania::Button;
+using Gigalomania::ImageButton;
+using Gigalomania::CycleButton;
+using Gigalomania::MultiPanel;
+
 //---------------------------------------------------------------------------
 
 void registerClick() {
@@ -414,7 +419,7 @@ this->h = h;
 this->image = image;
 }*/
 
-Button::Button(int x,int y,const char *text,Image *font[]) : PanelPage(x, y) {
+Button::Button(int x,int y,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
 	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
@@ -426,7 +431,7 @@ Button::Button(int x,int y,const char *text,Image *font[]) : PanelPage(x, y) {
 	}
 }
 
-Button::Button(int x,int y,int h,const char *text,Image *font[]) : PanelPage(x, y) {
+Button::Button(int x,int y,int h,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
 	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
@@ -438,7 +443,7 @@ Button::Button(int x,int y,int h,const char *text,Image *font[]) : PanelPage(x, 
 	}
 }
 
-Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Image *font[]) : PanelPage(x, y) {
+Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
 	this->w = draw_offset_x + font[0]->getScaledWidth() * this->text.length() + 2;
@@ -468,7 +473,7 @@ void Button::draw() {
 	this->drawForeground();
 }
 
-ImageButton::ImageButton(int x,int y,const Image *image) : PanelPage(x, y) {
+ImageButton::ImageButton(int x,int y,const Gigalomania::Image *image) : PanelPage(x, y) {
 	ASSERT(image != NULL);
 	this->image = image;
     /*this->has_alpha = false;
@@ -477,7 +482,7 @@ ImageButton::ImageButton(int x,int y,const Image *image) : PanelPage(x, y) {
 	this->h = image->getScaledHeight();
 }
 
-ImageButton::ImageButton(int x,int y,const Image *image,const char *infoLMB) : PanelPage(x, y, infoLMB) {
+ImageButton::ImageButton(int x,int y,const Gigalomania::Image *image,const char *infoLMB) : PanelPage(x, y, infoLMB) {
 	ASSERT(image != NULL);
 	this->image = image;
     /*this->has_alpha = false;
@@ -486,7 +491,7 @@ ImageButton::ImageButton(int x,int y,const Image *image,const char *infoLMB) : P
 	this->h = image->getScaledHeight();
 }
 
-ImageButton::ImageButton(int x,int y,int w, int h,const Image *image) : PanelPage(x, y) {
+ImageButton::ImageButton(int x,int y,int w, int h,const Gigalomania::Image *image) : PanelPage(x, y) {
 	ASSERT(image != NULL);
 	this->image = image;
     /*this->has_alpha = false;
@@ -495,7 +500,7 @@ ImageButton::ImageButton(int x,int y,int w, int h,const Image *image) : PanelPag
 	this->h = h;
 }
 
-ImageButton::ImageButton(int x,int y,int w, int h,const Image *image,const char *infoLMB) : PanelPage(x, y, infoLMB) {
+ImageButton::ImageButton(int x,int y,int w, int h,const Gigalomania::Image *image,const char *infoLMB) : PanelPage(x, y, infoLMB) {
 	ASSERT(image != NULL);
 	this->image = image;
     /*this->has_alpha = false;
@@ -528,7 +533,7 @@ void ImageButton::draw() {
 	this->drawForeground();
 }
 
-CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Image *font[]) : PanelPage(x, y) {
+CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	ASSERT( n_texts > 0 );
 	this->n_texts = n_texts;
 	this->texts = new char *[n_texts];
@@ -567,7 +572,7 @@ void CycleButton::draw() {
             int sy = (int)((owner->getTop() + offset_y - tolerance) * game_g->getScaleHeight());
             game_g->getScreen()->fillRect(sx, sy, (this->w+2*tolerance)*game_g->getScaleWidth(), (this->h+2*tolerance)*game_g->getScaleHeight(), 255, 0, 255);
         }*/
-		Image::write(owner->getLeft() + offset_x + 1, owner->getTop() + offset_y + 1, this->font, this->texts[ this->active ], Image::JUSTIFY_LEFT);
+		Gigalomania::Image::write(owner->getLeft() + offset_x + 1, owner->getTop() + offset_y + 1, this->font, this->texts[ this->active ], Image::JUSTIFY_LEFT);
 	}
 	this->drawForeground();
 }
@@ -629,4 +634,3 @@ void MultiPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bo
 	//this->pages[this->c_page]->input(m_x, m_y, m_b);
 	this->get(this->c_page)->input(m_x, m_y, m_left, m_middle, m_right, click);
 }
-

@@ -17,7 +17,7 @@
 
 //---------------------------------------------------------------------------
 
-Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_down_middle(false), m_down_right(false) {
+Gigalomania::Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_down_middle(false), m_down_right(false) {
 #if SDL_MAJOR_VERSION == 1
 	surface = NULL;
 #else
@@ -28,10 +28,10 @@ Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_down_middle(fal
 #endif
 }
 
-Screen::~Screen() {
+Gigalomania::Screen::~Screen() {
 }
 
-bool Screen::canOpenFullscreen(int width, int height) {
+bool Gigalomania::Screen::canOpenFullscreen(int width, int height) {
 #if SDL_MAJOR_VERSION == 1
 	if( SDL_VideoModeOK(width, height, 32, SDL_HWSURFACE|SDL_HWPALETTE|SDL_FULLSCREEN) != 0 )
 		return true;
@@ -41,7 +41,7 @@ bool Screen::canOpenFullscreen(int width, int height) {
 #endif
 }
 
-bool Screen::open(int screen_width, int screen_height, bool fullscreen) {
+bool Gigalomania::Screen::open(int screen_width, int screen_height, bool fullscreen) {
 	LOG("Screen::open(%d, %d, %s)\n", screen_width, screen_height, fullscreen?"fullscreen":"windowed");
 #if SDL_MAJOR_VERSION == 1
 	if( fullscreen )
@@ -95,7 +95,7 @@ bool Screen::open(int screen_width, int screen_height, bool fullscreen) {
 
 #if SDL_MAJOR_VERSION == 1
 #else
-void Screen::setLogicalSize(int width, int height, bool smooth) {
+void Gigalomania::Screen::setLogicalSize(int width, int height, bool smooth) {
 	this->width = width;
 	this->height = height;
 	LOG("width, height: %d, %d\n", width, height);
@@ -109,7 +109,7 @@ void Screen::setLogicalSize(int width, int height, bool smooth) {
 }
 #endif
 
-void Screen::setTitle(const char *title) {
+void Gigalomania::Screen::setTitle(const char *title) {
 #if SDL_MAJOR_VERSION == 1
 	SDL_WM_SetCaption(title, "");
 #else
@@ -117,7 +117,7 @@ void Screen::setTitle(const char *title) {
 #endif
 }
 
-void Screen::clear() {
+void Gigalomania::Screen::clear() {
 #if SDL_MAJOR_VERSION == 1
 	SDL_Rect rect;
 	rect.x = 0;
@@ -131,7 +131,7 @@ void Screen::clear() {
 #endif
 }
 
-void Screen::refresh() {
+void Gigalomania::Screen::refresh() {
 #if SDL_MAJOR_VERSION == 1
 	SDL_Flip(surface);
 #else
@@ -139,7 +139,7 @@ void Screen::refresh() {
 #endif
 }
 
-int Screen::getWidth() const {
+int Gigalomania::Screen::getWidth() const {
 #if SDL_MAJOR_VERSION == 1
 	return surface->w;
 #else
@@ -151,7 +151,7 @@ int Screen::getWidth() const {
 #endif
 }
 
-int Screen::getHeight() const {
+int Gigalomania::Screen::getHeight() const {
 #if SDL_MAJOR_VERSION == 1
 	return surface->h;
 #else
@@ -163,7 +163,7 @@ int Screen::getHeight() const {
 #endif
 }
 
-void Screen::fillRect(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b) {
+void Gigalomania::Screen::fillRect(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b) {
 	SDL_Rect rect;
 	rect.x = x;
 	rect.y = y;
@@ -181,7 +181,7 @@ void Screen::fillRect(short x, short y, short w, short h, unsigned char r, unsig
 #if SDL_MAJOR_VERSION == 1
 // not supported with SDL 1.2 (as SDL_FillRect can't do blending)!
 #else
-void Screen::fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha) {
+void Gigalomania::Screen::fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha) {
 	SDL_Rect rect;
 	rect.x = x;
 	rect.y = y;
@@ -196,7 +196,7 @@ void Screen::fillRectWithAlpha(short x, short y, short w, short h, unsigned char
 #if SDL_MAJOR_VERSION == 1
 // not supported with SDL 1.2
 #else
-void Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
+void Gigalomania::Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
 	SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
 	SDL_RenderDrawLine(sdlRenderer, x1, y1, x2, y2);
 }
@@ -205,7 +205,7 @@ void Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, u
 #if SDL_MAJOR_VERSION == 1
 // not supported with SDL 1.2
 #else
-void Screen::convertWindowToLogical(int *m_x, int *m_y) const {
+void Gigalomania::Screen::convertWindowToLogical(int *m_x, int *m_y) const {
 	SDL_Rect rect;
 	SDL_RenderGetViewport(sdlRenderer, &rect);
 	float scale_x = 0.0f, scale_y = 0.0f;
@@ -218,13 +218,13 @@ void Screen::convertWindowToLogical(int *m_x, int *m_y) const {
 	*m_y -= rect.y;
 }
 
-void Screen::getWindowSize(int *window_width, int *window_height) const {
+void Gigalomania::Screen::getWindowSize(int *window_width, int *window_height) const {
 	SDL_GetWindowSize(sdlWindow, window_width, window_height);
 }
 #endif
 
 
-void Screen::getMouseCoords(int *m_x, int *m_y) const {
+void Gigalomania::Screen::getMouseCoords(int *m_x, int *m_y) const {
 	// SDL_GetMouseState doesn't play well with touch events
 	/*SDL_GetMouseState(m_x, m_y);
 	// need to convert from window space to logical space
@@ -237,7 +237,7 @@ void Screen::getMouseCoords(int *m_x, int *m_y) const {
 	//LOG("Screen::getMouseCoords: %d, %d\n", *m_x, *m_y);
 }
 
-bool Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) const {
+bool Gigalomania::Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) const {
 	// SDL_GetMouseState doesn't play well with touch events
 	/*int m_b = SDL_GetMouseState(m_x, m_y);
 	*m_left = ( m_b & SDL_BUTTON(1) ) != 0;

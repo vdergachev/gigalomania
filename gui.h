@@ -10,14 +10,18 @@ namespace Gigalomania {
 	class CycleButton;
 }
 
-using namespace Gigalomania;
-
 class PlaceMenGameState;
 class PlayingGameState;
 class Invention;
 
 #include "common.h"
 #include "panel.h"
+
+using Gigalomania::Button;
+using Gigalomania::ImageButton;
+using Gigalomania::CycleButton;
+using Gigalomania::PanelPage;
+using Gigalomania::MultiPanel;
 
 typedef void (ClickFunc) (void *data, int arg, bool m_left, bool m_middle, bool m_right);
 

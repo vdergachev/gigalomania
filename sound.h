@@ -58,8 +58,6 @@ namespace Gigalomania {
 	};
 }
 
-using namespace Gigalomania;
-
 const int SOUND_CHANNEL_SAMPLES   = 0;
 const int SOUND_CHANNEL_MUSIC     = 1;
 const int SOUND_CHANNEL_FX        = 2;
@@ -67,7 +65,7 @@ const int SOUND_CHANNEL_BIPLANE   = 3;
 const int SOUND_CHANNEL_BOMBER    = 4;
 const int SOUND_CHANNEL_SPACESHIP = 5;
 
-inline void playSample(Sample *sample, int channel = SOUND_CHANNEL_SAMPLES, int loops = 0) {
+inline void playSample(Gigalomania::Sample *sample, int channel = SOUND_CHANNEL_SAMPLES, int loops = 0) {
 	sample->play(channel, loops);
 }
 
