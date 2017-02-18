@@ -1789,6 +1789,8 @@ void Sector::doCombat(int client_player) {
 	for(int i=0;i<n_players_c;i++) {
 		if( died[i] ) {
 			Army *army = this->getArmy(i);
+			/*
+			// original behaviour, randomly choose between a defending army or defenders in turrets
 			int this_total = army->getTotal();
 			if( this->player == i )
 				this_total += this->getNDefenders();
@@ -1801,15 +1803,48 @@ void Sector::doCombat(int client_player) {
 				// kill a defender
 				this->killDefender(die - army->getTotal());
 			}
+			*/
+			// new behaviour, only attack defenders if no army present in sector
+			// see https://sourceforge.net/p/gigalomania/discussion/general/thread/dbd2f751/
+			// this helps make defenders more powerful
+			int this_total = army->getTotal();
+			if( this->player == i && this_total == 0 ) {
+				// no army, so one of the defenders must die
+				this_total = this->getNDefenders();
+				T_ASSERT( this_total > 0 );
+				if( this_total > 0 ) { // just in case
+					int die = rand() % this_total;
+					// kill a defender
+					this->killDefender(die);
+ 				}
+			}
+			else {
+				T_ASSERT( this_total > 0 );
+				if( this_total > 0 ) { // just in case
+					int die = rand() % this_total;
+					army->kill(die);
+				}
+			}
 		}
 	}
 
 	// damage to buildings
 	if( this->player != -1 ) {
 		int bombard = 0;
-		for(int i=0;i<n_players_c;i++) {
-			if( this->player != i && !Player::isAlliance(this->player, i) ) {
-				bombard += this->getArmy(i)->getBombardStrength();
+		// buildings not harmed if there's an army or defenders
+		// see https://sourceforge.net/p/gigalomania/discussion/general/thread/dbd2f751/
+		// this makes defenders more useful, and means buildings aren't destroyed so quickly when an army attacks
+		if( this->getArmy(this->player)->any(true) ) {
+			bombard = 0;
+		}
+		else if( this->getNDefenders() > 0 ) {
+			bombard = 0;
+		}
+		else {
+			for(int i=0;i<n_players_c;i++) {
+				if( this->player != i && !Player::isAlliance(this->player, i) ) {
+					bombard += this->getArmy(i)->getBombardStrength();
+				}
 			}
 		}
 		if( bombard > 0 ) {
