@@ -1976,6 +1976,30 @@ bool Game::loadImages() {
 	string gfx_dir = "gfx/";
 
 	background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
+
+#if _WIN32
+	// for UWP
+	// https://social.msdn.microsoft.com/Forums/en-US/0fe26a3e-36f9-4a88-8793-f0ed242770ed/dac-desktopappconverter-centennial-accessing-files-from-install-folder?forum=wpdevelop
+	// Working directory will not be the same as the application install directory for UWP (typically it's C:\WINDOWS\system32)
+	// We need to use GetModuleFileName to find the real path - then a quick fix is to use SetCurrentDirectory.
+	// Note this code assumes we'll be loading images before anything else!
+	// Need to use Unicode, as unicode characters may be in the path.
+	WCHAR application_exe_path[MAX_PATH] = L"";
+	GetModuleFileNameW(NULL, application_exe_path, MAX_PATH);
+	LOG("application_exe_path: %S\n", application_exe_path);
+	std::wstring application_exe_path_s = std::wstring(application_exe_path);
+	std::wstring application_path = application_exe_path_s.substr(0, application_exe_path_s.find_last_of( L"\\/" ));
+	LOG("application_install_path: %S\n", application_path.c_str());
+	if( background == NULL ) {
+		SetCurrentDirectoryW(application_path.c_str());
+		WCHAR new_application_path[MAX_PATH] = L"";
+		GetCurrentDirectoryW(MAX_PATH, new_application_path);
+		LOG("new_application_path: %S\n", new_application_path);
+
+		background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
+	}
+#endif
+
 #ifdef DATADIR
 	if( background == NULL ) {
 		gfx_dir = datadir + "/" + gfx_dir;
@@ -5291,6 +5315,7 @@ void playGame(int n_args, char *args[]) {
     int time_s = clock();
 	game_g->drawProgress(0);
 
+	// images should be loaded first, as it also contains code for changing the working directories if required for some platforms
 	if( ok && !game_g->loadImages() ) {
 		LOG("failed to load images\n");
 		ok = false;
