@@ -7,6 +7,7 @@
 #include <stdexcept> // needed for Android at least
 
 #include <sstream>
+#include <algorithm>
 
 #include "player.h"
 #include "game.h"

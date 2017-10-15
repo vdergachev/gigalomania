@@ -47,7 +47,7 @@ sudo apt-get install libsdl-mixer1.2-dev
 Windows
 =======
 
-(The source has been tested using Visual C++ Express 2012 for Desktop on Windows 10 64 bit.)
+(The source has been tested using Visual Studio Community Edition 2017 on Windows 10 64 bit.)
 
 You need additional files to compile this program:
 
@@ -239,8 +239,8 @@ Licence
 
 Gigalomania is released under the GPL v2 or later.
 
-Please contact me if you have suggestions, bug fixes or whatever: mark dot harman at ntlworld dot com .
+Please contact me if you have suggestions, bug fixes or whatever: mark DOT harman DOT apps AT gmail DOT com  .
 
-Homepage: http://homepage.ntlworld.com/mark.harman/comp_gigalomania.html
+Homepage: http://gigalomania.sourceforge.net/
 
-Mark Harman 20 December 2016
+Mark Harman 15 October 2017
