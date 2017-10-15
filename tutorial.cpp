@@ -384,6 +384,7 @@ void Tutorial1::initCards() {
 		gui_handler->addException("button_deploy_attackers_3");
 		gui_handler->addException("map_1_2"); // need to allow the user to return to the player sector if necessary (as user can switch to the other sector without sending men)
 		gui_handler->addException("map_2_2");
+		gui_handler->addException("land_panel"); // needed in case the user sends the army to the wrong sector, allows user another way to select the army
 		gui_handler->addException("button_attack"); // allow the user to get back to the attack screen (a GUI resets to main if user switches current sector)
 		gui_handler->addException("button_bigattack"); // ...and for consistency, allow the user to go back to the main screen
 		// and in case the user wants to design some more:

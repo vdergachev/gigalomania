@@ -1262,6 +1262,7 @@ void PlayingGameState::reset() {
 	}
 
 	this->land_panel = new PanelPage(offset_land_x_c, offset_land_y_c, default_width_c - offset_land_x_c, default_height_c - offset_land_y_c - quit_button_offset_c);
+	this->land_panel->setId("land_panel");
 	screen_page->add(this->land_panel);
 
 	// setup screen_page buttons
