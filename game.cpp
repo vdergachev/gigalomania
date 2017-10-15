@@ -16,6 +16,7 @@
 
 #include <sstream>
 using std::stringstream;
+#include <algorithm>
 
 #ifdef _WIN32
 #include <windows.h>

@@ -387,10 +387,13 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEBUTTONDOWN:
 				{
+#if SDL_MAJOR_VERSION == 1
+#else
 					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
 						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
 						break;
 					}
+#endif
 					//LOG("received mouse down\n");
 					// if this code is changed, consider whether SDL_FINGERDOWN also needs updating
 					int m_x = event.button.x;
@@ -426,10 +429,13 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEBUTTONUP:
 				{
+#if SDL_MAJOR_VERSION == 1
+#else
 					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
 						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
 						break;
 					}
+#endif
 					//LOG("received mouse up\n");
 					// if this code is changed, consider whether SDL_FINGERUP also needs updating
 					Uint8 button = event.button.button;
@@ -446,10 +452,13 @@ void Application::runMainLoop() {
 				}
 			case SDL_MOUSEMOTION:
 				{
+#if SDL_MAJOR_VERSION == 1
+#else
 					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
 						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
 						break;
 					}
+#endif
 					// if this code is changed, consider whether SDL_FINGERMOTION also needs updating
 					int m_x = event.motion.x;
 					int m_y = event.motion.y;
