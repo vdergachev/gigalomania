@@ -204,7 +204,7 @@ History
 
 Note, this history is only for changes related to the source code. See the Gigalomania readme or homepage for a full history.
 
-Version 0.29 uses Android Studio instead of Eclipse for Android.
+Version 1.0 uses Android Studio instead of Eclipse for Android.
 
 Version 0.28 adds support for Qt Creator as an IDE. Debian and Maemo/Meego packaging info was removed from main source archive.
 
