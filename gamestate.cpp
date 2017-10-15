@@ -2140,6 +2140,7 @@ bool PlayingGameState::buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m
 		s_m_y < offset_land_y_c + building->getY() || s_m_y >= offset_land_y_c + building->getY() + base_image->getScaledHeight() ) {
 			return done;
 	}
+	LOG("clicked on building\n");
 
 	if( !done && this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_SHUTDOWN && building->getType() == BUILDING_TOWER ) {
 		//current_sector->shutdown();
@@ -2158,17 +2159,18 @@ bool PlayingGameState::buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m
 			&& s_m_y >= building->getTurretButton(i)->getTop()
 			&& s_m_y < building->getTurretButton(i)->getBottom()
 			) {
-				done = true;
 				//int n_population = current_sector->getPopulation();
 				//int n_spare = current_sector->getSparePopulation();
 				if( this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_DEPLOY_DEFENCE ) {
+					done = true;
 					// set new defender
 					int deploy_defence = this->getGamePanel()->getDeployDefence();
 					ASSERT(deploy_defence != -1);
 					//current_sector->deployDefender(building, i, deploy_defence);
 					this->deployDefender(current_sector->getXPos(), current_sector->getYPos(), building->getType(), i, deploy_defence);
 				}
-				else if( building->getTurretMan(i) != -1 ) {
+				else if( this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_NORMAL && building->getTurretMan(i) != -1 ) {
+					done = true;
 					// remove existing defender
 					// return current defender to stocks
 					//current_sector->returnDefender(building, i);
@@ -2178,6 +2180,7 @@ bool PlayingGameState::buildingMouseClick(int s_m_x,int s_m_y,bool m_left,bool m
 	}
 
 	if( !done && this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_DEPLOY_SHIELD ) {
+		LOG("try to deploy shield\n");
 		if( building->getHealth() < building->getMaxHealth() ) {
 			int deploy_shield = this->getGamePanel()->getDeployShield();
 			ASSERT(deploy_shield != -1);
@@ -2864,13 +2867,18 @@ void PlayingGameState::refreshButtons() {
 					building->getBuildingButton()->setInfoLMB("shutdown the sector");
 				}
 			}
+			else if ( this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_DEPLOY_SHIELD ) {
+				if( building->getBuildingButton() != NULL ) {
+					building->getBuildingButton()->setInfoLMB("deploy shield");
+				}
+			}
 			else {
 				for(int j=0;j<building->getNTurrets();j++) {
 					PanelPage *panel = building->getTurretButton(j);
 					if( this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_DEPLOY_DEFENCE ) {
 						panel->setInfoLMB("place a defender here");
 					}
-					else if( building->getTurretMan(j) != -1 ) {
+					else if( this->getGamePanel()->getMouseState() == GamePanel::MOUSESTATE_NORMAL &&  building->getTurretMan(j) != -1 ) {
 						panel->setInfoLMB("return defender to tower"); // todo: check text
 					}
 				}
