@@ -1977,6 +1977,14 @@ bool Game::loadImages() {
 
 	background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
 
+#ifdef DATADIR
+	if( background == NULL ) {
+		gfx_dir = datadir + "/" + gfx_dir;
+		LOG("look in %s for gfx\n", gfx_dir.c_str());
+		background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
+	}
+#endif
+
 #if _WIN32
 	// for UWP
 	// https://social.msdn.microsoft.com/Forums/en-US/0fe26a3e-36f9-4a88-8793-f0ed242770ed/dac-desktopappconverter-centennial-accessing-files-from-install-folder?forum=wpdevelop
@@ -1988,25 +1996,27 @@ bool Game::loadImages() {
 	GetModuleFileNameW(NULL, application_exe_path, MAX_PATH);
 	LOG("application_exe_path: %S\n", application_exe_path);
 	std::wstring application_exe_path_s = std::wstring(application_exe_path);
-	std::wstring application_path = application_exe_path_s.substr(0, application_exe_path_s.find_last_of( L"\\/" ));
+	std::wstring application_path = application_exe_path_s.substr(0, application_exe_path_s.find_last_of(L"\\/"));
 	LOG("application_install_path: %S\n", application_path.c_str());
 	if( background == NULL ) {
+		WCHAR old_application_path[MAX_PATH] = L"";
+		GetCurrentDirectoryW(MAX_PATH, old_application_path);
+		LOG("old_application_path: %S\n", old_application_path);
 		SetCurrentDirectoryW(application_path.c_str());
 		WCHAR new_application_path[MAX_PATH] = L"";
 		GetCurrentDirectoryW(MAX_PATH, new_application_path);
 		LOG("new_application_path: %S\n", new_application_path);
 
 		background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
+
+		if( background == NULL ) {
+			// need to put it back, in case user is using "old" gfx
+			LOG("still can't find gfx data\n");
+			SetCurrentDirectoryW(old_application_path);
+		}
 	}
 #endif
 
-#ifdef DATADIR
-	if( background == NULL ) {
-		gfx_dir = datadir + "/" + gfx_dir;
-		LOG("look in %s for gfx\n", gfx_dir.c_str());
-		background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
-	}
-#endif
 	if( background == NULL ) {
 		//return false;
 		return loadOldImages();
