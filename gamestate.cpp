@@ -257,8 +257,10 @@ GameState::GameState(int client_player) : client_player(client_player) {
 
 GameState::~GameState() {
 	LOG("~GameState()\n");
-	if( fade != NULL )
+	if( fade != NULL ) {
+		fade->clearFuncFinish();
 		delete fade;
+	}
 	if( whitefade != NULL )
 		delete whitefade;
 

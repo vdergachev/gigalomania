@@ -114,6 +114,12 @@ public:
 	virtual bool render() const {
 		return false;
 	}
+
+	/* Clears the stored func_finish, without calling it.
+	*/
+	void clearFuncFinish() {
+		this->func_finish = NULL;
+	}
 };
 
 class AmmoEffect : public TimedEffect {
