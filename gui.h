@@ -206,6 +206,17 @@ private:
 
 	void changeMiners(Id element,bool decrease,int n);
 
+	void drawSectorControlPage();
+	void drawDesignPage();
+	void drawShieldPage();
+	void drawDefencePage();
+	void drawAttackPage();
+	void drawElementStocksPage();
+	void drawBuildPage();
+	void drawKnownDesignsPage();
+	void drawDesignInfoPage();
+	void drawFactoryPage();
+
 	static void buttonNDesignersClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
 	static void buttonNManufacturersClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
 	static void buttonFAmountClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
