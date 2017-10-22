@@ -4111,7 +4111,7 @@ void Game::mouseClick(int m_x, int m_y, bool m_left, bool m_middle, bool m_right
 }
 
 void Game::updateGame() {
-	if( !paused ) {
+	if( !paused && screen != NULL ) { // screen can be NULL according to Google Play crash reports
 		int m_x = 0, m_y = 0;
 		bool m_left = false, m_middle = false, m_right = false;
 		bool m_res = screen->getMouseState(&m_x, &m_y, &m_left, &m_middle, &m_right);
