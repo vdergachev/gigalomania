@@ -371,6 +371,8 @@ bool Game::oneMouseButtonMode() const {
 
 Game *game_g = NULL;
 
+//#define DATADIR "c:\\temp"; // test
+
 #ifdef DATADIR
 string datadir = DATADIR;
 #endif
