@@ -7,7 +7,9 @@
 #include <cstdarg> // n.b., needed on Linux at least
 
 #ifdef _WIN32
-#include <shlobj.h>
+#include <initguid.h>
+#include <Knownfolders.h>
+#include <Shlobj.h>
 #include <Shlwapi.h>
 #pragma comment(lib,"shlwapi.lib")
 
@@ -115,9 +117,9 @@ void initFolderPaths() {
 
 #if _WIN32
 	bool ok = true;
-	WCHAR application_path_w[MAX_PATH];
-    if ( SUCCEEDED( SHGetFolderPathW( NULL, CSIDL_APPDATA,
-                                     NULL, 0, application_path_w ) ) ) {
+	PWSTR application_path_w = NULL;
+	if ( SUCCEEDED( SHGetKnownFolderPath( FOLDERID_RoamingAppData, 0,
+                                     NULL, &application_path_w ) ) ) {
 		{
 			// handle unicode (e.g., for unicode user accounts)
 			int shortpath_length_w = GetShortPathNameW(application_path_w,0,0);
@@ -127,7 +129,11 @@ void initFolderPaths() {
 			WideCharToMultiByte(CP_OEMCP, WC_NO_BEST_FIT_CHARS, shortpath_w, shortpath_length_w, application_path, MAX_PATH, 0, 0);
 			delete [] shortpath_w;
 		}
-        PathAppendA(application_path, application_name);
+		if( application_path_w != NULL) {
+			CoTaskMemFree(application_path_w);
+			application_path_w = NULL;
+		}
+		PathAppendA(application_path, application_name);
 
 		if( access(application_path, 0) != 0 ) {
 			// folder doesn't seem to exist - try creating it
