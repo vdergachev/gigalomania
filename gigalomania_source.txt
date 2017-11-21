@@ -177,7 +177,8 @@ Then create the Gigalomania folder as follows:
 2. Copy the Gigalomania source files (*.cpp, *.h, and the TinyXML subfolder) into app/src/main/jni/src/ .
 3. Copy the source from SDL2, SDL2_image, SDL2_mixer into app/src/main/jni/ (so you have folders app/src/main/jni/SDL/, app/src/main/jni/SDL_image/, app/src/main/jni/SDL_mixer/; each of these folders should be the root folder for the SDL sources - e.g., so inside app/src/main/jni/SDL/ will be folders such as acinclude/, include/, src/ etc). 
 4. Copy the gfx/, islands/, music/ and sound/ folders into app/src/main/assets/ .
-5. You may need to configure the file jni/SDL_image/Android.mk: ensure that SUPPORT_WEBP is set to false (this is already the case for SDL_image 2.0.1 onwards).
+4b. Copy the files inside gfx_android_extras/ into assets/gfx/ (so you have assets/gfx/starfield.png etc). Optionally, the files starfield.jpg and stars.jpg can be deleted. (This is because JPEG support in SDL_image 2 on Android is currently broken.)
+5. Configure the file jni/SDL_image/Android.mk: ensure that SUPPORT_JPG and SUPPORT_WEBP set to false.
 6. You need to configure the file jni/SDL_mixer/Android.mk: set SUPPORT_MOD_MODPLUG, SUPPORT_MOD_MIKMOD and SUPPORT_MP3_SMPEG to false.
 
 Then open the project in Android Studio. It will take some moments to initialise the project. When you run, the project will build - note that it can take several minutes to build the complete project.

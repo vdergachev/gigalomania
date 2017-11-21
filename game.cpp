@@ -1978,7 +1978,11 @@ bool Game::loadImages() {
 	// progress should go from 0 to 80%
 	string gfx_dir = "gfx/";
 
+#if defined(__ANDROID__)
+	background = Gigalomania::Image::loadImage(gfx_dir + "starfield.png");
+#else
 	background = Gigalomania::Image::loadImage(gfx_dir + "starfield.jpg");
+#endif
 
 #ifdef DATADIR
 	if( background == NULL ) {
@@ -2032,7 +2036,11 @@ bool Game::loadImages() {
 	// nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	processImage(background);
 
+#if defined(__ANDROID__)
+	background_stars = Gigalomania::Image::loadImage(gfx_dir + "stars.png");
+#else
 	background_stars = Gigalomania::Image::loadImage(gfx_dir + "stars.jpg");
+#endif
 	if( background_stars == NULL )
 		return false;
 	processImage(background_stars);
