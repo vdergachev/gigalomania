@@ -14,7 +14,7 @@
 
 // we include SDL globally, so that SDL_MAJOR_VERSION is available at least
 #if defined(__ANDROID__)
-#include <sdl.h>
+#include <SDL.h>
 #elif defined(__linux)
 #include <SDL2/SDL.h>
 #elif defined(__MORPHOS__)
