@@ -487,7 +487,9 @@ void Application::runMainLoop() {
 						// click automatically unpaused (needed to work without keyboard!)
 						game_g->togglePause();
 					}
-					game_g->mouseClick(m_x, m_y, true, false, false, true);
+					else {
+						game_g->mouseClick(m_x, m_y, true, false, false, true);
+					}
 					break;
 				}
 			case SDL_FINGERUP:
