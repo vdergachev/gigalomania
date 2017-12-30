@@ -1,15 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 15
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '27.0.1'
 
     defaultConfig {
         applicationId "net.sourceforge.gigalomania"
-        // Requires at least Android 2.3.3
-        minSdkVersion 10
-        // Tested on Android 7.0
-        targetSdkVersion 24
+        minSdkVersion 14
+        // Tested on Android 8.0
+        targetSdkVersion 26
 
         ndk {
             // Specifies the ABI configurations of your native
