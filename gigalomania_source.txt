@@ -1,7 +1,7 @@
 Linux
 =====
 
-(The source has been tested on Ubuntu 14.04 64 bit.)
+(The source has been tested on Ubuntu 16.04.3 LTS 64-bit.)
 
 You need to install the following libraries: SDL2 ( http://www.libsdl.org/ ), SDL2_Image ( http://www.libsdl.org/projects/SDL_image/ ), SDL2_Mixer ( http://www.libsdl.org/projects/SDL_mixer/ ).
 
@@ -244,4 +244,4 @@ Please contact me if you have suggestions, bug fixes or whatever: mark DOT harma
 
 Homepage: http://gigalomania.sourceforge.net/
 
-Mark Harman 15 October 2017
+Mark Harman 4 January 2018
