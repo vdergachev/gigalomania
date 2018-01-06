@@ -661,8 +661,8 @@ int Building::getDefenderStrength() const {
 		if( turret_man[i] != -1 )
 			n += Army::getIndividualStrength( sector->getPlayer(), turret_man[i] );
 	}
-	//n *= 2;
-	n *= 4;
+	n *= 2;
+	//n *= 4;
 	return n;
 }
 
