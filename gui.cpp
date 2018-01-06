@@ -1447,7 +1447,7 @@ void GamePanel::drawElementStocksPage() {
 		}
 		if( this->button_nminers2[i]->isVisible() ) {
 			int n_miners = gamestate->getCurrentSector()->getMiners( element );
-			Gigalomania::Image::writeNumbers( this->button_nminers2[i]->getXCentre(), this->button_nminers2[i]->getTop() + 2, game_g->numbers_white, n_miners,Gigalomania::Image::JUSTIFY_CENTRE);
+			Gigalomania::Image::writeNumbers( this->button_nminers2[i]->getXCentre(), this->button_nminers2[i]->getTop() + 7, game_g->numbers_white, n_miners,Gigalomania::Image::JUSTIFY_CENTRE);
 		}
 	}
 }
