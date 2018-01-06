@@ -739,18 +739,19 @@ void PlaceMenGameState::draw() {
     cy += s_h + 2;*/
 
 	if( choosemenPanel->getPage() == ChooseMenPanel::STATE_CHOOSEMEN ) {
-		cy = 100;
+		const int ydiff = s_h + 2;
+		cy = 140 - 5 * ydiff; // update this if we change the number of lines!
 		const int xpos = 80;
 		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "Click on the icon below", Gigalomania::Image::JUSTIFY_CENTRE);
-		cy += l_h + 2;
+		cy += ydiff;
 		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to choose how many men", Gigalomania::Image::JUSTIFY_CENTRE);
-		cy += l_h + 2;
+		cy += ydiff;
 		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to play with", Gigalomania::Image::JUSTIFY_CENTRE);
-		cy += l_h + 2;
+		cy += ydiff;
 		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "then click on the map", Gigalomania::Image::JUSTIFY_CENTRE);
-		cy += l_h + 2;
+		cy += ydiff;
 		Gigalomania::Image::writeMixedCase(xpos, cy, game_g->letters_large, game_g->letters_small, NULL, "to the right", Gigalomania::Image::JUSTIFY_CENTRE);
-		cy += l_h + 2;
+		cy += ydiff;
 	}
 
 	game_g->getMap()->draw(cx - 8*map_width_c, off_y);
