@@ -5470,8 +5470,7 @@ void launchUrl(string url) {
     __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: launch url: %s", url.c_str());
     // retrieve the JNI environment.
     JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
-    if (!env)
-    {
+    if (!env) {
         __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find env");
         return;
     }
@@ -5479,8 +5478,7 @@ void launchUrl(string url) {
 
     // retrieve the Java instance of the SDLActivity
     jobject activity = (jobject)SDL_AndroidGetActivity();
-    if (!activity)
-    {
+    if (!activity) {
         __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find activity");
         return;
     }
@@ -5488,8 +5486,7 @@ void launchUrl(string url) {
 
     // find the Java class of the activity. It should be SDLActivity or a subclass of it.
     jclass clazz( env->GetObjectClass(activity) );
-    if (!clazz)
-    {
+    if (!clazz) {
         __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find class");
         return;
     }
@@ -5497,8 +5494,7 @@ void launchUrl(string url) {
 
     // find the identifier of the method to call
     jmethodID method_id = env->GetMethodID(clazz, "launchUrl", "(Ljava/lang/String;)V");
-    if (!method_id)
-    {
+    if (!method_id) {
         __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find launchUrl method");
         return;
     }
@@ -5512,7 +5508,8 @@ void launchUrl(string url) {
     
     // clean up the local references.
     env->DeleteLocalRef(str);
-    env->DeleteLocalRef(activity);
-    __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: done");
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: done");
 }
 #endif
