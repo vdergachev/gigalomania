@@ -605,7 +605,9 @@ void playGame(int n_args, char *args[]);
 
 // JNI for Android
 
+void requestStoragePermission();
 void launchUrl(string url);
+void showToast(string toast);
 
 #endif
 

@@ -540,6 +540,10 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
             registerClick();
             //this->c_page = STATE_CHOOSEISLAND;
 			this->c_page = STATE_SAVEGAME;
+#if defined(__ANDROID__)
+			// if user didn't grant permission yet, nag again as needed for saving games!
+			requestStoragePermission();
+#endif
 		}
 	}
 	else if( this->c_page == STATE_LOADGAME ) {

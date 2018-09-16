@@ -981,7 +981,9 @@ void Game::saveGame(int slot) const {
 	delete [] filename;
 	if( file == NULL ) {
 		LOG("FAILED to open file\n");
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Save game", "Failed to save game", NULL);
+#if defined(__ANDROID__)
+		showToast("Failed to save game");
+#endif
 		return;
 	}
 
@@ -1038,6 +1040,10 @@ void Game::saveGame(int slot) const {
 	fwrite(buffer, diff, 1, file);
 
 	fclose(file);
+
+#if defined(__ANDROID__)
+	showToast("Successfully saved game");
+#endif
 }
 
 bool Game::validPlayer(int player) const {
@@ -5287,6 +5293,11 @@ void playGame(int n_args, char *args[]) {
 
 	initFolderPaths();
 	initLogFile();
+#if defined(__ANDROID__)
+	// n.b., no point requesting permission before intFolderPaths, as we'll have to wait for user to grant permission (if not already done so)
+	// if permission is not yet available, but is then granted by the user, PermissionsHandler.java will call initFolderPaths() again
+	requestStoragePermission();
+#endif
 
 	// set random seed - recommended way to do it from http://stackoverflow.com/questions/322938/recommended-way-to-initialize-srand
 	unsigned int seed = (unsigned int)time(NULL);
@@ -5467,6 +5478,50 @@ bool Game::playerAlive(int player) const {
 
 // see http://wiki.libsdl.org/SDL_AndroidGetActivity
 
+void callJavaVoid(string method) {
+	// retrieve the JNI environment.
+	JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+	if (!env) {
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find env");
+		return;
+	}
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained env");
+
+	// retrieve the Java instance of the SDLActivity
+	jobject activity = (jobject)SDL_AndroidGetActivity();
+	if (!activity) {
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find activity");
+		return;
+	}
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained activity");
+
+	// find the Java class of the activity. It should be SDLActivity or a subclass of it.
+	jclass clazz(env->GetObjectClass(activity));
+	if (!clazz) {
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find class");
+		return;
+	}
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained class");
+
+	// find the identifier of the method to call
+	jmethodID method_id = env->GetMethodID(clazz, method.c_str(), "()V");
+	if (!method_id) {
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find method");
+		return;
+	}
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained method");
+
+	// effectively call the Java method
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: about to call static method");
+	env->CallVoidMethod(activity, method_id);
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: called method");
+
+	// clean up the local references.
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: done");
+}
+
 void callJavaString(string method, string arg1) {
     // retrieve the JNI environment.
     JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
@@ -5513,9 +5568,57 @@ void callJavaString(string method, string arg1) {
 	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: done");
 }
 
+void requestStoragePermission() {
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: requestStoragePermission");
+	callJavaVoid("requestStoragePermission");
+}
+
 void launchUrl(string url) {
 	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: launch url: %s", url.c_str());
 	callJavaString("launchUrl", url);
 }
 
+void showToast(string toast) {
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: show toast: %s", toast.c_str());
+	callJavaString("showToast", toast);
+}
+
+// methods called FROM Java
+// also see http://community.kde.org/Necessitas/JNI
+
+static void AndroidGrantedStoragePermission(JNIEnv * /*env*/, jobject /*thiz*/) {
+	LOG("storage permission granted\n");
+	initFolderPaths();
+}
+
+static JNINativeMethod methods[] = {
+	{"AndroidGrantedStoragePermission", "()V", (void *)AndroidGrantedStoragePermission}
+};
+
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/) {
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI_OnLoad enter");
+	JNIEnv* env = NULL;
+	if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't get environment");
+		return -1;
+	}
+
+	// search for our class
+	jclass clazz = env->FindClass("net/sourceforge/gigalomania/Gigalomania");
+	if (!clazz)
+	{
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find Activity class");
+		return -1;
+	}
+
+	// register our native methods
+	if (env->RegisterNatives(clazz, methods, sizeof(methods) / sizeof(methods[0])) < 0)
+	{
+		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: failed to register methods");
+		return -1;
+	}
+
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI_OnLoad exit");
+	return JNI_VERSION_1_6;
+}
 #endif
