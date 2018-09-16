@@ -966,6 +966,9 @@ bool Game::loadGame(int slot) {
 	const char *filename = getFilename(slot);
 	bool ok = loadGame(filename);
 	delete [] filename;
+#if defined(__ANDROID__)
+	showToast(ok ? "Successfully loaded game" : "Failed to load game");
+#endif
 	return ok;
 }
 
