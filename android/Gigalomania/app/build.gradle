@@ -1,19 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.1'
+    compileSdkVersion 27
 
     defaultConfig {
         applicationId "net.sourceforge.gigalomania"
         minSdkVersion 14
-        // Tested on Android 8.0
-        targetSdkVersion 26
+        // Tested on Android 8.1
+        targetSdkVersion 27
 
         ndk {
             // Specifies the ABI configurations of your native
             // libraries Gradle should build and package with your APK.
-            abiFilters 'x86', 'armeabi', 'armeabi-v7a'
+            abiFilters 'x86', 'armeabi-v7a'
         }
     }
 
