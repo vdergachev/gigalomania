@@ -224,7 +224,7 @@ const char *getApplicationFilename(const char *name, bool survive_uninstall) {
 #elif __linux // also covers Maemo, Meego and Android
 	const char *path = application_path;
 #if defined(__ANDROID__)
-	// application_path already points to a folder that survives uninistallation, so only need to handle application_path being false
+	// application_path already points to a folder that survives uninistallation, so only need to handle survive_uninstall being false
 	if( !survive_uninstall ) {
 		path = application_path_uninstall;
 	}
