@@ -976,6 +976,7 @@ void Game::saveGame(int slot) const {
 	ASSERT( slot >= 0 && slot < n_slots_c );
 
 	const char *filename = getFilename(slot);
+	LOG("filename: %s\n", filename);
 	FILE *file = fopen(filename, "wb+");
 	delete [] filename;
 	if( file == NULL ) {
