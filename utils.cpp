@@ -98,7 +98,7 @@ const char *oldlogfilename = NULL;
 #if _WIN32
 char application_path[MAX_PATH] = "";
 #elif defined(__ANDROID__)
-char application_path[] = "/sdcard/net.sourceforge.gigalomania";
+const char application_path[] = "/sdcard/net.sourceforge.gigalomania";
 const char *application_path_uninstall = NULL; // path for folder that will be deleted upon uninstall
 #elif __linux
 char *application_path = NULL;
@@ -159,19 +159,14 @@ void initFolderPaths() {
 #elif defined(__ANDROID__)
 	// application_path already defined above
 	// create the folder if it doesn't already exist
-	bool ok = true;
+	// note that if this fails, it may be that storage permission isn't granted - we should NOT modify application_path, instead wait until
+	// permission is granted by user, when this function will be called again
 	if( access(application_path, 0) != 0 ) {
 		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "try to create data folder");
 		int res = mkdir(application_path, S_IRWXU | S_IRWXG | S_IRWXO);
 		if( res != 0 ) {
 			__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "failed to create data folder");
-			ok = false;
 		}
-	}
-
-	if( !ok ) {
-		// just save in local directory and hope for the best!
-		strcpy(application_path, "");
 	}
 
 	// find the folder that will be deleted upon uninstall - shouldn't need to create this folder
