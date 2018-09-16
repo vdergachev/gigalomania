@@ -981,6 +981,7 @@ void Game::saveGame(int slot) const {
 	delete [] filename;
 	if( file == NULL ) {
 		LOG("FAILED to open file\n");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Save game", "Failed to save game", NULL);
 		return;
 	}
 
@@ -5466,8 +5467,7 @@ bool Game::playerAlive(int player) const {
 
 // see http://wiki.libsdl.org/SDL_AndroidGetActivity
 
-void launchUrl(string url) {
-    __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: launch url: %s", url.c_str());
+void callJavaString(string method, string arg1) {
     // retrieve the JNI environment.
     JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
     if (!env) {
@@ -5493,15 +5493,15 @@ void launchUrl(string url) {
     __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained class");
 
     // find the identifier of the method to call
-    jmethodID method_id = env->GetMethodID(clazz, "launchUrl", "(Ljava/lang/String;)V");
+    jmethodID method_id = env->GetMethodID(clazz, method.c_str(), "(Ljava/lang/String;)V");
     if (!method_id) {
-        __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find launchUrl method");
+        __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find method");
         return;
     }
     __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained method");
 
     // effectively call the Java method
-	jstring str = env->NewStringUTF(url.c_str());
+	jstring str = env->NewStringUTF(arg1.c_str());
     __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: about to call static method");
     env->CallVoidMethod( activity, method_id, str );
     __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: called method");
@@ -5512,4 +5512,10 @@ void launchUrl(string url) {
 	env->DeleteLocalRef(clazz);
 	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: done");
 }
+
+void launchUrl(string url) {
+	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: launch url: %s", url.c_str());
+	callJavaString("launchUrl", url);
+}
+
 #endif
