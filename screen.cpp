@@ -29,6 +29,15 @@ Gigalomania::Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_do
 }
 
 Gigalomania::Screen::~Screen() {
+#if SDL_MAJOR_VERSION == 1
+#else
+	if( sdlWindow != NULL ) {
+		SDL_DestroyWindow(sdlWindow);
+	}
+	if( sdlRenderer != NULL ) {
+		SDL_DestroyRenderer(sdlRenderer);
+	}
+#endif
 }
 
 bool Gigalomania::Screen::canOpenFullscreen(int width, int height) {
