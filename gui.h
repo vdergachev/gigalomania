@@ -13,6 +13,7 @@ namespace Gigalomania {
 class PlaceMenGameState;
 class PlayingGameState;
 class Invention;
+class Design;
 
 #include "common.h"
 #include "panel.h"
@@ -214,6 +215,8 @@ private:
 	void drawElementStocksPage();
 	void drawBuildPage();
 	void drawKnownDesignsPage();
+	void drawDesignInfoPageNumbers(const Design *design, int cost, int cnt);
+	void drawDesignInfoPageForDesign(const Design *design);
 	void drawDesignInfoPage();
 	void drawFactoryPage();
 

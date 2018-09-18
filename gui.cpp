@@ -1482,31 +1482,39 @@ void GamePanel::drawKnownDesignsPage() {
 	game_g->icon_weapon->draw(offset_panel_x_c + 72, offset_panel_y_c + 24);
 }
 
-void GamePanel::drawDesignInfoPage() {
-	ASSERT(this->designinfo != NULL);
-	Design *design = gamestate->getCurrentSector()->knownDesign( this->designinfo->getType(), this->designinfo->getEpoch() );
-	ASSERT(design != NULL);
+void GamePanel::drawDesignInfoPageNumbers(const Design *design, int cost, int cnt) {
+	int whole = cost / element_multiplier_c;
+	int frac = cost % element_multiplier_c;
+	int off = 0;
+	if (whole > 0) {
+		Gigalomania::Image::writeNumbers(offset_panel_x_c + 36, offset_panel_y_c + 34 + 18 * cnt, game_g->numbers_blue, whole, Gigalomania::Image::JUSTIFY_LEFT);
+		off += game_g->numbers_blue[0]->getScaledWidth() * n_digits(whole);
+	}
+	if (frac == 1) {
+		game_g->numbers_half->draw(offset_panel_x_c + 36 + off + 1, offset_panel_y_c + 34 + 18 * cnt);
+	}
+}
+
+void GamePanel::drawDesignInfoPageForDesign(const Design *design) {
 	int cnt = 0;
 	for(int i=0;i<N_ID;i++) {
 		int cost = design->getCost((Id)i);
 		if( cost > 0 ) {
-			int whole = cost / element_multiplier_c;
-			int frac = cost % element_multiplier_c;
 			game_g->icon_elements[i]->draw(offset_panel_x_c + 16, offset_panel_y_c + 32 + 18 * cnt);
-			int off = 0;
-			if( whole > 0 ) {
-				Gigalomania::Image::writeNumbers(offset_panel_x_c + 36, offset_panel_y_c + 34 + 18 * cnt, game_g->numbers_blue, whole, Gigalomania::Image::JUSTIFY_LEFT);
-				off += game_g->numbers_blue[0]->getScaledWidth() * n_digits(whole);
-			}
-			if( frac == 1 ) {
-				game_g->numbers_half->draw(offset_panel_x_c + 36 + off + 1, offset_panel_y_c + 34 + 18 * cnt);
-			}
+			drawDesignInfoPageNumbers(design, cost, cnt);
 			cnt++;
 		}
 	}
 	if( design->isErgonomicallyTerrific() ) {
 		game_g->icon_ergo->draw(offset_panel_x_c + 64, offset_panel_y_c + 32);
 	}
+}
+
+void GamePanel::drawDesignInfoPage() {
+	ASSERT(this->designinfo != NULL);
+	Design *design = gamestate->getCurrentSector()->knownDesign( this->designinfo->getType(), this->designinfo->getEpoch() );
+	ASSERT(design != NULL);
+	drawDesignInfoPageForDesign(design);
 }
 
 void GamePanel::drawFactoryPage() {
