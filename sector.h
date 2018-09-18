@@ -180,7 +180,7 @@ public:
 	void setCost(Id id, float cost) {
 		this->cost[(int)id] = (int)(cost * element_multiplier_c);
 	}
-	int getCost(Id id) {
+	int getCost(Id id) const {
 		return this->cost[(int)id];
 	}
 	bool isErgonomicallyTerrific() const {
