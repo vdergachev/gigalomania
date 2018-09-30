@@ -171,6 +171,7 @@ public:
 class Design {
 	Invention *invention;
 	bool ergonomically_terrific;
+	bool no_nukes_only; // if true, then this design should only be available if nukes are disabled
 	int cost[N_ID];
 	int save_id;
 
@@ -180,11 +181,20 @@ public:
 	void setCost(Id id, float cost) {
 		this->cost[(int)id] = (int)(cost * element_multiplier_c);
 	}
+	void setCostRaw(Id id, int cost) {
+		this->cost[(int)id] = cost;
+	}
 	int getCost(Id id) const {
 		return this->cost[(int)id];
 	}
 	bool isErgonomicallyTerrific() const {
 		return this->ergonomically_terrific;
+	}
+	void setNoNukesOnly() {
+		this->no_nukes_only = true;
+	}
+	bool isNoNukesOnly() const {
+		return this->no_nukes_only;
 	}
 	Invention *getInvention() const {
 		return this->invention;

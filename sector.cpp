@@ -429,6 +429,7 @@ Gigalomania::Image *Element::getImage() const {
 Design::Design(Invention *invention,bool ergonomically_terrific) {
 	this->invention = invention;
 	this->ergonomically_terrific = ergonomically_terrific;
+	this->no_nukes_only = false;
 	this->save_id = -1;
 	for(int i=0;i<N_ID;i++)
 		this->cost[i] = 0;
@@ -1446,6 +1447,9 @@ Design *Sector::bestDesign(Invention::Type type,int epoch) const {
 		Design *design = invention->getDesign(i);
 		bool ok = true;
 		if( game_g->isPrefDisallowNukes() && ( type == Invention::DEFENCE || type == Invention::WEAPON ) && epoch == nuclear_epoch_c ) {
+			ok = false;
+		}
+		if( !game_g->isPrefDisallowNukes() && design->isNoNukesOnly() ) {
 			ok = false;
 		}
 		for(int j=0;j<N_ID && ok;j++) {
@@ -6675,6 +6679,20 @@ bool Design::setupDesigns() {
 	design = new Design(invention_shields[9], false);
 	design->setCost(BETHLIUM, 1);
 	design->setCost(YERIDIUM, 2);
+	
+	// set up extra designs for mode where nukes aren't allowed
+	// for simplicity, in this mode all nuke designs should be added as spaceships, but with increased costs
+	for(size_t i=0;i<invention_weapons[8]->getNDesigns();i++) {
+		const Design *this_design = invention_weapons[nuclear_epoch_c]->getDesign(i);
+		design = new Design(invention_weapons[spaceship_epoch_c], false); // transferred designs should never be ergonomic
+		design->setNoNukesOnly();
+		for(int j=0;j<N_ID;j++) {
+			int cost = this_design->getCost((Id)j);
+			if( cost > 0 ) {
+				design->setCostRaw((Id)j, (int)(0.1 + 1.5*cost));
+			}
+		}
+	}
 
 	return true;
 }
