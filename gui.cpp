@@ -1511,10 +1511,12 @@ void GamePanel::drawDesignInfoPageForDesign(const Design *design) {
 }
 
 void GamePanel::drawDesignInfoPage() {
-	ASSERT(this->designinfo != NULL);
-	Design *design = gamestate->getCurrentSector()->knownDesign( this->designinfo->getType(), this->designinfo->getEpoch() );
-	ASSERT(design != NULL);
-	drawDesignInfoPageForDesign(design);
+	if (this->designinfo != NULL) {
+		// normally designinfo will always be non-NULL, but it can end up being NULL if we're resuming from saved state (as we don't bother to save it)
+		Design *design = gamestate->getCurrentSector()->knownDesign(this->designinfo->getType(), this->designinfo->getEpoch());
+		ASSERT(design != NULL);
+		drawDesignInfoPageForDesign(design);
+	}
 }
 
 void GamePanel::drawFactoryPage() {
@@ -2132,9 +2134,11 @@ x		}*/
             done = true;
             registerClick();
             this->setPage(STATE_KNOWNDESIGNS);
-			ASSERT(this->designinfo != NULL);
-			//gamestate->getCurrentSector()->trashDesign(this->designinfo);
-			gamestate->trashDesign(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos(), this->designinfo);
+			if( this->designinfo != NULL ) {
+				// normally designinfo will always be non-NULL, but it can end up being NULL if we're resuming from saved state (as we don't bother to save it)
+				//gamestate->getCurrentSector()->trashDesign(this->designinfo);
+				gamestate->trashDesign(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos(), this->designinfo);
+			}
 		}
 	}
 	else if( this->c_page == STATE_FACTORY ) {
