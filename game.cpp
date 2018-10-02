@@ -4402,6 +4402,11 @@ void Game::runTests() {
 			sy = 4;
 			placeMenGameState->getChooseMenPanel()->setNMen(15);
 		}
+		else if( start_epoch == 8 && selected_island == 2 ) {
+			sx = 2;
+			sy = 2;
+			placeMenGameState->getChooseMenPanel()->setNMen(15);
+		}
 		else {
 			map->findRandomSector(&sx, &sy);
 			placeMenGameState->getChooseMenPanel()->setNMen(10);
@@ -4928,6 +4933,47 @@ void Game::runTests() {
 			// shouldn't be able to nuke again
 			if( playingGameState->nukeSector(sx, sy, sx+1, sy) ) {
 				throw string("didn't expect to nuke sector again");
+			}
+		}
+		else if( start_epoch == 8 && selected_island == 2 ) {
+			Sector *start_sector = map->getSector(sx, sy);
+			if (!start_sector->canBuild(BUILDING_MINE)) {
+				throw string("can't build mine");
+			}
+			start_sector->buildBuilding(BUILDING_MINE);
+			if (!start_sector->canBuild(BUILDING_FACTORY)) {
+				throw string("can't build factory");
+			}
+			start_sector->buildBuilding(BUILDING_FACTORY);
+			if (!start_sector->canBuild(BUILDING_LAB)) {
+				throw string("can't build lab");
+			}
+			start_sector->buildBuilding(BUILDING_LAB);
+			for (int i = 0; i < N_ID; i++) {
+				while (start_sector->canMine((Id)i) && start_sector->anyElements((Id)i)) {
+					start_sector->mineElement(human_player, (Id)i);
+				}
+			}
+			// first test with disallow nukes pref
+			pref_disallow_nukes = true;
+			Design *design = start_sector->canResearch(Invention::WEAPON, 8);
+			if( design != NULL ) {
+				throw string("didn't expect to design nuke when disallow nukes is on");
+			}
+			// but we should be able to build spaceships if we can't build nukes
+			design = start_sector->canResearch(Invention::WEAPON, 9);
+			if( design == NULL ) {
+				throw string("can't design spaceship even though disallow nukes is on");
+			}
+
+			pref_disallow_nukes = false;
+			design = start_sector->canResearch(Invention::WEAPON, 8);
+			if( design == NULL ) {
+				throw string("can't design nuke");
+			}
+			design = start_sector->canResearch(Invention::WEAPON, 9);
+			if( design != NULL ) {
+				throw string("wasn't expecting to be able to build spaceships when nukes are allowed");
 			}
 		}
 		else if( start_epoch == 9 && selected_island == 0 ) {
