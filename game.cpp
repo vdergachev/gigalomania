@@ -348,15 +348,18 @@ Game::~Game() {
 		}
 	}
 	map = NULL;
+
+	// must clean up tracked objects before closing screen, as for SDL 2 SDL_Textures must be destroyed before destroying the renderer
+	LOG("clean up tracked objects\n");
+	TrackedObject::cleanup();
+	// no longer need to stop music, as it's deleted as a TrackedObject
+	//stopMusic();
 	if( screen != NULL ) {
 		LOG("delete screen %d\n", screen);
 		delete screen;
 		screen = NULL;
 	}
-	LOG("clean up tracked objects\n");
-	TrackedObject::cleanup();
-	// no longer need to stop music, as it's deleted as a TrackedObject
-	//stopMusic();
+
 	LOG("free sound\n");
 	freeSound();
 	LOG("delete application %d\n", application);

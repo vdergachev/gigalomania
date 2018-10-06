@@ -47,6 +47,7 @@ namespace Gigalomania {
 		void drawLine(short x0, short y0, short x1, short y1, unsigned char r, unsigned char g, unsigned char b);
 		void convertWindowToLogical(int *m_x, int *m_y) const;
 		void getWindowSize(int *window_width, int *window_height) const;
+		void convertTouchCoords(int *m_x, int *m_y, float tx, float ty) const;
 #endif
 		void setMousePos(int x, int y) {
 			this->m_pos_x = x;

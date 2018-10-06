@@ -30,12 +30,19 @@ Gigalomania::Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_do
 
 Gigalomania::Screen::~Screen() {
 #if SDL_MAJOR_VERSION == 1
+	Image::setGraphicsOutput(NULL);
 #else
-	if( sdlWindow != NULL ) {
-		SDL_DestroyWindow(sdlWindow);
-	}
+	Image::setGraphicsOutput(NULL);
+	// must delete renderer before window (as renderer depends on window), otherwise get assertion failure on Android
+	// (see example code at https://wiki.libsdl.org/SDL_CreateRenderer )
+	// also ensure that all Images (and hence SDL_Textures) have been destroyed
 	if( sdlRenderer != NULL ) {
 		SDL_DestroyRenderer(sdlRenderer);
+		sdlRenderer = NULL;
+	}
+	if( sdlWindow != NULL ) {
+		SDL_DestroyWindow(sdlWindow);
+		sdlWindow = NULL;
 	}
 #endif
 }
@@ -230,6 +237,25 @@ void Gigalomania::Screen::convertWindowToLogical(int *m_x, int *m_y) const {
 void Gigalomania::Screen::getWindowSize(int *window_width, int *window_height) const {
 	SDL_GetWindowSize(sdlWindow, window_width, window_height);
 }
+
+/* Converts SDL touch coordinates (from SDL_TouchFingerEvent) to window coordinates (consistent
+   with those used for mouse events).
+*/
+void Gigalomania::Screen::convertTouchCoords(int *m_x, int *m_y, float tx, float ty) const {
+	// in SDL 2.0.7, touch coordiates were changed to be normalised to the render viewport rather than
+	// the screen, see https://hg.libsdl.org/SDL/rev/d94abaa07d8e
+#if SDL_VERSION_ATLEAST(2, 0, 7)
+	*m_x = (int)(tx*this->width);
+	*m_y = (int)(ty*this->height);
+#else
+	int window_width = 0, window_height = 0;
+	game_g->getScreen()->getWindowSize(&window_width, &window_height);
+	*m_x = (int)(tx*window_width);
+	*m_y = (int)(ty*window_height);
+	//LOG("    %d, %d\n", m_x, m_y);
+	game_g->getScreen()->convertWindowToLogical(m_x, m_y);
+#endif
+}
 #endif
 
 
@@ -407,6 +433,7 @@ void Application::runMainLoop() {
 					// if this code is changed, consider whether SDL_FINGERDOWN also needs updating
 					int m_x = event.button.x;
 					int m_y = event.button.y;
+					//LOG("    %d, %d\n", m_x, m_y);
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					bool m_left = false, m_middle = false, m_right = false;
 					Uint8 button = event.button.button;
@@ -481,12 +508,8 @@ void Application::runMainLoop() {
 			case SDL_FINGERDOWN:
 				{
 					//LOG("received fingerdown: %f , %f\n", event.tfinger.x, event.tfinger.y);
-					int window_width = 0, window_height = 0;
-					game_g->getScreen()->getWindowSize(&window_width, &window_height);
-					int m_x = (int)(event.tfinger.x*window_width);
-					int m_y = (int)(event.tfinger.y*window_height);
-					//LOG("    %d, %d\n", m_x, m_y);
-					game_g->getScreen()->convertWindowToLogical(&m_x, &m_y);
+					int m_x = 0, m_y = 0;
+					game_g->getScreen()->convertTouchCoords(&m_x, &m_y, event.tfinger.x, event.tfinger.y);
 					//LOG("    logical %d, %d\n", m_x, m_y);
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					game_g->getScreen()->setMouseLeft(true);
@@ -511,12 +534,8 @@ void Application::runMainLoop() {
 			case SDL_FINGERMOTION:
 				{
 					//LOG("received fingermotion: %f , %f\n", event.tfinger.x, event.tfinger.y);
-					int window_width = 0, window_height = 0;
-					game_g->getScreen()->getWindowSize(&window_width, &window_height);
-					int m_x = (int)(event.tfinger.x*window_width);
-					int m_y = (int)(event.tfinger.y*window_height);
-					//LOG("    %d, %d\n", m_x, m_y);
-					game_g->getScreen()->convertWindowToLogical(&m_x, &m_y);
+					int m_x = 0, m_y = 0;
+					game_g->getScreen()->convertTouchCoords(&m_x, &m_y, event.tfinger.x, event.tfinger.y);
 					//LOG("    logical %d, %d\n", m_x, m_y);
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					this->blank_mouse = true;

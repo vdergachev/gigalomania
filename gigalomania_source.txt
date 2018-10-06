@@ -167,7 +167,7 @@ SDL2_image: sdl_image2.lib . See http://www.libsdl.org/projects/SDL_image/ .
 
 SDL2_mixer: sdl_mixer2.lib . See http://www.libsdl.org/projects/SDL_mixer/ .
 
-I've tested this with version 2.0.5 of SDL, 2.0.1 of SDL_image and 2.0.1 of SDL_mixer.
+I've tested this with version 2.0.8 of SDL, 2.0.3 of SDL_image and 2.0.2 of SDL_mixer.
 
 See README-android.txt in the SDL source archive for some information. You need to obtain the Android SDK (Android Studio). Then see instructions at https://developer.android.com/studio/projects/add-native-code.html for how to install/enable the NDK in Android Studio (note, Gigalomania/SDL uses ndk-build rather than CMake).
 
@@ -179,7 +179,7 @@ Then create the Gigalomania folder as follows:
 4. Copy the gfx/, islands/, music/ and sound/ folders into app/src/main/assets/ .
 4b. Copy the files inside gfx_android_extras/ into assets/gfx/ (so you have assets/gfx/starfield.png etc). Optionally, the files starfield.jpg and stars.jpg can be deleted. (This is because JPEG support in SDL_image 2 on Android is currently broken.)
 5. Configure the file jni/SDL_image/Android.mk: ensure that SUPPORT_JPG and SUPPORT_WEBP set to false.
-6. You need to configure the file jni/SDL_mixer/Android.mk: set SUPPORT_MOD_MODPLUG, SUPPORT_MOD_MIKMOD and SUPPORT_MP3_SMPEG to false.
+6. You need to configure the file jni/SDL_mixer/Android.mk: set SUPPORT_FLAC, SUPPORT_MP3_MPG123, SUPPORT_MOD_MODPLUG and SUPPORT_TIMIDITY to false.
 
 Then open the project in Android Studio. It will take some moments to initialise the project. When you run, the project will build - note that it can take several minutes to build the complete project.
 
@@ -244,4 +244,4 @@ Please contact me if you have suggestions, bug fixes or whatever: mark DOT harma
 
 Homepage: http://gigalomania.sourceforge.net/
 
-Mark Harman 4 January 2018
+Mark Harman 5 October 2018
