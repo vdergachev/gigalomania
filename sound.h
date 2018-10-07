@@ -33,7 +33,7 @@ namespace Gigalomania {
 			channel = -1;
 		}
 	public:
-		Sample() : is_music(false), music(NULL), chunk(NULL) {
+		Sample() : is_music(false), music(NULL), chunk(NULL), channel(0) {
 			// create dummy Sample
 		}
 		virtual ~Sample();
