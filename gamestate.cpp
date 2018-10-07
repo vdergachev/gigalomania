@@ -1803,10 +1803,10 @@ void PlayingGameState::draw() {
 				player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
 			}
 #if SDL_MAJOR_VERSION == 1
-			Gigalomania::Image *fill_rect = Gigalomania::Image::createBlankImage(game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 24);
-			fill_rect->fillRect(0, 0, game_g->getScaleWidth()*rect.w, game_g->getScaleHeight()*rect.h, 0, 0, 0);
+			Gigalomania::Image *fill_rect = Gigalomania::Image::createBlankImage((int)(game_g->getScaleWidth()*rect.w), (int)(game_g->getScaleHeight()*rect.h), 24);
+			fill_rect->fillRect(0, 0, (int)(game_g->getScaleWidth()*rect.w), (int)(game_g->getScaleHeight()*rect.h), 0, 0, 0);
 			fill_rect->convertToDisplayFormat();
-			fill_rect->drawWithAlpha(game_g->getScaleWidth()*rect.x, game_g->getScaleHeight()*rect.y, tutorial_alpha_c);
+			fill_rect->drawWithAlpha((int)(game_g->getScaleWidth()*rect.x), (int)(game_g->getScaleHeight()*rect.y), tutorial_alpha_c);
 			delete fill_rect;
 #else
 			game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*rect.x), (short)(game_g->getScaleHeight()*rect.y), (short)(game_g->getScaleWidth()*rect.w), (short)(game_g->getScaleHeight()*rect.h), 0, 0, 0, tutorial_alpha_c);
