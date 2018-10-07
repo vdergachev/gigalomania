@@ -8,10 +8,11 @@
 
 #ifdef _WIN32
 #include <initguid.h>
-#include <Knownfolders.h>
-#include <Shlobj.h>
+#include <KnownFolders.h>
+#include <ShlObj.h>
 #include <Shlwapi.h>
 #pragma comment(lib,"shlwapi.lib")
+#pragma comment(lib,"ole32.lib") // needed for CoTaskMemFree on QtCreator
 
 #include <io.h> // for access
 #include <direct.h> // for mkdir
