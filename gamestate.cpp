@@ -1428,8 +1428,8 @@ void PlayingGameState::setFlashingSquare(int xpos,int ypos) {
 };
 
 void GameState::fadeScreen(bool out, int delay, void (*func_finish)()) {
-    if( fade != NULL )
-        delete fade;
+	if( fade != NULL )
+		delete fade;
 	if( game_g->isTesting() ) {
 		if( func_finish != NULL ) {
 			func_finish();
@@ -1442,10 +1442,10 @@ void GameState::fadeScreen(bool out, int delay, void (*func_finish)()) {
 
 void GameState::whiteFlash() {
 	//ASSERT( whitefade == NULL );
-    if( whitefade != NULL )
-        delete whitefade;
+	if( whitefade != NULL )
+		delete whitefade;
 	if( !game_g->isTesting() ) {
-	    whitefade = new FadeEffect(true, false, 0, NULL);
+		whitefade = new FadeEffect(true, false, 0, NULL);
 	}
 }
 
