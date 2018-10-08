@@ -1,7 +1,7 @@
 Linux
 =====
 
-(The source has been tested on Ubuntu 16.04.3 LTS 64-bit.)
+(The source has been tested on Ubuntu 18.04.1 LTS 64-bit.)
 
 You need to install the following libraries: SDL2 ( http://www.libsdl.org/ ), SDL2_Image ( http://www.libsdl.org/projects/SDL_image/ ), SDL2_Mixer ( http://www.libsdl.org/projects/SDL_mixer/ ).
 
@@ -9,6 +9,7 @@ Note that since v0.27, Gigalomania uses SDL 2 rather than SDL 1.2.
 
 On Ubuntu and Debian, you can install the required libraries with:
 
+sudo apt-get install make
 sudo apt-get install g++
 sudo apt-get install libsdl2-dev
 sudo apt-get install libsdl2-image-dev
@@ -244,4 +245,4 @@ Please contact me if you have suggestions, bug fixes or whatever: mark DOT harma
 
 Homepage: http://gigalomania.sourceforge.net/
 
-Mark Harman 5 October 2018
+Mark Harman 8 October 2018
