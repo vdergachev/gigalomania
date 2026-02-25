@@ -90,6 +90,8 @@ void textLines(int *n_lines,int *max_wid,const char *text, int lower_w, int uppe
 	}
 }
 
+bool logging_enabled = false;
+
 char application_name[] = "Gigalomania";
 
 const char *logfilename = NULL;
@@ -252,6 +254,7 @@ const char *getApplicationFilename(const char *name, bool survive_uninstall) {
  * Must be called after initFolderPaths().
  */
 void initLogFile() {
+    if( !logging_enabled ) return;
     LOG("initLogFile()\n"); // n.b., at this stage logging will only go to console output, not to log file
 	logfilename = getApplicationFilename("log.txt", false);
 	oldlogfilename = getApplicationFilename("log_old.txt", false);

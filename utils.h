@@ -7,10 +7,10 @@
 #define DEBUGprintf(x) if( !DEBUG || x > DEBUGLEVEL ) ((void)0); else log
 #endif*/
 
-const bool LOGGING = true; // enable logging even for release builds, for now
+extern bool logging_enabled;
 
 #ifndef LOG
-#define LOG if( !LOGGING ) ((void)0); else log
+#define LOG if( !logging_enabled ) ((void)0); else log
 #endif
 
 void initFolderPaths();

@@ -1992,6 +1992,15 @@ bool Game::loadImages() {
 	// progress should go from 0 to 80%
 	string gfx_dir = "gfx/";
 
+    LOG("gfx_dir: %s\n", gfx_dir.c_str());
+#ifdef _WIN32
+    {
+        WCHAR cwd_buf[MAX_PATH] = L"";
+        GetCurrentDirectoryW(MAX_PATH, cwd_buf);
+        LOG("CWD at loadImages start: %S\n", cwd_buf);
+    }
+#endif
+
 #if defined(__ANDROID__)
 	background = Gigalomania::Image::loadImage(gfx_dir + "starfield.png");
 #else
@@ -5330,6 +5339,8 @@ void playGame(int n_args, char *args[]) {
 			game_g->setGameMode(GAMEMODE_MULTIPLAYER_SERVER);
 		else if( strcmp(args[i], "client") == 0 )
 			game_g->setGameMode(GAMEMODE_MULTIPLAYER_CLIENT);
+		else if( strcmp(args[i], "verbose") == 0 )
+			logging_enabled = true;
 	}
 #endif
 
