@@ -1999,6 +1999,14 @@ bool Game::loadImages() {
         GetCurrentDirectoryW(MAX_PATH, cwd_buf);
         LOG("CWD at loadImages start: %S\n", cwd_buf);
     }
+    {
+        int img_flags = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+        LOG("IMG_Init result: 0x%x (JPG=%d PNG=%d)\n", img_flags,
+            (img_flags & IMG_INIT_JPG) != 0,
+            (img_flags & IMG_INIT_PNG) != 0);
+        if( !(img_flags & IMG_INIT_JPG) )
+            LOG("IMG_Init JPG error: %s\n", IMG_GetError());
+    }
 #endif
 
 #if defined(__ANDROID__)
