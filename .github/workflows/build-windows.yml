@@ -46,7 +46,7 @@ jobs:
           Copy-Item readme.html $distDir
 
       - name: Verify package contents
-        run: dir dist\gigalomania /s /b
+        run: cmd /c dir dist\gigalomania /s /b
 
       - name: Create zip
         run: Compress-Archive -Path dist\gigalomania -DestinationPath gigalomania-windows.zip
