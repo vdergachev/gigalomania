@@ -22,6 +22,8 @@
 #elif defined(__APPLE__)
 #include <SDL.h>
 #include <unistd.h>
+#elif defined(_WIN32)
+#include <SDL2/SDL.h>
 #else
 #include <sdl.h>
 #endif

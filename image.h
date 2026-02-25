@@ -13,6 +13,8 @@ using std::string;
 #include <SDL2/SDL_image.h>
 #elif defined(__MORPHOS__)
 #include <SDL/SDL_image.h>
+#elif defined(_WIN32)
+#include <SDL2/SDL_image.h>
 #else
 #include <SDL_image.h>
 #endif

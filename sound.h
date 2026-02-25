@@ -12,6 +12,8 @@ using std::string;
 #include <SDL_mixer.h>
 #elif defined(__linux)
 #include <SDL2/SDL_mixer.h>
+#elif defined(_WIN32)
+#include <SDL2/SDL_mixer.h>
 #else
 #include <SDL_mixer.h>
 #endif
