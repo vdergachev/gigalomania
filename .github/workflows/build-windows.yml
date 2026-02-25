@@ -24,21 +24,26 @@ jobs:
       - name: Build Release
         run: msbuild gigalomania.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnabled=true
 
-      - name: Collect DLLs from vcpkg
-        run: |
-          $vcpkgBin = "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin"
-          Get-ChildItem "$vcpkgBin\*.dll" | Copy-Item -Destination "x64\Release\"
-
       - name: Package
         run: |
-          New-Item -ItemType Directory -Force -Path dist\gigalomania
-          Copy-Item "x64\Release\gigalomania.exe" "dist\gigalomania\"
-          Copy-Item "x64\Release\*.dll" "dist\gigalomania\"
-          Copy-Item -Recurse gfx "dist\gigalomania\gfx"
-          Copy-Item -Recurse islands "dist\gigalomania\islands"
-          Copy-Item -Recurse music "dist\gigalomania\music"
-          Copy-Item -Recurse sound "dist\gigalomania\sound"
-          Copy-Item readme.html "dist\gigalomania\"
+          $outDir = "x64\Release"
+          $distDir = "dist\gigalomania"
+
+          New-Item -ItemType Directory -Force -Path $distDir
+
+          # Copy executable
+          Copy-Item "$outDir\gigalomania.exe" $distDir
+
+          # Copy DLLs from vcpkg (vcpkg integrate should place them in outDir, fallback to vcpkg bin)
+          $vcpkgBin = "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin"
+          Get-ChildItem "$vcpkgBin\*.dll" | Copy-Item -Destination $distDir
+
+          # Copy game assets
+          Copy-Item -Recurse -Force gfx     "$distDir\gfx"
+          Copy-Item -Recurse -Force islands  "$distDir\islands"
+          Copy-Item -Recurse -Force music    "$distDir\music"
+          Copy-Item -Recurse -Force sound    "$distDir\sound"
+          Copy-Item readme.html $distDir
 
       - name: Create zip
         run: Compress-Archive -Path dist\gigalomania -DestinationPath gigalomania-windows.zip
