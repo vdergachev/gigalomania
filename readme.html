@@ -173,7 +173,20 @@ tested on the Nokia N950.</p>
 <p>If the game fails to run, or has problems, please try the following:</p>
 <ul>
   <li>For Windows, make sure you have installed the required libraries/DLLs (see Windows download,
-  above).</li>
+  above). The official zip package already includes all required DLLs. If you are assembling
+  the game manually (e.g. from a self-compiled build), you need the following DLLs in the
+  same folder as <code>gigalomania.exe</code>:
+  <ul>
+    <li><b>SDL2.dll</b> &mdash; from <a href="https://github.com/libsdl-org/SDL/releases">SDL2 releases</a></li>
+    <li><b>SDL2_image.dll</b> &mdash; from <a href="https://github.com/libsdl-org/SDL_image/releases">SDL_image releases</a></li>
+    <li><b>SDL2_mixer.dll</b> &mdash; from <a href="https://github.com/libsdl-org/SDL_mixer/releases">SDL_mixer releases</a></li>
+    <li><b>jpeg62.dll</b> (or <b>jpeg-62.dll</b>) &mdash; JPEG image support, from
+        <a href="https://github.com/libjpeg-turbo/libjpeg-turbo/releases">libjpeg-turbo releases</a>.
+        <b>Without this file the game will fail to load images and crash on startup.</b></li>
+    <li><b>libpng16.dll</b>, <b>zlib1.dll</b> &mdash; PNG support, included with SDL_image</li>
+    <li>Audio DLLs: <b>ogg.dll</b>, <b>vorbis.dll</b>, <b>vorbisfile.dll</b> &mdash; included with SDL_mixer</li>
+  </ul>
+  </li>
   <li>On Linux (including the Pandora), try running from the command line (from Terminal window, type gigalomania) to see
   if that gives any informative error message.</li>
   <li>Ensure you have the latest drivers for your graphics card.</li>
