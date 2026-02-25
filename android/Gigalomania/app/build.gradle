@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    namespace 'net.sourceforge.gigalomania'
+    compileSdk 34
 
     defaultConfig {
         applicationId "net.sourceforge.gigalomania"
-        minSdkVersion 14
-        // Tested on Android 8.1
-        targetSdkVersion 27
+        minSdk 21
+        targetSdk 34
 
         ndk {
             // Specifies the ABI configurations of your native
@@ -31,5 +31,5 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'androidx.core:core:1.13.1'
 }

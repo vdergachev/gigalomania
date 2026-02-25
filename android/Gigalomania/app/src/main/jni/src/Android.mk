@@ -29,9 +29,9 @@ LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.c \
 	sound.cpp \
 	tutorial.cpp \
 	utils.cpp \
-	TinyXML\tinyxml.cpp \
-	TinyXML\tinyxmlerror.cpp \
-	TinyXML\tinyxmlparser.cpp
+	TinyXML/tinyxml.cpp \
+	TinyXML/tinyxmlerror.cpp \
+	TinyXML/tinyxmlparser.cpp
 
 LOCAL_SHARED_LIBRARIES := SDL2 SDL2_image SDL2_mixer
 
