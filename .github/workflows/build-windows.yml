@@ -38,12 +38,15 @@ jobs:
           $vcpkgBin = "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin"
           Get-ChildItem "$vcpkgBin\*.dll" | Copy-Item -Destination $distDir
 
-          # Copy game assets
-          Copy-Item -Recurse -Force gfx     "$distDir\gfx"
-          Copy-Item -Recurse -Force islands  "$distDir\islands"
-          Copy-Item -Recurse -Force music    "$distDir\music"
-          Copy-Item -Recurse -Force sound    "$distDir\sound"
+          # Copy game assets (xcopy is deterministic: /E includes subdirs, /I treats dest as dir, /Y no prompt)
+          cmd /c xcopy /E /I /Y gfx     dist\gigalomania\gfx\
+          cmd /c xcopy /E /I /Y islands dist\gigalomania\islands\
+          cmd /c xcopy /E /I /Y music   dist\gigalomania\music\
+          cmd /c xcopy /E /I /Y sound   dist\gigalomania\sound\
           Copy-Item readme.html $distDir
+
+      - name: Verify package contents
+        run: dir dist\gigalomania /s /b
 
       - name: Create zip
         run: Compress-Archive -Path dist\gigalomania -DestinationPath gigalomania-windows.zip
