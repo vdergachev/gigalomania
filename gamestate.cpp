@@ -1338,7 +1338,7 @@ void PlayingGameState::reset() {
 			GUIHandler::resetGUI(this);
 		}
 	}
-	if( LOGGING ) {
+	if( logging_enabled ) {
 		current_sector->printDebugInfo();
 	}
 }
