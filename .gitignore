@@ -34,3 +34,8 @@ newgfx/
 
 gigalomania.pro.user
 gpl.txt
+
+# Build artifacts
+*.o
+gigalomania
+log.txt

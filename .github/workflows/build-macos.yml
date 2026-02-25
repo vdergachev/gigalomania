@@ -1,0 +1,34 @@
+name: Build macOS
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install sdl2 sdl2_image sdl2_mixer
+
+      - name: Build
+        run: make
+
+      - name: Package
+        run: |
+          mkdir -p dist/gigalomania
+          cp gigalomania dist/gigalomania/
+          cp -r gfx islands music sound dist/gigalomania/
+          cp readme.html dist/gigalomania/
+          cd dist && zip -r ../gigalomania-macos.zip gigalomania/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gigalomania-macos
+          path: gigalomania-macos.zip

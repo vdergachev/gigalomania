@@ -19,6 +19,9 @@
 #include <SDL2/SDL.h>
 #elif defined(__MORPHOS__)
 #include <SDL/SDL.h>
+#elif defined(__APPLE__)
+#include <SDL.h>
+#include <unistd.h>
 #else
 #include <sdl.h>
 #endif
