@@ -14,18 +14,73 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: brew install sdl2 sdl2_image sdl2_mixer
+        run: brew install sdl2 sdl2_image sdl2_mixer dylibbundler
 
       - name: Build
         run: make
 
-      - name: Package
+      - name: Create app bundle
         run: |
-          mkdir -p dist/gigalomania
-          cp gigalomania dist/gigalomania/
-          cp -r gfx islands music sound dist/gigalomania/
-          cp readme.html dist/gigalomania/
-          cd dist && zip -r ../gigalomania-macos.zip gigalomania/
+          APP="dist/Gigalomania.app"
+          MACOS="$APP/Contents/MacOS"
+          RES="$APP/Contents/Resources"
+          LIBS="$APP/Contents/libs"
+
+          mkdir -p "$MACOS" "$RES" "$LIBS"
+
+          # Binary
+          cp gigalomania "$MACOS/gigalomania_bin"
+
+          # Launcher script — changes CWD to Resources so relative asset paths work
+          cat > "$MACOS/gigalomania" << 'LAUNCHER'
+          #!/bin/bash
+          DIR="$(cd "$(dirname "$0")" && pwd)"
+          cd "$DIR/../Resources"
+          exec "$DIR/gigalomania_bin" "$@"
+          LAUNCHER
+          chmod +x "$MACOS/gigalomania"
+
+          # Assets
+          cp -r gfx islands music sound readme.html "$RES/"
+
+          # Info.plist
+          cat > "$APP/Contents/Info.plist" << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>       <string>gigalomania</string>
+              <key>CFBundleIdentifier</key>       <string>net.sourceforge.gigalomania</string>
+              <key>CFBundleName</key>             <string>Gigalomania</string>
+              <key>CFBundleDisplayName</key>      <string>Gigalomania</string>
+              <key>CFBundleVersion</key>          <string>1.0</string>
+              <key>CFBundleShortVersionString</key> <string>1.0</string>
+              <key>CFBundlePackageType</key>      <string>APPL</string>
+              <key>CFBundleIconFile</key>         <string>gigalomania</string>
+              <key>NSHighResolutionCapable</key>  <true/>
+              <key>LSMinimumSystemVersion</key>   <string>10.13</string>
+          </dict>
+          </plist>
+          PLIST
+
+          # .icns icon from gigalomania64.png (sips + iconutil — built-in macOS tools)
+          mkdir -p icon.iconset
+          sips -z 16  16  gigalomania64.png --out icon.iconset/icon_16x16.png
+          sips -z 32  32  gigalomania64.png --out icon.iconset/icon_16x16@2x.png
+          sips -z 32  32  gigalomania64.png --out icon.iconset/icon_32x32.png
+          sips -z 64  64  gigalomania64.png --out icon.iconset/icon_32x32@2x.png
+          sips -z 128 128 gigalomania64.png --out icon.iconset/icon_128x128.png
+          sips -z 256 256 gigalomania64.png --out icon.iconset/icon_128x128@2x.png
+          iconutil -c icns icon.iconset -o "$RES/gigalomania.icns"
+
+          # Bundle SDL2 dylibs — copies libs into Contents/libs/ and rewrites install names
+          dylibbundler -od -b \
+            -x "$MACOS/gigalomania_bin" \
+            -d "$LIBS/" \
+            -p @executable_path/../libs/
+
+      - name: Create zip
+        run: cd dist && zip -r ../gigalomania-macos.zip Gigalomania.app/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
