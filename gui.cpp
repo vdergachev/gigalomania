@@ -395,11 +395,7 @@ void ChooseMenPanel::draw() {
     if( ( this->getPage() == STATE_LOADGAME || this->getPage() == STATE_SAVEGAME ) && !this->gamestate->hasConfirmWindow() ) {
         // hide background
         // (if request quit, then we'll hide background after drawing the GUI)
-#if SDL_MAJOR_VERSION == 1
-        game_g->getScreen()->fillRect(0, 0, default_width_c*game_g->getScaleWidth(), default_height_c*game_g->getScaleHeight(), 0, 0, 0);
-#else
         game_g->getScreen()->fillRectWithAlpha(0, 0, (short)(default_width_c*game_g->getScaleWidth()), (short)(default_height_c*game_g->getScaleHeight()), 0, 0, 0, 255-32);
-#endif
     }
 
     MultiPanel::draw();

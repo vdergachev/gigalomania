@@ -309,15 +309,7 @@ void PanelPage::drawPopups() {
 				const unsigned char panel_background_g = 128;
 				const unsigned char panel_background_b = 128;
 				const unsigned char panel_background_a = 160;
-#if SDL_MAJOR_VERSION == 1
-				Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
-				fill_rect->fillRect(0, 0, rect_w, rect_h, panel_background_r, panel_background_g, panel_background_b);
-				fill_rect->convertToDisplayFormat();
-				fill_rect->drawWithAlpha(rect_x, rect_y, panel_background_a);
-				delete fill_rect;
-#else
 				game_g->getScreen()->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, panel_background_r, panel_background_g, panel_background_b, panel_background_a);
-#endif
 
 				int py = (int)(popup_y/game_g->getScaleHeight());
 				for(int j=0;j<n_texts;j++) {
@@ -346,15 +338,7 @@ void PanelPage::drawBackground() {
 		int rect_y = (int)(game_g->getScaleWidth()*(owner->getTop() + offset_y));
 		int rect_w = (int)(game_g->getScaleWidth()*this->w);
 		int rect_h = (int)(game_g->getScaleHeight()*this->h);
-#if SDL_MAJOR_VERSION == 1
-		Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
-		fill_rect->fillRect(0, 0, rect_w, rect_h, background[0], background[1], background[2]);
-		fill_rect->convertToDisplayFormat();
-		fill_rect->drawWithAlpha(rect_x, rect_y, background[3]);
-		delete fill_rect;
-#else
 		game_g->getScreen()->fillRectWithAlpha((short)rect_x, (short)rect_y, (short)rect_w, (short)rect_h, background[0], background[1], background[2], background[3]);
-#endif
 	}
 }
 

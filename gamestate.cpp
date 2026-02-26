@@ -139,26 +139,10 @@ const int whitefade_time_c = 1000;
 FadeEffect::FadeEffect(bool white,bool out,int delay, void (*func_finish)()) : TimedEffect(delay, func_finish) {
 	this->white = white;
 	this->out = out;
-#if SDL_MAJOR_VERSION == 1
-	this->image = Gigalomania::Image::createBlankImage(game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), 24);
-	int r = 0, g = 0, b = 0;
-	if( white ) {
-		r = g = b = 255;
-	}
-	else {
-		r = g = b = 0;
-	}
-	image->fillRect(0, 0, game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), r, g, b);
-	this->image->convertToDisplayFormat();
-#else
 	image = NULL;
-#endif
 }
 
 FadeEffect::~FadeEffect() {
-#if SDL_MAJOR_VERSION == 1
-	delete image;
-#endif
 }
 
 bool FadeEffect::render() const {
@@ -182,12 +166,8 @@ bool FadeEffect::render() const {
 		if( !out )
 			alpha = 1.0 - alpha;
 	}
-#if SDL_MAJOR_VERSION == 1
-	image->drawWithAlpha(0, 0, (unsigned char)(alpha * 255));
-#else
 	unsigned char value = white ? 255 : 0;
 	game_g->getScreen()->fillRectWithAlpha(0, 0, game_g->getScreen()->getWidth(), game_g->getScreen()->getHeight(), value, value, value, (unsigned char)(alpha * 255));
-#endif
 	if( time > length ) // we still need to draw the fade, on the last time
 		return true;
 	return false;
@@ -1075,12 +1055,12 @@ bool PlayingGameState::readSectors(Map *map) {
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
-	SDL_RWops *file = SDL_RWFromFile(fullname, "rb");
+	SDL_IOStream *file = SDL_IOFromFile(fullname, "rb");
 #ifdef DATADIR
 	if( file == NULL ) {
 		LOG("searching in /usr/share/gigalomania/ for islands folder\n");
 		sprintf(fullname, "%s/%s", alt_maps_dirname.c_str(), game_g->getMap()->getFilename());
-		file = SDL_RWFromFile(fullname, "rb");
+		file = SDL_IOFromFile(fullname, "rb");
 	}
 #endif
 	if( file == NULL ) {
@@ -1104,7 +1084,7 @@ bool PlayingGameState::readSectors(Map *map) {
 			ok = readSectorsProcessLine(map, line, &done_header, &sec_x, &sec_y);
 		}
 	}
-	file->close(file);
+	SDL_CloseIO(file);
 
 	return ok;
 }
@@ -1802,15 +1782,7 @@ void PlayingGameState::draw() {
 			if( player_image != NULL ) {
 				player_image->draw(rect.x, rect.y - player_image->getScaledHeight());
 			}
-#if SDL_MAJOR_VERSION == 1
-			Gigalomania::Image *fill_rect = Gigalomania::Image::createBlankImage((int)(game_g->getScaleWidth()*rect.w), (int)(game_g->getScaleHeight()*rect.h), 24);
-			fill_rect->fillRect(0, 0, (int)(game_g->getScaleWidth()*rect.w), (int)(game_g->getScaleHeight()*rect.h), 0, 0, 0);
-			fill_rect->convertToDisplayFormat();
-			fill_rect->drawWithAlpha((int)(game_g->getScaleWidth()*rect.x), (int)(game_g->getScaleHeight()*rect.y), tutorial_alpha_c);
-			delete fill_rect;
-#else
 			game_g->getScreen()->fillRectWithAlpha((short)(game_g->getScaleWidth()*rect.x), (short)(game_g->getScaleHeight()*rect.y), (short)(game_g->getScaleWidth()*rect.w), (short)(game_g->getScaleHeight()*rect.h), 0, 0, 0, tutorial_alpha_c);
-#endif
 			Gigalomania::Image::writeMixedCase(rect.x, rect.y, game_g->letters_large, game_g->letters_small, game_g->numbers_white, card->getText().c_str(), Gigalomania::Image::JUSTIFY_LEFT);
 			if( card->hasArrow(this) ) {
 				int arrow_x = card->getArrowX();
