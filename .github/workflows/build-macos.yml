@@ -14,7 +14,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: brew install sdl2 sdl2_image sdl2_mixer dylibbundler
+        run: brew install sdl3 sdl3_image dylibbundler
+
+      - name: Install SDL2_mixer (SDL3_mixer not yet in homebrew)
+        run: brew install sdl2_mixer
 
       - name: Build
         run: make

@@ -36,7 +36,7 @@ bool initSound() {
 		return false;
 	}
 	if( Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1 ) {
-		LOG("Mix_OpenAudio failed: %s\n", Mix_GetError());
+		LOG("Mix_OpenAudio failed: %s\n", SDL_GetError());
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 		return false;
 	}
@@ -69,7 +69,7 @@ Sample *Sample::loadSample(const char *filename, bool iff) {
 	if( have_sound ) {
 		chunk = Mix_LoadWAV(filename);
 		if( chunk == NULL ) {
-			LOG("Mix_LoadWAV failed: %s\n", Mix_GetError());
+			LOG("Mix_LoadWAV failed: %s\n", SDL_GetError());
 			error_occurred = true;
 		}
 	}
@@ -87,14 +87,9 @@ Sample *Sample::loadMusic(const char *filename) {
 	LOG("loadMusic %s\n", filename);
 	Mix_Music *music = NULL;
 	if( have_sound ) {
-		// Mix_LoadMUS doesn't support RWops, so won't work on Android (but only available in SDL 2)
-#if SDL_MAJOR_VERSION == 1
-		music = Mix_LoadMUS(filename);
-#else
-		music = Mix_LoadMUSType_RW(SDL_RWFromFile(filename, "rb"), MUS_OGG, 1);
-#endif
+			music = Mix_LoadMUS(filename);
 		if( music == NULL ) {
-			LOG("Mix_LoadMUS failed: %s\n", Mix_GetError());
+			LOG("Mix_LoadMUS failed: %s\n", SDL_GetError());
 			error_occurred = true;
 		}
 	}
@@ -112,7 +107,7 @@ void Sample::play(int ch, int loops) {
 		if( is_music && game_g->isPrefMusicOn() ) {
 			if( Mix_PlayMusic(music, loops) == -1 ) {
 			//if( Mix_FadeInMusic(music, -1, 2000) == -1 ) {
-				LOG("Mix_PlayMusic failed: %s\n", Mix_GetError());
+				LOG("Mix_PlayMusic failed: %s\n", SDL_GetError());
 			}
 			Mix_VolumeMusic(MIX_MAX_VOLUME);
 		}
@@ -131,7 +126,7 @@ void Sample::play(int ch, int loops) {
 				if( !done ) {
 					channel = Mix_PlayChannel(ch, chunk, loops);
 					if( channel == -1 ) {
-						LOG("Failed to play sound: %s\n", Mix_GetError());
+						LOG("Failed to play sound: %s\n", SDL_GetError());
 					}
 					else {
 						Mix_Volume(channel, MIX_MAX_VOLUME);
