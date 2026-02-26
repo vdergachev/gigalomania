@@ -12,18 +12,12 @@
 #include <string>
 #include <cassert>
 
-// we include SDL globally, so that SDL_MAJOR_VERSION is available at least
-#if defined(__ANDROID__)
-#include <SDL.h>
-#elif defined(__linux)
-#include <SDL2/SDL.h>
-#elif defined(__MORPHOS__)
+// we include SDL globally
+#if defined(__MORPHOS__)
 #include <SDL/SDL.h>
-#elif defined(__APPLE__)
-#include <SDL.h>
-#include <unistd.h>
-#elif defined(_WIN32)
-#include <SDL2/SDL.h>
 #else
-#include <sdl.h>
+#include <SDL3/SDL.h>
+#endif
+#if defined(__APPLE__)
+#include <unistd.h>
 #endif

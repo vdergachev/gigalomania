@@ -510,7 +510,7 @@ public:
 	void addTextEffect(TextEffect *effect);
 	void drawProgress(int percentage) const;
 
-	bool readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
+	bool readLineFromRWOps(bool &ok, SDL_IOStream *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end);
 	bool loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, int suspended[n_players_c], int *epoch, bool completed[max_islands_per_epoch_c], int slot);
 	bool loadGame(int slot);
 	void saveGame(int slot) const;

@@ -6,14 +6,10 @@
 
 namespace Gigalomania {
 	class Screen {
-#if SDL_MAJOR_VERSION == 1
-		SDL_Surface *surface;
-#else
 		SDL_Window *sdlWindow;
 		SDL_Renderer *sdlRenderer;
 		int width, height; // this stores the logical size rather than the window size
 		int windowed_w, windowed_h; // physical window size for windowed mode (for fullscreen toggle)
-#endif
 		int m_pos_x;
 		int m_pos_y;
 		bool m_down_left;
@@ -26,12 +22,9 @@ namespace Gigalomania {
 
 		static bool canOpenFullscreen(int width, int height);
 		bool open(int screen_width, int screen_height, bool fullscreen);
-#if SDL_MAJOR_VERSION == 1
-#else
 		void setLogicalSize(int width, int height, bool smooth);
 		void setWindowedSize(int w, int h);
 		void setFullscreen(bool fullscreen);
-#endif
 		void setTitle(const char *title);
 		void clear();
 		void refresh();
@@ -39,19 +32,11 @@ namespace Gigalomania {
 		int getWidth() const;
 		int getHeight() const;
 		void fillRect(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b);
-#if SDL_MAJOR_VERSION == 1
-		// not supported with SDL 1.2
-		void fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha) {
-		}
-		void drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
-		}
-#else
 		void fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha);
 		void drawLine(short x0, short y0, short x1, short y1, unsigned char r, unsigned char g, unsigned char b);
 		void convertWindowToLogical(int *m_x, int *m_y) const;
 		void getWindowSize(int *window_width, int *window_height) const;
 		void convertTouchCoords(int *m_x, int *m_y, float tx, float ty) const;
-#endif
 		void setMousePos(int x, int y) {
 			this->m_pos_x = x;
 			this->m_pos_y = y;
