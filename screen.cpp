@@ -46,8 +46,8 @@ bool Gigalomania::Screen::canOpenFullscreen(int width, int height) {
 
 bool Gigalomania::Screen::open(int screen_width, int screen_height, bool fullscreen) {
 	LOG("Screen::open(%d, %d, %s)\n", screen_width, screen_height, fullscreen?"fullscreen":"windowed");
-	if( SDL_CreateWindowAndRenderer("Gigalomania", screen_width, screen_height, fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE, &sdlWindow, &sdlRenderer) != 0 ) {
-		LOG("failed to open screen at this resolution\n");
+	if( !SDL_CreateWindowAndRenderer("Gigalomania", screen_width, screen_height, fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE, &sdlWindow, &sdlRenderer) ) {
+		LOG("failed to open screen at this resolution: %s\n", SDL_GetError());
 		return false;
 	}
 	this->width = screen_width;

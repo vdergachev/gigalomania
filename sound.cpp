@@ -31,7 +31,7 @@ bool initSound() {
 	error_occurred = false;
 	have_sound = false;
 
-	if( SDL_InitSubSystem(SDL_INIT_AUDIO) != 0 ) {
+	if( !SDL_InitSubSystem(SDL_INIT_AUDIO) ) {
 		LOG("failed to init SDL audio subsystem");
 		return false;
 	}
