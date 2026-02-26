@@ -1322,12 +1322,8 @@ void Game::processImage(Gigalomania::Image *image, bool old_smooth) const {
     image->scale(scale_factor_w, scale_factor_h);
     //LOG("    set scale\n");
     image->setScale(scale_width, scale_height);
-#if SDL_MAJOR_VERSION == 1
-	// with SDL 2, we let SDL do smoothing when scaling the graphics on the GPU
-	if( using_old_gfx && old_smooth ) {
-        image->smooth();
-	}
-#endif
+	// with SDL 3, we let SDL do smoothing when scaling the graphics on the GPU
+	(void)0; // no SDL1 smooth call needed
     //LOG("    done\n");
 }
 
@@ -1381,19 +1377,13 @@ bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 }
 
 void Game::calculateScale(const Gigalomania::Image *image) {
-#if SDL_MAJOR_VERSION == 1
-	scale_factor_w = ((float)(scale_width*default_width_c))/(float)image->getWidth();
-	scale_factor_h = ((float)(scale_height*default_height_c))/(float)image->getHeight();
-	LOG("scale factor for images = %f X %f\n", scale_factor_w, scale_factor_h);
-#else
-	// with SDL 2, we don't scale the graphics, and instead set the logical size to match the graphics
+	// with SDL 3, we don't scale the graphics, and instead set the logical size to match the graphics
 	scale_factor_w = 1.0f;
 	scale_factor_h = 1.0f;
 	scale_width = ((float)(image->getWidth()))/(float)default_width_c;
 	scale_height = ((float)(image->getHeight()))/(float)default_height_c;
 	LOG("scale width/height of logical resolution = %f X %f\n", scale_width, scale_height);
 	screen->setLogicalSize((int)(scale_width*default_width_c), (int)(scale_height*default_height_c), true);
-#endif
 }
 
 bool Game::loadOldImages() {
@@ -1407,19 +1397,13 @@ bool Game::loadOldImages() {
 		return false;
 	drawProgress(20);
 	// do equivalent for calculateScale(), but for a 320x240 image (n.b., not 320x256)
-#if SDL_MAJOR_VERSION == 1
-	scale_factor_w = scale_width;
-	scale_factor_h = scale_height;
-	LOG("scale factor for images = %f X %f\n", scale_factor_w, scale_factor_h);
-#else
-	// with SDL 2, we don't scale the graphics, and instead set the logical size to match the graphics
+	// with SDL 3, we don't scale the graphics, and instead set the logical size to match the graphics
 	scale_factor_w = 1.0f;
 	scale_factor_h = 1.0f;
 	scale_width = 1.0f;
 	scale_height = 1.0f;
 	LOG("scale width/height of logical resolution = %f X %f\n", scale_width, scale_height);
 	screen->setLogicalSize((int)(scale_width*default_width_c), (int)(scale_height*default_height_c), false); // don't smooth, as doesn't look too good with old graphics
-#endif
 
 	// nb, still scale if scale_factor==1, as this is a way of converting to 8bit
 	processImage(background);
@@ -2929,24 +2913,17 @@ void Game::getDesktopResolution(int *user_width, int *user_height) const {
 		getAROSScreenSize(user_width, user_height);
 #else
 
-#if SDL_MAJOR_VERSION == 1
-		const SDL_VideoInfo *videoInfo = SDL_GetVideoInfo();
-		*user_width = videoInfo->current_w;
-		*user_height = videoInfo->current_h;
-		LOG("desktop is %d x %d\n", *user_width, *user_height);
-#else
-		SDL_DisplayMode displayMode;
-		if( SDL_GetDesktopDisplayMode(0, &displayMode) != 0 ) {
+		const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+		if( mode == NULL ) {
 			LOG("SDL_GetDesktopDisplayMode failed!");
 			*user_width = 640;
 			*user_height = 480;
 		}
 		else {
-			*user_width = displayMode.w;
-			*user_height = displayMode.h;
+			*user_width = mode->w;
+			*user_height = mode->h;
 			LOG("desktop is %d x %d\n", *user_width, *user_height);
 		}
-#endif
 
 #endif
 }
@@ -2968,67 +2945,7 @@ bool Game::openScreen(bool fullscreen) {
 		getDesktopResolution(&user_width, &user_height);
 #endif
 
-#if SDL_MAJOR_VERSION == 1
-		// Only allow integer scaling, otherwise have poor quality scaling (especially for the font)
-		//user_width = 1184;
-		//user_height = 720;
-
-		if( user_width >= 4*default_width_c ) {
-			scale_width = 4.0f;
-			LOG("scale width 4x\n");
-		}
-		else if( user_width >= 3*default_width_c ) {
-			scale_width = 3.0f;
-			LOG("scale width 3x\n");
-		}
-		else if( user_width >= 2*default_width_c ) {
-			scale_width = 2.0f;
-			LOG("scale width 2x\n");
-		}
-		else if( user_width >= default_width_c ) {
-			scale_width = 1.0f;
-			LOG("scale width 1x\n");
-		}
-		else {
-			LOG("desktop resolution too small even for 1x scale width\n");
-			return false;
-		}
-
-		if( user_height >= 4*default_height_c ) {
-			scale_height = 4.0f;
-			LOG("scale height 4x\n");
-		}
-		else if( user_height >= 3*default_height_c ) {
-			scale_height = 3.0f;
-			LOG("scale height 3x\n");
-		}
-		else if( user_height >= 2*default_height_c ) {
-			scale_height = 2.0f;
-			LOG("scale height 2x\n");
-		}
-		else if( user_height >= default_height_c ) {
-			scale_height = 1.0f;
-			LOG("scale height 1x\n");
-		}
-		else {
-			LOG("desktop resolution too small even for 1x scale height\n");
-			return false;
-		}
-
-		// better to have uniform scaling, so we have 1:1 aspect ratio
-		scale_width = std::min(scale_width, scale_height);
-		scale_height = scale_width;
-
-		//scale_width = 2.0f; scale_height = 1.5f;
-		//scale_width = scale_height = 1.0f; // test
-		//scale_width = scale_height = 2.0f; // test
-		//scale_width = 1.0f;
-		//scale_height = 1.0f;
-		
-		int screen_width = (int)(scale_width * default_width_c);
-		int screen_height = (int)(scale_height * default_height_c);
-#else
-		// with SDL2, we let SDL do the scaling via SDL_RenderSetLogicalSize, so we don't have to do the scaling ourselves, and can set the screen width/height to whatever we like
+		// with SDL3, we let SDL do the scaling via SDL_SetRenderLogicalPresentation, so we don't have to do the scaling ourselves
 		// for windowed mode, we pick a suitable size based on the available desktop space
 		int screen_width = default_width_c;
 		int screen_height = default_height_c;
@@ -3037,47 +2954,18 @@ bool Game::openScreen(bool fullscreen) {
 			screen_width *= 2;
 			screen_height *= 2;
 		}
-		//screen_width = 480;
-		//screen_height = 320;
-		//screen_width = 640;
-		//screen_height = 480;
-#endif
 
 		screen = new Gigalomania::Screen();
 		if( !screen->open(screen_width, screen_height, fullscreen) )
 			return false;
-#if SDL_MAJOR_VERSION != 1
 		screen->setWindowedSize(screen_width, screen_height);
-#endif
 
 	}
 	else {
 		// fullscreen
 		screen = new Gigalomania::Screen();
 
-#if SDL_MAJOR_VERSION == 1
-		if( screen->open(4*default_width_c, 4*default_height_c, fullscreen) ) {
-			scale_width = scale_height = 4.0f;
-			LOG("scale 4x\n");
-		}
-		else if( screen->open(3*default_width_c, 3*default_height_c, fullscreen) ) {
-			scale_width = scale_height = 3.0f;
-			LOG("scale 3x\n");
-		}
-		else if( screen->open(2*default_width_c, 2*default_height_c, fullscreen) ) {
-			scale_width = scale_height = 2.0f;
-			LOG("scale 2x\n");
-		}
-		else if( screen->open(default_width_c, default_height_c, fullscreen) ) {
-			scale_width = scale_height = 1.0f;
-			LOG("scale 1x\n");
-		}
-		else {
-			LOG("can't even open screen at 1x scale\n");
-			return false;
-		}
-#else
-		// With SDL2, we let SDL do the scaling via SDL_RenderSetLogicalSize, so we don't have to do the scaling ourselves
+		// With SDL3, we let SDL do the scaling via SDL_SetRenderLogicalPresentation
 		// for fullscreen, the supplied width/height is ignored, as we always run at the native resolution.
 		int user_width = 0, user_height = 0;
 #ifdef _WIN32
@@ -3099,7 +2987,6 @@ bool Game::openScreen(bool fullscreen) {
 			}
 			screen->setWindowedSize(ww, wh);
 		}
-#endif
 
 	}
 
@@ -3251,7 +3138,7 @@ bool Game::readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, c
 	return ok;
 }
 
-bool Game::readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end) {
+bool Game::readLineFromRWOps(bool &ok, SDL_IOStream *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end) {
 	if( newline_index > 1 ) {
 		// not safe to use strcpy on overlapping strings (undefined behaviour)
 		int len = strlen(&buffer[newline_index-1]);
@@ -3265,7 +3152,7 @@ bool Game::readLineFromRWOps(bool &ok, SDL_RWops *file, char *buffer, char *line
 	if( !reached_end ) {
 		// fill up buffer
 		for(;;) {
-			int n_read = file->read(file, &buffer[buffer_offset], 1, MAX_LINE-buffer_offset);
+			int n_read = (int)SDL_ReadIO(file, &buffer[buffer_offset], MAX_LINE-buffer_offset);
 			//LOG("buffer offset %d , read %d\n", buffer_offset, n_read);
 			if( n_read == 0 ) {
 				// error or eof - don't quit yet, still need to finish reading buffer
@@ -3316,12 +3203,12 @@ bool Game::readMap(const char *filename) {
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
-	SDL_RWops *file = SDL_RWFromFile(fullname, "rb");
+	SDL_IOStream *file = SDL_IOFromFile(fullname, "rb");
 #ifdef DATADIR
 	if( file == NULL ) {
 		LOG("searching in %s for islands\n", alt_maps_dirname.c_str());
 		sprintf(fullname, "%s/%s", alt_maps_dirname.c_str(), filename);
-		file = SDL_RWFromFile(fullname, "rb");
+		file = SDL_IOFromFile(fullname, "rb");
 	}
 #endif
     if( file == NULL ) {
@@ -3344,7 +3231,7 @@ bool Game::readMap(const char *filename) {
 			ok = readMapProcessLine(&epoch, &index, &l_map, line, MAX_LINE, filename);
 		}
 	}
-	file->close(file);
+	SDL_CloseIO(file);
 
 	if( !ok && l_map != NULL ) {
 		LOG("delete map that was created\n");
@@ -3844,7 +3731,7 @@ void Game::saveState() const {
 	    stream << "</savegame>\n";
 
 		const char *save_fullfilename = getApplicationFilename(autosave_filename, autosave_survive_uninstall);
-		SDL_RWops *file = SDL_RWFromFile(save_fullfilename, "w+");
+		SDL_IOStream *file = SDL_IOFromFile(save_fullfilename, "w+");
 		if( file == NULL ) {
 			LOG("failed to open: %s\n", save_fullfilename);
 			LOG("error: %s\n", SDL_GetError());
@@ -3853,8 +3740,8 @@ void Game::saveState() const {
 			size_t length = stream.str().length();
 			char *ptr = new char[length];
 			stream.read(ptr, length);
-			file->write(file, ptr, length, 1);
-			file->close(file);
+			SDL_WriteIO(file, ptr, length);
+			SDL_CloseIO(file);
 		}
 		delete [] save_fullfilename;
 	}
@@ -4065,23 +3952,16 @@ bool Game::loadState() {
 	bool ok = false;
 	stringstream stream;
 	const char *save_fullfilename = getApplicationFilename(autosave_filename, autosave_survive_uninstall);
-	SDL_RWops *file = SDL_RWFromFile(save_fullfilename, "r");
+	SDL_IOStream *file = SDL_IOFromFile(save_fullfilename, "r");
 	if( file == NULL ) {
 		LOG("couldn't find or open saved state file: %s\n", save_fullfilename);
 	}
 	else {
 		LOG("found a saved state file: %s\n", save_fullfilename);
-#if SDL_MAJOR_VERSION == 1
-		// SDL 1 doesn't have a size parameter
-		SDL_RWseek(file, 0, RW_SEEK_END);
-		size_t size = (size_t)SDL_RWtell(file);
-		SDL_RWseek(file, 0, RW_SEEK_SET);
-#else
-		size_t size = (size_t)file->size(file);
-#endif
+		size_t size = (size_t)SDL_GetIOSize(file);
 		char *buffer = new char[size+1];
-		if( file->read(file, buffer, 1, size) > 0 ) {
-			file->close(file);
+		if( SDL_ReadIO(file, buffer, size) > 0 ) {
+			SDL_CloseIO(file);
 			// rename immediately so that if there's a crash while loading the saved state, the game doesn't repeatedly crash
 			const char *save_old_fullfilename = getApplicationFilename(autosave_old_filename, autosave_survive_uninstall);
 			remove(save_old_fullfilename);
@@ -4133,7 +4013,7 @@ bool Game::loadState() {
 			}
 		}
 		else {
-			file->close(file);
+			SDL_CloseIO(file);
 			const char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename, autosave_survive_uninstall);
 			remove(save_bad_fullfilename);
 			rename(save_fullfilename, save_bad_fullfilename);
@@ -4267,7 +4147,7 @@ bool Game::createApplication() {
 
 void Game::loadPrefs() {
 	const char *prefs_fullfilename = getApplicationFilename(prefs_filename, prefs_survive_uninstall);
-	SDL_RWops *prefs_file = SDL_RWFromFile(prefs_fullfilename, "rb");
+	SDL_IOStream *prefs_file = SDL_IOFromFile(prefs_fullfilename, "rb");
 	if( prefs_file != NULL ) {
 		// reset
 		pref_sound_on = false;
@@ -4315,7 +4195,7 @@ void Game::loadPrefs() {
 				}
 			}
 		}
-		prefs_file->close(prefs_file);
+		SDL_CloseIO(prefs_file);
 
 #if defined(__ANDROID__)
 		// force onemousebutton mode, just to be safe
@@ -4327,41 +4207,39 @@ void Game::loadPrefs() {
 
 void Game::setPrefFullscreen(bool pref_fullscreen) {
 	this->pref_fullscreen = pref_fullscreen;
-#if SDL_MAJOR_VERSION != 1
 	if( screen != NULL ) {
 		screen->setFullscreen(pref_fullscreen);
 	}
-#endif
 }
 
 void Game::savePrefs() const {
 	const char *prefs_fullfilename = getApplicationFilename(prefs_filename, prefs_survive_uninstall);
-	SDL_RWops *prefs_file = SDL_RWFromFile(prefs_fullfilename, "wb+");
+	SDL_IOStream *prefs_file = SDL_IOFromFile(prefs_fullfilename, "wb+");
 	if( prefs_file == NULL ) {
 		LOG("failed to open: %s\n", prefs_fullfilename);
 	}
 	else {
 		if( onemousebutton ) {
-			prefs_file->write(prefs_file, onemousebutton_key, sizeof(char), strlen(onemousebutton_key));
-			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
+			SDL_WriteIO(prefs_file, onemousebutton_key, strlen(onemousebutton_key));
+			SDL_WriteIO(prefs_file, "\n", 1);
 		}
 		if( pref_sound_on ) {
-			prefs_file->write(prefs_file, sound_on_key, sizeof(char), strlen(sound_on_key));
-			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
+			SDL_WriteIO(prefs_file, sound_on_key, strlen(sound_on_key));
+			SDL_WriteIO(prefs_file, "\n", 1);
 		}
 		if( pref_music_on ) {
-			prefs_file->write(prefs_file, music_on_key, sizeof(char), strlen(music_on_key));
-			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
+			SDL_WriteIO(prefs_file, music_on_key, strlen(music_on_key));
+			SDL_WriteIO(prefs_file, "\n", 1);
 		}
 		if( pref_disallow_nukes ) {
-			prefs_file->write(prefs_file, disallow_nukes_key, sizeof(char), strlen(disallow_nukes_key));
-			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
+			SDL_WriteIO(prefs_file, disallow_nukes_key, strlen(disallow_nukes_key));
+			SDL_WriteIO(prefs_file, "\n", 1);
 		}
 		if( !pref_fullscreen ) {
-			prefs_file->write(prefs_file, windowed_key, sizeof(char), strlen(windowed_key));
-			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
+			SDL_WriteIO(prefs_file, windowed_key, strlen(windowed_key));
+			SDL_WriteIO(prefs_file, "\n", 1);
 		}
-		prefs_file->close(prefs_file);
+		SDL_CloseIO(prefs_file);
 	}
 	delete [] prefs_fullfilename;
 }
@@ -5315,30 +5193,23 @@ void Game::runTests() {
 }
 
 void Game::copyFile(const char *src, const char *dst) const {
-	SDL_RWops *read_file = SDL_RWFromFile(src, "r");
+	SDL_IOStream *read_file = SDL_IOFromFile(src, "r");
 	if( read_file == NULL ) {
 		throw string("couldn't open test save state file");
 	}
-	SDL_RWops *save_file = SDL_RWFromFile(dst, "w");
+	SDL_IOStream *save_file = SDL_IOFromFile(dst, "w");
 	if( save_file == NULL ) {
 		throw string("couldn't copy save state file");
 	}
-#if SDL_MAJOR_VERSION == 1
-	// SDL 1 doesn't have a size parameter
-	SDL_RWseek(read_file, 0, RW_SEEK_END);
-	size_t size = (size_t)SDL_RWtell(read_file);
-	SDL_RWseek(read_file, 0, RW_SEEK_SET);
-#else
-	size_t size = (size_t)read_file->size(read_file);
-#endif
+	size_t size = (size_t)SDL_GetIOSize(read_file);
 	char *buffer = new char[size+1];
-	if( read_file->read(read_file, buffer, 1, size) == 0 ) {
-		read_file->close(read_file);
+	if( SDL_ReadIO(read_file, buffer, size) == 0 ) {
+		SDL_CloseIO(read_file);
 		throw string("failed to read from test save state file");
 	}
-	save_file->write(save_file, buffer, 1, size);
-	save_file->close(save_file);
-	read_file->close(read_file);
+	SDL_WriteIO(save_file, buffer, size);
+	SDL_CloseIO(save_file);
+	SDL_CloseIO(read_file);
 	delete [] buffer;
 }
 
