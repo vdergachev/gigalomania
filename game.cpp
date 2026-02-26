@@ -3046,6 +3046,9 @@ bool Game::openScreen(bool fullscreen) {
 		screen = new Gigalomania::Screen();
 		if( !screen->open(screen_width, screen_height, fullscreen) )
 			return false;
+#if SDL_MAJOR_VERSION != 1
+		screen->setWindowedSize(screen_width, screen_height);
+#endif
 
 	}
 	else {
@@ -3084,6 +3087,17 @@ bool Game::openScreen(bool fullscreen) {
 		if( !screen->open(user_width, user_height, fullscreen) ) {
 			LOG("can't open screen\n");
 			return false;
+		}
+		// Compute and store windowed size for use when user toggles to windowed mode
+		{
+			int uw = 0, uh = 0;
+			getDesktopResolution(&uw, &uh);
+			int ww = default_width_c, wh = default_height_c;
+			while( 2*ww <= uw && 2*wh <= uh ) {
+				ww *= 2;
+				wh *= 2;
+			}
+			screen->setWindowedSize(ww, wh);
 		}
 #endif
 
@@ -4241,6 +4255,7 @@ const char onemousebutton_key[] = "onemousebutton";
 const char sound_on_key[] = "sound_on";
 const char music_on_key[] = "music_on";
 const char disallow_nukes_key[] = "disallow_nukes";
+const char windowed_key[] = "windowed";
 
 bool Game::createApplication() {
 	application = new Application();
@@ -4258,6 +4273,7 @@ void Game::loadPrefs() {
 		pref_sound_on = false;
 		pref_music_on = false;
 		pref_disallow_nukes = false;
+		pref_fullscreen = true; // default to fullscreen; "windowed" key in prefs disables it
 		onemousebutton = false;
 
 		const int MAX_LINE = 4096;
@@ -4293,6 +4309,10 @@ void Game::loadPrefs() {
 					LOG("enable pref_disallow_nukes from prefs\n");
 					pref_disallow_nukes = true;
 				}
+				else if( strncmp(line, windowed_key, strlen(windowed_key)) == 0 ) {
+					LOG("enable windowed mode from prefs\n");
+					pref_fullscreen = false;
+				}
 			}
 		}
 		prefs_file->close(prefs_file);
@@ -4303,6 +4323,15 @@ void Game::loadPrefs() {
 #endif
 	}
 	delete [] prefs_fullfilename;
+}
+
+void Game::setPrefFullscreen(bool pref_fullscreen) {
+	this->pref_fullscreen = pref_fullscreen;
+#if SDL_MAJOR_VERSION != 1
+	if( screen != NULL ) {
+		screen->setFullscreen(pref_fullscreen);
+	}
+#endif
 }
 
 void Game::savePrefs() const {
@@ -4326,6 +4355,10 @@ void Game::savePrefs() const {
 		}
 		if( pref_disallow_nukes ) {
 			prefs_file->write(prefs_file, disallow_nukes_key, sizeof(char), strlen(disallow_nukes_key));
+			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
+		}
+		if( !pref_fullscreen ) {
+			prefs_file->write(prefs_file, windowed_key, sizeof(char), strlen(windowed_key));
 			prefs_file->write(prefs_file, "\n", sizeof(char), 1);
 		}
 		prefs_file->close(prefs_file);
@@ -5321,11 +5354,14 @@ void playGame(int n_args, char *args[]) {
 #endif
 
 	bool fullscreen = true;
+	bool fullscreen_forced = false; // true if platform/debug/args override the user pref
 #if defined(__amigaos4__) || defined(AROS) || defined(__MORPHOS__)
 	fullscreen = false; // run in windowed mode due to reported performance problems in fullscreen mode on AmigaOS 4; also randomly hangs on AROS in fullscreen mode; also included MorphOS just to be safe
+	fullscreen_forced = true;
 #endif
 #ifdef _DEBUG
 	fullscreen = false;
+	fullscreen_forced = true;
 #endif
 	//debugwindow = true;
 	//fullscreen = false;
@@ -5333,10 +5369,14 @@ void playGame(int n_args, char *args[]) {
 #if !defined(__ANDROID__)
     // n.b., crashes when run on Galaxy Nexus (even though fine in the emulator)
 	for(int i=0;i<n_args;i++) {
-		if( strcmp(args[i], "fullscreen") == 0 )
+		if( strcmp(args[i], "fullscreen") == 0 ) {
 			fullscreen = true;
-		else if( strcmp(args[i], "windowed") == 0 )
+			fullscreen_forced = true;
+		}
+		else if( strcmp(args[i], "windowed") == 0 ) {
 			fullscreen = false;
+			fullscreen_forced = true;
+		}
 		else if( strcmp(args[i], "debugwindow") == 0 )
 			debugwindow = true;
 		else if( strcmp(args[i], "onemousebutton") == 0 )
@@ -5395,6 +5435,13 @@ void playGame(int n_args, char *args[]) {
 	if( !run_tests ) {
 		game_g->loadPrefs();
 	}
+
+#if !defined(__ANDROID__)
+	// Apply fullscreen preference from prefs file, unless overridden by platform/debug/args
+	if( !fullscreen_forced ) {
+		fullscreen = game_g->isPrefFullscreen();
+	}
+#endif
 
 	// init application
 	if( !game_g->createApplication() ) {

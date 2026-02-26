@@ -25,6 +25,8 @@ Gigalomania::Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_do
 	sdlRenderer = NULL;
 	width = 0;
 	height = 0;
+	windowed_w = 0;
+	windowed_h = 0;
 #endif
 }
 
@@ -122,6 +124,19 @@ void Gigalomania::Screen::setLogicalSize(int width, int height, bool smooth) {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 	}
 	SDL_RenderSetLogicalSize(sdlRenderer, width, height);
+}
+
+void Gigalomania::Screen::setWindowedSize(int w, int h) {
+	this->windowed_w = w;
+	this->windowed_h = h;
+}
+
+void Gigalomania::Screen::setFullscreen(bool fullscreen) {
+	LOG("Screen::setFullscreen(%s)\n", fullscreen ? "fullscreen" : "windowed");
+	SDL_SetWindowFullscreen(sdlWindow, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	if( !fullscreen && windowed_w > 0 && windowed_h > 0 ) {
+		SDL_SetWindowSize(sdlWindow, windowed_w, windowed_h);
+	}
 }
 #endif
 

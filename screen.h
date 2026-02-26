@@ -12,6 +12,7 @@ namespace Gigalomania {
 		SDL_Window *sdlWindow;
 		SDL_Renderer *sdlRenderer;
 		int width, height; // this stores the logical size rather than the window size
+		int windowed_w, windowed_h; // physical window size for windowed mode (for fullscreen toggle)
 #endif
 		int m_pos_x;
 		int m_pos_y;
@@ -28,6 +29,8 @@ namespace Gigalomania {
 #if SDL_MAJOR_VERSION == 1
 #else
 		void setLogicalSize(int width, int height, bool smooth);
+		void setWindowedSize(int w, int h);
+		void setFullscreen(bool fullscreen);
 #endif
 		void setTitle(const char *title);
 		void clear();

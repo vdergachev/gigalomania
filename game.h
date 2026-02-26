@@ -131,6 +131,7 @@ class Game {
 	bool pref_sound_on;
 	bool pref_music_on;
 	bool pref_disallow_nukes;
+	bool pref_fullscreen;
 
 	GameMode gameMode;
 	GameType gameType;
@@ -466,6 +467,10 @@ public:
 	}
 	bool isPrefDisallowNukes() const {
 		return this->pref_disallow_nukes;
+	}
+	void setPrefFullscreen(bool pref_fullscreen);
+	bool isPrefFullscreen() const {
+		return this->pref_fullscreen;
 	}
 
 	int getMapSqOffset() const {

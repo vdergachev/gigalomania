@@ -257,6 +257,16 @@ ChooseMenPanel::ChooseMenPanel(PlaceMenGameState *gamestate) : MultiPanel(N_STAT
     this->button_disallow_nukes->setActive( game_g->isPrefDisallowNukes() ? 0 : 1 );
 	this->addToPanel(STATE_OPTIONS, button_disallow_nukes);
 
+#if !defined(__ANDROID__)
+    const char *fullscreen_texts[] = { "FULLSCREEN", "WINDOWED" };
+    this->button_fullscreen = new CycleButton((int)(mx - 5.5*fw), cy, fullscreen_texts, 2, game_g->letters_large);
+    cy += step_y;
+    this->button_fullscreen->setActive( game_g->isPrefFullscreen() ? 0 : 1 );
+    this->addToPanel(STATE_OPTIONS, button_fullscreen);
+#else
+    this->button_fullscreen = NULL;
+#endif
+
     this->button_new = new Button((int)(mx - 4.0*fw), cy, "NEW GAME", game_g->letters_large);
     cy += step_y;
     this->addToPanel(STATE_OPTIONS, button_new);
@@ -519,6 +529,9 @@ void ChooseMenPanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_righ
 			}
 			if( button_disallow_nukes != NULL ) {
 				game_g->setPrefDisallowNukes( button_disallow_nukes->getActive() == 0 );
+			}
+			if( button_fullscreen != NULL ) {
+				game_g->setPrefFullscreen( button_fullscreen->getActive() == 0 );
 			}
 			game_g->savePrefs();
 
