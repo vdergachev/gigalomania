@@ -220,8 +220,8 @@ ChooseMenPanel::ChooseMenPanel(PlaceMenGameState *gamestate) : MultiPanel(N_STAT
 	this->button_cancel = new Button((int)(mx - 10.5*fw), 210, "CHOOSE ANOTHER ISLAND", game_g->letters_large);
     this->addToPanel(STATE_CHOOSEMEN, button_cancel);
 
-    cy = start_y - 52;
-    step_y = 26;
+    cy = start_y - 56;
+    step_y = 22;
 	if( game_g->getGameType() != GAMETYPE_ALLISLANDS ) {
 		cy += 2*step_y; // so that options are aligned vertically better
 	}
