@@ -10,7 +10,7 @@ using std::string;
 
 #if defined(__MORPHOS__)
 #include <SDL/SDL_mixer.h>
-#elif defined(__APPLE__) || defined(__linux)
+#elif defined(__APPLE__) || defined(__linux__) || defined(_WIN32)
 // SDL3_mixer not yet in package managers; use SDL2_mixer via compatibility shim
 // We need SDL2_mixer's API declarations without including SDL2 headers that clash with SDL3
 // Use a minimal declaration approach: declare only what we need from Mix_ API

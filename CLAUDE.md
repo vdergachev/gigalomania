@@ -37,7 +37,7 @@ Entry point: `main.cpp` → `playGame()` in `game.cpp`.
 
 **Player & AI** (`player.cpp`): Human and AI players share the same `Player` class. AI decision logic lives in `sector.cpp` (AI chooses build targets and attacks based on epoch).
 
-**Rendering pipeline**: `screen.cpp` manages the SDL2 window and renderer; `image.cpp` wraps SDL2_image for sprite loading/blitting; `panel.cpp` / `gui.cpp` implement the UI widget layer (buttons, panels, selection screens).
+**Rendering pipeline**: `screen.cpp` manages the SDL3 window and renderer; `image.cpp` wraps SDL3_image for sprite loading/blitting; `panel.cpp` / `gui.cpp` implement the UI widget layer (buttons, panels, selection screens).
 
 **Asset paths are hardcoded as relative** (`"gfx/"`, `"sound/"`, `"islands/"`). The binary must be run from the directory containing these folders, or — in the macOS `.app` bundle — the launcher script sets CWD to `Contents/Resources/` before exec-ing the binary.
 
@@ -45,11 +45,10 @@ Entry point: `main.cpp` → `playGame()` in `game.cpp`.
 
 ## CI
 
-- `.github/workflows/build-macos.yml` — builds, creates `Gigalomania.app` bundle (launcher script + SDL2 dylibs via dylibbundler), uploads `gigalomania-macos.zip`
+- `.github/workflows/build-macos.yml` — builds, creates `Gigalomania.app` bundle (launcher script + SDL3 dylibs via dylibbundler), uploads `gigalomania-macos.zip`
 - `.github/workflows/build-windows.yml` — builds with MSBuild + vcpkg, uploads `gigalomania-windows.zip`
 
 ## Platform notes
 
 - **SDL includes** are platform-gated in `stdafx.h` — add new platform branches there, not in individual files.
-- SDL1 legacy code paths still exist behind `#ifdef` — the active codebase targets SDL2.
 - `gigalomania.pro` (Qt project) and `android/` directory exist but are not maintained in this fork.
