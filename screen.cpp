@@ -166,29 +166,12 @@ void Gigalomania::Screen::convertTouchCoords(int *m_x, int *m_y, float tx, float
 
 
 void Gigalomania::Screen::getMouseCoords(int *m_x, int *m_y) const {
-	// SDL_GetMouseState doesn't play well with touch events
-	/*SDL_GetMouseState(m_x, m_y);
-	// need to convert from window space to logical space
-#if SDL_MAJOR_VERSION == 1
-#else
-	this->convertWindowToLogical(m_x, m_y);
-#endif*/
 	*m_x = this->m_pos_x;
 	*m_y = this->m_pos_y;
 	//LOG("Screen::getMouseCoords: %d, %d\n", *m_x, *m_y);
 }
 
 bool Gigalomania::Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) const {
-	// SDL_GetMouseState doesn't play well with touch events
-	/*int m_b = SDL_GetMouseState(m_x, m_y);
-	*m_left = ( m_b & SDL_BUTTON(1) ) != 0;
-	*m_middle = ( m_b & SDL_BUTTON(2) ) != 0;
-	*m_right = ( m_b & SDL_BUTTON(3) ) != 0;
-	// need to convert from window space to logical space
-#if SDL_MAJOR_VERSION == 1
-#else
-	this->convertWindowToLogical(m_x, m_y);
-#endif*/
 	*m_x = this->m_pos_x;
 	*m_y = this->m_pos_y;
 	*m_left = this->m_down_left;

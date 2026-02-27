@@ -1453,10 +1453,6 @@ bool Game::loadOldImages() {
 			return false;
 		}
 		convertToHiColor(land[i]);
-#if SDL_MAJOR_VERSION == 1
-		// with SDL 2, we let SDL do smoothing when scaling the graphics on the GPU
-		land[i]->smooth();
-#endif
 	}
 	delete image_slabs;
 	image_slabs = NULL;
@@ -1492,10 +1488,6 @@ bool Game::loadOldImages() {
 	icons->setScale(scale_width, scale_height);
 	icons->setColor(0, 255, 0, 255);
 	convertToHiColor(icons);
-#if SDL_MAJOR_VERSION == 1
-	// with SDL 2, we let SDL do smoothing when scaling the graphics on the GPU
-	icons->smooth();
-#endif
 
 	for(int i=0;i<n_epochs_c;i++)
 		men[i] = icons->copy(16*i, 0, 16, 16);
