@@ -223,7 +223,7 @@ void Application::delay(unsigned int time) {
 }
 
 const int TICK_INTERVAL      = 16; // ~60 fps cap for gameplay (no-op when vsync active)
-const int TICK_INTERVAL_MENU = 50; // ~20 fps cap for menus - saves CPU/battery
+const int TICK_INTERVAL_MENU = 33; // ~30 fps cap for menus - saves CPU/battery
 
 void Application::wait() {
 	// Use tighter cap during gameplay, relaxed cap in menus

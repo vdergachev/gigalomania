@@ -421,7 +421,7 @@ void initPerlin() {
 float perlin_noise2(float vec[2]) {
 	int bx0, bx1, by0, by1, b00, b10, b01, b11;
 	float rx0, rx1, ry0, ry1, *q, sx, sy, a, b, t, u, v;
-	register int i, j;
+	int i, j;
 
 	if (start) {
 		initPerlin();
