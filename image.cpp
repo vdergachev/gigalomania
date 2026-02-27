@@ -790,7 +790,7 @@ Gigalomania::Image *Gigalomania::Image::loadImage(const char *filename) {
 	}
 	Gigalomania::Image *image = new Image();
 
-	// workaround IMG_Load_IO fails on IFF files with 2 bitplanes, as of SDL 2.0.8
+	// workaround: IMG_Load_IO fails on IFF files with 2 bitplanes (bug in SDL2_image 2.0.8, still present in SDL3_image)
 	if( strstr(filename, ".") == NULL ) {
 		LOG("load as IFF, using local function\n");
 		image->surface = my_IMG_LoadLBM_RW(src);

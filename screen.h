@@ -28,7 +28,7 @@ namespace Gigalomania {
 		void setTitle(const char *title);
 		void clear();
 		void refresh();
-		// in SDL2, these return the logical size rather than the window size
+		// return the logical size rather than the window size
 		int getWidth() const;
 		int getHeight() const;
 		void fillRect(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b);

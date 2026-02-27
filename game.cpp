@@ -349,7 +349,7 @@ Game::~Game() {
 	}
 	map = NULL;
 
-	// must clean up tracked objects before closing screen, as for SDL 2 SDL_Textures must be destroyed before destroying the renderer
+	// must clean up tracked objects before closing screen; SDL_Textures must be destroyed before the renderer
 	LOG("clean up tracked objects\n");
 	TrackedObject::cleanup();
 	// no longer need to stop music, as it's deleted as a TrackedObject
@@ -1322,8 +1322,6 @@ void Game::processImage(Gigalomania::Image *image, bool old_smooth) const {
     image->scale(scale_factor_w, scale_factor_h);
     //LOG("    set scale\n");
     image->setScale(scale_width, scale_height);
-	// with SDL 3, we let SDL do smoothing when scaling the graphics on the GPU
-	(void)0; // no SDL1 smooth call needed
     //LOG("    done\n");
 }
 

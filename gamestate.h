@@ -134,7 +134,7 @@ public:
 };
 
 class FadeEffect : public TimedEffect {
-	Gigalomania::Image *image; // used by SDL 1.2 (note, we still declare for SDL 2, to avoid having to include the SDL directories to find out the SDL_MAJOR_VERSION value)
+	Gigalomania::Image *image; // unused in SDL 3 (was needed for SDL 1.2 fade effect; declared here to avoid SDL header dependency)
 	bool white;
 	bool out;
 public:
