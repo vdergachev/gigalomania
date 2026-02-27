@@ -739,7 +739,7 @@ Gigalomania::Image *Gigalomania::Image::copy(int x, int y, int w, int h) const {
 	src_rect.w = w;
 	src_rect.h = h;
 	SDL_SetSurfaceBlendMode(this->surface, SDL_BLENDMODE_NONE);
-	if( SDL_BlitSurface(this->surface, &src_rect, copy_image->surface, NULL) < 0 ) {
+	if( !SDL_BlitSurface(this->surface, &src_rect, copy_image->surface, NULL) ) {
 		LOG("SDL_BlitSurface failed: %s\n", SDL_GetError());
 	}
 	/*unsigned char *src_data = (unsigned char *)this->surface->pixels;
@@ -930,7 +930,7 @@ void Gigalomania::Image::setGraphicsOutput(SDL_Renderer *sdlRenderer) {
 
 void Gigalomania::Image::writeNumbers(int x,int y,Gigalomania::Image *images[10],int number,Justify justify) {
 	char buffer[16] = "";
-	sprintf(buffer,"%d",number);
+	snprintf(buffer, sizeof(buffer), "%d",number);
 	int len = strlen(buffer);
 	int w = images[0]->getScaledWidth();
 	int sx = 0;
@@ -1142,7 +1142,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_IOStream *src )
     Uint32      remainingbytes;
     Uint32      width;
     BMHD          bmhd;
-    char        *error;
+    const char  *error;
     Uint8       flagHAM,flagEHB;
 
     Image   = NULL;

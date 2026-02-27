@@ -334,7 +334,7 @@ void ChooseMenPanel::refreshLoadSaveButtons() {
 			else {
 				ASSERT(false);
 			}
-			sprintf(buffer, "%d %c %s Age %d  Men %d  Suspended %d", i, diff_ch, PlayerType::getName((PlayerType::PlayerTypeID)player), epoch+1, n_men, suspended[player]);
+			snprintf(buffer, sizeof(buffer), "%d %c %s Age %d  Men %d  Suspended %d", i, diff_ch, PlayerType::getName((PlayerType::PlayerTypeID)player), epoch+1, n_men, suspended[player]);
 			//this->button_load_load[i] = new Button(96, 228 + (i-n_slots_c) * 8, buffer, game_g->letters_small);
             //int xpos = 16;
             //int ypos = 228 + (i-n_slots_c) * 8;
@@ -371,11 +371,11 @@ void ChooseMenPanel::refreshLoadSaveButtons() {
 			else {
 				ASSERT(false);
 			}
-			//sprintf(buffer, "%d %c %s Age %d Men %d Stored %d", i, diff_ch, PlayerType::getName((PlayerType::PlayerTypeID)player), epoch+1, n_men, suspended[player]);
-			sprintf(buffer, "%d %c %s Age %d  Men %d  Saved %d", i, diff_ch, PlayerType::getName((PlayerType::PlayerTypeID)player), epoch+1, n_men, suspended[player]);
+			//snprintf(buffer, sizeof(buffer), "%d %c %s Age %d Men %d Stored %d", i, diff_ch, PlayerType::getName((PlayerType::PlayerTypeID)player), epoch+1, n_men, suspended[player]);
+			snprintf(buffer, sizeof(buffer), "%d %c %s Age %d  Men %d  Saved %d", i, diff_ch, PlayerType::getName((PlayerType::PlayerTypeID)player), epoch+1, n_men, suspended[player]);
 		}
 		else {
-			sprintf(buffer, "UNUSED Slot %d", i);
+			snprintf(buffer, sizeof(buffer), "UNUSED Slot %d", i);
 		}
 		//this->button_save_save[i] = new Button(96, 228 + (i-n_slots_c) * 8, buffer, game_g->letters_small);
         //int xpos = 16;
@@ -731,7 +731,7 @@ void GamePanel::setup() {
 		ASSERT_ELEMENT_ID( this->element_index[i] );
 		//this->button_elements[i] = new ImageButton(8 + 24*i, 90, icon_elements[ this->element_index[i] ]);
 		this->button_elements[i] = new ImageButton(xpos, ypos, game_g->icon_elements[ this->element_index[i] ], "view element stocks");
-		sprintf(buffer, "button_elements_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_elements_%d", i);
 		this->button_elements[i]->setId(buffer);
 		//this->button_elements[i]->setInfoLMB("view element stocks");
 		this->addToPanel(STATE_SECTORCONTROL, button_elements[i]);
@@ -822,7 +822,7 @@ void GamePanel::setup() {
 	this->addToPanel(STATE_DEFENCE, button_bigdefence);
 	for(int i=0;i<game_g->getNSubEpochs();i++) {
 		this->button_deploy_defences[i] = new ImageButton(offset_attack_x_c + space_attack_x_c*i, 56, game_g->numbered_defences[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "deploy a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "deploy a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
 		this->button_deploy_defences[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_DEFENCE, button_deploy_defences[i]);
 	}
@@ -838,9 +838,9 @@ void GamePanel::setup() {
 	for(int i=0;i<game_g->getNSubEpochs();i++) {
 		//this->button_deploy_attackers[i] = new ImageButton(offset_attack_x_c + space_attack_x_c*i, 56, 16, 28, numbered_weapons[game_g->getStartEpoch() + i]);
 		this->button_deploy_attackers[i] = new ImageButton(offset_attack_x_c + space_attack_x_c*i, 56, 16, 40, game_g->numbered_weapons[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "button_deploy_attackers_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_deploy_attackers_%d", i);
 		this->button_deploy_attackers[i]->setId(buffer);
-		sprintf(buffer, "add a %s to the army", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "add a %s to the army", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
 		this->button_deploy_attackers[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_ATTACK, button_deploy_attackers[i]);
 	}
@@ -869,20 +869,20 @@ void GamePanel::setup() {
         //int this_y = 60 + i*16;
         int this_y = 60 + i*20;
         this->button_shields[i] = new ImageButton(8, this_y, game_g->icon_shields[i]);
-		sprintf(buffer, "button_shields_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_shields_%d", i);
 		this->button_shields[i]->setId(buffer);
 		this->button_shields[i]->setInfoLMB("design a shield");
 		this->addToPanel(STATE_DESIGN, button_shields[i]);
         this->button_defences[i] = new ImageButton(40, this_y, game_g->icon_defences[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "button_defences_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_defences_%d", i);
 		this->button_defences[i]->setId(buffer);
-		sprintf(buffer, "design a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "design a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
 		this->button_defences[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_DESIGN, button_defences[i]);
         this->button_weapons[i] = new ImageButton(72, this_y, game_g->icon_weapons[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "button_weapons_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_weapons_%d", i);
 		this->button_weapons[i]->setId(buffer);
-		sprintf(buffer, "design a %s", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "design a %s", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
 		this->button_weapons[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_DESIGN, button_weapons[i]);
 	}
@@ -896,7 +896,7 @@ void GamePanel::setup() {
 			this->button_elements2[i] = new PanelPage(0, 0, 0, 0);
 			this->addToPanel(STATE_SECTORCONTROL, button_elements2[i]);
 			this->button_nminers2[i] = new PanelPage(0, 0, 0, 0);
-			sprintf(buffer, "button_nminers2_%d", i);
+			snprintf(buffer, sizeof(buffer), "button_nminers2_%d", i);
 			this->button_nminers2[i]->setId(buffer);
 			this->addToPanel(STATE_SECTORCONTROL, button_nminers2[i]);
 			continue;
@@ -907,7 +907,7 @@ void GamePanel::setup() {
         this->button_elements2[i] = new ImageButton(64, this_y, 16, 24, game_g->icon_elements[ this->element_index[i] ]);
 		this->addToPanel(STATE_ELEMENTSTOCKS, button_elements2[i]);
         this->button_nminers2[i] = new PanelPage(40, this_y, 16, 16);
-		sprintf(buffer, "button_nminers2_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_nminers2_%d", i);
 		this->button_nminers2[i]->setId(buffer);
 		if( game_g->isOneMouseButton() ) {
 			this->button_nminers2[i]->setInfoLMB("change the number of miners");
@@ -969,11 +969,11 @@ void GamePanel::setup() {
 		this->button_knownshields[i]->setInfoLMB("view blueprint for a shield");
 		this->addToPanel(STATE_KNOWNDESIGNS, button_knownshields[i]);
         this->button_knowndefences[i] = new ImageButton(40, this_y, game_g->icon_defences[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "view blueprint for a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "view blueprint for a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
 		this->button_knowndefences[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_KNOWNDESIGNS, button_knowndefences[i]);
         this->button_knownweapons[i] = new ImageButton(72, this_y, game_g->icon_weapons[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "view blueprint for a %s", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "view blueprint for a %s", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
 		this->button_knownweapons[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_KNOWNDESIGNS, button_knownweapons[i]);
 	}
@@ -1018,20 +1018,20 @@ void GamePanel::setup() {
 	for(int i=0;i<game_g->getNSubEpochs();i++) {
         const int this_y = 82 + i*14;
         this->button_fshields[i] = new ImageButton(8, this_y, 16, 14, game_g->icon_shields[i]);
-		sprintf(buffer, "button_fshields_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_fshields_%d", i);
 		this->button_fshields[i]->setId(buffer);
 		this->button_fshields[i]->setInfoLMB("manufacture a shield");
 		this->addToPanel(STATE_FACTORY, button_fshields[i]);
         this->button_fdefences[i] = new ImageButton(40, this_y, 16, 14, game_g->icon_defences[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "button_fdefences_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_fdefences_%d", i);
 		this->button_fdefences[i]->setId(buffer);
-		sprintf(buffer, "manufacture a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "manufacture a %s", Invention::getInvention(Invention::DEFENCE, game_g->getStartEpoch() + i)->getName());
 		this->button_fdefences[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_FACTORY, button_fdefences[i]);
         this->button_fweapons[i] = new ImageButton(72, this_y, 16, 14, game_g->icon_weapons[game_g->getStartEpoch() + i]);
-		sprintf(buffer, "button_fweapons_%d", i);
+		snprintf(buffer, sizeof(buffer), "button_fweapons_%d", i);
 		this->button_fweapons[i]->setId(buffer);
-		sprintf(buffer, "manufacture a %s", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
+		snprintf(buffer, sizeof(buffer), "manufacture a %s", Invention::getInvention(Invention::WEAPON, game_g->getStartEpoch() + i)->getName());
 		this->button_fweapons[i]->setInfoLMB(buffer);
 		this->addToPanel(STATE_FACTORY, button_fweapons[i]);
 	}

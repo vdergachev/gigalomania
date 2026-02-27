@@ -949,7 +949,7 @@ bool Game::loadGame(const char *filename) {
 
 const char *Game::getFilename(int slot) const {
 	char name[300] = "";
-	sprintf(name, "game_%d.SAV", slot);
+	snprintf(name, sizeof(name), "game_%d.SAV", slot);
 	const char *filename = getApplicationFilename(name, true); // important for save game files to survive an uninstall
     //LOG("filename: %s\n", filename);
 	return filename;
@@ -1327,7 +1327,7 @@ void Game::processImage(Gigalomania::Image *image, bool old_smooth) const {
 
 bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 	char filename[300] = "";
-	sprintf(filename, "attacker_walking_%d.png", epoch);
+	snprintf(filename, sizeof(filename), "attacker_walking_%d.png", epoch);
 	Gigalomania::Image *gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
 	// if NULL, look for direction specific graphics
 	if( gfx_image != NULL ) {
@@ -1339,7 +1339,7 @@ bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 			// load direction specific image
 			//LOG("try loading direction specific images for epoch %d dir %d\n", epoch, dir);
 			direction_specific = true;
-			sprintf(filename, "attacker_walking_%d_%d.png", epoch, dir);
+			snprintf(filename, sizeof(filename), "attacker_walking_%d_%d.png", epoch, dir);
 			gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
 			if( gfx_image == NULL ) {
 				LOG("failed to load attacker walking image for epoch %d dir %d\n", epoch, dir);
@@ -2981,7 +2981,7 @@ bool Game::openScreen(bool fullscreen) {
 	}
 
 	char buffer[256] = "";
-	sprintf(buffer, "Gigalomania, version %d.%d.%d - Loading...", majorVersion, minorVersion, patchVersion);
+	snprintf(buffer, sizeof(buffer), "Gigalomania, version %d.%d.%d - Loading...", majorVersion, minorVersion, patchVersion);
 	screen->setTitle(buffer);
 	return true;
 }
@@ -3189,7 +3189,7 @@ bool Game::readMap(const char *filename) {
 	int index = -1;
 
     char fullname[4096] = "";
-	sprintf(fullname, "%s/%s", maps_dirname.c_str(), filename);
+	snprintf(fullname, sizeof(fullname), "%s/%s", maps_dirname.c_str(), filename);
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
@@ -3197,7 +3197,7 @@ bool Game::readMap(const char *filename) {
 #ifdef DATADIR
 	if( file == NULL ) {
 		LOG("searching in %s for islands\n", alt_maps_dirname.c_str());
-		sprintf(fullname, "%s/%s", alt_maps_dirname.c_str(), filename);
+		snprintf(fullname, sizeof(fullname), "%s/%s", alt_maps_dirname.c_str(), filename);
 		file = SDL_IOFromFile(fullname, "rb");
 	}
 #endif
@@ -3249,7 +3249,7 @@ bool Game::createMaps() {
 #if defined(_WIN32)
     WIN32_FIND_DATAA findFileData;
 	char maps_dirname_w[256];
-	sprintf(maps_dirname_w, "%s\\*", maps_dirname.c_str());
+	snprintf(maps_dirname_w, sizeof(maps_dirname_w), "%s\\*", maps_dirname.c_str());
 	HANDLE handle = FindFirstFileA(maps_dirname_w, &findFileData);
 	if( handle == INVALID_HANDLE_VALUE ) {
 		LOG("Invalid File Handle. GetLastError reports %d\n", GetLastError());
@@ -5396,7 +5396,7 @@ void playGame(int n_args, char *args[]) {
 	LOG("time taken to load data: %d\n", time_taken);
 
 	char buffer[256] = "";
-	sprintf(buffer, "Gigalomania, version %d.%d.%d", majorVersion, minorVersion, patchVersion);
+	snprintf(buffer, sizeof(buffer), "Gigalomania, version %d.%d.%d", majorVersion, minorVersion, patchVersion);
 	game_g->getScreen()->setTitle(buffer);
 
     LOG("all done!\n");

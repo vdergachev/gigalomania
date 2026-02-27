@@ -664,9 +664,9 @@ void PlaceMenGameState::draw() {
 
 	if( !game_g->isUsingOldGfx() ) {
 		if( patchVersion == 0 )
-			sprintf(buffer, "Gigalomania v%d.%d", majorVersion, minorVersion);
+			snprintf(buffer, sizeof(buffer), "Gigalomania v%d.%d", majorVersion, minorVersion);
 		else
-			sprintf(buffer, "Gigalomania v%d.%d.%d", majorVersion, minorVersion, patchVersion);
+			snprintf(buffer, sizeof(buffer), "Gigalomania v%d.%d.%d", majorVersion, minorVersion, patchVersion);
 	    Gigalomania::Image::writeMixedCase(160, 228, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Gigalomania::Image::JUSTIFY_CENTRE);
 	}
 
@@ -683,7 +683,7 @@ void PlaceMenGameState::draw() {
 	cy += s_h + 2;
 	Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, "of the", Gigalomania::Image::JUSTIFY_CENTRE);
 	cy += l_h + 2;
-	sprintf(buffer, "%s AGE", epoch_names[game_g->getStartEpoch()]);
+	snprintf(buffer, sizeof(buffer), "%s AGE", epoch_names[game_g->getStartEpoch()]);
 	Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, NULL, buffer, Gigalomania::Image::JUSTIFY_CENTRE);
     cy += l_h + 2;
 
@@ -703,7 +703,7 @@ void PlaceMenGameState::draw() {
 		int n_suspended = game_g->getNSuspended();
         if( n_suspended > 0 )
 		{
-			sprintf(buffer, "Saved Men %d", n_suspended);
+			snprintf(buffer, sizeof(buffer), "Saved Men %d", n_suspended);
             Gigalomania::Image::writeMixedCase(cx, cy, game_g->letters_large, game_g->letters_small, game_g->numbers_white, buffer, Gigalomania::Image::JUSTIFY_CENTRE);
 		}
 	}
@@ -1051,7 +1051,7 @@ bool PlayingGameState::readSectors(Map *map) {
 	bool done_header = false;
 
     char fullname[4096] = "";
-	sprintf(fullname, "%s/%s", maps_dirname.c_str(), game_g->getMap()->getFilename());
+	snprintf(fullname, sizeof(fullname), "%s/%s", maps_dirname.c_str(), game_g->getMap()->getFilename());
 	// open in binary mode, so that we parse files in an OS-independent manner
 	// (otherwise, Windows will parse "\r\n" as being "\n", but Linux will still read it as "\n")
 	//FILE *file = fopen(fullname, "rb");
@@ -1059,7 +1059,7 @@ bool PlayingGameState::readSectors(Map *map) {
 #ifdef DATADIR
 	if( file == NULL ) {
 		LOG("searching in /usr/share/gigalomania/ for islands folder\n");
-		sprintf(fullname, "%s/%s", alt_maps_dirname.c_str(), game_g->getMap()->getFilename());
+		snprintf(fullname, sizeof(fullname), "%s/%s", alt_maps_dirname.c_str(), game_g->getMap()->getFilename());
 		file = SDL_IOFromFile(fullname, "rb");
 	}
 #endif
@@ -1211,7 +1211,7 @@ void PlayingGameState::setupMapGUI() {
 					//game_g->getMap()->panels[x][y] = panel;
 					map_panels[x][y] = panel;
 					char buffer[256] = "";
-					sprintf(buffer, "map_%d_%d", x, y);
+					snprintf(buffer, sizeof(buffer), "map_%d_%d", x, y);
 					map_panels[x][y]->setId(buffer);
 				}
 			}
