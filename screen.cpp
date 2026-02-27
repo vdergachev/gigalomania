@@ -58,6 +58,12 @@ bool Gigalomania::Screen::open(int screen_width, int screen_height, bool fullscr
 		LOG("render draw blend mode: %d\n", blendMode);
 	}
 	SDL_SetRenderDrawBlendMode(sdlRenderer, SDL_BLENDMODE_BLEND); // needed for Screen::fillRectWithAlpha, as blending is off by default for drawing functions
+	// Try adaptive vsync first, fall back to regular vsync
+	if( !SDL_SetRenderVSync(sdlRenderer, SDL_RENDERER_VSYNC_ADAPTIVE) ) {
+		if( !SDL_SetRenderVSync(sdlRenderer, 1) ) {
+			LOG("vsync not available: %s\n", SDL_GetError());
+		}
+	}
 	LOG("screen opened ok\n");
 
 	if( game_g->isMobileUI() ) {
@@ -216,18 +222,22 @@ void Application::delay(unsigned int time) {
 	SDL_Delay(time);
 }
 
-const int TICK_INTERVAL = 16; // 62.5 fps max
+const int TICK_INTERVAL      = 16; // ~60 fps cap for gameplay (no-op when vsync active)
+const int TICK_INTERVAL_MENU = 50; // ~20 fps cap for menus - saves CPU/battery
 
 void Application::wait() {
+	// Use tighter cap during gameplay, relaxed cap in menus
+	int tick_interval = (game_g->getGameStateID() == GAMESTATEID_PLAYING)
+		? TICK_INTERVAL : TICK_INTERVAL_MENU;
 	unsigned int now = game_g->getApplication()->getTicks();
 	// use unsigned int and compare by subtraction to avoid overflow problems - see http://blogs.msdn.com/b/oldnewthing/archive/2005/05/31/423407.aspx, http://www.gammon.com.au/millis
 	unsigned int elapsed = now - last_time;
 	unsigned int delay = 0;
-	if( elapsed >= TICK_INTERVAL ) {
-		// fine, we've already passed TICK_INTERVAL
+	if( elapsed >= (unsigned int)tick_interval ) {
+		// fine, we've already passed tick_interval
 	}
 	else {
-		delay = TICK_INTERVAL - elapsed;
+		delay = tick_interval - elapsed;
 		game_g->getApplication()->delay(delay);
 	}
 	last_time = now + delay;
