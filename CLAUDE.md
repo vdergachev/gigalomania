@@ -6,10 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **macOS:**
 ```sh
-brew install sdl2 sdl2_image sdl2_mixer
+brew install sdl3 sdl3_image sdl2_mixer
 make
 ./gigalomania
 ```
+
+Note: SDL3_mixer is not yet available in homebrew; SDL2_mixer is used as a temporary shim.
 
 **Clean:**
 ```sh
@@ -18,8 +20,10 @@ make clean
 
 **Windows:** Open `gigalomania.sln` in Visual Studio 2022, build Release/x64. Dependencies via vcpkg:
 ```bat
-vcpkg install sdl2 "sdl2-image[libjpeg-turbo]" sdl2-mixer --triplet x64-windows
+vcpkg install sdl3 sdl3-image sdl2-mixer --triplet x64-windows
 ```
+
+Note: Windows build has not been updated for SDL3 yet (vcpkg packages may differ).
 
 There are no automated tests.
 
