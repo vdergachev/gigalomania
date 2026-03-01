@@ -1356,30 +1356,17 @@ void Game::processImage(Gigalomania::Image *image, bool old_smooth) const {
 
 bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 	char filename[300] = "";
-	snprintf(filename, sizeof(filename), "attacker_walking_%d.png", epoch);
-	Gigalomania::Image *gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
-	// if NULL, look for direction specific graphics
-	if( gfx_image != NULL ) {
-	    gfx_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h); // so the copying will work at the right scale for the input image
-	}
 	for(int dir=0;dir<n_attacker_directions_c;dir++) {
-		bool direction_specific = false;
+		snprintf(filename, sizeof(filename), "attacker_walking_%d_%d.png", epoch, dir);
+		Gigalomania::Image *gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
 		if( gfx_image == NULL ) {
-			// load direction specific image
-			//LOG("try loading direction specific images for epoch %d dir %d\n", epoch, dir);
-			direction_specific = true;
-			snprintf(filename, sizeof(filename), "attacker_walking_%d_%d.png", epoch, dir);
-			gfx_image = Gigalomania::Image::loadImage(gfx_dir + filename);
-			if( gfx_image == NULL ) {
-				LOG("failed to load attacker walking image for epoch %d dir %d\n", epoch, dir);
-				return false;
-			}
-		    gfx_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h); // so the copying will work at the right scale for the input image
+			LOG("failed to load attacker walking image for epoch %d dir %d\n", epoch, dir);
+			return false;
 		}
+		gfx_image->setScale(scale_width/scale_factor_w, scale_height/scale_factor_h);
 		int height_per_frame = gfx_image->getScaledHeight();
 		int width_per_frame = height_per_frame;
 		n_attacker_frames[epoch][dir] = gfx_image->getScaledWidth()/width_per_frame;
-		//LOG("epoch %d, direction %d has %d frames\n", epoch, dir, n_attacker_frames[epoch][dir]);
 		// need to update max_attacker_frames_c if we ever want to allow more frames!
 		ASSERT( n_attacker_frames[epoch][dir] <= max_attacker_frames_c );
 		for(int player=0;player<n_players_c;player++) {
@@ -1392,12 +1379,6 @@ bool Game::loadAttackersWalkingImages(const string &gfx_dir, int epoch) {
 				processImage(attackers_walking[player][epoch][dir][frame]);
 			}
 		}
-		if( direction_specific ) {
-			delete gfx_image;
-			gfx_image = NULL;
-		}
-	}
-	if( gfx_image != NULL ) {
 		delete gfx_image;
 	}
 	return true;
