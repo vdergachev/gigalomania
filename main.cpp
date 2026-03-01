@@ -13,7 +13,24 @@
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrev*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/)
 {
     SDL_SetMainReady();
-    playGame(0, nullptr);
+    // Parse command line into argc/argv (WinMain does not receive them directly)
+    int argc = 0;
+    LPWSTR *argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+    char **argv = nullptr;
+    if (argvW != nullptr && argc > 0) {
+        argv = new char*[argc];
+        for (int i = 0; i < argc; i++) {
+            int len = WideCharToMultiByte(CP_ACP, 0, argvW[i], -1, nullptr, 0, nullptr, nullptr);
+            argv[i] = new char[len];
+            WideCharToMultiByte(CP_ACP, 0, argvW[i], -1, argv[i], len, nullptr, nullptr);
+        }
+        LocalFree(argvW);
+    }
+    playGame(argc, argv);
+    if (argv != nullptr) {
+        for (int i = 0; i < argc; i++) delete[] argv[i];
+        delete[] argv;
+    }
     return 0;
 }
 #else

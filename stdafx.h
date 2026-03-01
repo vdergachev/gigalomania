@@ -11,6 +11,7 @@
 // Prevent windows.h from defining min/max macros (conflict with std::min/std::max)
 #define NOMINMAX
 #include <windows.h>
+#include <shellapi.h>
 #endif
 
 #include <vector>

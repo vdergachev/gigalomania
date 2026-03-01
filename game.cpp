@@ -5197,6 +5197,10 @@ void Game::copyFile(const char *src, const char *dst) const {
 }
 
 void playGame(int n_args, char *args[]) {
+#ifdef _WIN32
+    // On Windows logging is always enabled; log goes to %APPDATA%\Gigalomania\log.txt
+    logging_enabled = true;
+#endif
     LOG("playGame()\n");
 
 	Player::resetAllAlliances(); // need to reset for Android, where variables aren't reinitialised if the native app restarts!
