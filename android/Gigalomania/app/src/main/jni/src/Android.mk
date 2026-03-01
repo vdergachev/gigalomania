@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := main
 
-SDL_PATH := ../SDL
+SDL_PATH := ../SDL3
 SDL_IMAGE_PATH := ../SDL_image
 SDL_MIXER_PATH := ../SDL_mixer
 
