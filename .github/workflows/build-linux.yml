@@ -65,7 +65,7 @@ jobs:
           echo "PKG_CONFIG_PATH=$HOME/.local/sdl3/lib/pkgconfig:$HOME/.local/sdl3-image/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Build
-        run: make
+        run: make INC="`pkg-config --cflags sdl3 sdl3-image`"
 
       - name: Create archive
         run: |
