@@ -142,9 +142,9 @@ void Gigalomania::Screen::fillRectWithAlpha(short x, short y, short w, short h, 
 	SDL_RenderFillRect(sdlRenderer, &rect);
 }
 
-void Gigalomania::Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
+void Gigalomania::Screen::drawLine(short x0, short y0, short x1, short y1, unsigned char r, unsigned char g, unsigned char b) {
 	SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
-	SDL_RenderLine(sdlRenderer, (float)x1, (float)y1, (float)x2, (float)y2);
+	SDL_RenderLine(sdlRenderer, (float)x0, (float)y0, (float)x1, (float)y1);
 }
 
 void Gigalomania::Screen::convertWindowToLogical(int *m_x, int *m_y) const {

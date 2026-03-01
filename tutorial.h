@@ -65,6 +65,8 @@ class TutorialCard {
 public:
 	TutorialCard(const string &id, const string &text) : id(id), text(text), next_text("Next"), has_arrow(false), arrow_x(-1), arrow_y(-1), show_arrow_on_page(false), show_arrow_page(-1), show_arrow_on_sector(false), show_arrow_sector_x(-1), show_arrow_sector_y(-1), auto_proceed(false), player_allow_build_tower(true), gui_handler(NULL) {
 	}
+	TutorialCard(const TutorialCard&) = delete;
+	TutorialCard& operator=(const TutorialCard&) = delete;
 	virtual ~TutorialCard() {
 		if( gui_handler != NULL ) {
 			delete gui_handler;

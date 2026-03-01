@@ -34,6 +34,8 @@ class OneMouseButtonPanel : public PanelPage {
     ImageButton *button_left;
 public:
 	OneMouseButtonPanel(ClickFunc *clickFunc, void *data, int arg, PanelPage *caller_button);
+	OneMouseButtonPanel(const OneMouseButtonPanel&) = delete;
+	OneMouseButtonPanel& operator=(const OneMouseButtonPanel&) = delete;
 
 	virtual void input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
 };
@@ -47,6 +49,8 @@ class ChooseGameTypePanel : public MultiPanel {
 
 public:
 	ChooseGameTypePanel();
+	ChooseGameTypePanel(const ChooseGameTypePanel&) = delete;
+	ChooseGameTypePanel& operator=(const ChooseGameTypePanel&) = delete;
 
 	virtual void input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
 };
@@ -59,6 +63,8 @@ class ChooseDifficultyPanel : public MultiPanel {
 
 public:
 	ChooseDifficultyPanel();
+	ChooseDifficultyPanel(const ChooseDifficultyPanel&) = delete;
+	ChooseDifficultyPanel& operator=(const ChooseDifficultyPanel&) = delete;
 
 	virtual void input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
 };
@@ -105,6 +111,8 @@ public:
 	};
 
 	ChooseMenPanel(PlaceMenGameState *placeMenGameState);
+	ChooseMenPanel(const ChooseMenPanel&) = delete;
+	ChooseMenPanel& operator=(const ChooseMenPanel&) = delete;
 
 	virtual void draw();
 	virtual void input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click);
@@ -239,6 +247,8 @@ private:
 public:
 	GamePanel(PlayingGameState *gamestate, int client_player);
 	virtual ~GamePanel();
+	GamePanel(const GamePanel&) = delete;
+	GamePanel& operator=(const GamePanel&) = delete;
 
 	void setup();
 	void refreshCanDesign();

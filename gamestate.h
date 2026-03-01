@@ -208,6 +208,8 @@ protected:
 public:
 	GameState(int client_player);
 	virtual ~GameState();
+	GameState(const GameState&) = delete;
+	GameState& operator=(const GameState&) = delete;
 
 	PanelPage *getScreenPage() {
 		return screen_page;

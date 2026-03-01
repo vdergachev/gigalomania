@@ -93,6 +93,7 @@ Game::Game() {
 	pref_sound_on = default_pref_sound_on_c;
 	pref_music_on = default_pref_music_on_c;
 	pref_disallow_nukes = default_pref_disallow_nukes_c;
+	pref_fullscreen = true; // default; overridden by loadPrefs()
 
 	gameMode = GAMEMODE_SINGLEPLAYER;
 	gameType = GAMETYPE_SINGLEISLAND;
@@ -758,13 +759,14 @@ void Game::setEpoch(int epoch) {
 	selected_island = 0;
 
 	if( gameType == GAMETYPE_ALLISLANDS ) {
-		// skip islands we've completed
-		while( completed_island[selected_island] ) {
+		// skip islands we've completed; check bounds before array access to avoid OOB read
+		while( selected_island < max_islands_per_epoch_c && maps[start_epoch][selected_island] != NULL && completed_island[selected_island] ) {
 			selected_island++;
-			if( selected_island == max_islands_per_epoch_c || maps[start_epoch][selected_island] == NULL ) {
-				LOG("error, should be at least one island on this epoch that isn't completed\n");
-				ASSERT( false );
-			}
+		}
+		if( selected_island >= max_islands_per_epoch_c || maps[start_epoch][selected_island] == NULL ) {
+			LOG("error, should be at least one island on this epoch that isn't completed\n");
+			ASSERT( false );
+			return; // unreachable; prevents static analysis false positive on subsequent array access
 		}
 	}
 
@@ -863,6 +865,7 @@ bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, in
 	const int bufsize = 1024;
 	char buffer[bufsize+1] = "";
 	if( fgets(buffer, bufsize, file) == NULL ) { // header line
+		fclose(file);
 		return false;
 	}
 
@@ -884,37 +887,49 @@ bool Game::loadGameInfo(DifficultyLevel *difficulty, int *player, int *n_men, in
 
 	char *ptr = buffer;
 
-	*difficulty = (DifficultyLevel)*((int *)ptr);
+	*difficulty = static_cast<DifficultyLevel>(*reinterpret_cast<int*>(ptr));
 	ptr += sizeof(int);
-	if( !validDifficulty( *difficulty ) )
+	if( !validDifficulty( *difficulty ) ) {
+		fclose(file);
 		return false;
-
-	*player = *((int *)ptr);
-	ptr += sizeof(int);
-	if( !validPlayer( *player ) )
-		return false;
-
-	*n_men = *((int *)ptr);
-	ptr += sizeof(int);
-	if( *n_men < 0 )
-		return false;
-
-	for(int i=0;i<n_players_c;i++) {
-		suspended[i] = *((int *)ptr);
-		ptr += sizeof(int);
-		if( suspended[i] < 0 )
-			return false;
 	}
 
-	*epoch = *((int *)ptr);
+	*player = *reinterpret_cast<int*>(ptr);
 	ptr += sizeof(int);
-	if( *epoch < 0 || *epoch >= n_epochs_c )
+	if( !validPlayer( *player ) ) {
+		fclose(file);
 		return false;
+	}
+
+	*n_men = *reinterpret_cast<int*>(ptr);
+	ptr += sizeof(int);
+	if( *n_men < 0 ) {
+		fclose(file);
+		return false;
+	}
+
+	for(int i=0;i<n_players_c;i++) {
+		suspended[i] = *reinterpret_cast<int*>(ptr);
+		ptr += sizeof(int);
+		if( suspended[i] < 0 ) {
+			fclose(file);
+			return false;
+		}
+	}
+
+	*epoch = *reinterpret_cast<int*>(ptr);
+	ptr += sizeof(int);
+	if( *epoch < 0 || *epoch >= n_epochs_c ) {
+		fclose(file);
+		return false;
+	}
 
 	for(int i=0;i<max_islands_per_epoch_c;i++) {
-		int val = *((int *)ptr);
-		if( val != 0 && val != 1 )
+		int val = *reinterpret_cast<int*>(ptr);
+		if( val != 0 && val != 1 ) {
+			fclose(file);
 			return false;
+		}
 		completed[i] = (val==1);
 		ptr += sizeof(int);
 	}
@@ -999,13 +1014,13 @@ void Game::saveGame(int slot) const {
 	char buffer[256] = "";
 	char *ptr = buffer;
 
-	*((int *)ptr) = difficulty_level;
+	*reinterpret_cast<int*>(ptr) = difficulty_level;
 	ptr += sizeof(int);
 
-	*((int *)ptr) = human_player;
+	*reinterpret_cast<int*>(ptr) = human_player;
 	ptr += sizeof(int);
 
-	*((int *)ptr) = n_men_store;
+	*reinterpret_cast<int*>(ptr) = n_men_store;
 	ptr += sizeof(int);
 
 	int n_suspended[n_players_c]; // no longer use n_suspended for all players, but still need to keep save game files compatible
@@ -1014,16 +1029,16 @@ void Game::saveGame(int slot) const {
 	}
 	n_suspended[human_player] = n_player_suspended;
 	for(int i=0;i<n_players_c;i++) {
-		*((int *)ptr) = n_suspended[i];
+		*reinterpret_cast<int*>(ptr) = n_suspended[i];
 		ptr += sizeof(int);
 	}
 
-	*((int *)ptr) = start_epoch;
+	*reinterpret_cast<int*>(ptr) = start_epoch;
 	ptr += sizeof(int);
 
 	for(int i=0;i<max_islands_per_epoch_c;i++) {
 		int val = completed_island[i] ? 1 : 0;
-		*((int *)ptr) = val;
+		*reinterpret_cast<int*>(ptr) = val;
 		ptr += sizeof(int);
 	}
 
@@ -1035,7 +1050,7 @@ void Game::saveGame(int slot) const {
 
 	LOG("checksum %d\n", sum);
 
-	*((int *)ptr) = sum;
+	*reinterpret_cast<int*>(ptr) = sum;
 	ptr += sizeof(int);
 
 	*ptr = '\0';
@@ -2076,9 +2091,9 @@ bool Game::loadImages() {
 	delete player_heads_select_all;
 
 	Gigalomania::Image *player_heads_alliance_all = Gigalomania::Image::loadImage(gfx_dir + "player_heads_alliance.png");
-	processImage(player_heads_alliance_all);
 	if( player_heads_alliance_all == NULL )
 		return false;
+	processImage(player_heads_alliance_all);
 	for(int i=0;i<n_players_c;i++) {
 		player_heads_alliance[i] = player_heads_alliance_all->copy(32*i, 0, 32, 41);
 	}
@@ -5374,7 +5389,7 @@ void playGame(int n_args, char *args[]) {
 	for(size_t i=0;i<TrackedObject::getNumTags();i++) {
 		TrackedObject *to = TrackedObject::getTag(i);
 		if( to != NULL && strcmp( to->getClass(), "CLASS_IMAGE" ) == 0 ) {
-			Gigalomania::Image *image = (Gigalomania::Image *)to;
+			Gigalomania::Image *image = static_cast<Gigalomania::Image*>(to);
 			if( !image->convertToDisplayFormat() ) {
 				LOG("failed to convertToDisplayFormat\n");
 				LOG("delete game %d\n", game_g);

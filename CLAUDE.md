@@ -70,6 +70,27 @@ The codebase was migrated from SDL2 to SDL3 on the `MMM-migrate-to-sdl3` branch:
 
 Extended notes, research, and ideas live in `.claude/docs/`. These files may be outdated — read them only when explicitly asked.
 
+## Static analysis
+
+Run `make check` before every build to catch issues early:
+
+```sh
+brew install cppcheck   # macOS, one-time
+make check
+```
+
+Linux: `apt install cppcheck`. Windows: cppcheck.org installer or `winget install Cppcheck`.
+
+For runtime leak detection (AddressSanitizer + UBSan):
+
+```sh
+make debug
+ASAN_OPTIONS=detect_leaks=1 ./gigalomania
+```
+
+`make debug` implies `make clean` first — it forces a full rebuild with sanitizer flags.
+Full heap leak reports (LSAN) work best on Linux; on macOS leak detection is partial.
+
 ## When making code changes
 
 After any code change, verify that build instructions for all supported platforms (macOS, Linux, Windows, Android) remain accurate and up to date. If a change affects build steps, dependencies, or version numbers, update the relevant sections in this file.

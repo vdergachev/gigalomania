@@ -610,7 +610,59 @@ GamePanel::GamePanel(PlayingGameState *gamestate, int client_player) : MultiPane
 	this->deploy_shield = -1;
 	this->deploy_defence = -1;
 	this->deploy_weapon = -1;
-	this->designinfo = NULL;
+	this->designinfo = nullptr;
+
+	// All button_* members are assigned in setup(); initialize to nullptr to avoid UB
+	// if anything reads them before setup() is called.
+	this->button_design = nullptr;
+	this->button_ndesigners = nullptr;
+	this->button_shield = nullptr;
+	this->button_defence = nullptr;
+	this->button_attack = nullptr;
+	this->button_knowndesigns = nullptr;
+	this->button_factory = nullptr;
+	this->button_nworkers = nullptr;
+	this->button_bigdesign = nullptr;
+	this->button_designers = nullptr;
+	this->button_bigshield = nullptr;
+	this->button_shutdown = nullptr;
+	this->button_bigdefence = nullptr;
+	this->button_bigattack = nullptr;
+	this->button_deploy_unarmedmen = nullptr;
+	this->button_return_attackers = nullptr;
+	this->button_select_all = nullptr;
+	this->button_bigelementstocks = nullptr;
+	this->button_bigbuild = nullptr;
+	this->button_bigknowndesigns = nullptr;
+	this->button_bigdesigninfo = nullptr;
+	this->button_trashdesign = nullptr;
+	this->button_bigfactory = nullptr;
+	this->button_workers = nullptr;
+	this->button_famount = nullptr;
+	for(int i = 0; i < 4; i++) {
+		this->element_index[i] = 0;
+		this->button_elements[i] = nullptr;
+		this->button_nminers[i] = nullptr;
+		this->button_shields[i] = nullptr;
+		this->button_defences[i] = nullptr;
+		this->button_weapons[i] = nullptr;
+		this->button_deploy_shields[i] = nullptr;
+		this->button_deploy_defences[i] = nullptr;
+		this->button_deploy_attackers[i] = nullptr;
+		this->button_elements2[i] = nullptr;
+		this->button_nminers2[i] = nullptr;
+		this->button_knownshields[i] = nullptr;
+		this->button_knowndefences[i] = nullptr;
+		this->button_knownweapons[i] = nullptr;
+		this->button_fshields[i] = nullptr;
+		this->button_fdefences[i] = nullptr;
+		this->button_fweapons[i] = nullptr;
+	}
+	for(int i = 0; i < N_BUILDINGS; i++) {
+		this->button_build[i] = nullptr;
+		this->button_nbuilders[i] = nullptr;
+		this->button_nbuilders2[i] = nullptr;
+	}
 
 	//this->setup();
 }

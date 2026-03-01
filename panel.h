@@ -203,6 +203,8 @@ namespace Gigalomania {
 	public:
 		CycleButton(int x,int y,const char *texts[],int n_texts,Image *font[]);
 		virtual ~CycleButton();
+		CycleButton(const CycleButton&) = delete;
+		CycleButton& operator=(const CycleButton&) = delete;
 
 		virtual const char *getClass() const { return "CLASS_CYCLEBUTTON"; }
 		virtual void draw();

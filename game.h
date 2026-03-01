@@ -176,6 +176,9 @@ class Game {
 	void setEpoch(int epoch);
 	void cleanupPlayers();
 public:
+	Game(const Game&) = delete;
+	Game& operator=(const Game&) = delete;
+
 	Gigalomania::Image *background;
 	Gigalomania::Image *background_stars;
 	Gigalomania::Image *player_heads_select[n_players_c];

@@ -15,7 +15,7 @@ $(APP): $(OFILES) $(HFILES) $(CFILES)
 	$(CC) $(OFILES) $(CCFLAGS) $(LINKPATH) $(LIBS) -o $(APP)
 
 .cpp.o:
-	$(CC) $(CCFLAGS) -O2 $(INC) -c $< -o $@
+	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
 
 # REMEMBER to update debian/dirs if the system directories that we use are changed!!!
 install: $(APP)
@@ -82,6 +82,22 @@ uninstall_meego:
 	rm -f $(DESTDIR)/usr/share/applications/gigalomania_maemo.desktop
 	rm -f $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/gigalomania48.png
 	rm -f $(DESTDIR)/usr/bin/gigalomania_mobile.sh
+
+debug: CCFLAGS = -g -O0 -Wall -fsanitize=address,undefined -fno-omit-frame-pointer
+debug: LIBS += -fsanitize=address,undefined
+debug: clean all
+	@echo "Debug build done. Run: ASAN_OPTIONS=detect_leaks=1 ./$(APP)"
+
+check:
+	cppcheck --enable=all --std=c++17 --language=c++ \
+	         --suppress=missingIncludeSystem \
+	         --suppress=unusedFunction \
+	         --suppress=ignoredReturnValue \
+	         --suppress=assertWithSideEffect \
+	         --suppress=noDestructor:panel.cpp \
+	         --suppress=noCopyConstructor:panel.cpp \
+	         --suppress=*:TinyXML/* \
+	         $(CFILES) $(HFILES)
 
 clean:
 	rm -rf *.o

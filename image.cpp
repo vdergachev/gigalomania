@@ -190,7 +190,7 @@ Uint32 getpixel(SDL_Surface *surface, int x, int y) {
 		return *p;
 
 	case 2:
-		return *(Uint16 *)p;
+		return *reinterpret_cast<const Uint16*>(p);
 
 	case 3:
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -199,7 +199,7 @@ Uint32 getpixel(SDL_Surface *surface, int x, int y) {
 			return p[0] | p[1] << 8 | p[2] << 16;
 
 	case 4:
-		return *(Uint32 *)p;
+		return *reinterpret_cast<const Uint32*>(p);
 
 	default:
 		return 0;       /* shouldn't happen, but avoids warnings */
@@ -221,7 +221,7 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
 		break;
 
 	case 2:
-		*(Uint16 *)p = pixel;
+		*reinterpret_cast<Uint16*>(p) = static_cast<Uint16>(pixel);
 		break;
 
 	case 3:
@@ -237,7 +237,7 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
 		break;
 
 	case 4:
-		*(Uint32 *)p = pixel;
+		*reinterpret_cast<Uint32*>(p) = pixel;
 		break;
 	}
 }
