@@ -2981,8 +2981,8 @@ bool Game::openScreen(bool fullscreen) {
 
 bool Game::readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, const int MAX_LINE, const char *filename) {
 	bool ok = true;
-	line[ strlen(line) - 1 ] = '\0'; // trim new line
-	line[ strlen(line) - 1 ] = '\0'; // trim carriage return
+	// Trim trailing \r and \n to handle both LF and CRLF files in binary mode
+	{ int len = (int)strlen(line); while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r')) line[--len] = '\0'; }
 	//LOG("line: %s\n", line);
 	if( *l_map == NULL ) {
 		if( line[0] != '#' ) {
