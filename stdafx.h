@@ -6,24 +6,24 @@
 // get rid of "unsafe" warnings for file commands (fopen vs fopen_s etc)
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 #define _CRT_SECURE_NO_WARNINGS
+// SDL3main.lib is not shipped by vcpkg sdl3; we provide WinMain ourselves in main.cpp
+#define SDL_MAIN_HANDLED
+// Prevent windows.h from defining min/max macros (conflict with std::min/std::max)
+#define NOMINMAX
+#include <windows.h>
+#include <shellapi.h>
 #endif
 
 #include <vector>
 #include <string>
 #include <cassert>
 
-// we include SDL globally, so that SDL_MAJOR_VERSION is available at least
-#if defined(__ANDROID__)
-#include <SDL.h>
-#elif defined(__linux)
-#include <SDL2/SDL.h>
-#elif defined(__MORPHOS__)
+// we include SDL globally
+#if defined(__MORPHOS__)
 #include <SDL/SDL.h>
-#elif defined(__APPLE__)
-#include <SDL.h>
-#include <unistd.h>
-#elif defined(_WIN32)
-#include <SDL2/SDL.h>
 #else
-#include <sdl.h>
+#include <SDL3/SDL.h>
+#endif
+#if defined(__APPLE__)
+#include <unistd.h>
 #endif

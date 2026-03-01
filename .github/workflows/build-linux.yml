@@ -1,0 +1,97 @@
+name: Build Linux
+
+on:
+  push:
+    branches: [ master, MMM-migrate-to-sdl3 ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    if: false
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install apt dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config cmake git \
+            libpng-dev libjpeg-dev libsdl2-mixer-dev
+
+      - name: Cache SDL3
+        id: cache-sdl3
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/sdl3
+          key: sdl3-3.2.14-${{ runner.os }}
+
+      - name: Build SDL3
+        if: steps.cache-sdl3.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth=1 https://github.com/libsdl-org/SDL.git -b release-3.2.14
+          cd SDL
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=$HOME/.local/sdl3 \
+            -DSDL_SHARED=ON -DSDL_STATIC=OFF
+          cmake --build build -j$(nproc)
+          cmake --install build
+
+      - name: Cache SDL3_image
+        id: cache-sdl3-image
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/sdl3-image
+          key: sdl3-image-3.2.4-${{ runner.os }}
+
+      - name: Build SDL3_image
+        if: steps.cache-sdl3-image.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth=1 https://github.com/libsdl-org/SDL_image.git -b release-3.2.4
+          cd SDL_image
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=$HOME/.local/sdl3-image \
+            -DSDL3_DIR=$HOME/.local/sdl3/lib/cmake/SDL3
+          cmake --build build -j$(nproc)
+          cmake --install build
+
+      - name: Configure library paths
+        run: |
+          echo "$HOME/.local/sdl3/lib" | sudo tee /etc/ld.so.conf.d/sdl3.conf
+          echo "$HOME/.local/sdl3-image/lib" | sudo tee /etc/ld.so.conf.d/sdl3-image.conf
+          sudo ldconfig
+          echo "PKG_CONFIG_PATH=$HOME/.local/sdl3/lib/pkgconfig:$HOME/.local/sdl3-image/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          make \
+            INC="`pkg-config --cflags sdl3 sdl3-image`" \
+            LINKPATH="`pkg-config --libs sdl3 sdl3-image` -L/usr/lib" \
+            LIBS="-lSDL2_mixer"
+
+      - name: Create archive
+        run: |
+          mkdir -p dist/gigalomania
+          cp gigalomania dist/gigalomania/
+          cp -r gfx islands music sound readme.html dist/gigalomania/
+          # Bundle SDL3 shared libs so the artifact is self-contained
+          cp $HOME/.local/sdl3/lib/libSDL3.so.0 dist/gigalomania/
+          cp $HOME/.local/sdl3-image/lib/libSDL3_image.so.0 dist/gigalomania/
+          # Run script that sets LD_LIBRARY_PATH to the bundle dir
+          cat > dist/gigalomania/run.sh << 'EOF'
+          #!/bin/bash
+          DIR="$(cd "$(dirname "$0")" && pwd)"
+          export LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH"
+          exec "$DIR/gigalomania" "$@"
+          EOF
+          chmod +x dist/gigalomania/run.sh
+          cd dist && tar czf ../gigalomania-linux.tar.gz gigalomania/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gigalomania-linux
+          path: gigalomania-linux.tar.gz

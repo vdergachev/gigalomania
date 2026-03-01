@@ -7,16 +7,10 @@
 
 using std::string;
 
-#if defined(__ANDROID__)
-#include <SDL_image.h>
-#elif defined(__linux)
-#include <SDL2/SDL_image.h>
-#elif defined(__MORPHOS__)
+#if defined(__MORPHOS__)
 #include <SDL/SDL_image.h>
-#elif defined(_WIN32)
-#include <SDL2/SDL_image.h>
 #else
-#include <SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 #endif
 
 const int font_index_period_c = 26;
@@ -32,12 +26,8 @@ namespace Gigalomania {
 		unsigned char *data;
 		bool need_to_free_data;
 		SDL_Surface *surface;
-#if SDL_MAJOR_VERSION == 1
-		static SDL_Surface *dest_surf;
-#else
 		SDL_Texture *texture;
 		static SDL_Renderer *sdlRenderer;
-#endif
 		float scale_x, scale_y;
 		int offset_x, offset_y;
 
@@ -80,9 +70,6 @@ namespace Gigalomania {
 		void reshadeRGB(int from, bool to_r, bool to_g, bool to_b);
 		void brighten(float sr, float sg, float sb);
 		void fadeAlpha(bool x_dir, bool fwd);
-#if SDL_MAJOR_VERSION == 1
-		void fillRect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b);
-#endif
 		//void flipX();
 		Image *copy(int x,int y,int w,int h) const;
 		Image *copy() const {
@@ -127,10 +114,6 @@ namespace Gigalomania {
 		static void writeMixedCase(int x,int y,Image *large[n_font_chars_c],Image *little[n_font_chars_c],Image *numbers[10],const char *text,Justify justify);
 
 		// SDL specific
-#if SDL_MAJOR_VERSION == 1
-		static void setGraphicsOutput(SDL_Surface *dest_surf);
-#else
 		static void setGraphicsOutput(SDL_Renderer *sdlRenderer);
-#endif
 	};
 }

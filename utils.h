@@ -10,7 +10,14 @@
 extern bool logging_enabled;
 
 #ifndef LOG
+#ifdef USE_SDL3_LOGGING
+// Legacy LOG() redirects to DEBUG (diagnostic traces, hidden by default at INFO level)
+// Use LOG_DEBUG/INFO/WARN/ERROR from logging.h for new code
+#define LOG(fmt, ...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, fmt, ##__VA_ARGS__)
+#else
+// Legacy logging system
 #define LOG if( !logging_enabled ) ((void)0); else log
+#endif
 #endif
 
 void initFolderPaths();

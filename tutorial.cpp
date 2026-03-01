@@ -491,7 +491,7 @@ void Tutorial2::initCards() {
 				// enable the current square too, as we need to allow getting back if the user clicks another square without an assembled army!
 				if( game_g->getMap()->isSectorAt(x, y) ) {
 					char buffer[256] = "";
-					sprintf(buffer, "map_%d_%d", x, y);
+					snprintf(buffer, sizeof(buffer), "map_%d_%d", x, y);
 					gui_handler->addException(buffer);
 				}
 			}

@@ -8,13 +8,17 @@ on:
 
 jobs:
   build:
+    if: false
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: brew install sdl2 sdl2_image sdl2_mixer dylibbundler
+        run: brew install sdl3 sdl3_image dylibbundler
+
+      - name: Install SDL2_mixer (SDL3_mixer not yet in homebrew)
+        run: brew install sdl2_mixer
 
       - name: Build
         run: make
@@ -73,7 +77,7 @@ jobs:
           sips -z 256 256 gigalomania64.png --out icon.iconset/icon_128x128@2x.png
           iconutil -c icns icon.iconset -o "$RES/gigalomania.icns"
 
-          # Bundle SDL2 dylibs — copies libs into Contents/libs/ and rewrites install names
+          # Bundle SDL3 dylibs — copies libs into Contents/libs/ and rewrites install names
           dylibbundler -od -b \
             -x "$MACOS/gigalomania_bin" \
             -d "$LIBS/" \

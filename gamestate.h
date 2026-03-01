@@ -3,8 +3,11 @@
 /** Classes to manage the various gamestates.
 */
 
+#include <memory>
+
 #include "TinyXML/tinyxml.h"
 
+using std::unique_ptr;
 using std::vector;
 using std::string;
 using std::stringstream;
@@ -30,11 +33,23 @@ class ChooseMenPanel;
 class GamePanel;
 class Sector;
 class Army;
-class Soldier;
 class Building;
 class Map;
 class Design;
 class Invention;
+
+// Visual representation of a single soldier on the battlefield.
+// Stored by value in vector<Soldier> -- no heap allocation per soldier.
+class Soldier {
+    static int sort_soldier_pair(const void *v1, const void *v2);
+public:
+    int player;
+    int epoch;
+    int xpos, ypos;
+    AmmoDirection dir;
+    Soldier(int player, int epoch, int xpos, int ypos);
+    static void sortSoldiers(Soldier **soldiers, int n_soldiers);
+};
 
 const int offset_map_x_c = 8;
 const int offset_map_y_c = 16;
@@ -134,7 +149,7 @@ public:
 };
 
 class FadeEffect : public TimedEffect {
-	Gigalomania::Image *image; // used by SDL 1.2 (note, we still declare for SDL 2, to avoid having to include the SDL directories to find out the SDL_MAJOR_VERSION value)
+	Gigalomania::Image *image; // unused in SDL 3 (was needed for SDL 1.2 fade effect; declared here to avoid SDL header dependency)
 	bool white;
 	bool out;
 public:
@@ -208,6 +223,8 @@ protected:
 public:
 	GameState(int client_player);
 	virtual ~GameState();
+	GameState(const GameState&) = delete;
+	GameState& operator=(const GameState&) = delete;
 
 	PanelPage *getScreenPage() {
 		return screen_page;
@@ -345,10 +362,11 @@ class PlayingGameState : public GameState {
 	const Army *selected_army;
 	//int n_soldiers[n_players_c];
 	//Vector *soldiers[n_players_c];
-	vector<Soldier *> soldiers[n_players_c];
-	vector<TimedEffect *> effects;
+	vector<Soldier> soldiers[n_players_c];
+	vector<Soldier *> soldier_sort_buf; // reused each frame to avoid per-frame heap alloc
+	vector<unique_ptr<TimedEffect>> effects;
 	//Vector *ammo_effects;
-	vector<TimedEffect *> ammo_effects;
+	vector<unique_ptr<TimedEffect>> ammo_effects;
 	TextEffect *text_effect;
 	/*SmokeParticleSystem *smokeParticleSystem;
 	SmokeParticleSystem *smokeParticleSystem_busy;*/

@@ -285,6 +285,8 @@ private:
 public:
 	Building(PlayingGameState *gamestate, Sector *sector, Type type);
 	~Building();
+	Building(const Building&) = delete;
+	Building& operator=(const Building&) = delete;
 
 	Type getType() const {
 		return this->type;
@@ -416,6 +418,8 @@ public:
 
 	Sector(PlayingGameState *gamestate, int epoch, int xpos, int ypos, MapColour map_colour);
 	~Sector();
+	Sector(const Sector&) = delete;
+	Sector& operator=(const Sector&) = delete;
 
 	void createTower(int player,int population);
 	void destroyTower(bool nuked, int client_player);
@@ -452,7 +456,7 @@ public:
 	void update(int client_player);
 
 	int getNFeatures() const {
-		return this->features.size();
+		return (int)this->features.size();
 	}
 	const Feature *getFeature(int i) const {
 		return this->features.at(i);

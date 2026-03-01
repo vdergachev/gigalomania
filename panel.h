@@ -4,6 +4,8 @@
 *   anything specific to a particular game in these classes.
 */
 
+#include <functional>
+
 #include "resources.h"
 
 namespace Gigalomania {
@@ -19,6 +21,7 @@ namespace Gigalomania {
 	class PanelPage : public TrackedObject {
 	private:
 		void init_panelpage();
+		std::function<void(bool left, bool right)> on_click;
 	protected:
 		string id;
 		bool visible;
@@ -76,7 +79,7 @@ namespace Gigalomania {
 			return this->children->at(index);
 		}
 		virtual int nChildren() const {
-			return children->size();
+			return (int)children->size();
 		}
 		/*void setModalChild(PanelPage *panel) {
 			// must already be a child!
@@ -118,6 +121,9 @@ namespace Gigalomania {
 		//virtual const char *getInfoBMB() const;
 		void setSurviveOwner(bool survive_owner) {
 			this->survive_owner = survive_owner;
+		}
+		void setOnClick(std::function<void(bool left, bool right)> fn) {
+			this->on_click = fn;
 		}
 
 		// gets position relative to parent
@@ -197,6 +203,8 @@ namespace Gigalomania {
 	public:
 		CycleButton(int x,int y,const char *texts[],int n_texts,Image *font[]);
 		virtual ~CycleButton();
+		CycleButton(const CycleButton&) = delete;
+		CycleButton& operator=(const CycleButton&) = delete;
 
 		virtual const char *getClass() const { return "CLASS_CYCLEBUTTON"; }
 		virtual void draw();

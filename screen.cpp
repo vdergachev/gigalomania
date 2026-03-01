@@ -18,25 +18,17 @@
 //---------------------------------------------------------------------------
 
 Gigalomania::Screen::Screen() : m_pos_x(0), m_pos_y(0), m_down_left(false), m_down_middle(false), m_down_right(false) {
-#if SDL_MAJOR_VERSION == 1
-	surface = NULL;
-#else
 	sdlWindow = NULL;
 	sdlRenderer = NULL;
 	width = 0;
 	height = 0;
 	windowed_w = 0;
 	windowed_h = 0;
-#endif
 }
 
 Gigalomania::Screen::~Screen() {
-#if SDL_MAJOR_VERSION == 1
-	Image::setGraphicsOutput(NULL);
-#else
 	Image::setGraphicsOutput(NULL);
 	// must delete renderer before window (as renderer depends on window), otherwise get assertion failure on Android
-	// (see example code at https://wiki.libsdl.org/SDL_CreateRenderer )
 	// also ensure that all Images (and hence SDL_Textures) have been destroyed
 	if( sdlRenderer != NULL ) {
 		SDL_DestroyRenderer(sdlRenderer);
@@ -46,33 +38,16 @@ Gigalomania::Screen::~Screen() {
 		SDL_DestroyWindow(sdlWindow);
 		sdlWindow = NULL;
 	}
-#endif
 }
 
 bool Gigalomania::Screen::canOpenFullscreen(int width, int height) {
-#if SDL_MAJOR_VERSION == 1
-	if( SDL_VideoModeOK(width, height, 32, SDL_HWSURFACE|SDL_HWPALETTE|SDL_FULLSCREEN) != 0 )
-		return true;
-	return false;
-#else
-	return true; // assume always true?
-#endif
+	return true;
 }
 
 bool Gigalomania::Screen::open(int screen_width, int screen_height, bool fullscreen) {
 	LOG("Screen::open(%d, %d, %s)\n", screen_width, screen_height, fullscreen?"fullscreen":"windowed");
-#if SDL_MAJOR_VERSION == 1
-	if( fullscreen )
-		surface = SDL_SetVideoMode(screen_width, screen_height, 32, SDL_HWSURFACE|SDL_HWPALETTE|SDL_FULLSCREEN);
-	else
-		surface = SDL_SetVideoMode(screen_width, screen_height, 32, SDL_HWSURFACE|SDL_HWPALETTE);
-	if( surface == NULL ) {
-		LOG("failed to open screen at this resolution\n");
-		return false;
-	}
-#else
-	if( SDL_CreateWindowAndRenderer(screen_width, screen_height, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE, &sdlWindow, &sdlRenderer) != 0 ) {
-		LOG("failed to open screen at this resolution\n");
+	if( !SDL_CreateWindowAndRenderer("Gigalomania", screen_width, screen_height, fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE, &sdlWindow, &sdlRenderer) ) {
+		LOG("failed to open screen at this resolution: %s\n", SDL_GetError());
 		return false;
 	}
 	this->width = screen_width;
@@ -83,11 +58,16 @@ bool Gigalomania::Screen::open(int screen_width, int screen_height, bool fullscr
 		LOG("render draw blend mode: %d\n", blendMode);
 	}
 	SDL_SetRenderDrawBlendMode(sdlRenderer, SDL_BLENDMODE_BLEND); // needed for Screen::fillRectWithAlpha, as blending is off by default for drawing functions
-#endif
+	// Try adaptive vsync first, fall back to regular vsync
+	if( !SDL_SetRenderVSync(sdlRenderer, SDL_RENDERER_VSYNC_ADAPTIVE) ) {
+		if( !SDL_SetRenderVSync(sdlRenderer, 1) ) {
+			LOG("vsync not available: %s\n", SDL_GetError());
+		}
+	}
 	LOG("screen opened ok\n");
 
 	if( game_g->isMobileUI() ) {
-		SDL_ShowCursor(false); // comment out to test with system cursor, for testing purposes when ran on non-touchscreen devices
+		SDL_HideCursor(); // comment out to test with system cursor, for testing purposes when ran on non-touchscreen devices
 	}
 	else {
 		//SDL_ShowCursor(false);
@@ -99,31 +79,19 @@ bool Gigalomania::Screen::open(int screen_width, int screen_height, bool fullscr
 		SDL_Cursor *cursor = SDL_CreateCursor(data, mask, 8, 1, 0, 0);
 		SDL_Cursor *old_cursor = SDL_GetCursor();
 		SDL_SetCursor(cursor);
-		SDL_FreeCursor(old_cursor);
+		SDL_DestroyCursor(old_cursor);
 	}
 
-#if SDL_MAJOR_VERSION == 1
-	Image::setGraphicsOutput(surface);
-#else
 	Image::setGraphicsOutput(sdlRenderer);
-#endif
 
 	return true;
 }
 
-#if SDL_MAJOR_VERSION == 1
-#else
 void Gigalomania::Screen::setLogicalSize(int width, int height, bool smooth) {
 	this->width = width;
 	this->height = height;
 	LOG("width, height: %d, %d\n", width, height);
-	if( smooth ) {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
-	}
-	else {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-	}
-	SDL_RenderSetLogicalSize(sdlRenderer, width, height);
+	SDL_SetRenderLogicalPresentation(sdlRenderer, width, height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 }
 
 void Gigalomania::Screen::setWindowedSize(int w, int h) {
@@ -133,116 +101,57 @@ void Gigalomania::Screen::setWindowedSize(int w, int h) {
 
 void Gigalomania::Screen::setFullscreen(bool fullscreen) {
 	LOG("Screen::setFullscreen(%s)\n", fullscreen ? "fullscreen" : "windowed");
-	SDL_SetWindowFullscreen(sdlWindow, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	SDL_SetWindowFullscreen(sdlWindow, fullscreen);
 	if( !fullscreen && windowed_w > 0 && windowed_h > 0 ) {
 		SDL_SetWindowSize(sdlWindow, windowed_w, windowed_h);
 	}
 }
-#endif
 
 void Gigalomania::Screen::setTitle(const char *title) {
-#if SDL_MAJOR_VERSION == 1
-	SDL_WM_SetCaption(title, "");
-#else
 	SDL_SetWindowTitle(sdlWindow, title);
-#endif
 }
 
 void Gigalomania::Screen::clear() {
-#if SDL_MAJOR_VERSION == 1
-	SDL_Rect rect;
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = getWidth();
-	rect.h = getHeight();
-	SDL_FillRect(surface, &rect, 0);
-#else
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(sdlRenderer);
-#endif
 }
 
 void Gigalomania::Screen::refresh() {
-#if SDL_MAJOR_VERSION == 1
-	SDL_Flip(surface);
-#else
 	SDL_RenderPresent(sdlRenderer);
-#endif
 }
 
 int Gigalomania::Screen::getWidth() const {
-#if SDL_MAJOR_VERSION == 1
-	return surface->w;
-#else
-	/*int w = 0, h = 0;
-	SDL_RenderGetLogicalSize(sdlRenderer, &w, &h);
-	return w;*/
-	//LOG("width = %d\n", width);
 	return this->width;
-#endif
 }
 
 int Gigalomania::Screen::getHeight() const {
-#if SDL_MAJOR_VERSION == 1
-	return surface->h;
-#else
-	/*int w = 0, h = 0;
-	SDL_RenderGetLogicalSize(sdlRenderer, &w, &h);
-	return h;*/
-	//LOG("height = %d\n", height);
 	return this->height;
-#endif
 }
 
 void Gigalomania::Screen::fillRect(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b) {
-	SDL_Rect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-#if SDL_MAJOR_VERSION == 1
-	Uint32 col = SDL_MapRGB(surface->format, r, g, b);
-	SDL_FillRect(surface, &rect, col);
-#else
+	SDL_FRect rect;
+	rect.x = x; rect.y = y; rect.w = w; rect.h = h;
 	SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
 	SDL_RenderFillRect(sdlRenderer, &rect);
-#endif
 }
 
-#if SDL_MAJOR_VERSION == 1
-// not supported with SDL 1.2 (as SDL_FillRect can't do blending)!
-#else
 void Gigalomania::Screen::fillRectWithAlpha(short x, short y, short w, short h, unsigned char r, unsigned char g, unsigned char b, unsigned char alpha) {
-	SDL_Rect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	//LOG("fill rect %d %d %d %d\n", r, g, b, alpha);
+	SDL_FRect rect;
+	rect.x = x; rect.y = y; rect.w = w; rect.h = h;
 	SDL_SetRenderDrawColor(sdlRenderer, r, g, b, alpha);
 	SDL_RenderFillRect(sdlRenderer, &rect);
 }
-#endif
 
-#if SDL_MAJOR_VERSION == 1
-// not supported with SDL 1.2
-#else
-void Gigalomania::Screen::drawLine(short x1, short y1, short x2, short y2, unsigned char r, unsigned char g, unsigned char b) {
+void Gigalomania::Screen::drawLine(short x0, short y0, short x1, short y1, unsigned char r, unsigned char g, unsigned char b) {
 	SDL_SetRenderDrawColor(sdlRenderer, r, g, b, 255);
-	SDL_RenderDrawLine(sdlRenderer, x1, y1, x2, y2);
+	SDL_RenderLine(sdlRenderer, (float)x0, (float)y0, (float)x1, (float)y1);
 }
-#endif
 
-#if SDL_MAJOR_VERSION == 1
-// not supported with SDL 1.2
-#else
 void Gigalomania::Screen::convertWindowToLogical(int *m_x, int *m_y) const {
 	SDL_Rect rect;
-	SDL_RenderGetViewport(sdlRenderer, &rect);
+	SDL_GetRenderViewport(sdlRenderer, &rect);
 	float scale_x = 0.0f, scale_y = 0.0f;
-	SDL_RenderGetScale(sdlRenderer, &scale_x, &scale_y);
-	//LOG("viewport: %d x %d : %d, %d\n", rect.x, rect.y, rect.w, rect.h);
-	//LOG("render scale: %f x %f\n", scale_x, scale_y);
+	SDL_GetRenderScale(sdlRenderer, &scale_x, &scale_y);
 	*m_x = (int)(*m_x / scale_x);
 	*m_y = (int)(*m_y / scale_y);
 	*m_x -= rect.x;
@@ -257,47 +166,18 @@ void Gigalomania::Screen::getWindowSize(int *window_width, int *window_height) c
    with those used for mouse events).
 */
 void Gigalomania::Screen::convertTouchCoords(int *m_x, int *m_y, float tx, float ty) const {
-	// in SDL 2.0.7, touch coordiates were changed to be normalised to the render viewport rather than
-	// the screen, see https://hg.libsdl.org/SDL/rev/d94abaa07d8e
-#if SDL_VERSION_ATLEAST(2, 0, 7)
 	*m_x = (int)(tx*this->width);
 	*m_y = (int)(ty*this->height);
-#else
-	int window_width = 0, window_height = 0;
-	game_g->getScreen()->getWindowSize(&window_width, &window_height);
-	*m_x = (int)(tx*window_width);
-	*m_y = (int)(ty*window_height);
-	//LOG("    %d, %d\n", m_x, m_y);
-	game_g->getScreen()->convertWindowToLogical(m_x, m_y);
-#endif
 }
-#endif
 
 
 void Gigalomania::Screen::getMouseCoords(int *m_x, int *m_y) const {
-	// SDL_GetMouseState doesn't play well with touch events
-	/*SDL_GetMouseState(m_x, m_y);
-	// need to convert from window space to logical space
-#if SDL_MAJOR_VERSION == 1
-#else
-	this->convertWindowToLogical(m_x, m_y);
-#endif*/
 	*m_x = this->m_pos_x;
 	*m_y = this->m_pos_y;
 	//LOG("Screen::getMouseCoords: %d, %d\n", *m_x, *m_y);
 }
 
 bool Gigalomania::Screen::getMouseState(int *m_x, int *m_y, bool *m_left, bool *m_middle, bool *m_right) const {
-	// SDL_GetMouseState doesn't play well with touch events
-	/*int m_b = SDL_GetMouseState(m_x, m_y);
-	*m_left = ( m_b & SDL_BUTTON(1) ) != 0;
-	*m_middle = ( m_b & SDL_BUTTON(2) ) != 0;
-	*m_right = ( m_b & SDL_BUTTON(3) ) != 0;
-	// need to convert from window space to logical space
-#if SDL_MAJOR_VERSION == 1
-#else
-	this->convertWindowToLogical(m_x, m_y);
-#endif*/
 	*m_x = this->m_pos_x;
 	*m_y = this->m_pos_y;
 	*m_left = this->m_down_left;
@@ -327,7 +207,7 @@ bool Application::init() {
 #else
 	setenv("SDL_VIDEO_CENTERED", "0,0", 1);
 #endif
-	if( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) == -1 ) {
+	if( !SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) ) {
 		LOG("SDL_Init failed\n");
 		return false;
 	}
@@ -335,25 +215,29 @@ bool Application::init() {
 }
 
 unsigned int Application::getTicks() const {
-	return SDL_GetTicks();
+	return (unsigned int)SDL_GetTicks();
 }
 
 void Application::delay(unsigned int time) {
 	SDL_Delay(time);
 }
 
-const int TICK_INTERVAL = 16; // 62.5 fps max
+const int TICK_INTERVAL      = 16; // ~60 fps cap for gameplay (no-op when vsync active)
+const int TICK_INTERVAL_MENU = 33; // ~30 fps cap for menus - saves CPU/battery
 
 void Application::wait() {
+	// Use tighter cap during gameplay, relaxed cap in menus
+	int tick_interval = (game_g->getGameStateID() == GAMESTATEID_PLAYING)
+		? TICK_INTERVAL : TICK_INTERVAL_MENU;
 	unsigned int now = game_g->getApplication()->getTicks();
 	// use unsigned int and compare by subtraction to avoid overflow problems - see http://blogs.msdn.com/b/oldnewthing/archive/2005/05/31/423407.aspx, http://www.gammon.com.au/millis
 	unsigned int elapsed = now - last_time;
 	unsigned int delay = 0;
-	if( elapsed >= TICK_INTERVAL ) {
-		// fine, we've already passed TICK_INTERVAL
+	if( elapsed >= (unsigned int)tick_interval ) {
+		// fine, we've already passed tick_interval
 	}
 	else {
-		delay = TICK_INTERVAL - elapsed;
+		delay = tick_interval - elapsed;
 		game_g->getApplication()->delay(delay);
 	}
 	last_time = now + delay;
@@ -405,50 +289,32 @@ void Application::runMainLoop() {
 		// user input
 		while( SDL_PollEvent(&event) == 1 ) {
 			switch (event.type) {
-			case SDL_QUIT:
-				// SDL_QUIT may mean a message from the OS (e.g., OS shutting down) - so we quit immediately, saving the current state
-				// It will also be sent if the user clicks the window close button, but reasonable to also interpret this as "quit immediately"
-				// Also important for Android to quit immediately, as SDL_QUIT is sent when the screen is locked - if we don't quit immediately,
-				// the app hangs when the screen is unlocked.
+			case SDL_EVENT_QUIT:
+				// SDL_EVENT_QUIT may mean a message from the OS (e.g., OS shutting down) - so we quit immediately, saving the current state
 				game_g->requestQuit(true);
 				break;
-			case SDL_KEYDOWN:
+			case SDL_EVENT_KEY_DOWN:
 				{
-#if SDL_MAJOR_VERSION == 1
-					SDL_keysym key = event.key.keysym;
-#else
-					SDL_Keysym key = event.key.keysym;
-#endif
-					if( key.sym == SDLK_ESCAPE || key.sym == SDLK_q
-#if SDL_MAJOR_VERSION == 1
-#else
-						|| key.sym == SDLK_AC_BACK // SDLK_AC_BACK required for Android
-#endif
+					SDL_Keycode key = event.key.key;
+					if( key == SDLK_ESCAPE || key == SDLK_Q
+						|| key == SDLK_AC_BACK // SDLK_AC_BACK required for Android
 						) {
 						game_g->requestQuit(false);
 					}
-					else if( key.sym == SDLK_p ) {
+					else if( key == SDLK_P ) {
 						game_g->togglePause();
 					}
-					else if( key.sym == SDLK_RETURN ) {
+					else if( key == SDLK_RETURN ) {
 						game_g->keypressReturn();
 					}
 					break;
 				}
-			case SDL_MOUSEBUTTONDOWN:
+			case SDL_EVENT_MOUSE_BUTTON_DOWN:
 				{
-#if SDL_MAJOR_VERSION == 1
-#else
-					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
-						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
-						break;
-					}
-#endif
 					//LOG("received mouse down\n");
-					// if this code is changed, consider whether SDL_FINGERDOWN also needs updating
-					int m_x = event.button.x;
-					int m_y = event.button.y;
-					//LOG("    %d, %d\n", m_x, m_y);
+					// if this code is changed, consider whether SDL_EVENT_FINGER_DOWN also needs updating
+					int m_x = (int)event.button.x;
+					int m_y = (int)event.button.y;
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					bool m_left = false, m_middle = false, m_right = false;
 					Uint8 button = event.button.button;
@@ -470,25 +336,15 @@ void Application::runMainLoop() {
 						game_g->togglePause();
 					}
 					else if( m_left || m_middle || m_right ) {
-						/*int m_x = 0, m_y = 0;
-						game_g->getScreen()->getMouseCoords(&m_x, &m_y);*/
-						//LOG("received mouse click: %d, %d\n", m_x, m_y);
 						game_g->mouseClick(m_x, m_y, m_left, m_middle, m_right, true);
 					}
 
 					break;
 				}
-			case SDL_MOUSEBUTTONUP:
+			case SDL_EVENT_MOUSE_BUTTON_UP:
 				{
-#if SDL_MAJOR_VERSION == 1
-#else
-					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
-						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
-						break;
-					}
-#endif
 					//LOG("received mouse up\n");
-					// if this code is changed, consider whether SDL_FINGERUP also needs updating
+					// if this code is changed, consider whether SDL_EVENT_FINGER_UP also needs updating
 					Uint8 button = event.button.button;
 					if( button == SDL_BUTTON_LEFT ) {
 						game_g->getScreen()->setMouseLeft(false);
@@ -501,31 +357,21 @@ void Application::runMainLoop() {
 					}
 					break;
 				}
-			case SDL_MOUSEMOTION:
+			case SDL_EVENT_MOUSE_MOTION:
 				{
-#if SDL_MAJOR_VERSION == 1
-#else
-					if( event.motion.which == SDL_TOUCH_MOUSEID ) {
-						// touchscreens handled below; n.b., for Windows requires SDL 2.0.4 or later otherwise "which" isn't set to SDL_TOUCH_MOUSEID
-						break;
-					}
-#endif
-					// if this code is changed, consider whether SDL_FINGERMOTION also needs updating
-					int m_x = event.motion.x;
-					int m_y = event.motion.y;
+					// if this code is changed, consider whether SDL_EVENT_FINGER_MOTION also needs updating
+					int m_x = (int)event.motion.x;
+					int m_y = (int)event.motion.y;
 					this->blank_mouse = false;
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					break;
 				}
-#if SDL_MAJOR_VERSION == 1
-#else
 			// support for touchscreens
-			case SDL_FINGERDOWN:
+			case SDL_EVENT_FINGER_DOWN:
 				{
 					//LOG("received fingerdown: %f , %f\n", event.tfinger.x, event.tfinger.y);
 					int m_x = 0, m_y = 0;
 					game_g->getScreen()->convertTouchCoords(&m_x, &m_y, event.tfinger.x, event.tfinger.y);
-					//LOG("    logical %d, %d\n", m_x, m_y);
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					game_g->getScreen()->setMouseLeft(true);
 					this->blank_mouse = true;
@@ -539,52 +385,30 @@ void Application::runMainLoop() {
 					}
 					break;
 				}
-			case SDL_FINGERUP:
+			case SDL_EVENT_FINGER_UP:
 				{
 					//LOG("received fingerup\n");
 					game_g->getScreen()->setMouseLeft(false);
 					this->blank_mouse = true;
 					break;
 				}
-			case SDL_FINGERMOTION:
+			case SDL_EVENT_FINGER_MOTION:
 				{
 					//LOG("received fingermotion: %f , %f\n", event.tfinger.x, event.tfinger.y);
 					int m_x = 0, m_y = 0;
 					game_g->getScreen()->convertTouchCoords(&m_x, &m_y, event.tfinger.x, event.tfinger.y);
-					//LOG("    logical %d, %d\n", m_x, m_y);
 					game_g->getScreen()->setMousePos(m_x, m_y);
 					this->blank_mouse = true;
 					break;
 				}
-#endif
-#if SDL_MAJOR_VERSION == 1
-			case SDL_ACTIVEEVENT:
-#ifndef AROS
-				// disabled for AROS, as we receive inactive events when the mouse goes outside the window!
-				if( (event.active.state & SDL_APPINPUTFOCUS) != 0 || (event.active.state & SDL_APPACTIVE) != 0 ) {
-					if( event.active.gain == 1 ) {
-						// activate
-						game_g->activate();
-					}
-					else if( event.active.gain == 0 ) {
-						// inactive
-						game_g->deactivate();
-					}
-				}
-#endif
+			case SDL_EVENT_WINDOW_SHOWN:
+			case SDL_EVENT_WINDOW_FOCUS_GAINED:
+				game_g->activate();
 				break;
-#else
-			case SDL_WINDOWEVENT:
-				if( event.window.event == SDL_WINDOWEVENT_SHOWN || event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED ) {
-					// activate
-					game_g->activate();
-				}
-				else if( event.window.event == SDL_WINDOWEVENT_HIDDEN || event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ) {
-					// inactive
-					game_g->deactivate();
-				}
+			case SDL_EVENT_WINDOW_HIDDEN:
+			case SDL_EVENT_WINDOW_FOCUS_LOST:
+				game_g->deactivate();
 				break;
-#endif
 			}
 		}
 		SDL_PumpEvents();

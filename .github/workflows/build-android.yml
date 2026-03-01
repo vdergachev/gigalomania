@@ -2,13 +2,10 @@ name: Build Android
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ MMM-migrate-to-sdl3 ]
 
 jobs:
   build:
-    if: false  # temporarily disabled
     runs-on: ubuntu-latest
 
     steps:
@@ -19,21 +16,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Download SDL2 sources
+      - name: Download SDL2 + SDL3 sources
         run: |
           JNI=android/Gigalomania/app/src/main/jni
 
+          # SDL2 in jni/SDL/ -- SDL2_mixer's Android.mk expects ../SDL = SDL2
           curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-2.28.5.tar.gz | tar xz
           mv SDL2-2.28.5 $JNI/SDL
 
-          curl -L https://github.com/libsdl-org/SDL_image/releases/download/release-2.6.3/SDL2_image-2.6.3.tar.gz | tar xz
-          mv SDL2_image-2.6.3 $JNI/SDL_image
+          # SDL3 in jni/SDL3/ -- the game uses SDL3 API
+          git clone --depth=1 https://github.com/libsdl-org/SDL.git -b release-3.2.14 sdl3_src
+          mv sdl3_src $JNI/SDL3
 
+          git clone --depth=1 https://github.com/libsdl-org/SDL_image.git -b release-3.2.4 sdl3_image_src
+          mv sdl3_image_src $JNI/SDL_image
+
+          # Keep SDL2_mixer until SDL3_mixer is stable and available
           curl -L https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.6.3/SDL2_mixer-2.6.3.tar.gz | tar xz
           mv SDL2_mixer-2.6.3 $JNI/SDL_mixer
 
-          # Sync SDL Java files to match downloaded C source version
-          cp $JNI/SDL/android-project/app/src/main/java/org/libsdl/app/*.java \
+          # SDL3 Java files for Android activity
+          cp $JNI/SDL3/android-project/app/src/main/java/org/libsdl/app/*.java \
              android/Gigalomania/app/src/main/java/org/libsdl/app/
 
       - name: Copy game sources into jni/src

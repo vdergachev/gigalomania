@@ -6,19 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **macOS:**
 ```sh
-brew install sdl2 sdl2_image sdl2_mixer
+brew install sdl3 sdl3_image sdl2_mixer
 make
 ./gigalomania
 ```
 
-**Clean:**
-```sh
-make clean
-```
+Note: SDL3_mixer is not yet in homebrew; SDL2_mixer is used as a temporary shim.
+
+**Linux (Ubuntu 24.04):** SDL3 and SDL3_image are not in apt — build from source.
+See `.claude/docs/` for detailed instructions (only read on explicit request).
 
 **Windows:** Open `gigalomania.sln` in Visual Studio 2022, build Release/x64. Dependencies via vcpkg:
 ```bat
-vcpkg install sdl2 "sdl2-image[libjpeg-turbo]" sdl2-mixer --triplet x64-windows
+vcpkg install sdl3 sdl3-image[png,jpeg] sdl2-mixer --triplet x64-windows
+```
+
+Note: vcpkg does not ship `SDL3main.lib`. The project uses `SDL_MAIN_HANDLED` + custom `WinMain` in `main.cpp` to handle this.
+
+**Clean:**
+```sh
+make clean
 ```
 
 There are no automated tests.
@@ -29,23 +36,74 @@ Entry point: `main.cpp` → `playGame()` in `game.cpp`.
 
 **Game state machine** (`gamestate.cpp`): States cycle through menu screens (choose game type → difficulty → player placement) into the play loop and end screens. Each state is a class with `run()` / `draw()` methods.
 
-**Core simulation** (`sector.cpp`, ~6700 lines): The map is a 5×5 grid of sectors. Each sector owns population, buildings (tower/mine/factory/lab), armies, and particles. Combat, production, and AI all execute per-sector per game tick.
+**Core simulation** (`sector.cpp`, ~6400 lines + `sector_combat.cpp`, `sector_ai.cpp`): The map is a 5×5 grid of sectors. Each sector owns population, buildings (tower/mine/factory/lab), armies, and particles. Combat logic lives in `sector_combat.cpp` (`doCombat`), AI decision logic in `sector_ai.cpp` (`doPlayer`); both are compiled as separate translation units that include `sector.h`.
 
-**Player & AI** (`player.cpp`): Human and AI players share the same `Player` class. AI decision logic lives in `sector.cpp` (AI chooses build targets and attacks based on epoch).
+**Player & AI** (`player.cpp`): Human and AI players share the same `Player` class.
 
-**Rendering pipeline**: `screen.cpp` manages the SDL2 window and renderer; `image.cpp` wraps SDL2_image for sprite loading/blitting; `panel.cpp` / `gui.cpp` implement the UI widget layer (buttons, panels, selection screens).
+**Rendering pipeline**: `screen.cpp` manages the SDL3 window and renderer; `image.cpp` wraps SDL3_image for sprite loading/blitting; `panel.cpp` / `gui.cpp` implement the UI widget layer (buttons, panels, selection screens).
+
+**Input dispatch** (`panel.cpp`): `GamePanel::input()` delegates to per-page handler methods (`inputSectorControlPage`, etc.). `PanelPage::setOnClick(std::function<void(bool,bool)>)` fires callbacks on mouseOver and click events.
 
 **Asset paths are hardcoded as relative** (`"gfx/"`, `"sound/"`, `"islands/"`). The binary must be run from the directory containing these folders, or — in the macOS `.app` bundle — the launcher script sets CWD to `Contents/Resources/` before exec-ing the binary.
 
 **Save/load** uses TinyXML (embedded in `TinyXML/`) to write XML game state files (`autosave.sav`, `prefs`).
 
+## SDL3 migration notes
+
+The codebase was migrated from SDL2 to SDL3 on the `MMM-migrate-to-sdl3` branch:
+
+- All SDL2 API calls updated to SDL3 equivalents
+- `SDL_CreateWindowAndRenderer` returns `bool` in SDL3 — check with `!func()`, not `!= 0`
+- SDL3_image: include path is `<SDL3_image/SDL_image.h>`
+- SDL2_mixer kept as-is (SDL3_mixer not yet widely available); sound.cpp wraps it behind the existing sound abstraction
+- Windows: `SDL_MAIN_HANDLED` defined in `stdafx.h`; custom `WinMain` calls `SDL_SetMainReady()` then `playGame()`
+- Platform-specific SDL includes are gated in `stdafx.h` — add new platforms there
+
 ## CI
 
-- `.github/workflows/build-macos.yml` — builds, creates `Gigalomania.app` bundle (launcher script + SDL2 dylibs via dylibbundler), uploads `gigalomania-macos.zip`
+- `.github/workflows/build-macos.yml` — builds, creates `Gigalomania.app` bundle (launcher script + SDL3 dylibs via dylibbundler), uploads `gigalomania-macos.zip`
 - `.github/workflows/build-windows.yml` — builds with MSBuild + vcpkg, uploads `gigalomania-windows.zip`
+- `.github/workflows/build-linux.yml` — builds on `ubuntu-latest` (amd64); SDL3 and SDL3_image built from source with caching; uploads `gigalomania-linux.tar.gz`
+- `.github/workflows/build-android.yml` — disabled (`if: false`); Android has not been migrated to SDL3 yet
+
+## Project docs
+
+Extended notes, research, and ideas live in `.claude/docs/`. These files may be outdated — read them only when explicitly asked.
+
+## Static analysis
+
+Run `make check` before every build to catch issues early:
+
+```sh
+brew install cppcheck   # macOS, one-time
+make check
+```
+
+Linux: `apt install cppcheck`. Windows: cppcheck.org installer or `winget install Cppcheck`.
+
+For runtime leak detection (AddressSanitizer + UBSan):
+
+```sh
+make debug
+ASAN_OPTIONS=detect_leaks=1 ./gigalomania
+```
+
+`make debug` implies `make clean` first — it forces a full rebuild with sanitizer flags.
+Full heap leak reports (LSAN) work best on Linux; on macOS leak detection is partial.
+
+## When making code changes
+
+After any code change, verify that build instructions for all supported platforms (macOS, Linux, Windows, Android) remain accurate and up to date. If a change affects build steps, dependencies, or version numbers, update the relevant sections in this file.
+
+Memory management conventions (mixed manual + modern):
+
+- **`Soldier`** (in `PlayingGameState::soldiers[]`): stored **by value** in `vector<Soldier>` — no `new`/`delete` per soldier. Use `emplace_back()` to add, `erase()` to remove. The sort buffer `soldier_sort_buf` holds raw `Soldier*` pointers into the vector during draw; never hold these pointers across vector modifications.
+
+- **`effects` / `ammo_effects`**: `vector<unique_ptr<TimedEffect>>` — ownership is automatic. Use `make_unique<X>(...)` to create, `erase()` to destroy (destructor called automatically). Do NOT call `delete` manually on elements.
+
+- **Everything else** (buildings, armies, sectors, UI panels, `fade`/`whitefade`, `text_effect`): raw `new`/`delete` as before. When adding a `new T(...)`, immediately verify the matching `delete` in the destructor or cleanup function. Common pitfall: adding to an array whose destructor loop was written before the new entry existed (e.g. `elements[]` in `Game`).
 
 ## Platform notes
 
 - **SDL includes** are platform-gated in `stdafx.h` — add new platform branches there, not in individual files.
-- SDL1 legacy code paths still exist behind `#ifdef` — the active codebase targets SDL2.
-- `gigalomania.pro` (Qt project) and `android/` directory exist but are not maintained in this fork.
+- `android/` directory exists; `Android.mk` is kept up to date with the source file list but the Android build is not actively maintained (still on SDL2).

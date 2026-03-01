@@ -13,6 +13,7 @@ using std::max;
 
 #include "sector.h"
 #include "game.h"
+#include "logging.h"
 #include "utils.h"
 #include "gamestate.h"
 #include "panel.h"
@@ -79,7 +80,7 @@ void SmokeParticleSystem::setBirthRate(float birth_rate) {
 void SmokeParticleSystem::update() {
 	// expire old particles
 	int time_now = game_g->getGameTime();
-	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
+	for(int i=(int)particles.size()-1;i>=0;i--) { // count backwards in case of deletion
 		if( time_now >= particles.at(i).getBirthTime() + life_exp ) {
 			// for performance, we reorder and reduce the length by 1 (as the order of the particles shouldn't matter)
 			particles[i] = particles[particles.size()-1];
@@ -90,7 +91,7 @@ void SmokeParticleSystem::update() {
 	int real_loop_time = game_g->getLoopTime();
 	//LOG("%d\n", real_loop_time);
 	// update particles
-	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
+	for(int i=(int)particles.size()-1;i>=0;i--) { // count backwards in case of deletion
 		//const float xspeed = 0.01f;
 		const float xspeed = 0.015f;
 		//const float yspeed = 0.05f;
@@ -466,7 +467,7 @@ Gigalomania::Image *Invention::getImage() const {
 void Invention::addDesign(Design *design) {
 	ASSERT( design->getInvention() == this );
 	ASSERT( design->getSaveId() == -1 );
-	design->setSaveId( designs.size() );
+	design->setSaveId( (int)designs.size() );
 	this->designs.push_back(design);
 }
 
@@ -1474,7 +1475,7 @@ Design *Sector::bestDesign(Invention::Type type,int epoch) const {
 }
 
 void Sector::trashDesign(Invention *invention) {
-	LOG("Sector::trashDesign(%d) [%d: %d, %d]\n", invention, player, xpos, ypos);
+	LOG("Sector::trashDesign(%p) [%d: %d, %d]\n", (void*)invention, player, xpos, ypos);
 	this->inventions_known[ invention->getType() ][ invention->getEpoch() ] = false;
 	for(size_t i=0;i<this->designs.size();i++) {
 		Design *design = this->designs.at(i);
@@ -1490,7 +1491,7 @@ void Sector::trashDesign(Invention *invention) {
 }
 
 void Sector::trashDesign(Design *design) {
-	LOG("Sector::trashDesign(%d) [%d: %d, %d]\n", design, player, xpos, ypos);
+	LOG("Sector::trashDesign(%p) [%d: %d, %d]\n", (void*)design, player, xpos, ypos);
 	this->inventions_known[ design->getInvention()->getType() ][ design->getInvention()->getEpoch() ] = false;
 	for(size_t i=0;i<this->designs.size();i++) {
 		Design *this_design = this->designs.at(i);
@@ -1506,7 +1507,7 @@ void Sector::trashDesign(Design *design) {
 }
 
 bool Sector::nukeSector(Sector *source) {
-	LOG("Sector::nuke(%d) [%d: %d, %d]\n", source, player, xpos, ypos);
+	LOG("Sector::nuke(%p) [%d: %d, %d]\n", (void*)source, player, xpos, ypos);
 	ASSERT( source->player != -1 );
 	ASSERT( this->player != source->player );
 	ASSERT( this->player == -1 || !Player::isAlliance( this->player, source->player ) );
@@ -1559,7 +1560,7 @@ Design *Sector::canResearch(Invention::Type type,int epoch) const {
 
 int Sector::getNDesigns() const {
 	//LOG("Sector::getNDesigns()\n");
-	return this->designs.size();
+	return (int)this->designs.size();
 }
 
 void Sector::consumeStocks(Design *design) {
@@ -1708,7 +1709,7 @@ bool Sector::useShield(Building *building,int shield) {
 		this->consumeStocks(design);
 		this->stored_shields[shield]++;
 	}
-	LOG("-> Use Shield %d on building %d type %d\n", shield, building, building->getType());
+	LOG("-> Use Shield %d on building %p type %d\n", shield, (void*)building, building->getType());
 	//building->addHealth( 10 * ( shield + 1 ) );
 	building->addHealth( 5 * ( shield + 1 ) );
 	this->stored_shields[shield]--;
@@ -1735,328 +1736,6 @@ float Sector::getDefenceStrength() const {
 		str *= 1.25f;
 	}
 	return str;
-}
-
-void Sector::doCombat(int client_player) {
-	//LOG("Sector::doCombat()\n");
-	int looptime = game_g->getLoopTime();
-
-	/*int army_strengths[n_players_c];
-	int n_armies = 0;
-	for(i=0;i<n_players_c;i++) {
-	army_strengths[i] = this->getArmy(i)->getStrength();
-	if( army_strengths[i] > 0 )
-	n_armies++;
-	}
-	if( n_armies == 2 ) {
-	Army *friendly = this->getArmy(human_player);
-	Army *enemy = this->getArmy(enemy_player);
-	}*/
-	bool died[n_players_c];
-	//int random = rand () % RAND_MAX;
-	for(int i=0;i<n_players_c;i++) {
-		died[i] = false;
-		Army *army = this->getArmy(i);
-		int this_strength = army->getStrength();
-		int this_total = army->getTotal();
-		//LOG(">>> %d , %d\n", this_strength, this_total);
-		if( this->player == i ) {
-			this_total += this->getNDefenders();
-			this_strength += this->getDefenderStrength();
-		}
-		//LOG("    %d , %d\n", this_strength, this_total);
-		if( this_total > 0 ) {
-			int enemy_strength = 0;
-			for(int j=0;j<n_players_c;j++) {
-				if( i != j && !Player::isAlliance(i,j) ) {
-					enemy_strength += this->getArmy(j)->getStrength();
-					if( this->player == j ) {
-						enemy_strength += this->getDefenderStrength();
-					}
-				}
-			}
-			if( enemy_strength > 0 ) {
-				//int death_rate = ( combat_rate_c * gameticks_per_hour_c * this_strength ) / enemy_strength;
-				//int death_rate = ( combat_rate_c * gameticks_per_hour_c ) / enemy_strength;
-				//int death_rate = ( combat_rate_c * gameticks_per_hour_c * this_strength ) / ( enemy_total * enemy_strength );
-				// need to use floats, to avoid possible overflow!!!
-				// lower death rate is faster - which is why we divide by the enemy strength
-				// but we multiply by the average strength of a soldier, because we need to convert a loss in terms of strength to a loss in terms of soldier numbers
-				// consider if we have: A=1*100 vs B=100*1 - we want this to be an even battle. But that means B should lose soldiers on average at 100 times the rate of A, in order for it to be even
-				// see docs/combat_logic.txt for more examples
-				float death_rate = ((float)this_strength) / ((float)this_total);
-				death_rate = death_rate * ((float)(combat_rate_c * gameticks_per_hour_c)) / ((float)enemy_strength);
-				int prob = poisson((int)death_rate, looptime);
-				int random = rand() % RAND_MAX;
-				if( random <= prob ) {
-					// soldier has died
-					died[i] = true;
-				}
-			}
-		}
-	}
-	for(int i=0;i<n_players_c;i++) {
-		if( died[i] ) {
-			Army *army = this->getArmy(i);
-			/*
-			// original behaviour, randomly choose between a defending army or defenders in turrets
-			int this_total = army->getTotal();
-			if( this->player == i )
-				this_total += this->getNDefenders();
-
-			int die = rand() % this_total;
-			if( die < army->getTotal() ) {
-				army->kill(die);
-			}
-			else {
-				// kill a defender
-				this->killDefender(die - army->getTotal());
-			}
-			*/
-			// new behaviour, only attack defenders if no army present in sector
-			// see https://sourceforge.net/p/gigalomania/discussion/general/thread/dbd2f751/
-			// this helps make defenders more powerful
-			int this_total = army->getTotal();
-			if( this->player == i && this_total == 0 ) {
-				// no army, so one of the defenders must die
-				this_total = this->getNDefenders();
-				T_ASSERT( this_total > 0 );
-				if( this_total > 0 ) { // just in case
-					int die = rand() % this_total;
-					// kill a defender
-					this->killDefender(die);
- 				}
-			}
-			else {
-				T_ASSERT( this_total > 0 );
-				if( this_total > 0 ) { // just in case
-					int die = rand() % this_total;
-					army->kill(die);
-				}
-			}
-		}
-	}
-
-	// damage to buildings
-	if( this->player != -1 ) {
-		int bombard = 0;
-		// buildings not harmed if there's an army or defenders
-		// see https://sourceforge.net/p/gigalomania/discussion/general/thread/dbd2f751/
-		// this makes defenders more useful, and means buildings aren't destroyed so quickly when an army attacks
-		if( this->getArmy(this->player)->any(true) ) {
-			bombard = 0;
-		}
-		else if( this->getNDefenders() > 0 ) {
-			bombard = 0;
-		}
-		else {
-			for(int i=0;i<n_players_c;i++) {
-				if( this->player != i && !Player::isAlliance(this->player, i) ) {
-					bombard += this->getArmy(i)->getBombardStrength();
-				}
-			}
-		}
-		if( bombard > 0 ) {
-			int bombard_rate = ( bombard_rate_c * gameticks_per_hour_c ) / bombard;
-			bombard_rate = (int)(bombard_rate * this->getDefenceStrength());
-			int prob = poisson(bombard_rate, looptime);
-			int random = rand() % RAND_MAX;
-			if( random <= prob ) {
-				// caused some damage
-				int n_buildings = 0;
-				for(int i=0;i<N_BUILDINGS;i++) {
-					if( this->buildings[i] != NULL )
-						n_buildings++;
-				}
-				ASSERT( n_buildings > 0 );
-				int b = rand() % n_buildings;
-				for(int i=0;i<N_BUILDINGS;i++) {
-					Building *building = this->buildings[i];
-					if( building != NULL ) {
-						if( b == 0 ) {
-							building->addHealth(-1);
-#ifdef _DEBUG
-                            // disable in Release mode as possible performance issue on mobile devices (Symbian)
-                            LOG("Sector [%d: %d, %d] caused some damage on building %d, type %d, %d remaining\n", player, xpos, ypos, building, building->getType(), building->getHealth());
-#endif
-							if( building->getHealth() <= 0 ) {
-								// destroy building
-								destroyBuilding((Type)i, client_player);
-							}
-							else if( this->player == client_player && building->getHealth() == 10 && building->getType() == BUILDING_TOWER ) {
-								playSample(game_g->s_tower_critical);
-								//((PlayingGameState *)gamestate)->setFlashingSquare(this->xpos, this->ypos);
-								gamestate->setFlashingSquare(this->xpos, this->ypos);
-							}
-							break;
-						}
-						b--;
-					}
-				}
-			}
-		}
-	}
-}
-
-void Sector::doPlayer(int client_player) {
-	//LOG("Sector::doPlayer()\n");
-	// stuff for sectors owned by a player
-
-	// n.b., only update the particle systems that are specific to sectors owned by a player
-	if( this->smokeParticleSystem != NULL ) {
-		this->smokeParticleSystem->update();
-	}
-
-	if( game_g->getGameMode() == GAMEMODE_MULTIPLAYER_CLIENT ) {
-		// rest of function is for game logic done by server
-		return;
-	}
-
-	int time = game_g->getGameTime();
-	int looptime = game_g->getLoopTime();
-
-	if( this->current_design != NULL ) {
-		if( this->researched_lasttime == -1 )
-			this->researched_lasttime = time;
-		while( time - this->researched_lasttime > gameticks_per_hour_c ) {
-			this->researched += this->getDesigners();
-			this->researched_lasttime += gameticks_per_hour_c;
-		}
-		int cost = this->getInventionCost();
-		if( this->researched > cost ) {
-			//LOG("Sector [%d: %d, %d] has made a %s\n", player, xpos, ypos, this->current_design->getInvention()->getName());
-			this->invent(client_player);
-		}
-	}
-
-	if( this->current_manufacture != NULL ) {
-		if( this->manufactured_lasttime == -1 )
-			this->manufactured_lasttime = time;
-		if( this->manufactured == 0 && this->getWorkers() > 0 ) {
-			if( !this->canBuildDesign( this->current_manufacture ) ) {
-				// not enough elements
-				// therefore production run completed
-				if( this->player == client_player ) {
-					playSample(game_g->s_fcompleted);
-					gamestate->setFlashingSquare(this->xpos, this->ypos);
-				}
-				this->setCurrentManufacture(NULL);
-				if( this == gamestate->getCurrentSector() ) {
-					//((PlayingGameState *)gamestate)->getGamePanel()->refresh();
-					gamestate->getGamePanel()->refresh();
-				}
-			}
-			else {
-				this->consumeStocks( this->current_manufacture );
-			}
-		}
-	}
-	// a new if statement, as production run may have ended due to lack of elements
-	if( this->current_manufacture != NULL ) {
-		while( time - this->manufactured_lasttime > gameticks_per_hour_c ) {
-			this->manufactured += this->getWorkers();
-			this->manufactured_lasttime += gameticks_per_hour_c;
-		}
-		if( this->manufactured == 0 && this->getWorkers() > 0 ) {
-			this->manufactured++; // a bit hacky; just to avoid consuming stocks again
-		}
-		int cost = this->getManufactureCost();
-		if( this->manufactured > cost ) {
-			this->buildDesign();
-			this->manufactured = 0;
-			if( this->n_famount != infinity_c )
-				this->setFAmount( this->n_famount - 1 );
-			if( this->n_famount == 0 ) {
-				// production run completed
-				//LOG("production run completed\n");
-				if( this->player == client_player ) {
-					playSample(game_g->s_fcompleted);
-					gamestate->setFlashingSquare(this->xpos, this->ypos);
-				}
-				this->setCurrentManufacture(NULL);
-			}
-			if( this == gamestate->getCurrentSector() ) {
-				//((PlayingGameState *)gamestate)->getGamePanel()->refresh();
-				gamestate->getGamePanel()->refresh();
-			}
-		}
-	}
-
-	bool new_stocks = false;
-	for(int i=0;i<N_ID;i++) {
-		if( this->elements[i] == 0 ) {
-			continue; // no more of this element
-		}
-		Element *element = game_g->elements[i];
-		if( element->getType() != Element::GATHERABLE || this->elementstocks[i] < max_gatherables_stored_c * element_multiplier_c )
-		{
-			int n_gatherers = 0;
-			if( element->getType() == Element::GATHERABLE ) {
-				n_gatherers = n_gatherable_rate_c;
-			}
-			else
-				n_gatherers = this->getMiners((Id)i);
-			this->partial_elementstocks[i] += element_multiplier_c * n_gatherers * looptime;
-			while( this->partial_elementstocks[i] > mine_rate_c * gameticks_per_hour_c ) {
-				new_stocks = true;
-				this->partial_elementstocks[i] -= mine_rate_c * gameticks_per_hour_c;
-				if( this->mineElement(client_player, (Id)i) ) {
-					break;
-				}
-			}
-		}
-	}
-	if( new_stocks && this == gamestate->getCurrentSector() ) {
-		/*((PlayingGameState *)gamestate)->getGamePanel()->refreshCanDesign();
-		((PlayingGameState *)gamestate)->getGamePanel()->refreshDesignInventions();
-		//((PlayingGameState *)gamestate)->getGamePanel()->refreshDeployInventions();
-		((PlayingGameState *)gamestate)->getGamePanel()->refreshManufactureInventions();*/
-
-		gamestate->getGamePanel()->refreshCanDesign();
-		gamestate->getGamePanel()->refreshDesignInventions();
-		gamestate->getGamePanel()->refreshManufactureInventions();
-	}
-
-	if( this->built_lasttime == -1 )
-		this->built_lasttime = time;
-	while( time - this->built_lasttime > gameticks_per_hour_c ) {
-		for(int i=0;i<N_BUILDINGS;i++) {
-			this->built[i] += this->getBuilders((Type)i);
-		}
-		this->built_lasttime += gameticks_per_hour_c;
-	}
-	for(int i=0;i<N_BUILDINGS;i++) {
-		int cost = getBuildingCost((Type)i, this->player);
-		if( this->built[i] > cost ) {
-			this->buildBuilding((Type)i);
-		}
-	}
-
-	if( this->growth_lasttime == -1 )
-		this->growth_lasttime = time;
-	else if( game_g->getTutorial() != NULL && !game_g->getTutorial()->aiAllowGrowth() && !game_g->players[this->player]->isHuman() ) {
-		// don't allow growth
-	}
-	else if( this->getSparePopulation() > 0 ) {
-		int spare_pop = this->getSparePopulation();
-		if( spare_pop > max_grow_population_c/2 ) {
-			spare_pop = max_grow_population_c - spare_pop;
-			spare_pop = max(spare_pop, 0);
-		}
-		if( spare_pop > 0 ) {
-			int delay = ( growth_rate_c * gameticks_per_hour_c ) / spare_pop;
-			if( time - this->growth_lasttime > delay ) {
-				int old_pop = this->population;
-				if( this->getSparePopulation() < max_grow_population_c )
-					this->population++;
-				this->growth_lasttime = time;
-				int births = this->population - old_pop;
-				if( births > 0 ) {
-					game_g->players[this->player]->registerBirths(births);
-				}
-			}
-		}
-	}
 }
 
 void Sector::getNukePos(int *nuke_x, int *nuke_y) const {
@@ -3363,35 +3042,34 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 
 void Sector::printDebugInfo() const {
 #ifdef _DEBUG
-	printf("*** Sector Information        ***\n");
+	LOG_DEBUG("*** Sector Information        ***");
 	if( player == -1 ) {
-		printf("    No player in this sector\n");
+		LOG_DEBUG("    No player in this sector");
 	}
 	else {
-		printf("    player %d\n", player);
-		printf("    population %d\n", population);
-		printf("    designers %d\n", n_designers);
+		LOG_DEBUG("    player %d", player);
+		LOG_DEBUG("    population %d", population);
+		LOG_DEBUG("    designers %d", n_designers);
 		if( current_design != NULL )
-			printf("    researching %s\n", current_design->getInvention()->getName());
-		printf("    workers %d\n", n_workers);
+			LOG_DEBUG("    researching %s", current_design->getInvention()->getName());
+		LOG_DEBUG("    workers %d", n_workers);
 		if( current_manufacture != NULL )
-			printf("    manufacturing %s\n", current_manufacture->getInvention()->getName());
+			LOG_DEBUG("    manufacturing %s", current_manufacture->getInvention()->getName());
 		for(int i=0;i<N_ID;i++) {
 			if( this->canMine((Id)i) ) {
 				Element *element = game_g->elements[i];
 				if( element->getType() != Element::GATHERABLE )
-					printf("   mining %s %d\n", element->getName(), this->getMiners((Id)i));
+					LOG_DEBUG("   mining %s %d", element->getName(), this->getMiners((Id)i));
 			}
 		}
 		for(int i=0;i<N_ID;i++) {
 			int stocks = this->elementstocks[i];
 			Element *element = game_g->elements[i];
 			if( stocks > 0 )
-				printf("stocks of %s: %d\n", element->getName(), stocks);
+				LOG_DEBUG("stocks of %s: %d", element->getName(), stocks);
 		}
-		//printf("    \n", );
 	}
-	printf("*** End Of Sector Information ***\n");
+	LOG_DEBUG("*** End Of Sector Information ***");
 #endif
 }
 

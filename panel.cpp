@@ -309,15 +309,7 @@ void PanelPage::drawPopups() {
 				const unsigned char panel_background_g = 128;
 				const unsigned char panel_background_b = 128;
 				const unsigned char panel_background_a = 160;
-#if SDL_MAJOR_VERSION == 1
-				Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
-				fill_rect->fillRect(0, 0, rect_w, rect_h, panel_background_r, panel_background_g, panel_background_b);
-				fill_rect->convertToDisplayFormat();
-				fill_rect->drawWithAlpha(rect_x, rect_y, panel_background_a);
-				delete fill_rect;
-#else
 				game_g->getScreen()->fillRectWithAlpha(rect_x, rect_y, rect_w, rect_h, panel_background_r, panel_background_g, panel_background_b, panel_background_a);
-#endif
 
 				int py = (int)(popup_y/game_g->getScaleHeight());
 				for(int j=0;j<n_texts;j++) {
@@ -346,15 +338,7 @@ void PanelPage::drawBackground() {
 		int rect_y = (int)(game_g->getScaleWidth()*(owner->getTop() + offset_y));
 		int rect_w = (int)(game_g->getScaleWidth()*this->w);
 		int rect_h = (int)(game_g->getScaleHeight()*this->h);
-#if SDL_MAJOR_VERSION == 1
-		Image *fill_rect = Image::createBlankImage(rect_w, rect_h, 24);
-		fill_rect->fillRect(0, 0, rect_w, rect_h, background[0], background[1], background[2]);
-		fill_rect->convertToDisplayFormat();
-		fill_rect->drawWithAlpha(rect_x, rect_y, background[3]);
-		delete fill_rect;
-#else
 		game_g->getScreen()->fillRectWithAlpha((short)rect_x, (short)rect_y, (short)rect_w, (short)rect_h, background[0], background[1], background[2], background[3]);
-#endif
 	}
 }
 
@@ -392,6 +376,10 @@ void PanelPage::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,boo
 		this->modal_child->input(m_x, m_y, m_left, m_middle, m_right, click);
         return;
 	}
+	// fire on_click callback if button is clicked and cursor is over it
+	if( this->on_click && click && ( m_left || m_right ) && this->mouseOver(m_x, m_y) ) {
+		this->on_click(m_left, m_right);
+	}
 	for(unsigned int i=0;i<children->size();i++) {
 		PanelPage *panel = children->at(i);
 		panel->input(m_x, m_y, m_left, m_middle, m_right, click);
@@ -422,7 +410,7 @@ this->image = image;
 Button::Button(int x,int y,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
-	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
+	this->w = font[0]->getScaledWidth() * (int)this->text.length() + 2;
 	this->h = font[0]->getScaledHeight() + 2;
 	this->draw_offset_x = 0;
 	if( game_g->isMobileUI() ) {
@@ -434,7 +422,7 @@ Button::Button(int x,int y,const char *text,Gigalomania::Image *font[]) : PanelP
 Button::Button(int x,int y,int h,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
-	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
+	this->w = font[0]->getScaledWidth() * (int)this->text.length() + 2;
 	this->h = h;
 	this->draw_offset_x = 0;
 	if( game_g->isMobileUI() ) {
@@ -446,7 +434,7 @@ Button::Button(int x,int y,int h,const char *text,Gigalomania::Image *font[]) : 
 Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
-	this->w = draw_offset_x + font[0]->getScaledWidth() * this->text.length() + 2;
+	this->w = draw_offset_x + font[0]->getScaledWidth() * (int)this->text.length() + 2;
 	this->h = h;
 	this->draw_offset_x = draw_offset_x;
 	if( game_g->isMobileUI() ) {
@@ -539,7 +527,7 @@ CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Gigalomania
 	this->texts = new char *[n_texts];
 	int max_len = 0;
 	for(int i=0;i<n_texts;i++) {
-		int len = strlen(texts[i]);
+		int len = (int)strlen(texts[i]);
 		if( len > max_len )
 			max_len = len;
 		this->texts[i] = new char[ len + 1 ];

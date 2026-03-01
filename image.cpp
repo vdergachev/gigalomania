@@ -18,7 +18,7 @@ using std::max;
 #include "utils.h"
 //---------------------------------------------------------------------------
 
-SDL_Surface *my_IMG_LoadLBM_RW(SDL_RWops *src);
+SDL_Surface *my_IMG_LoadLBM_RW(SDL_IOStream *src);
 
 inline void CreateMask( Uint32& rmask, Uint32& gmask, Uint32& bmask, Uint32& amask) {
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -47,20 +47,13 @@ inline void CreateMask( Uint32& rmask, Uint32& gmask, Uint32& bmask, Uint32& ama
 extern const bool DEBUG;
 extern const int DEBUGLEVEL;
 
-#if SDL_MAJOR_VERSION == 1
-SDL_Surface *Gigalomania::Image::dest_surf = NULL;
-#else
 SDL_Renderer *Gigalomania::Image::sdlRenderer = NULL;
-#endif
 
 Gigalomania::Image::Image() {
 	this->data = NULL;
 	this->need_to_free_data = false;
 	this->surface = NULL;
-#if SDL_MAJOR_VERSION == 1
-#else
 	this->texture = NULL;
-#endif
 	this->scale_x = 1;
 	this->scale_y = 1;
 	this->offset_x = 0;
@@ -73,16 +66,13 @@ Gigalomania::Image::~Image() {
 
 void Gigalomania::Image::free() {
 	if( this->surface != NULL ) {
-		SDL_FreeSurface(this->surface);
+		SDL_DestroySurface(this->surface);
 		this->surface = NULL;
 	}
-#if SDL_MAJOR_VERSION == 1
-#else
 	if( this->texture != NULL ) {
 		SDL_DestroyTexture(this->texture);
 		this->texture = NULL;
 	}
-#endif
 	if( need_to_free_data && this->data != NULL ) {
 		delete [] this->data;
 		this->data = NULL;
@@ -94,26 +84,12 @@ void Gigalomania::Image::draw(int x, int y) const {
 	y += offset_y;
 	x = (int)(x * scale_x);
 	y = (int)(y * scale_y);
-#if SDL_MAJOR_VERSION == 1
-	SDL_Rect srcrect;
-	srcrect.x = 0;
-	srcrect.y = 0;
-	srcrect.w = (short)this->getWidth();
-	srcrect.h = (short)this->getHeight();
-	SDL_Rect dstrect;
-	dstrect.x = (short)x;
-	dstrect.y = (short)y;
-	dstrect.w = 0;
-	dstrect.h = 0;
-	SDL_BlitSurface(surface, &srcrect, dest_surf, &dstrect);
-#else
-	SDL_Rect dstrect;
-	dstrect.x = (short)x;
-	dstrect.y = (short)y;
-	dstrect.w = (short)this->getWidth();
-	dstrect.h = (short)this->getHeight();
-	SDL_RenderCopy(sdlRenderer, texture, NULL, &dstrect);
-#endif
+	SDL_FRect dstrect;
+	dstrect.x = (float)x;
+	dstrect.y = (float)y;
+	dstrect.w = (float)this->getWidth();
+	dstrect.h = (float)this->getHeight();
+	SDL_RenderTexture(sdlRenderer, texture, NULL, &dstrect);
 }
 
 void Gigalomania::Image::draw(int x, int y, int sw, int sh) const {
@@ -123,68 +99,26 @@ void Gigalomania::Image::draw(int x, int y, int sw, int sh) const {
 	y = (int)(y * scale_y);
 	sw = (int)(sw * scale_x);
 	sh = (int)(sh * scale_y);
-#if SDL_MAJOR_VERSION == 1
-	SDL_Rect srcrect;
-	srcrect.x = 0;
-	srcrect.y = 0;
-	srcrect.w = sw;
-	srcrect.h = sh;
-	SDL_Rect dstrect;
-	dstrect.x = (short)x;
-	dstrect.y = (short)y;
-	dstrect.w = 0;
-	dstrect.h = 0;
-	SDL_BlitSurface(surface, &srcrect, dest_surf, &dstrect);
-#else
-	SDL_Rect srcrect;
-	srcrect.x = 0;
-	srcrect.y = 0;
-	srcrect.w = sw;
-	srcrect.h = sh;
-	SDL_Rect dstrect;
-	dstrect.x = (short)x;
-	dstrect.y = (short)y;
-	dstrect.w = sw;
-	dstrect.h = sh;
-	SDL_RenderCopy(sdlRenderer, texture, &srcrect, &dstrect);
-#endif
+	SDL_FRect srcrect;
+	srcrect.x = 0; srcrect.y = 0; srcrect.w = (float)sw; srcrect.h = (float)sh;
+	SDL_FRect dstrect;
+	dstrect.x = (float)x; dstrect.y = (float)y; dstrect.w = (float)sw; dstrect.h = (float)sh;
+	SDL_RenderTexture(sdlRenderer, texture, &srcrect, &dstrect);
 }
 
 void Gigalomania::Image::draw(int x, int y, float scale_w, float scale_h) const {
 	x = (int)(x * scale_x);
 	y = (int)(y * scale_y);
-#if SDL_MAJOR_VERSION == 1
-	// scaling only supported for SDL 2
-	if( scale_w == 1.0f && scale_h == 1.0f ) {
-	SDL_Rect srcrect;
-	srcrect.x = 0;
-	srcrect.y = 0;
-	srcrect.w = (short)this->getWidth();
-	srcrect.h = (short)this->getHeight();
-	SDL_Rect dstrect;
-	dstrect.x = (short)x;
-	dstrect.y = (short)y;
-	dstrect.w = 0;
-	dstrect.h = 0;
-	SDL_BlitSurface(surface, &srcrect, dest_surf, &dstrect);
-	}
-#else
-	SDL_Rect dstrect;
-	dstrect.x = (short)x;
-	dstrect.y = (short)y;
-	dstrect.w = (short)(this->getWidth()*scale_w);
-	dstrect.h = (short)(this->getHeight()*scale_h);
-	SDL_RenderCopy(sdlRenderer, texture, NULL, &dstrect);
-#endif
+	SDL_FRect dstrect;
+	dstrect.x = (float)x; dstrect.y = (float)y;
+	dstrect.w = (float)(this->getWidth()*scale_w);
+	dstrect.h = (float)(this->getHeight()*scale_h);
+	SDL_RenderTexture(sdlRenderer, texture, NULL, &dstrect);
 }
 
 void Gigalomania::Image::drawWithAlpha(int x, int y, unsigned char alpha) const {
 	// n.b., only works if the image doesn't have per-pixel alpha channel
-#if SDL_MAJOR_VERSION == 1
-	SDL_SetAlpha(this->surface, SDL_SRCALPHA|SDL_RLEACCEL, alpha);
-#else
 	SDL_SetTextureAlphaMod(texture, alpha);
-#endif
 	this->draw(x, y);
 }
 
@@ -202,11 +136,11 @@ void Gigalomania::Image::setScale(float scale_x,float scale_y) {
 }
 
 bool Gigalomania::Image::isPaletted() const {
-	return this->surface->format->palette != NULL;
+	return SDL_GetSurfacePalette(this->surface) != NULL;
 }
 
 int Gigalomania::Image::getNColors() const {
-	return this->surface->format->palette->ncolors;
+	return SDL_GetSurfacePalette(this->surface)->ncolors;
 }
 
 unsigned char Gigalomania::Image::getPixelIndex(int x,int y) const {
@@ -234,7 +168,7 @@ bool Gigalomania::Image::setColor(int index,unsigned char r,unsigned char g,unsi
 		return false;
 
 	SDL_LockSurface(this->surface);
-	SDL_Color *col = &this->surface->format->palette->colors[index];
+	SDL_Color *col = &SDL_GetSurfacePalette(this->surface)->colors[index];
 	col->r = r;
 	col->g = g;
 	col->b = b;
@@ -247,7 +181,7 @@ bool Gigalomania::Image::setColor(int index,unsigned char r,unsigned char g,unsi
 * NOTE: The surface must be locked before calling this!
 */
 Uint32 getpixel(SDL_Surface *surface, int x, int y) {
-	int bpp = surface->format->BytesPerPixel;
+	int bpp = SDL_BYTESPERPIXEL(surface->format);
 	/* Here p is the address to the pixel we want to retrieve */
 	Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
@@ -256,7 +190,7 @@ Uint32 getpixel(SDL_Surface *surface, int x, int y) {
 		return *p;
 
 	case 2:
-		return *(Uint16 *)p;
+		return *reinterpret_cast<const Uint16*>(p);
 
 	case 3:
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -265,7 +199,7 @@ Uint32 getpixel(SDL_Surface *surface, int x, int y) {
 			return p[0] | p[1] << 8 | p[2] << 16;
 
 	case 4:
-		return *(Uint32 *)p;
+		return *reinterpret_cast<const Uint32*>(p);
 
 	default:
 		return 0;       /* shouldn't happen, but avoids warnings */
@@ -277,7 +211,7 @@ Uint32 getpixel(SDL_Surface *surface, int x, int y) {
 * NOTE: The surface must be locked before calling this!
 */
 void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
-	int bpp = surface->format->BytesPerPixel;
+	int bpp = SDL_BYTESPERPIXEL(surface->format);
 	/* Here p is the address to the pixel we want to set */
 	Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
@@ -287,7 +221,7 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
 		break;
 
 	case 2:
-		*(Uint16 *)p = pixel;
+		*reinterpret_cast<Uint16*>(p) = static_cast<Uint16>(pixel);
 		break;
 
 	case 3:
@@ -303,7 +237,7 @@ void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
 		break;
 
 	case 4:
-		*(Uint32 *)p = pixel;
+		*reinterpret_cast<Uint32*>(p) = pixel;
 		break;
 	}
 }
@@ -325,13 +259,13 @@ bool Gigalomania::Image::createAlphaForColor(bool mask, unsigned char mr, unsign
 		for(int cx=0;cx<w;cx++) {
 			Uint32 pixel = getpixel(this->surface, cx, cy);
 			Uint8 r = 0, g = 0, b = 0, a = 0;
-			SDL_GetRGB(pixel, this->surface->format, &r, &g, &b);
+			SDL_GetRGB(pixel, SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), &r, &g, &b);
 			if( r == ar && g == ag && b == ab ) {
 				r = 0;
 				g = 0;
 				b = 0;
 				a = alpha;
-				pixel = SDL_MapRGBA(this->surface->format, r, g, b, a);
+				pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), r, g, b, a);
 				putpixel(this->surface, cx, cy, pixel);
 			}
 			else if( mask && r == mr && g == mg && b == mb ) {
@@ -339,7 +273,7 @@ bool Gigalomania::Image::createAlphaForColor(bool mask, unsigned char mr, unsign
 				g = 0;
 				b = 0;
 				a = 0;
-				pixel = SDL_MapRGBA(this->surface->format, r, g, b, a);
+				pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), r, g, b, a);
 				putpixel(this->surface, cx, cy, pixel);
 			}
 		}
@@ -357,7 +291,7 @@ bool Gigalomania::Image::createAlphaForColor(bool mask, unsigned char mr, unsign
 }
 
 void Gigalomania::Image::scaleAlpha(float scale) {
-	int bpp = this->surface->format->BitsPerPixel;
+	int bpp = SDL_BITSPERPIXEL(this->surface->format);
 	if( bpp != 32 )
 		return;
 
@@ -373,10 +307,10 @@ void Gigalomania::Image::scaleAlpha(float scale) {
 		for(int cx=0;cx<w;cx++) {
 			Uint32 pixel = getpixel(this->surface, cx, cy);
 			Uint8 r = 0, g = 0, b = 0, a = 0;
-			SDL_GetRGBA(pixel, this->surface->format, &r, &g, &b, &a);
+			SDL_GetRGBA(pixel, SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), &r, &g, &b, &a);
 			//a *= scale;
 			a = (Uint8)(a*scale);
-			pixel = SDL_MapRGBA(this->surface->format, r, g, b, a);
+			pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), r, g, b, a);
 			putpixel(this->surface, cx, cy, pixel);
 		}
 	}
@@ -395,14 +329,14 @@ bool Gigalomania::Image::convertToHiColor(bool alpha) {
 	int time_s = clock();
 #endif
 	// todo: repeated conversions don't seem to work? seems to be due to repeated blitting not working
-	int bpp = this->surface->format->BitsPerPixel;
+	int bpp = SDL_BITSPERPIXEL(this->surface->format);
 	if( bpp == 32 )
 		return false;
 	Uint32 rmask, gmask, bmask, amask;
 	CreateMask(rmask, gmask, bmask, amask);
 
 	int depth = alpha ? 32 : 24;
-	SDL_Surface *new_surf = SDL_CreateRGBSurface(0, this->getWidth(), this->getHeight(), depth, rmask, gmask, bmask, amask);
+	SDL_Surface *new_surf = SDL_CreateSurface(this->getWidth(), this->getHeight(), SDL_GetPixelFormatForMasks(depth, rmask, gmask, bmask, amask));
 	SDL_BlitSurface(this->surface, NULL, new_surf, NULL);
 	free();
 	this->surface = new_surf;
@@ -419,16 +353,7 @@ bool Gigalomania::Image::convertToHiColor(bool alpha) {
 }
 
 bool Gigalomania::Image::convertToDisplayFormat() {
-#if SDL_MAJOR_VERSION == 1
-	SDL_Surface *new_surf = NULL;
-	int bpp = this->surface->format->BitsPerPixel;
-	if( bpp == 32 && this->surface->format->Amask != 0 )
-		new_surf = SDL_DisplayFormatAlpha(this->surface);
-	else
-		new_surf = SDL_DisplayFormat(this->surface);
-	SDL_FreeSurface(this->surface);
-	this->surface = new_surf;
-#else
+	{
 	texture = SDL_CreateTextureFromSurface(sdlRenderer, surface);
 	if( texture == NULL ) {
 		LOG("SDL_CreateTextureFromSurface failed\n");
@@ -440,22 +365,17 @@ bool Gigalomania::Image::convertToDisplayFormat() {
 		LOG("texture blend mode: %d\n", blendMode);
 	}*/
 	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND); // seems to be default, but just in case
-#endif
+	}
 	return true;
 }
 
 bool Gigalomania::Image::copyPalette(const Gigalomania::Image *image) {
-	if( this->surface->format->palette == NULL || image->surface->format->palette == NULL )
+	SDL_Palette *src_palette = SDL_GetSurfacePalette(image->surface);
+	SDL_Palette *dst_palette = SDL_GetSurfacePalette(this->surface);
+	if( src_palette == NULL || dst_palette == NULL )
 		return false;
 
-	/*if( this->surface->format->palette->ncolors != image->surface->format->palette->ncolors )
-		return false;*/
-
-#if SDL_MAJOR_VERSION == 1
-	SDL_SetColors(this->surface, image->surface->format->palette->colors, 0, this->surface->format->palette->ncolors);
-#else
-	SDL_SetPaletteColors(this->surface->format->palette, image->surface->format->palette->colors, 0, this->surface->format->palette->ncolors);
-#endif
+	SDL_SetPaletteColors(dst_palette, src_palette->colors, 0, dst_palette->ncolors);
 	return true;
 }
 
@@ -481,7 +401,7 @@ void Gigalomania::Image::scale(float sx,float sy) {
 	int h = this->getHeight();
 	SDL_LockSurface(this->surface);
 	unsigned char *src_data = (unsigned char *)this->surface->pixels;
-	int bytesperpixel = this->surface->format->BytesPerPixel;
+	int bytesperpixel = SDL_BYTESPERPIXEL(this->surface->format);
 	int new_width = (int)(w * sx);
 	int new_height = (int)(h * sy);
 	int new_size = (int)(new_width * new_height * bytesperpixel);
@@ -556,13 +476,8 @@ void Gigalomania::Image::scale(float sx,float sy) {
 	{
 		w = (int)(w * sx);
 		h = (int)(h * sy);
-		int bpp = this->surface->format->BitsPerPixel;
-		int pitch = this->surface->format->BytesPerPixel * w;
-
-		Uint32 rmask = this->surface->format->Rmask;
-		Uint32 gmask = this->surface->format->Gmask;
-		Uint32 bmask = this->surface->format->Bmask;
-		Uint32 amask = this->surface->format->Amask;
+		SDL_PixelFormat fmt = this->surface->format;
+		int pitch = SDL_BYTESPERPIXEL(this->surface->format) * w;
 		if( !(is_paletted || enlarging) ) {
 			new_data = new unsigned char[new_size];
 			for(int i=0;i<new_size;i++) {
@@ -573,13 +488,13 @@ void Gigalomania::Image::scale(float sx,float sy) {
 			delete [] count;
 			count = NULL;
 		}
-		SDL_Surface *new_surf = SDL_CreateRGBSurfaceFrom(new_data, w, h, bpp, pitch, rmask, gmask, bmask, amask);
-		if( this->surface->format->palette != NULL ) {
-#if SDL_MAJOR_VERSION == 1
-			SDL_SetColors(new_surf, this->surface->format->palette->colors, 0, this->surface->format->palette->ncolors);
-#else
-			SDL_SetPaletteColors(new_surf->format->palette, this->surface->format->palette->colors, 0, this->surface->format->palette->ncolors);
-#endif
+		SDL_Surface *new_surf = SDL_CreateSurfaceFrom(w, h, fmt, new_data, pitch);
+		{
+			SDL_Palette *src_pal = SDL_GetSurfacePalette(this->surface);
+			SDL_Palette *dst_pal = SDL_GetSurfacePalette(new_surf);
+			if( src_pal != NULL && dst_pal != NULL ) {
+				SDL_SetPaletteColors(dst_pal, src_pal->colors, 0, src_pal->ncolors);
+			}
 		}
 		free();
 		this->surface = new_surf;
@@ -603,7 +518,7 @@ bool Gigalomania::Image::scaleTo(int n_w) {
 }
 
 void Gigalomania::Image::remap(unsigned char sr,unsigned char sg,unsigned char sb,unsigned char rr,unsigned char rg,unsigned char rb) {
-	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
+	if( SDL_BITSPERPIXEL(this->surface->format) != 24 && SDL_BITSPERPIXEL(this->surface->format) != 32 ) {
 		return;
 	}
 	if( rr == sr && rg == sg && rb == sb ) {
@@ -629,9 +544,9 @@ void Gigalomania::Image::remap(unsigned char sr,unsigned char sg,unsigned char s
 		for(int x=0;x<w;x++) {
 			Uint32 pixel = getpixel(this->surface, x, y);
 			Uint8 r = 0, g = 0, b = 0, a = 0;
-			SDL_GetRGBA(pixel, this->surface->format, &r, &g, &b, &a);
+			SDL_GetRGBA(pixel, SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), &r, &g, &b, &a);
 			if( r == sr && g == sg && b == sb ) {
-				pixel = SDL_MapRGBA(surface->format, rr, rg, rb, a);
+				pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(surface->format), SDL_GetSurfacePalette(surface), rr, rg, rb, a);
 				putpixel(this->surface, x, y, pixel);
 			}
 			/*if( r == 0 && g == 0 && b == 0 ) {
@@ -667,7 +582,7 @@ void Gigalomania::Image::remap(unsigned char sr,unsigned char sg,unsigned char s
 
 void Gigalomania::Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
 	ASSERT(from >= 0 && from < 3);
-	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
+	if( SDL_BITSPERPIXEL(this->surface->format) != 24 && SDL_BITSPERPIXEL(this->surface->format) != 32 ) {
 		return;
 	}
 	bool to[3] = {to_r, to_g, to_b};
@@ -679,7 +594,7 @@ void Gigalomania::Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
 		for(int x=0;x<w;x++) {
 			Uint32 pixel = getpixel(this->surface, x, y);
 			Uint8 rgba[] = {0, 0, 0, 0};
-			SDL_GetRGBA(pixel, this->surface->format, &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
+			SDL_GetRGBA(pixel, SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
 			int val = rgba[from];
 			int t_diff = 0;
 			int n = 0;
@@ -698,7 +613,7 @@ void Gigalomania::Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
 				ASSERT(val >=0 && val < 256);
 				rgba[from] = val;
 			}
-			pixel = SDL_MapRGBA(surface->format, rgba[0], rgba[1], rgba[2], rgba[3]);
+			pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(surface->format), SDL_GetSurfacePalette(surface), rgba[0], rgba[1], rgba[2], rgba[3]);
 			putpixel(this->surface, x, y, pixel);
 		}
 	}
@@ -707,7 +622,7 @@ void Gigalomania::Image::reshadeRGB(int from, bool to_r, bool to_g, bool to_b) {
 }
 
 void Gigalomania::Image::brighten(float sr, float sg, float sb) {
-	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
+	if( SDL_BITSPERPIXEL(this->surface->format) != 24 && SDL_BITSPERPIXEL(this->surface->format) != 32 ) {
 		return;
 	}
 #ifdef TIMING
@@ -722,7 +637,7 @@ void Gigalomania::Image::brighten(float sr, float sg, float sb) {
 		for(int x=0;x<w;x++) {
 			Uint32 pixel = getpixel(this->surface, x, y);
 			Uint8 rgba[] = {0, 0, 0, 0};
-			SDL_GetRGBA(pixel, this->surface->format, &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
+			SDL_GetRGBA(pixel, SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
 			for(int j=0;j<3;j++) {
 				float col = (float)rgba[j];
 				col *= scale[j];
@@ -732,7 +647,7 @@ void Gigalomania::Image::brighten(float sr, float sg, float sb) {
 					col = 255;
 				rgba[j] = (unsigned char)col;
 			}
-			pixel = SDL_MapRGBA(surface->format, rgba[0], rgba[1], rgba[2], rgba[3]);
+			pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(surface->format), SDL_GetSurfacePalette(surface), rgba[0], rgba[1], rgba[2], rgba[3]);
 			putpixel(this->surface, x, y, pixel);
 		}
 	}
@@ -747,7 +662,7 @@ void Gigalomania::Image::brighten(float sr, float sg, float sb) {
 }
 
 void Gigalomania::Image::fadeAlpha(bool x_dir, bool fwd) {
-	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
+	if( SDL_BITSPERPIXEL(this->surface->format) != 24 && SDL_BITSPERPIXEL(this->surface->format) != 32 ) {
 		return;
 	}
 #ifdef TIMING
@@ -761,7 +676,7 @@ void Gigalomania::Image::fadeAlpha(bool x_dir, bool fwd) {
 		for(int x=0;x<w;x++) {
 			Uint32 pixel = getpixel(this->surface, x, y);
 			Uint8 rgba[] = {0, 0, 0, 0};
-			SDL_GetRGBA(pixel, this->surface->format, &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
+			SDL_GetRGBA(pixel, SDL_GetPixelFormatDetails(this->surface->format), SDL_GetSurfacePalette(this->surface), &rgba[0], &rgba[1], &rgba[2], &rgba[3]);
 			float frac = 0.0f;
 			//float perp_frac = 0.0f;
 			if( x_dir ) {
@@ -781,7 +696,7 @@ void Gigalomania::Image::fadeAlpha(bool x_dir, bool fwd) {
 				alpha = (frac-cutoff) / (1.0f-cutoff);
 			}
 			rgba[3] = (Uint8)(rgba[3] * alpha);
-			pixel = SDL_MapRGBA(surface->format, rgba[0], rgba[1], rgba[2], rgba[3]);
+			pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(surface->format), SDL_GetSurfacePalette(surface), rgba[0], rgba[1], rgba[2], rgba[3]);
 			putpixel(this->surface, x, y, pixel);
 		}
 	}
@@ -795,19 +710,6 @@ void Gigalomania::Image::fadeAlpha(bool x_dir, bool fwd) {
 #endif
 }
 
-#if SDL_MAJOR_VERSION == 1
-// If using SDL2, should just blit the rectangle directly with Screen::fillRect() or Screen::fillRectWithAlpha().
-// We need this for SDL1.2, as there Screen::fillRectWithAlpha() isn't supported (due to SDL_fillRect not supporting alpha blending in SDL 1.2)
-void Gigalomania::Image::fillRect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b) {
-	int col = SDL_MapRGB(this->surface->format, r, g, b);
-	SDL_Rect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	SDL_FillRect(this->surface, &rect, col);
-}
-#endif
 
 Gigalomania::Image *Gigalomania::Image::copy(int x, int y, int w, int h) const {
 	//LOG("Image::copy(%d,%d,%d,%d)\n",x,y,w,h);
@@ -822,7 +724,7 @@ Gigalomania::Image *Gigalomania::Image::copy(int x, int y, int w, int h) const {
 
 	Gigalomania::Image *copy_image = NULL;
 	{
-		SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, this->surface->format->BitsPerPixel, this->surface->format->Rmask, this->surface->format->Gmask, this->surface->format->Bmask, this->surface->format->Amask);
+		SDL_Surface *surface = SDL_CreateSurface(w, h, this->surface->format);
 		copy_image = new Image();
 		copy_image->surface = surface;
 		copy_image->data = (unsigned char *)copy_image->surface->pixels;
@@ -836,12 +738,8 @@ Gigalomania::Image *Gigalomania::Image::copy(int x, int y, int w, int h) const {
 	src_rect.y = y;
 	src_rect.w = w;
 	src_rect.h = h;
-#if SDL_MAJOR_VERSION == 1
-	SDL_SetAlpha(this->surface, 0, SDL_ALPHA_OPAQUE);
-#else
 	SDL_SetSurfaceBlendMode(this->surface, SDL_BLENDMODE_NONE);
-#endif
-	if( SDL_BlitSurface(this->surface, &src_rect, copy_image->surface, NULL) < 0 ) {
+	if( !SDL_BlitSurface(this->surface, &src_rect, copy_image->surface, NULL) ) {
 		LOG("SDL_BlitSurface failed: %s\n", SDL_GetError());
 	}
 	/*unsigned char *src_data = (unsigned char *)this->surface->pixels;
@@ -884,30 +782,27 @@ Gigalomania::Image *Gigalomania::Image::loadImage(const char *filename) {
 	int time_s = clock();
 #endif
 	//LOG("Image::loadImage(\"%s\")\n",filename); // disabled logging to improve performance on startup
-	SDL_RWops *src = SDL_RWFromFile(filename, "rb");
+	SDL_IOStream *src = SDL_IOFromFile(filename, "rb");
 	if( src == NULL ) {
 		LOG("failed to load: %s\n", filename);
-		LOG("SDL_RWFromFile failed: %s\n", SDL_GetError());
+		LOG("SDL_IOFromFile failed: %s\n", SDL_GetError());
 		return NULL;
 	}
 	Gigalomania::Image *image = new Image();
 
-#if SDL_MAJOR_VERSION == 1
-#else
-	// workaround IMG_Load_RW fails on IFF files with 2 bitplanes, as of SDL 2.0.8
+	// workaround: IMG_Load_IO fails on IFF files with 2 bitplanes (bug in SDL2_image 2.0.8, still present in SDL3_image)
 	if( strstr(filename, ".") == NULL ) {
 		LOG("load as IFF, using local function\n");
 		image->surface = my_IMG_LoadLBM_RW(src);
-		SDL_RWclose(src);
+		SDL_CloseIO(src);
 	}
-#endif
 	if( image->surface == NULL ) {
-		image->surface = IMG_Load_RW(src, 1);
+		image->surface = IMG_Load_IO(src, 1);
 	}
 
 	if( image->surface == NULL ) {
 		LOG("failed to load: %s\n", filename);
-		LOG("IMG_Load_RW failed: %s\n", IMG_GetError());
+		LOG("IMG_Load_IO failed: %s\n", SDL_GetError());
 		delete image;
 		image = NULL;
 	}
@@ -919,16 +814,6 @@ Gigalomania::Image *Gigalomania::Image::loadImage(const char *filename) {
 	LOG("    image load total %d\n", total);
 #endif
 
-	// Workaround: every image is loaded as 32 bit, but on <32 bit images, the alpha mask is not set
-	// so we have to set it manually for transparency to work:
-#if defined(__APPLE__) && defined(__MACH__)
-	if (image->surface->format->BitsPerPixel == 32 && image->surface->format->Amask == 0)
-	{
-		Uint32 rmask, gmask, bmask, amask;
-		CreateMask(rmask, gmask, bmask, amask);
-		image->surface->format->Amask = amask;
-	}
-#endif
 
 	return image;
 }
@@ -937,7 +822,7 @@ Gigalomania::Image *Gigalomania::Image::createBlankImage(int width,int height, i
 	Uint32 rmask, gmask, bmask, amask;
 	CreateMask(rmask, gmask, bmask, amask);
 
-	SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, bpp, rmask, gmask, bmask, amask);
+	SDL_Surface *surface = SDL_CreateSurface(width, height, SDL_GetPixelFormatForMasks(bpp, rmask, gmask, bmask, amask));
 
 	Gigalomania::Image *image = new Image();
 	image->surface = surface;
@@ -1001,7 +886,7 @@ Gigalomania::Image *Gigalomania::Image::createNoise(int w,int h,float scale_u,fl
 			Uint8 g = (Uint8)((filter_max[1] - filter_min[1]) * h + filter_min[1]);
 			Uint8 b = (Uint8)((filter_max[2] - filter_min[2]) * h + filter_min[2]);
 			Uint8 a = 255;
-			Uint32 pixel = SDL_MapRGBA(image->surface->format, r, g, b, a);
+			Uint32 pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(image->surface->format), SDL_GetSurfacePalette(image->surface), r, g, b, a);
 			putpixel(image->surface, x, y, pixel);
 		}
 	}
@@ -1030,7 +915,7 @@ Gigalomania::Image * Gigalomania::Image::createRadial(int w,int h,float alpha_sc
 			dist *= alpha_scale;
 			unsigned char v = (int)(255.0f * dist);
 			Uint8 a = v;
-			Uint32 pixel = SDL_MapRGBA(image->surface->format, r, g, b, a);
+			Uint32 pixel = SDL_MapRGBA(SDL_GetPixelFormatDetails(image->surface->format), SDL_GetSurfacePalette(image->surface), r, g, b, a);
 			putpixel(image->surface, x, y, pixel);
 		}
 	}
@@ -1039,20 +924,14 @@ Gigalomania::Image * Gigalomania::Image::createRadial(int w,int h,float alpha_sc
 	return image;
 }
 
-#if SDL_MAJOR_VERSION == 1
-void Gigalomania::Image::setGraphicsOutput(SDL_Surface *dest_surf) {
-	Gigalomania::Image::dest_surf = dest_surf;
-}
-#else
 void Gigalomania::Image::setGraphicsOutput(SDL_Renderer *sdlRenderer) {
 	Gigalomania::Image::sdlRenderer = sdlRenderer;
 }
-#endif
 
 void Gigalomania::Image::writeNumbers(int x,int y,Gigalomania::Image *images[10],int number,Justify justify) {
 	char buffer[16] = "";
-	sprintf(buffer,"%d",number);
-	int len = strlen(buffer);
+	snprintf(buffer, sizeof(buffer), "%d",number);
+	int len = (int)strlen(buffer);
 	int w = images[0]->getScaledWidth();
 	int sx = 0;
 	if( justify == JUSTIFY_LEFT )
@@ -1073,7 +952,7 @@ void Gigalomania::Image::write(int x,int y,Gigalomania::Image *images[n_font_cha
 }
 
 void Gigalomania::Image::writeMixedCase(int x,int y,Gigalomania::Image *large[n_font_chars_c],Gigalomania::Image *little[n_font_chars_c],Gigalomania::Image *numbers[10],const char *text,Justify justify) {
-	int len = strlen(text);
+	int len = (int)strlen(text);
 	int n_lines = 0;
 	int s_w = little[0]->getScaledWidth();
 	int l_w = large[0]->getScaledWidth();
@@ -1164,13 +1043,13 @@ void Gigalomania::Image::writeMixedCase(int x,int y,Gigalomania::Image *large[n_
 }
 
 void Gigalomania::Image::smooth() {
-	if( this->surface->format->BitsPerPixel != 24 && this->surface->format->BitsPerPixel != 32 ) {
+	if( SDL_BITSPERPIXEL(this->surface->format) != 24 && SDL_BITSPERPIXEL(this->surface->format) != 32 ) {
 		return;
 	}
 	int w = getWidth();
 	int h = getHeight();
 	unsigned char *src_data = (unsigned char *)this->surface->pixels;
-	int bytesperpixel = this->surface->format->BytesPerPixel;
+	int bytesperpixel = SDL_BYTESPERPIXEL(this->surface->format);
 	int pitch = this->surface->pitch;
 	unsigned char *new_data = new unsigned char[w * h * bytesperpixel];
 
@@ -1253,7 +1132,7 @@ typedef struct
 	Sint16  Hpage;      /* height of the screen in pixels */
 } BMHD;
 
-SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
+SDL_Surface *my_IMG_LoadLBM_RW( SDL_IOStream *src )
 {
     Sint64 start;
     SDL_Surface *Image;
@@ -1263,7 +1142,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
     Uint32      remainingbytes;
     Uint32      width;
     BMHD          bmhd;
-    char        *error;
+    const char  *error;
     Uint8       flagHAM,flagEHB;
 
     Image   = NULL;
@@ -1271,19 +1150,19 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
     MiniBuf = NULL;
 
     if ( !src ) {
-        /* The error message has been set in SDL_RWFromFile */
+        /* The error message has been set in SDL_IOFromFile */
         return NULL;
     }
-    start = SDL_RWtell(src);
+    start = SDL_TellIO(src);
 
-    if ( !SDL_RWread( src, id, 4, 1 ) )
+    if ( SDL_ReadIO( src, id, 4 ) != 4 )
     {
         error="error reading IFF chunk";
         goto done;
     }
 
     /* Should be the size of the file minus 4+4 ( 'FORM'+size ) */
-    if ( !SDL_RWread( src, &size, 4, 1 ) )
+    if ( SDL_ReadIO( src, &size, 4 ) != 4 )
     {
         error="error reading IFF chunk size";
         goto done;
@@ -1297,7 +1176,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
         goto done;
     }
 
-    if ( !SDL_RWread( src, id, 4, 1 ) )
+    if ( SDL_ReadIO( src, id, 4 ) != 4 )
     {
         error="error reading IFF chunk";
         goto done;
@@ -1321,13 +1200,13 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
 
     while ( SDL_memcmp( id, "BODY", 4 ) != 0 )
     {
-        if ( !SDL_RWread( src, id, 4, 1 ) )
+        if ( SDL_ReadIO( src, id, 4 ) != 4 )
         {
             error="error reading IFF chunk";
             goto done;
         }
 
-        if ( !SDL_RWread( src, &size, 4, 1 ) )
+        if ( SDL_ReadIO( src, &size, 4 ) != 4 )
         {
             error="error reading IFF chunk size";
             goto done;
@@ -1335,11 +1214,11 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
 
         bytesloaded = 0;
 
-        size = SDL_SwapBE32( size );
+        size = SDL_Swap32BE( size );
 
         if ( !SDL_memcmp( id, "BMHD", 4 ) ) /* Bitmap header */
         {
-            if ( !SDL_RWread( src, &bmhd, sizeof( BMHD ), 1 ) )
+            if ( SDL_ReadIO( src, &bmhd, sizeof( BMHD ) ) != sizeof( BMHD ) )
             {
                 error="error reading BMHD chunk";
                 goto done;
@@ -1347,13 +1226,13 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
 
             bytesloaded = sizeof( BMHD );
 
-            bmhd.w      = SDL_SwapBE16( bmhd.w );
-            bmhd.h      = SDL_SwapBE16( bmhd.h );
-            bmhd.x      = SDL_SwapBE16( bmhd.x );
-            bmhd.y      = SDL_SwapBE16( bmhd.y );
-            bmhd.tcolor = SDL_SwapBE16( bmhd.tcolor );
-            bmhd.Lpage  = SDL_SwapBE16( bmhd.Lpage );
-            bmhd.Hpage  = SDL_SwapBE16( bmhd.Hpage );
+            bmhd.w      = SDL_Swap16BE( bmhd.w );
+            bmhd.h      = SDL_Swap16BE( bmhd.h );
+            bmhd.x      = SDL_Swap16BE( bmhd.x );
+            bmhd.y      = SDL_Swap16BE( bmhd.y );
+            bmhd.tcolor = SDL_Swap16BE( bmhd.tcolor );
+            bmhd.Lpage  = SDL_Swap16BE( bmhd.Lpage );
+            bmhd.Hpage  = SDL_Swap16BE( bmhd.Hpage );
         }
 
         if ( !SDL_memcmp( id, "CMAP", 4 ) ) /* palette ( Color Map ) */
@@ -1363,7 +1242,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
                 goto done;
             }
 
-            if ( !SDL_RWread( src, &colormap, size, 1 ) )
+            if ( SDL_ReadIO( src, &colormap, size ) != size )
             {
                 error="error reading CMAP chunk";
                 goto done;
@@ -1376,14 +1255,14 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
         if ( !SDL_memcmp( id, "CAMG", 4 ) ) /* Amiga ViewMode  */
         {
             Uint32 viewmodes;
-            if ( !SDL_RWread( src, &viewmodes, sizeof(viewmodes), 1 ) )
+            if ( SDL_ReadIO( src, &viewmodes, sizeof(viewmodes) ) != sizeof(viewmodes) )
             {
                 error="error reading CAMG chunk";
                 goto done;
             }
 
             bytesloaded = size;
-            viewmodes = SDL_SwapBE32( viewmodes );
+            viewmodes = SDL_Swap32BE( viewmodes );
             if ( viewmodes & 0x0800 )
                 flagHAM = 1;
             if ( viewmodes & 0x0080 )
@@ -1395,7 +1274,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
             if ( size & 1 ) ++size;     /* padding ! */
             size -= bytesloaded;
             /* skip the remaining bytes of this chunk */
-            if ( size ) SDL_RWseek( src, size, RW_SEEK_CUR );
+            if ( size ) SDL_SeekIO( src, size, SDL_IO_SEEK_CUR );
         }
     }
 
@@ -1431,11 +1310,11 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
         goto done;
     }
 
-    if ( ( Image = SDL_CreateRGBSurface( SDL_SWSURFACE, width, bmhd.h, (nbplanes==24 || flagHAM==1)?24:8, 0, 0, 0, 0 ) ) == NULL )
+    if ( ( Image = SDL_CreateSurface( width, bmhd.h, (nbplanes==24 || flagHAM==1) ? SDL_PIXELFORMAT_RGB24 : SDL_PIXELFORMAT_INDEX8 ) ) == NULL )
        goto done;
 
     if ( bmhd.mask & 2 )               /* There is a transparent color */
-        SDL_SetColorKey( Image, SDL_TRUE, bmhd.tcolor );
+        SDL_SetSurfaceColorKey( Image, true, bmhd.tcolor );
 
     /* Update palette informations */
 
@@ -1448,9 +1327,9 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
 
         for ( i=0; i<nbcolors; i++ )
         {
-            Image->format->palette->colors[i].r = *ptr++;
-            Image->format->palette->colors[i].g = *ptr++;
-            Image->format->palette->colors[i].b = *ptr++;
+            SDL_GetSurfacePalette(Image)->colors[i].r = *ptr++;
+            SDL_GetSurfacePalette(Image)->colors[i].g = *ptr++;
+            SDL_GetSurfacePalette(Image)->colors[i].b = *ptr++;
         }
 
         /* Amiga EHB mode (Extra-Half-Bright) */
@@ -1464,9 +1343,9 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
             ptr = &colormap[0];
             for ( i=32; i<64; i++ )
             {
-                Image->format->palette->colors[i].r = (*ptr++)/2;
-                Image->format->palette->colors[i].g = (*ptr++)/2;
-                Image->format->palette->colors[i].b = (*ptr++)/2;
+                SDL_GetSurfacePalette(Image)->colors[i].r = (*ptr++)/2;
+                SDL_GetSurfacePalette(Image)->colors[i].g = (*ptr++)/2;
+                SDL_GetSurfacePalette(Image)->colors[i].b = (*ptr++)/2;
             }
         }
 
@@ -1477,12 +1356,12 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
         }
         for ( i=nbcolors; i < (Uint32)nbrcolorsfinal; i++ )
         {
-            Image->format->palette->colors[i].r = Image->format->palette->colors[i%nbcolors].r;
-            Image->format->palette->colors[i].g = Image->format->palette->colors[i%nbcolors].g;
-            Image->format->palette->colors[i].b = Image->format->palette->colors[i%nbcolors].b;
+            SDL_GetSurfacePalette(Image)->colors[i].r = SDL_GetSurfacePalette(Image)->colors[i%nbcolors].r;
+            SDL_GetSurfacePalette(Image)->colors[i].g = SDL_GetSurfacePalette(Image)->colors[i%nbcolors].g;
+            SDL_GetSurfacePalette(Image)->colors[i].b = SDL_GetSurfacePalette(Image)->colors[i%nbcolors].b;
         }
         if ( !pbm )
-            Image->format->palette->ncolors = nbrcolorsfinal;
+            SDL_GetSurfacePalette(Image)->ncolors = nbrcolorsfinal;
     }
 
     /* Get the bitmap */
@@ -1501,7 +1380,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
             {
                 do
                 {
-                    if ( !SDL_RWread( src, &count, 1, 1 ) )
+                    if ( SDL_ReadIO( src, &count, 1 ) != 1 )
                     {
                         error="error reading BODY chunk";
                         goto done;
@@ -1512,7 +1391,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
                         count ^= 0xFF;
                         count += 2; /* now it */
 
-                        if ( ( count > remainingbytes ) || !SDL_RWread( src, &color, 1, 1 ) )
+                        if ( ( count > remainingbytes ) || SDL_ReadIO( src, &color, 1 ) != 1 )
                         {
                             error="error reading BODY chunk";
                             goto done;
@@ -1523,7 +1402,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
                     {
                         ++count;
 
-                        if ( ( count > remainingbytes ) || !SDL_RWread( src, ptr, count, 1 ) )
+                        if ( ( count > remainingbytes ) || SDL_ReadIO( src, ptr, count ) != count )
                         {
                            error="error reading BODY chunk";
                             goto done;
@@ -1537,7 +1416,7 @@ SDL_Surface *my_IMG_LoadLBM_RW( SDL_RWops *src )
             }
             else
             {
-                if ( !SDL_RWread( src, ptr, bytesperline, 1 ) )
+                if ( SDL_ReadIO( src, ptr, bytesperline ) != bytesperline )
                 {
                     error="error reading BODY chunk";
                     goto done;
@@ -1653,12 +1532,12 @@ done:
 
     if ( error )
     {
-        SDL_RWseek(src, start, RW_SEEK_SET);
+        SDL_SeekIO(src, start, SDL_IO_SEEK_SET);
         if ( Image ) {
-            SDL_FreeSurface( Image );
+            SDL_DestroySurface( Image );
             Image = NULL;
         }
-        IMG_SetError( "%s", error );
+        SDL_SetError( "%s", error );
     }
 
     return( Image );

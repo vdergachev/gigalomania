@@ -92,6 +92,49 @@ void textLines(int *n_lines,int *max_wid,const char *text, int lower_w, int uppe
 
 bool logging_enabled = false;
 
+#ifdef USE_SDL3_LOGGING
+// When using SDL3 logging, we don't need the legacy log function
+// Just provide stubs if they're somehow referenced
+bool log(const char *text,...) {
+    // With SDL3 logging, this function should not be used
+    // Instead, use the SDL3 logging functions
+    return true;
+}
+#else
+// Legacy logging implementation
+bool log(const char *text,...) {
+	//return true;
+	// n.b., on Ubuntu Linux at least, need to have a separate va_list every time we use it
+#if defined(__ANDROID__)
+	{
+		va_list vlist;
+		va_start(vlist, text);
+		__android_log_vprint(ANDROID_LOG_INFO, "Gigalomania", text, vlist);
+		va_end(vlist);
+	}
+#endif
+	if( logfilename != NULL ) {
+		FILE *logfile = fopen(logfilename,"at+");
+		if( logfile != NULL ) {
+			va_list vlist;
+			va_start(vlist, text);
+			vfprintf(logfile, text, vlist);
+			va_end(vlist);
+			fclose(logfile);
+			logfile = NULL;
+		}
+	}
+	if( debugwindow ) {
+		va_list vlist;
+		va_start(vlist, text);
+		vprintf(text, vlist);
+		va_end(vlist);
+	}
+
+	return true;
+}
+#endif
+
 char application_name[] = "Gigalomania";
 
 const char *logfilename = NULL;
@@ -173,7 +216,7 @@ void initFolderPaths() {
 	}
 
 	// find the folder that will be deleted upon uninstall - shouldn't need to create this folder
-	application_path_uninstall = SDL_AndroidGetExternalStoragePath();
+	application_path_uninstall = SDL_GetAndroidExternalStoragePath();
 	if( application_path_uninstall == NULL ) {
 		// just save in local directory and hope for the best!
 		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "SDL_AndroidGetExternalStoragePath returned NULL");
@@ -253,6 +296,7 @@ const char *getApplicationFilename(const char *name, bool survive_uninstall) {
 /* Initialises the log files.
  * Must be called after initFolderPaths().
  */
+#ifndef USE_SDL3_LOGGING
 void initLogFile() {
     if( !logging_enabled ) return;
     LOG("initLogFile()\n"); // n.b., at this stage logging will only go to console output, not to log file
@@ -296,7 +340,9 @@ void initLogFile() {
 	LOG("logfilename: %s\n", logfilename);
 	LOG("oldlogfilename: %s\n", oldlogfilename);
 }
+#endif
 
+#ifndef USE_SDL3_LOGGING
 void cleanupLogFile() {
     LOG("cleanupLogFile()\n");
 	if( logfilename != NULL ) {
@@ -306,38 +352,8 @@ void cleanupLogFile() {
 		delete [] oldlogfilename;
 	}
 }
-
-bool log(const char *text,...) {
-	//return true;
-	// n.b., on Ubuntu Linux at least, need to have a separate va_list every time we use it
-#if defined(__ANDROID__)
-	{
-		va_list vlist;
-		va_start(vlist, text);
-		__android_log_vprint(ANDROID_LOG_INFO, "Gigalomania", text, vlist);
-		va_end(vlist);
-	}
 #endif
-	if( logfilename != NULL ) {
-		FILE *logfile = fopen(logfilename,"at+");
-		if( logfile != NULL ) {
-			va_list vlist;
-			va_start(vlist, text);
-			vfprintf(logfile, text, vlist);
-			va_end(vlist);
-			fclose(logfile);
-			logfile = NULL;
-		}
-	}
-	if( debugwindow ) {
-		va_list vlist;
-		va_start(vlist, text);
-		vprintf(text, vlist);
-		va_end(vlist);
-	}
 
-	return true;
-}
 
 // Perlin noise
 
@@ -421,7 +437,7 @@ void initPerlin() {
 float perlin_noise2(float vec[2]) {
 	int bx0, bx1, by0, by1, b00, b10, b01, b11;
 	float rx0, rx1, ry0, ry1, *q, sx, sy, a, b, t, u, v;
-	register int i, j;
+	int i, j;
 
 	if (start) {
 		initPerlin();

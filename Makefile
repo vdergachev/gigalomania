@@ -1,13 +1,13 @@
 CC=g++
-CCFLAGS=-O2 -Wall
-CFILES=game.cpp gamestate.cpp gui.cpp image.cpp main.cpp panel.cpp player.cpp resources.cpp screen.cpp sector.cpp sound.cpp tutorial.cpp utils.cpp TinyXML/tinyxml.cpp TinyXML/tinyxmlerror.cpp TinyXML/tinyxmlparser.cpp
-HFILES=game.h gamestate.h gui.h image.h panel.h player.h resources.h screen.h sector.h sound.h tutorial.h utils.h common.h stdafx.h TinyXML/tinyxml.h
-OFILES=game.o gamestate.o gui.o image.o panel.o player.o resources.o screen.o sector.o sound.o tutorial.o utils.o main.o TinyXML/tinyxml.o TinyXML/tinyxmlerror.o TinyXML/tinyxmlparser.o
+CCFLAGS=-O2 -Wall -DUSE_SDL3_LOGGING
+CFILES=game.cpp gamestate.cpp gui.cpp image.cpp logging.cpp main.cpp panel.cpp player.cpp resources.cpp screen.cpp sector.cpp sector_combat.cpp sector_ai.cpp sound.cpp tutorial.cpp utils.cpp TinyXML/tinyxml.cpp TinyXML/tinyxmlerror.cpp TinyXML/tinyxmlparser.cpp
+HFILES=game.h gamestate.h gui.h image.h logging.h panel.h player.h resources.h screen.h sector.h sound.h tutorial.h utils.h common.h stdafx.h TinyXML/tinyxml.h
+OFILES=game.o gamestate.o gui.o image.o logging.o main.o panel.o player.o resources.o screen.o sector.o sector_combat.o sector_ai.o sound.o tutorial.o utils.o TinyXML/tinyxml.o TinyXML/tinyxmlerror.o TinyXML/tinyxmlparser.o
 APP=gigalomania
-INC=`sdl2-config --cflags`
-LINKPATH=`sdl2-config --libs` -L/usr/X11R6/lib/ -L/usr/lib
+INC=`pkg-config --cflags sdl3` -I/opt/homebrew/include
+LINKPATH=`pkg-config --libs sdl3` -L/opt/homebrew/lib -L/usr/lib
 
-LIBS=-lSDL2_image -lSDL2_mixer
+LIBS=-lSDL3_image -lSDL2_mixer
 
 all: $(APP)
 
@@ -15,7 +15,7 @@ $(APP): $(OFILES) $(HFILES) $(CFILES)
 	$(CC) $(OFILES) $(CCFLAGS) $(LINKPATH) $(LIBS) -o $(APP)
 
 .cpp.o:
-	$(CC) $(CCFLAGS) -O2 $(INC) -c $< -o $@
+	$(CC) $(CCFLAGS) $(INC) -c $< -o $@
 
 # REMEMBER to update debian/dirs if the system directories that we use are changed!!!
 install: $(APP)
@@ -82,6 +82,27 @@ uninstall_meego:
 	rm -f $(DESTDIR)/usr/share/applications/gigalomania_maemo.desktop
 	rm -f $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/gigalomania48.png
 	rm -f $(DESTDIR)/usr/bin/gigalomania_mobile.sh
+
+debug: CCFLAGS = -g -O0 -Wall -fsanitize=address,undefined -fno-omit-frame-pointer -DUSE_SDL3_LOGGING
+debug: LIBS += -fsanitize=address,undefined
+debug: clean all
+	@echo "Debug build done. Run: make run_debug"
+
+run_debug:
+	ASAN_OPTIONS=detect_leaks=1:abort_on_error=0 LSAN_OPTIONS=suppressions=lsan.supp ./$(APP) verbose 2>&1 | tee /tmp/gigalomania_debug.log
+	@echo "--- console log: /tmp/gigalomania_debug.log ---"
+	@echo "--- game log:    ~/.local/share/Gigalomania/Gigalomania/logs/ (Linux)"
+
+check:
+	cppcheck --enable=all --std=c++17 --language=c++ \
+	         --suppress=missingIncludeSystem \
+	         --suppress=unusedFunction \
+	         --suppress=ignoredReturnValue \
+	         --suppress=assertWithSideEffect \
+	         --suppress=noDestructor:panel.cpp \
+	         --suppress=noCopyConstructor:panel.cpp \
+	         --suppress=*:TinyXML/* \
+	         $(CFILES) $(HFILES)
 
 clean:
 	rm -rf *.o
