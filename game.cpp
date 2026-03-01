@@ -35,6 +35,7 @@ using std::stringstream;
 #undef max
 
 #include "game.h"
+#include "logging.h"
 #include "utils.h"
 #include "sector.h"
 #include "gamestate.h"
@@ -380,7 +381,9 @@ Game::~Game() {
 	LOG("delete application %d\n", application);
 	delete application;
 	LOG("exiting...\n");
+#ifndef USE_SDL3_LOGGING
 	cleanupLogFile();
+#endif
 }
 
 bool Game::oneMouseButtonMode() const {
@@ -5211,11 +5214,11 @@ void Game::copyFile(const char *src, const char *dst) const {
 }
 
 void playGame(int n_args, char *args[]) {
-#ifdef _WIN32
-    // On Windows logging is always enabled; log goes to %APPDATA%\Gigalomania\log.txt
+#if defined(_WIN32) && !defined(USE_SDL3_LOGGING)
+    // On Windows logging is always enabled (legacy path); SDL3 logging handles this via initSDL3Logging()
     logging_enabled = true;
 #endif
-    LOG("playGame()\n");
+    LOG_DEBUG("playGame()");
 
 	game_g = new Game();
 	Player::resetAllAlliances(); // need to reset for Android, where variables aren't reinitialised if the native app restarts!
@@ -5259,8 +5262,18 @@ void playGame(int n_args, char *args[]) {
 			game_g->setGameMode(GAMEMODE_MULTIPLAYER_SERVER);
 		else if( strcmp(args[i], "client") == 0 )
 			game_g->setGameMode(GAMEMODE_MULTIPLAYER_CLIENT);
-		else if( strcmp(args[i], "verbose") == 0 )
-			logging_enabled = true;
+		else if( strcmp(args[i], "verbose") == 0 ) {
+#ifdef USE_SDL3_LOGGING
+            setSDL3LogLevel(SDL_LOG_PRIORITY_DEBUG);
+#else
+            logging_enabled = true;
+#endif
+        }
+		else if( strncmp(args[i], "--log-level=", 12) == 0 ) {
+#ifdef USE_SDL3_LOGGING
+            setSDL3LogLevel(parseSDL3LogLevel(args[i] + 12));
+#endif
+        }
 	}
 #endif
 
@@ -5275,7 +5288,9 @@ void playGame(int n_args, char *args[]) {
 #endif
 
 	initFolderPaths();
+#ifndef USE_SDL3_LOGGING
 	initLogFile();
+#endif
 #if defined(__ANDROID__)
 	// n.b., no point requesting permission before intFolderPaths, as we'll have to wait for user to grant permission (if not already done so)
 	// if permission is not yet available, but is then granted by the user, PermissionsHandler.java will call initFolderPaths() again
@@ -5285,7 +5300,7 @@ void playGame(int n_args, char *args[]) {
 	// set random seed - recommended way to do it from http://stackoverflow.com/questions/322938/recommended-way-to-initialize-srand
 	unsigned int seed = (unsigned int)time(NULL);
 	//seed = 72638; // test
-	LOG("set random seed to %d\n", seed);
+	LOG_DEBUG("set random seed to %d", seed);
 	srand( seed );
 
 	//bool run_tests = true;
@@ -5301,8 +5316,8 @@ void playGame(int n_args, char *args[]) {
 	LOG("can't find data folder\n");
 	return;
 	}*/
-	LOG("onemousebutton?: %d\n", game_g->isOneMouseButton());
-	LOG("mobile_ui?: %d\n", game_g->isMobileUI());
+	LOG_DEBUG("onemousebutton?: %d", game_g->isOneMouseButton());
+	LOG_DEBUG("mobile_ui?: %d", game_g->isMobileUI());
 
 	if( !run_tests ) {
 		game_g->loadPrefs();
@@ -5317,19 +5332,19 @@ void playGame(int n_args, char *args[]) {
 
 	// init application
 	if( !game_g->createApplication() ) {
-		LOG("failed to init application\n");
+		LOG_ERROR("failed to init application");
 	}
 	// init sound
 	else if( !initSound() ) {
 		// don't fail, just warn
-		LOG("Failed to initialise sound system\n");
+		LOG_WARN("Failed to initialise sound system");
 	}
 
-	LOG("successfully opened libraries\n");
+	LOG_INFO("successfully opened libraries");
 
 	bool ok = true;
 	if( !game_g->openScreen(fullscreen) ) {
-		LOG("failed to open screen\n");
+		LOG_ERROR("failed to open screen");
 		ok = false;
 #ifdef _WIN32
 		MessageBoxA(NULL, "Failed to open screen", "Error", MB_OK|MB_ICONEXCLAMATION);
@@ -5341,7 +5356,7 @@ void playGame(int n_args, char *args[]) {
 
 	// images should be loaded first, as it also contains code for changing the working directories if required for some platforms
 	if( ok && !game_g->loadImages() ) {
-		LOG("failed to load images\n");
+		LOG_ERROR("failed to load images");
 		ok = false;
 #ifdef _WIN32
 		MessageBoxA(NULL, "Failed to load images", "Error", MB_OK|MB_ICONEXCLAMATION);
@@ -5359,7 +5374,7 @@ void playGame(int n_args, char *args[]) {
 	// n.b., still need to load samples even if sound failed to initialise, as we want the Sample objects for the textual display
 	if( !game_g->loadSamples() ) {
 		// don't fail, just warn
-		LOG("warning - failed to load samples\n");
+		LOG_WARN("failed to load samples");
 		// no longer show message - no longer an error, as the default install won't have any samples!
 /*#ifdef _WIN32
 		MessageBoxA(NULL, "Failed to load all samples", "Warning", MB_OK|MB_ICONEXCLAMATION);
@@ -5374,8 +5389,8 @@ void playGame(int n_args, char *args[]) {
 	Design::setupDesigns();
 	game_g->drawProgress(90);
 	if( !game_g->createMaps() ) {
-		LOG("failed to create maps\n");
-		LOG("delete game %d\n", game_g);
+		LOG_ERROR("failed to create maps");
+		LOG_DEBUG("delete game %p", game_g);
 		delete game_g;
 		game_g = NULL;
 #ifdef _WIN32
@@ -5404,13 +5419,13 @@ void playGame(int n_args, char *args[]) {
 
 	game_g->drawProgress(100);
     int time_taken = clock() - time_s;
-	LOG("time taken to load data: %d\n", time_taken);
+	LOG_INFO("time taken to load data: %d ms", time_taken);
 
 	char buffer[256] = "";
 	snprintf(buffer, sizeof(buffer), "Gigalomania, version %d.%d.%d", majorVersion, minorVersion, patchVersion);
 	game_g->getScreen()->setTitle(buffer);
 
-    LOG("all done!\n");
+	LOG_INFO("all done!");
 
 	if( run_tests ) {
 		game_g->runTests();

@@ -13,6 +13,7 @@ using std::max;
 
 #include "sector.h"
 #include "game.h"
+#include "logging.h"
 #include "utils.h"
 #include "gamestate.h"
 #include "panel.h"
@@ -3041,35 +3042,34 @@ void Sector::loadStateParseXMLNode(const TiXmlNode *parent) {
 
 void Sector::printDebugInfo() const {
 #ifdef _DEBUG
-	printf("*** Sector Information        ***\n");
+	LOG_DEBUG("*** Sector Information        ***");
 	if( player == -1 ) {
-		printf("    No player in this sector\n");
+		LOG_DEBUG("    No player in this sector");
 	}
 	else {
-		printf("    player %d\n", player);
-		printf("    population %d\n", population);
-		printf("    designers %d\n", n_designers);
+		LOG_DEBUG("    player %d", player);
+		LOG_DEBUG("    population %d", population);
+		LOG_DEBUG("    designers %d", n_designers);
 		if( current_design != NULL )
-			printf("    researching %s\n", current_design->getInvention()->getName());
-		printf("    workers %d\n", n_workers);
+			LOG_DEBUG("    researching %s", current_design->getInvention()->getName());
+		LOG_DEBUG("    workers %d", n_workers);
 		if( current_manufacture != NULL )
-			printf("    manufacturing %s\n", current_manufacture->getInvention()->getName());
+			LOG_DEBUG("    manufacturing %s", current_manufacture->getInvention()->getName());
 		for(int i=0;i<N_ID;i++) {
 			if( this->canMine((Id)i) ) {
 				Element *element = game_g->elements[i];
 				if( element->getType() != Element::GATHERABLE )
-					printf("   mining %s %d\n", element->getName(), this->getMiners((Id)i));
+					LOG_DEBUG("   mining %s %d", element->getName(), this->getMiners((Id)i));
 			}
 		}
 		for(int i=0;i<N_ID;i++) {
 			int stocks = this->elementstocks[i];
 			Element *element = game_g->elements[i];
 			if( stocks > 0 )
-				printf("stocks of %s: %d\n", element->getName(), stocks);
+				LOG_DEBUG("stocks of %s: %d", element->getName(), stocks);
 		}
-		//printf("    \n", );
 	}
-	printf("*** End Of Sector Information ***\n");
+	LOG_DEBUG("*** End Of Sector Information ***");
 #endif
 }
 
