@@ -82,7 +82,7 @@
       <Culture>0x0809</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>SDL3.lib;SDL3main.lib;SDL3_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)gigalomania.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -131,7 +131,7 @@
       <Culture>0x0809</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>SDL3.lib;SDL3main.lib;SDL3_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)gigalomania.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ProgramDatabaseFile>$(OutDir)gigalomania.pdb</ProgramDatabaseFile>
