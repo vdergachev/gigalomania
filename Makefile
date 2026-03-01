@@ -1,8 +1,8 @@
 CC=g++
-CCFLAGS=-O2 -Wall
-CFILES=game.cpp gamestate.cpp gui.cpp image.cpp main.cpp panel.cpp player.cpp resources.cpp screen.cpp sector.cpp sector_combat.cpp sector_ai.cpp sound.cpp tutorial.cpp utils.cpp TinyXML/tinyxml.cpp TinyXML/tinyxmlerror.cpp TinyXML/tinyxmlparser.cpp
-HFILES=game.h gamestate.h gui.h image.h panel.h player.h resources.h screen.h sector.h sound.h tutorial.h utils.h common.h stdafx.h TinyXML/tinyxml.h
-OFILES=game.o gamestate.o gui.o image.o panel.o player.o resources.o screen.o sector.o sector_combat.o sector_ai.o sound.o tutorial.o utils.o main.o TinyXML/tinyxml.o TinyXML/tinyxmlerror.o TinyXML/tinyxmlparser.o
+CCFLAGS=-O2 -Wall -DUSE_SDL3_LOGGING
+CFILES=game.cpp gamestate.cpp gui.cpp image.cpp logging.cpp main.cpp panel.cpp player.cpp resources.cpp screen.cpp sector.cpp sector_combat.cpp sector_ai.cpp sound.cpp tutorial.cpp utils.cpp TinyXML/tinyxml.cpp TinyXML/tinyxmlerror.cpp TinyXML/tinyxmlparser.cpp
+HFILES=game.h gamestate.h gui.h image.h logging.h panel.h player.h resources.h screen.h sector.h sound.h tutorial.h utils.h common.h stdafx.h TinyXML/tinyxml.h
+OFILES=game.o gamestate.o gui.o image.o logging.o main.o panel.o player.o resources.o screen.o sector.o sector_combat.o sector_ai.o sound.o tutorial.o utils.o TinyXML/tinyxml.o TinyXML/tinyxmlerror.o TinyXML/tinyxmlparser.o
 APP=gigalomania
 INC=`pkg-config --cflags sdl3` -I/opt/homebrew/include
 LINKPATH=`pkg-config --libs sdl3` -L/opt/homebrew/lib -L/usr/lib
@@ -83,7 +83,7 @@ uninstall_meego:
 	rm -f $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/gigalomania48.png
 	rm -f $(DESTDIR)/usr/bin/gigalomania_mobile.sh
 
-debug: CCFLAGS = -g -O0 -Wall -fsanitize=address,undefined -fno-omit-frame-pointer
+debug: CCFLAGS = -g -O0 -Wall -fsanitize=address,undefined -fno-omit-frame-pointer -DUSE_SDL3_LOGGING
 debug: LIBS += -fsanitize=address,undefined
 debug: clean all
 	@echo "Debug build done. Run: make run_debug"
