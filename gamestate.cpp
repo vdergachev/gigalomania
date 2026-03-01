@@ -30,35 +30,23 @@ const int soldier_turn_rate_c = (int)(50.0 * ticks_per_frame_c * time_ratio_c); 
 
 const int shield_step_y_c = 20;
 
-class Soldier {
-	static int sort_soldier_pair(const void *v1,const void *v2);
-public:
-	int player;
-	int epoch;
-	int xpos, ypos;
-	AmmoDirection dir;
-	Soldier(int player,int epoch,int xpos,int ypos) {
-		ASSERT_S_EPOCH(epoch);
-		this->player = player;
-		this->epoch = epoch;
-		this->xpos = xpos;
-		this->ypos = ypos;
-		this->dir = (AmmoDirection)(rand() % 4);
-	}
-	static void sortSoldiers(Soldier **soldiers,int n_soldiers) {
-		qsort(soldiers, n_soldiers, sizeof( Soldier *), sort_soldier_pair);
-	}
-};
+Soldier::Soldier(int player, int epoch, int xpos, int ypos) {
+	ASSERT_S_EPOCH(epoch);
+	this->player = player;
+	this->epoch = epoch;
+	this->xpos = xpos;
+	this->ypos = ypos;
+	this->dir = (AmmoDirection)(rand() % 4);
+}
 
-int Soldier::sort_soldier_pair(const void *v1,const void *v2) {
+int Soldier::sort_soldier_pair(const void *v1, const void *v2) {
 	Soldier *s1 = *(Soldier **)v1;
 	Soldier *s2 = *(Soldier **)v2;
-	/*if( s1->epoch >= 6 )
-	return 1;
-	else if( s2->epoch >= 6 )
-	return -1;
-	else*/
 	return (s1->ypos - s2->ypos);
+}
+
+void Soldier::sortSoldiers(Soldier **soldiers, int n_soldiers) {
+	qsort(soldiers, n_soldiers, sizeof(Soldier *), sort_soldier_pair);
 }
 
 void Feature::draw() const {
@@ -899,26 +887,14 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
-	for(int i=0;i<n_players_c;i++) {
-		for(size_t j=0;j<soldiers[i].size();j++) {
-			delete soldiers[i].at(j);
-		}
-		soldiers[i].clear();
-	}
+	// soldiers[] vector<Soldier> -- elements destroyed automatically
 	if( game_g->getMap() != NULL ) { // check needed if the current map failed to load, and we're resuming from saved state with that island
 		game_g->getMap()->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
 	}
 	game_g->s_biplane->fadeOut(500);
 	game_g->s_jetplane->fadeOut(500);
 	game_g->s_spaceship->fadeOut(500);
-	for(size_t i=0;i<effects.size();i++) {
-		TimedEffect *effect = effects.at(i);
-		delete effect;
-	}
-	for(size_t i=0;i<ammo_effects.size();i++) {
-		TimedEffect *effect = ammo_effects.at(i);
-		delete effect;
-	}
+	// effects/ammo_effects: unique_ptr elements destroyed automatically
 	if( text_effect != NULL ) {
 		delete text_effect;
 	}
@@ -1408,8 +1384,7 @@ void PlayingGameState::addBuilding(Building *building) {
 
 void PlayingGameState::setFlashingSquare(int xpos,int ypos) {
 	if( this->player_asking_alliance == -1 && map_display == MAPDISPLAY_MAP ) {
-		FlashingSquare *square = new FlashingSquare(xpos, ypos);
-		this->effects.push_back(square);
+		this->effects.push_back(std::make_unique<FlashingSquare>(xpos, ypos));
 	}
 };
 
@@ -1631,28 +1606,20 @@ void PlayingGameState::draw() {
 	for(int i=0;i<n_players_c;i++) {
 		n_total_soldiers += (int)soldiers[i].size();
 	}
-	Soldier **soldier_list = new Soldier *[n_total_soldiers];
+	// reuse the sort buffer -- no per-frame heap allocation
+	soldier_sort_buf.resize(n_total_soldiers);
 	for(int i=0,c=0;i<n_players_c;i++) {
 		//for(int j=0;j<n_soldiers[i];j++) {
 		for(size_t j=0;j<soldiers[i].size();j++) {
-			//Soldier *soldier = soldiers[i][j];
-			//Soldier *soldier = (Soldier *)soldiers[i]->get(j);
-			Soldier *soldier = soldiers[i].at(j);
-			//soldier_list.add(soldier);
-			soldier_list[c++] = soldier;
+			soldier_sort_buf[c++] = &soldiers[i][j];
 		}
 	}
-	//Soldier::sortSoldiers((Soldier **)soldier_list.getData(), soldier_list.size());
-	Soldier::sortSoldiers(soldier_list, n_total_soldiers);
+	Soldier::sortSoldiers(soldier_sort_buf.data(), n_total_soldiers);
 	// draw land units
-	/*for(int i=0;i<soldier_list.size();i++) {
-	Soldier *soldier = (Soldier *)soldier_list.elementAt(i);*/
 	for(int i=0;i<n_total_soldiers;i++) {
-		Soldier *soldier = soldier_list[i];
+		Soldier *soldier = soldier_sort_buf[i];
 		ASSERT(soldier->epoch != nuclear_epoch_c);
 		if( !isAirUnit(soldier->epoch) ) {
-			//int frame = soldier->dir * 4 + ( game_g->getFrameCounter() % 3 );
-			//Gigalomania::Image *image = attackers_walking[soldier->player][soldier->epoch][frame];
 			int n_frames = game_g->n_attacker_frames[soldier->epoch][soldier->dir];
 			Gigalomania::Image *image = game_g->attackers_walking[soldier->player][soldier->epoch][soldier->dir][game_g->getFrameCounter() % n_frames];
 			image->draw(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
@@ -1668,25 +1635,21 @@ void PlayingGameState::draw() {
 	}
 
 	for(int i=(int)effects.size()-1;i>=0;i--) {
-		TimedEffect *effect = effects.at(i);
-		if( effect->render() ) {
+		if( effects[i]->render() ) {
 			effects.erase(effects.begin() + i);
-			delete effect;
+			// unique_ptr destructor handles delete
 		}
 	}
 	for(int i=(int)ammo_effects.size()-1;i>=0;i--) {
-		TimedEffect *effect = ammo_effects.at(i);
-		if( effect->render() ) {
+		if( ammo_effects[i]->render() ) {
 			ammo_effects.erase(ammo_effects.begin() + i);
-			delete effect;
+			// unique_ptr destructor handles delete
 		}
 	}
 
 	// draw air units
-	/*for(int i=0;i<soldier_list.size();i++) {
-	Soldier *soldier = (Soldier *)soldier_list.elementAt(i);*/
 	for(int i=0;i<n_total_soldiers;i++) {
-		Soldier *soldier = soldier_list[i];
+		Soldier *soldier = soldier_sort_buf[i];
 		ASSERT(soldier->epoch != nuclear_epoch_c);
 		if( isAirUnit(soldier->epoch) ) {
 			Gigalomania::Image *image = NULL;
@@ -1706,7 +1669,6 @@ void PlayingGameState::draw() {
 			}
 		}
 	}
-	delete [] soldier_list;
 
 	// nuke
 	int nuke_time = -1;
@@ -1985,10 +1947,7 @@ void PlayingGameState::update() {
 	for(int i=0;i<n_players_c;i++) {
 		//for(int j=0;j<n_soldiers[i];j++) {
 		for(size_t j=0;j<soldiers[i].size();j++) {
-			//Soldier *soldier = soldiers[i][j];
-			//Soldier *soldier = (Soldier *)soldiers[i]->get(j);
-			Soldier *soldier = soldiers[i].at(j);
-			//if( soldier->epoch == 6 || soldier->epoch == 7 || soldier->epoch == 9 ) {
+			Soldier *soldier = &soldiers[i][j];
 			if( isAirUnit(soldier->epoch) ) {
 				// air unit
 				if( move_air_step > 0 ) {
@@ -2003,8 +1962,7 @@ void PlayingGameState::update() {
 					int fire_random = rand() % RAND_MAX;
 					if( fire_random <= fire_prob ) {
 						// fire!
-						AmmoEffect *ammoeffect = new AmmoEffect( this, soldier->epoch, ATTACKER_AMMO_BOMB, soldier->xpos + 4, soldier->ypos + 8 );
-						this->ammo_effects.push_back(ammoeffect);
+						this->ammo_effects.push_back(std::make_unique<AmmoEffect>( this, soldier->epoch, ATTACKER_AMMO_BOMB, soldier->xpos + 4, soldier->ypos + 8 ));
 					}
 				}
 			}
@@ -2099,8 +2057,7 @@ void PlayingGameState::update() {
 							xpos = soldier->xpos + image->getScaledWidth()/2;
 							ypos = soldier->ypos;
 						}
-						AmmoEffect *ammoeffect = new AmmoEffect( this, soldier->epoch, soldier->dir, xpos, ypos );
-						this->ammo_effects.push_back(ammoeffect);
+						this->ammo_effects.push_back(std::make_unique<AmmoEffect>( this, soldier->epoch, soldier->dir, xpos, ypos ));
 					}
 				}
 			}
@@ -2178,16 +2135,8 @@ void PlayingGameState::moveTo(int map_x,int map_y) {
 	if( this->getGamePanel() != NULL )
 		this->getGamePanel()->setPage( GamePanel::STATE_SECTORCONTROL );
 	this->reset();
-	for(size_t i=0;i<effects.size();i++) {
-		TimedEffect *effect = effects.at(i);
-		delete effect;
-	}
-	effects.clear();
-	for(size_t i=0;i<ammo_effects.size();i++) {
-		TimedEffect *effect = ammo_effects.at(i);
-		delete effect;
-	}
-	ammo_effects.clear();
+	effects.clear();       // unique_ptr elements destroyed automatically
+	ammo_effects.clear();  // unique_ptr elements destroyed automatically
 }
 
 bool PlayingGameState::canRequestAlliance(int player,int i) const {
@@ -2729,8 +2678,7 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 		for(int j=0;j<=n_epochs_c;j++)
 			n_soldiers_type[j] = 0;
 		for(size_t j=0;j<soldiers[i].size();j++) {
-			Soldier *soldier = soldiers[i].at(j);
-			n_soldiers_type[ soldier->epoch ]++;
+			n_soldiers_type[ soldiers[i][j].epoch ]++;
 		}
 		const Army *army = current_sector->getArmy(i);
 		for(int j=0;j<=n_epochs_c;j++) {
@@ -2745,8 +2693,8 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 						ypos = rand() % land_height_c;
 						found_loc = validSoldierLocation(j, xpos, ypos);
 					}
-					Soldier *soldier = new Soldier(i, j, xpos, ypos);
-					soldiers[i].push_back( soldier );
+					soldiers[i].emplace_back(i, j, xpos, ypos);
+					Soldier *soldier = &soldiers[i].back();
 					if( flash && !isAirUnit( soldier->epoch ) ) {
 						blueEffect(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos, true);
 					}
@@ -2764,11 +2712,10 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 			else if( diff < 0 ) {
 				// remove some
 				for(size_t k=0;k<soldiers[i].size();) {
-					Soldier *soldier = soldiers[i].at(k);
-					if( soldier->epoch == j ) {
+					if( soldiers[i][k].epoch == j ) {
 						if( n_deaths[i][j] > 0 ) {
-							if( flash && !isAirUnit( soldier->epoch ) ) {
-								deathEffect(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos);
+							if( flash && !isAirUnit( soldiers[i][k].epoch ) ) {
+								deathEffect(offset_land_x_c + soldiers[i][k].xpos, offset_land_y_c + soldiers[i][k].ypos);
 								if( !isPlaying(SOUND_CHANNEL_FX) ) {
 									// only play if sound fx channel is free, to avoid too many death samples sounding
 									playSample(game_g->s_scream, SOUND_CHANNEL_FX);
@@ -2776,11 +2723,11 @@ void PlayingGameState::refreshSoldiers(bool flash) {
 							}
 							n_deaths[i][j]--;
 						}
-						else if( flash && !isAirUnit( soldier->epoch ) ) {
-							blueEffect(offset_land_x_c + soldier->xpos, offset_land_y_c + soldier->ypos, false);
+						else if( flash && !isAirUnit( soldiers[i][k].epoch ) ) {
+							blueEffect(offset_land_x_c + soldiers[i][k].xpos, offset_land_y_c + soldiers[i][k].ypos, false);
 						}
 						soldiers[i].erase(soldiers[i].begin() + k);
-						delete soldier;
+						// no delete -- Soldier is a value type
 						diff++;
 						if( diff == 0 )
 							break;
@@ -2813,19 +2760,16 @@ n_soldiers[i] = 0;
 }*/
 
 void PlayingGameState::deathEffect(int xpos,int ypos) {
-	AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, game_g->death_flashes, n_death_flashes_c, 100, true);
-	this->effects.push_back(animationeffect);
+	this->effects.push_back(std::make_unique<AnimationEffect>(xpos, ypos, game_g->death_flashes, n_death_flashes_c, 100, true));
 }
 
 void PlayingGameState::blueEffect(int xpos,int ypos,bool dir) {
-	AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, game_g->blue_flashes, n_blue_flashes_c, 50, dir);
-	this->effects.push_back(animationeffect);
+	this->effects.push_back(std::make_unique<AnimationEffect>(xpos, ypos, game_g->blue_flashes, n_blue_flashes_c, 50, dir));
 }
 
 void PlayingGameState::explosionEffect(int xpos,int ypos) {
 	if( game_g->explosions[0] != NULL ) { // not available with "old" graphics
-		AnimationEffect *animationeffect = new AnimationEffect(xpos, ypos, game_g->explosions, n_explosions_c, 50, true);
-		this->effects.push_back(animationeffect);
+		this->effects.push_back(std::make_unique<AnimationEffect>(xpos, ypos, game_g->explosions, n_explosions_c, 50, true));
 	}
 }
 
