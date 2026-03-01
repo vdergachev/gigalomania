@@ -5351,7 +5351,7 @@ void playGame(int n_args, char *args[]) {
 #endif
 	}
 
-    int time_s = clock();
+    clock_t time_s = clock();
 	game_g->drawProgress(0);
 
 	// images should be loaded first, as it also contains code for changing the working directories if required for some platforms
@@ -5362,7 +5362,7 @@ void playGame(int n_args, char *args[]) {
 		MessageBoxA(NULL, "Failed to load images", "Error", MB_OK|MB_ICONEXCLAMATION);
 #endif
 	}
-	LOG("time taken to load images: %d\n", clock() - time_s);
+	LOG_DEBUG("time taken to load images: %ld ms", (clock() - time_s) * 1000 / CLOCKS_PER_SEC);
 	// loadImages takes progress up to 80%
 	if( !ok ) {
 		LOG("delete game %d\n", game_g);
@@ -5418,8 +5418,8 @@ void playGame(int n_args, char *args[]) {
 	}
 
 	game_g->drawProgress(100);
-    int time_taken = clock() - time_s;
-	LOG_INFO("time taken to load data: %d ms", time_taken);
+    clock_t time_taken = (clock() - time_s) * 1000 / CLOCKS_PER_SEC;
+	LOG_INFO("time taken to load data: %ld ms", time_taken);
 
 	char buffer[256] = "";
 	snprintf(buffer, sizeof(buffer), "Gigalomania, version %d.%d.%d", majorVersion, minorVersion, patchVersion);
