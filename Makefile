@@ -89,7 +89,9 @@ debug: clean all
 	@echo "Debug build done. Run: make run_debug"
 
 run_debug:
-	ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=lsan.supp ./$(APP)
+	ASAN_OPTIONS=detect_leaks=1:abort_on_error=0 LSAN_OPTIONS=suppressions=lsan.supp ./$(APP) verbose 2>&1 | tee /tmp/gigalomania_debug.log
+	@echo "--- log saved to /tmp/gigalomania_debug.log ---"
+	@echo "--- game log: ~/.config/gigalomania/log.txt ---"
 
 check:
 	cppcheck --enable=all --std=c++17 --language=c++ \

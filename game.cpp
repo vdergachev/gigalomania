@@ -4012,6 +4012,7 @@ bool Game::loadState() {
 				const char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename, autosave_survive_uninstall);
 				remove(save_bad_fullfilename);
 				rename(save_old_fullfilename, save_bad_fullfilename);
+				delete [] save_bad_fullfilename;
 
 				if( gamestate != NULL ) {
 					LOG("delete gamestate\n");
@@ -4024,12 +4025,14 @@ bool Game::loadState() {
 					tutorial = NULL;
 				}
 			}
+			delete [] save_old_fullfilename;
 		}
 		else {
 			SDL_CloseIO(file);
 			const char *save_bad_fullfilename = getApplicationFilename(autosave_bad_filename, autosave_survive_uninstall);
 			remove(save_bad_fullfilename);
 			rename(save_fullfilename, save_bad_fullfilename);
+			delete [] save_bad_fullfilename;
 		}
 		delete [] buffer;
 	}

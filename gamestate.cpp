@@ -46,6 +46,7 @@ int Soldier::sort_soldier_pair(const void *v1, const void *v2) {
 }
 
 void Soldier::sortSoldiers(Soldier **soldiers, int n_soldiers) {
+	if( n_soldiers == 0 ) return; // qsort requires non-null pointer even for n=0 (UBSan)
 	qsort(soldiers, n_soldiers, sizeof(Soldier *), sort_soldier_pair);
 }
 
