@@ -18,7 +18,7 @@ jobs:
 
       - name: Install SDL3 via vcpkg
         run: |
-          vcpkg install sdl3 sdl3-image sdl2-mixer --triplet x64-windows
+          vcpkg install sdl3 "sdl3-image[jpeg]" libjpeg-turbo sdl2-mixer --triplet x64-windows
           vcpkg integrate install
 
       - name: Build Release
