@@ -332,7 +332,7 @@ Game::Game() {
 Game::~Game() {
 	cleanupPlayers();
 	if( gamestate != NULL ) {
-		LOG("delete gamestate %d\n", gamestate);
+		LOG("delete gamestate %p\n", (void*)gamestate);
 		delete gamestate;
 		gamestate = NULL;
 	}
@@ -371,14 +371,14 @@ Game::~Game() {
 	// no longer need to stop music, as it's deleted as a TrackedObject
 	//stopMusic();
 	if( screen != NULL ) {
-		LOG("delete screen %d\n", screen);
+		LOG("delete screen %p\n", (void*)screen);
 		delete screen;
 		screen = NULL;
 	}
 
 	LOG("free sound\n");
 	freeSound();
-	LOG("delete application %d\n", application);
+	LOG("delete application %p\n", (void*)application);
 	delete application;
 	LOG("exiting...\n");
 #ifndef USE_SDL3_LOGGING
@@ -3355,13 +3355,13 @@ bool Game::createMaps() {
 
 void Game::disposeGameState() {
 	ASSERT( dispose_gamestate == NULL );
-	LOG("disposeGameState: %d\n", gamestate);
+	LOG("disposeGameState: %p\n", (void*)gamestate);
 	dispose_gamestate = gamestate;
 	gamestate = NULL;
 }
 
 void Game::setGameStateID(GameStateID state, GameState *new_gamestate) {
-	LOG("setGameStateID(%d, %d)\n", state, new_gamestate);
+	LOG("setGameStateID(%d, %p)\n", state, (void*)new_gamestate);
 	LOG("old gameStateID was %d\n", gameStateID);
 	gameStateID = state;
 	playMusic();
@@ -3513,7 +3513,7 @@ void endIsland_g() {
 void Game::returnToChooseIsland() {
 	ASSERT(gameStateID == GAMESTATEID_ENDISLAND);
 	if( gameType == GAMETYPE_TUTORIAL ) {
-		LOG("delete tutorial %d\n", tutorial);
+		LOG("delete tutorial %p\n", (void*)tutorial);
 		delete tutorial;
 		tutorial = NULL;
 		setGameStateID(GAMESTATEID_CHOOSEGAMETYPE);
@@ -4117,7 +4117,7 @@ void Game::updateGame() {
 	}
 
 	if( dispose_gamestate != NULL ) {
-		LOG("delete dispose_gamestate %d (current gamestate is %d)\n", dispose_gamestate, gamestate);
+		LOG("delete dispose_gamestate %p (current gamestate is %p)\n", (void*)dispose_gamestate, (void*)gamestate);
 		delete dispose_gamestate;
 		LOG("done delete\n");
 		dispose_gamestate = NULL;
@@ -5365,7 +5365,7 @@ void playGame(int n_args, char *args[]) {
 	LOG_DEBUG("time taken to load images: %ld ms", (clock() - time_s) * 1000 / CLOCKS_PER_SEC);
 	// loadImages takes progress up to 80%
 	if( !ok ) {
-		LOG("delete game %d\n", game_g);
+		LOG("delete game %p\n", (void*)game_g);
 		delete game_g;
 		game_g = NULL;
 		return;
@@ -5406,7 +5406,7 @@ void playGame(int n_args, char *args[]) {
 			Gigalomania::Image *image = static_cast<Gigalomania::Image*>(to);
 			if( !image->convertToDisplayFormat() ) {
 				LOG("failed to convertToDisplayFormat\n");
-				LOG("delete game %d\n", game_g);
+				LOG("delete game %p\n", (void*)game_g);
 				delete game_g;
 				game_g = NULL;
 #ifdef _WIN32
@@ -5440,7 +5440,7 @@ void playGame(int n_args, char *args[]) {
 		game_g->getApplication()->runMainLoop();
 	}
 
-	LOG("delete game %d\n", game_g);
+	LOG("delete game %p\n", (void*)game_g);
 	delete game_g;
 	game_g = NULL;
 }
