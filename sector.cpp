@@ -1475,7 +1475,7 @@ Design *Sector::bestDesign(Invention::Type type,int epoch) const {
 }
 
 void Sector::trashDesign(Invention *invention) {
-	LOG("Sector::trashDesign(%d) [%d: %d, %d]\n", invention, player, xpos, ypos);
+	LOG("Sector::trashDesign(%p) [%d: %d, %d]\n", (void*)invention, player, xpos, ypos);
 	this->inventions_known[ invention->getType() ][ invention->getEpoch() ] = false;
 	for(size_t i=0;i<this->designs.size();i++) {
 		Design *design = this->designs.at(i);
@@ -1491,7 +1491,7 @@ void Sector::trashDesign(Invention *invention) {
 }
 
 void Sector::trashDesign(Design *design) {
-	LOG("Sector::trashDesign(%d) [%d: %d, %d]\n", design, player, xpos, ypos);
+	LOG("Sector::trashDesign(%p) [%d: %d, %d]\n", (void*)design, player, xpos, ypos);
 	this->inventions_known[ design->getInvention()->getType() ][ design->getInvention()->getEpoch() ] = false;
 	for(size_t i=0;i<this->designs.size();i++) {
 		Design *this_design = this->designs.at(i);
@@ -1507,7 +1507,7 @@ void Sector::trashDesign(Design *design) {
 }
 
 bool Sector::nukeSector(Sector *source) {
-	LOG("Sector::nuke(%d) [%d: %d, %d]\n", source, player, xpos, ypos);
+	LOG("Sector::nuke(%p) [%d: %d, %d]\n", (void*)source, player, xpos, ypos);
 	ASSERT( source->player != -1 );
 	ASSERT( this->player != source->player );
 	ASSERT( this->player == -1 || !Player::isAlliance( this->player, source->player ) );
@@ -1709,7 +1709,7 @@ bool Sector::useShield(Building *building,int shield) {
 		this->consumeStocks(design);
 		this->stored_shields[shield]++;
 	}
-	LOG("-> Use Shield %d on building %d type %d\n", shield, building, building->getType());
+	LOG("-> Use Shield %d on building %p type %d\n", shield, (void*)building, building->getType());
 	//building->addHealth( 10 * ( shield + 1 ) );
 	building->addHealth( 5 * ( shield + 1 ) );
 	this->stored_shields[shield]--;

@@ -216,7 +216,7 @@ void initFolderPaths() {
 	}
 
 	// find the folder that will be deleted upon uninstall - shouldn't need to create this folder
-	application_path_uninstall = SDL_AndroidGetExternalStoragePath();
+	application_path_uninstall = SDL_GetAndroidExternalStoragePath();
 	if( application_path_uninstall == NULL ) {
 		// just save in local directory and hope for the best!
 		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "SDL_AndroidGetExternalStoragePath returned NULL");
