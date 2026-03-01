@@ -14,7 +14,7 @@ make
 Note: SDL3_mixer is not yet in homebrew; SDL2_mixer is used as a temporary shim.
 
 **Linux (Ubuntu 24.04):** SDL3 and SDL3_image are not in apt — build from source.
-See `LINUX.md` for full instructions.
+See `.claude/docs/` for detailed instructions (only read on explicit request).
 
 **Windows:** Open `gigalomania.sln` in Visual Studio 2022, build Release/x64. Dependencies via vcpkg:
 ```bat
@@ -65,6 +65,10 @@ The codebase was migrated from SDL2 to SDL3 on the `MMM-migrate-to-sdl3` branch:
 - `.github/workflows/build-windows.yml` — builds with MSBuild + vcpkg, uploads `gigalomania-windows.zip`
 - `.github/workflows/build-linux.yml` — builds on `ubuntu-latest` (amd64); SDL3 and SDL3_image built from source with caching; uploads `gigalomania-linux.tar.gz`
 - `.github/workflows/build-android.yml` — disabled (`if: false`); Android has not been migrated to SDL3 yet
+
+## Project docs
+
+Extended notes, research, and ideas live in `.claude/docs/`. These files may be outdated — read them only when explicitly asked.
 
 ## Platform notes
 
