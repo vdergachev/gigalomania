@@ -86,7 +86,10 @@ uninstall_meego:
 debug: CCFLAGS = -g -O0 -Wall -fsanitize=address,undefined -fno-omit-frame-pointer
 debug: LIBS += -fsanitize=address,undefined
 debug: clean all
-	@echo "Debug build done. Run: ASAN_OPTIONS=detect_leaks=1 ./$(APP)"
+	@echo "Debug build done. Run: make run_debug"
+
+run_debug:
+	ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=lsan.supp ./$(APP)
 
 check:
 	cppcheck --enable=all --std=c++17 --language=c++ \

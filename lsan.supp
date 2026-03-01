@@ -1,0 +1,7 @@
+# LSAN suppressions for false positives from system libraries.
+# Mesa/Gallium OpenGL driver allocates internal GL context structures
+# that are not freed on process exit. These are not leaks in game code.
+leak:libgallium
+leak:libSDL3.so
+leak:GL_CreateShaderContext
+leak:GL_CreateRenderer

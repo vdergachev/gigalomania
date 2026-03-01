@@ -3754,6 +3754,7 @@ void Game::saveState() const {
 			stream.read(ptr, length);
 			SDL_WriteIO(file, ptr, length);
 			SDL_CloseIO(file);
+			delete[] ptr;
 		}
 		delete [] save_fullfilename;
 	}
