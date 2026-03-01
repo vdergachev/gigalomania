@@ -329,6 +329,7 @@ Game::Game() {
 }
 
 Game::~Game() {
+	cleanupPlayers();
 	if( gamestate != NULL ) {
 		LOG("delete gamestate %d\n", gamestate);
 		delete gamestate;

@@ -899,6 +899,12 @@ PlayingGameState::PlayingGameState(int client_player) : GameState(client_player)
 
 PlayingGameState::~PlayingGameState() {
 	LOG("~PlayingGameState()\n");
+	for(int i=0;i<n_players_c;i++) {
+		for(size_t j=0;j<soldiers[i].size();j++) {
+			delete soldiers[i].at(j);
+		}
+		soldiers[i].clear();
+	}
 	if( game_g->getMap() != NULL ) { // check needed if the current map failed to load, and we're resuming from saved state with that island
 		game_g->getMap()->freeSectors(); // needed to avoid crash for tests, and exiting to desktop
 	}
