@@ -5481,11 +5481,11 @@ bool Game::playerAlive(int player) const {
 #include <jni.h>
 #include <android/log.h>
 
-// see http://wiki.libsdl.org/SDL_AndroidGetActivity
+// see http://wiki.libsdl.org/SDL_GetAndroidActivity
 
 void callJavaVoid(string method) {
 	// retrieve the JNI environment.
-	JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+	JNIEnv* env = (JNIEnv*)SDL_GetAndroidJNIEnv();
 	if (!env) {
 		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find env");
 		return;
@@ -5493,7 +5493,7 @@ void callJavaVoid(string method) {
 	__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained env");
 
 	// retrieve the Java instance of the SDLActivity
-	jobject activity = (jobject)SDL_AndroidGetActivity();
+	jobject activity = (jobject)SDL_GetAndroidActivity();
 	if (!activity) {
 		__android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find activity");
 		return;
@@ -5529,7 +5529,7 @@ void callJavaVoid(string method) {
 
 void callJavaString(string method, string arg1) {
     // retrieve the JNI environment.
-    JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+    JNIEnv* env = (JNIEnv*)SDL_GetAndroidJNIEnv();
     if (!env) {
         __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find env");
         return;
@@ -5537,7 +5537,7 @@ void callJavaString(string method, string arg1) {
     __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: obtained env");
 
     // retrieve the Java instance of the SDLActivity
-    jobject activity = (jobject)SDL_AndroidGetActivity();
+    jobject activity = (jobject)SDL_GetAndroidActivity();
     if (!activity) {
         __android_log_print(ANDROID_LOG_INFO, "Gigalomania", "JNI: can't find activity");
         return;
