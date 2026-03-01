@@ -39,3 +39,4 @@ gpl.txt
 *.o
 gigalomania
 log.txt
+.DS_Store
