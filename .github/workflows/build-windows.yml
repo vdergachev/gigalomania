@@ -21,6 +21,13 @@ jobs:
           vcpkg install sdl3 sdl3-image sdl2-mixer --triplet x64-windows
           vcpkg integrate install
 
+      - name: List SDL3 vcpkg libs
+        run: |
+          Write-Host "=== lib ==="
+          dir C:\vcpkg\installed\x64-windows\lib *SDL* -ErrorAction SilentlyContinue
+          Write-Host "=== lib\manual-link ==="
+          dir C:\vcpkg\installed\x64-windows\lib\manual-link *SDL* -ErrorAction SilentlyContinue
+
       - name: Build Release
         run: msbuild gigalomania.sln /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnabled=true
 
