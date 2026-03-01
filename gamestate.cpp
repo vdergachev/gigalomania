@@ -946,8 +946,8 @@ void PlayingGameState::createQuitWindow() {
 
 bool PlayingGameState::readSectorsProcessLine(Map *map, char *line, bool *done_header, int *sec_x, int *sec_y) {
 	bool ok = true;
-	line[ strlen(line) - 1 ] = '\0'; // trim new line
-	line[ strlen(line) - 1 ] = '\0'; // trim carriage return
+	// Trim trailing \r and \n to handle both LF and CRLF files in binary mode
+	{ int len = (int)strlen(line); while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r')) line[--len] = '\0'; }
 	if( !(*done_header) ) {
 		if( line[0] != '#' ) {
 			LOG("expected first character to be '#'\n");
