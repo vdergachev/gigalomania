@@ -8,6 +8,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 // SDL3main.lib is not shipped by vcpkg sdl3; we provide WinMain ourselves in main.cpp
 #define SDL_MAIN_HANDLED
+#include <windows.h>
 #endif
 
 #include <vector>
