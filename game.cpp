@@ -347,6 +347,10 @@ Game::~Game() {
 		delete invention_weapons[i];
 		invention_weapons[i] = NULL;
 	}
+	for(int i=0;i<N_ID;i++) {
+		delete elements[i];
+		elements[i] = NULL;
+	}
 
 	LOG("delete maps\n");
 	for(int i=0;i<n_epochs_c;i++) {
@@ -5227,8 +5231,8 @@ void playGame(int n_args, char *args[]) {
 #endif
     LOG("playGame()\n");
 
-	Player::resetAllAlliances(); // need to reset for Android, where variables aren't reinitialised if the native app restarts!
 	game_g = new Game();
+	Player::resetAllAlliances(); // need to reset for Android, where variables aren't reinitialised if the native app restarts!
 
 #ifdef _DEBUG
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF );  // TEST!
