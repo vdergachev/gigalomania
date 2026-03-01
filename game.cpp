@@ -339,6 +339,15 @@ Game::~Game() {
 		delete tutorial;
 		tutorial = NULL;
 	}
+	for(int i=0;i<n_epochs_c;i++) {
+		delete invention_shields[i];
+		invention_shields[i] = NULL;
+		delete invention_defences[i];
+		invention_defences[i] = NULL;
+		delete invention_weapons[i];
+		invention_weapons[i] = NULL;
+	}
+
 	LOG("delete maps\n");
 	for(int i=0;i<n_epochs_c;i++) {
 		for(int j=0;j<max_islands_per_epoch_c;j++) {
