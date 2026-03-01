@@ -8,6 +8,9 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
 
 static FILE* logFile = nullptr;
 static char* currentLogFilename = nullptr;
