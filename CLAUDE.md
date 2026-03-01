@@ -95,6 +95,14 @@ Full heap leak reports (LSAN) work best on Linux; on macOS leak detection is par
 
 After any code change, verify that build instructions for all supported platforms (macOS, Linux, Windows, Android) remain accurate and up to date. If a change affects build steps, dependencies, or version numbers, update the relevant sections in this file.
 
+Memory management conventions (mixed manual + modern):
+
+- **`Soldier`** (in `PlayingGameState::soldiers[]`): stored **by value** in `vector<Soldier>` — no `new`/`delete` per soldier. Use `emplace_back()` to add, `erase()` to remove. The sort buffer `soldier_sort_buf` holds raw `Soldier*` pointers into the vector during draw; never hold these pointers across vector modifications.
+
+- **`effects` / `ammo_effects`**: `vector<unique_ptr<TimedEffect>>` — ownership is automatic. Use `make_unique<X>(...)` to create, `erase()` to destroy (destructor called automatically). Do NOT call `delete` manually on elements.
+
+- **Everything else** (buildings, armies, sectors, UI panels, `fade`/`whitefade`, `text_effect`): raw `new`/`delete` as before. When adding a `new T(...)`, immediately verify the matching `delete` in the destructor or cleanup function. Common pitfall: adding to an array whose destructor loop was written before the new entry existed (e.g. `elements[]` in `Game`).
+
 ## Platform notes
 
 - **SDL includes** are platform-gated in `stdafx.h` — add new platform branches there, not in individual files.
