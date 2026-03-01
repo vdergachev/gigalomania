@@ -981,6 +981,11 @@ void GamePanel::setup() {
 	// DESIGNINFO
 	this->button_bigdesigninfo = new ImageButton(33, 0, game_g->panel_bigknowndesigns, "view blueprints\nof completed designs");
 	this->addToPanel(STATE_DESIGNINFO, button_bigdesigninfo);
+	this->button_bigdesigninfo->setOnClick([this](bool left, bool) {
+		if( !left ) return;
+		registerClick();
+		this->setPage(STATE_KNOWNDESIGNS);
+	});
 	this->button_trashdesign = new ImageButton(64, 100, game_g->icon_trash);
 	/*if( game_g->isOneMouseButton() ) {
 		button_trashdesign->setInfoLMB("trash this design");
@@ -990,6 +995,14 @@ void GamePanel::setup() {
 	}*/
 	button_trashdesign->setInfoLMB("trash this design");
 	this->addToPanel(STATE_DESIGNINFO, button_trashdesign);
+	this->button_trashdesign->setOnClick([this](bool left, bool) {
+		if( !left ) return;
+		registerClick();
+		this->setPage(STATE_KNOWNDESIGNS);
+		if( this->designinfo != NULL ) {
+			gamestate->trashDesign(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos(), this->designinfo);
+		}
+	});
 
 	// FACTORY
 	this->button_bigfactory = new ImageButton(33, 0, 32, 16, game_g->panel_bigfactory, "return to main screen");
@@ -2132,24 +2145,7 @@ x		}*/
 			}
 		}
 	}
-	else if( this->c_page == STATE_DESIGNINFO ) {
-		if( m_left && click && this->button_bigdesigninfo->mouseOver(m_x,m_y) ) {
-            done = true;
-            registerClick();
-            this->setPage(STATE_KNOWNDESIGNS);
-		}
-		//if( ( onemousebutton ? m_left : ( m_left && m_right ) ) && click && this->button_trashdesign->mouseOver(m_x,m_y) ) {
-		if( m_left && click && this->button_trashdesign->mouseOver(m_x,m_y) ) {
-            done = true;
-            registerClick();
-            this->setPage(STATE_KNOWNDESIGNS);
-			if( this->designinfo != NULL ) {
-				// normally designinfo will always be non-NULL, but it can end up being NULL if we're resuming from saved state (as we don't bother to save it)
-				//gamestate->getCurrentSector()->trashDesign(this->designinfo);
-				gamestate->trashDesign(gamestate->getCurrentSector()->getXPos(), gamestate->getCurrentSector()->getYPos(), this->designinfo);
-			}
-		}
-	}
+	// STATE_DESIGNINFO: handled via on_click callbacks set in the constructor
 	else if( this->c_page == STATE_FACTORY ) {
 		if( m_left && click && this->button_bigfactory->mouseOver(m_x,m_y) ) {
             done = true;

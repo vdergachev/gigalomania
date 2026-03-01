@@ -376,6 +376,10 @@ void PanelPage::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,boo
 		this->modal_child->input(m_x, m_y, m_left, m_middle, m_right, click);
         return;
 	}
+	// fire on_click callback if button is clicked and cursor is over it
+	if( this->on_click && click && ( m_left || m_right ) && this->mouseOver(m_x, m_y) ) {
+		this->on_click(m_left, m_right);
+	}
 	for(unsigned int i=0;i<children->size();i++) {
 		PanelPage *panel = children->at(i);
 		panel->input(m_x, m_y, m_left, m_middle, m_right, click);
