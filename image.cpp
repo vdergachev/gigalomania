@@ -931,7 +931,7 @@ void Gigalomania::Image::setGraphicsOutput(SDL_Renderer *sdlRenderer) {
 void Gigalomania::Image::writeNumbers(int x,int y,Gigalomania::Image *images[10],int number,Justify justify) {
 	char buffer[16] = "";
 	snprintf(buffer, sizeof(buffer), "%d",number);
-	int len = strlen(buffer);
+	int len = (int)strlen(buffer);
 	int w = images[0]->getScaledWidth();
 	int sx = 0;
 	if( justify == JUSTIFY_LEFT )
@@ -952,7 +952,7 @@ void Gigalomania::Image::write(int x,int y,Gigalomania::Image *images[n_font_cha
 }
 
 void Gigalomania::Image::writeMixedCase(int x,int y,Gigalomania::Image *large[n_font_chars_c],Gigalomania::Image *little[n_font_chars_c],Gigalomania::Image *numbers[10],const char *text,Justify justify) {
-	int len = strlen(text);
+	int len = (int)strlen(text);
 	int n_lines = 0;
 	int s_w = little[0]->getScaledWidth();
 	int l_w = large[0]->getScaledWidth();

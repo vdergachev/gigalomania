@@ -1623,7 +1623,7 @@ void PlayingGameState::draw() {
 	//Vector soldier_list(n_players_c * 250);
 	int n_total_soldiers = 0;
 	for(int i=0;i<n_players_c;i++) {
-		n_total_soldiers += soldiers[i].size();
+		n_total_soldiers += (int)soldiers[i].size();
 	}
 	Soldier **soldier_list = new Soldier *[n_total_soldiers];
 	for(int i=0,c=0;i<n_players_c;i++) {
@@ -1661,14 +1661,14 @@ void PlayingGameState::draw() {
 		}
 	}
 
-	for(int i=effects.size()-1;i>=0;i--) {
+	for(int i=(int)effects.size()-1;i>=0;i--) {
 		TimedEffect *effect = effects.at(i);
 		if( effect->render() ) {
 			effects.erase(effects.begin() + i);
 			delete effect;
 		}
 	}
-	for(int i=ammo_effects.size()-1;i>=0;i--) {
+	for(int i=(int)ammo_effects.size()-1;i>=0;i--) {
 		TimedEffect *effect = ammo_effects.at(i);
 		if( effect->render() ) {
 			ammo_effects.erase(ammo_effects.begin() + i);

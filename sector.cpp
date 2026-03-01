@@ -79,7 +79,7 @@ void SmokeParticleSystem::setBirthRate(float birth_rate) {
 void SmokeParticleSystem::update() {
 	// expire old particles
 	int time_now = game_g->getGameTime();
-	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
+	for(int i=(int)particles.size()-1;i>=0;i--) { // count backwards in case of deletion
 		if( time_now >= particles.at(i).getBirthTime() + life_exp ) {
 			// for performance, we reorder and reduce the length by 1 (as the order of the particles shouldn't matter)
 			particles[i] = particles[particles.size()-1];
@@ -90,7 +90,7 @@ void SmokeParticleSystem::update() {
 	int real_loop_time = game_g->getLoopTime();
 	//LOG("%d\n", real_loop_time);
 	// update particles
-	for(int i=particles.size()-1;i>=0;i--) { // count backwards in case of deletion
+	for(int i=(int)particles.size()-1;i>=0;i--) { // count backwards in case of deletion
 		//const float xspeed = 0.01f;
 		const float xspeed = 0.015f;
 		//const float yspeed = 0.05f;
@@ -466,7 +466,7 @@ Gigalomania::Image *Invention::getImage() const {
 void Invention::addDesign(Design *design) {
 	ASSERT( design->getInvention() == this );
 	ASSERT( design->getSaveId() == -1 );
-	design->setSaveId( designs.size() );
+	design->setSaveId( (int)designs.size() );
 	this->designs.push_back(design);
 }
 
@@ -1559,7 +1559,7 @@ Design *Sector::canResearch(Invention::Type type,int epoch) const {
 
 int Sector::getNDesigns() const {
 	//LOG("Sector::getNDesigns()\n");
-	return this->designs.size();
+	return (int)this->designs.size();
 }
 
 void Sector::consumeStocks(Design *design) {

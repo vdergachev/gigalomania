@@ -410,7 +410,7 @@ this->image = image;
 Button::Button(int x,int y,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
-	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
+	this->w = font[0]->getScaledWidth() * (int)this->text.length() + 2;
 	this->h = font[0]->getScaledHeight() + 2;
 	this->draw_offset_x = 0;
 	if( game_g->isMobileUI() ) {
@@ -422,7 +422,7 @@ Button::Button(int x,int y,const char *text,Gigalomania::Image *font[]) : PanelP
 Button::Button(int x,int y,int h,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
-	this->w = font[0]->getScaledWidth() * this->text.length() + 2;
+	this->w = font[0]->getScaledWidth() * (int)this->text.length() + 2;
 	this->h = h;
 	this->draw_offset_x = 0;
 	if( game_g->isMobileUI() ) {
@@ -434,7 +434,7 @@ Button::Button(int x,int y,int h,const char *text,Gigalomania::Image *font[]) : 
 Button::Button(int x,int y,int draw_offset_x,int h,const char *text,Gigalomania::Image *font[]) : PanelPage(x, y) {
 	this->text = text;
 	this->font = font;
-	this->w = draw_offset_x + font[0]->getScaledWidth() * this->text.length() + 2;
+	this->w = draw_offset_x + font[0]->getScaledWidth() * (int)this->text.length() + 2;
 	this->h = h;
 	this->draw_offset_x = draw_offset_x;
 	if( game_g->isMobileUI() ) {
@@ -527,7 +527,7 @@ CycleButton::CycleButton(int x,int y,const char *texts[],int n_texts,Gigalomania
 	this->texts = new char *[n_texts];
 	int max_len = 0;
 	for(int i=0;i<n_texts;i++) {
-		int len = strlen(texts[i]);
+		int len = (int)strlen(texts[i]);
 		if( len > max_len )
 			max_len = len;
 		this->texts[i] = new char[ len + 1 ];

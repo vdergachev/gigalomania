@@ -79,7 +79,7 @@ namespace Gigalomania {
 			return this->children->at(index);
 		}
 		virtual int nChildren() const {
-			return children->size();
+			return (int)children->size();
 		}
 		/*void setModalChild(PanelPage *panel) {
 			// must already be a child!

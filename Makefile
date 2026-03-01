@@ -5,7 +5,7 @@ HFILES=game.h gamestate.h gui.h image.h panel.h player.h resources.h screen.h se
 OFILES=game.o gamestate.o gui.o image.o panel.o player.o resources.o screen.o sector.o sector_combat.o sector_ai.o sound.o tutorial.o utils.o main.o TinyXML/tinyxml.o TinyXML/tinyxmlerror.o TinyXML/tinyxmlparser.o
 APP=gigalomania
 INC=`pkg-config --cflags sdl3` -I/opt/homebrew/include
-LINKPATH=`pkg-config --libs sdl3` -L/opt/homebrew/lib -L/usr/X11R6/lib/ -L/usr/lib
+LINKPATH=`pkg-config --libs sdl3` -L/opt/homebrew/lib -L/usr/lib
 
 LIBS=-lSDL3_image -lSDL2_mixer
 

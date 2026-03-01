@@ -1973,14 +1973,7 @@ bool Game::loadImages() {
         GetCurrentDirectoryW(MAX_PATH, cwd_buf);
         LOG("CWD at loadImages start: %S\n", cwd_buf);
     }
-    {
-        int img_flags = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-        LOG("IMG_Init result: 0x%x (JPG=%d PNG=%d)\n", img_flags,
-            (img_flags & IMG_INIT_JPG) != 0,
-            (img_flags & IMG_INIT_PNG) != 0);
-        if( !(img_flags & IMG_INIT_JPG) )
-            LOG("IMG_Init JPG error: %s\n", IMG_GetError());
-    }
+    // SDL3_image: IMG_Init() removed, formats load on demand
 #endif
 
 #if defined(__ANDROID__)
@@ -3131,7 +3124,7 @@ bool Game::readMapProcessLine(int *epoch, int *index, Map **l_map, char *line, c
 bool Game::readLineFromRWOps(bool &ok, SDL_IOStream *file, char *buffer, char *line, int MAX_LINE, int &buffer_offset, int &newline_index, bool &reached_end) {
 	if( newline_index > 1 ) {
 		// not safe to use strcpy on overlapping strings (undefined behaviour)
-		int len = strlen(&buffer[newline_index-1]);
+		int len = (int)strlen(&buffer[newline_index-1]);
 		memmove(buffer, &buffer[newline_index-1], len);
 		buffer[len] = '\0';
 		if( reached_end && buffer[0] == '\0' ) {

@@ -452,7 +452,7 @@ public:
 	void update(int client_player);
 
 	int getNFeatures() const {
-		return this->features.size();
+		return (int)this->features.size();
 	}
 	const Feature *getFeature(int i) const {
 		return this->features.at(i);
