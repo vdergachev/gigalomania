@@ -73,5 +73,4 @@ Extended notes, research, and ideas live in `.claude/docs/`. These files may be 
 ## Platform notes
 
 - **SDL includes** are platform-gated in `stdafx.h` — add new platform branches there, not in individual files.
-- `gigalomania.pro` (Qt project) exists but is not maintained in this fork.
 - `android/` directory exists; `Android.mk` is kept up to date with the source file list but the Android build is not actively maintained (still on SDL2).
