@@ -221,6 +221,16 @@ private:
 	void drawDesignInfoPage();
 	void drawFactoryPage();
 
+	void inputSectorControlPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputDesignPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputShieldPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputDefencePage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputAttackPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputElementStocksPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputBuildPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputKnownDesignsPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+	void inputFactoryPage(int m_x, int m_y, bool m_left, bool m_middle, bool m_right, bool click, bool &done);
+
 	static void buttonNDesignersClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
 	static void buttonNManufacturersClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);
 	static void buttonFAmountClick(void *data, int arg, bool m_left, bool m_middle, bool m_right);

@@ -1774,23 +1774,15 @@ void GamePanel::buttonNBuildersClick(void *data, int arg, bool m_left, bool m_mi
 	}
 }
 
-void GamePanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
-	MultiPanel::input(m_x, m_y, m_left, m_middle, m_right, click);
-	if( this->hasModal() ) {
-		return;
-	}
-	//bool m_left = mouse_left(m_b);
-	//bool m_right = mouse_right(m_b);
-    bool done = false;
+// Constants shared across all GamePanel per-page input handlers
+static const int help_delay_c = 1000;
+static const int help_x_c = 160;
+static const int help_y_c = 120;
+static const char help_elementstocks_c[] = "mine new elements";
+static const char help_build_c[] = "construct new buildings";
 
-	const int help_delay_c = 1000;
-	const int help_x_c = 160;
-	const int help_y_c = 120;
-	const char help_elementstocks_c[] = "mine new elements";
-	const char help_build_c[] = "construct new buildings";
-
-	if( this->c_page == STATE_SECTORCONTROL ) {
-		if( m_left && click && this->button_design->mouseOver(m_x,m_y) ) {
+void GamePanel::inputSectorControlPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_design->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
 			if( gamestate->getCurrentSector()->getCurrentDesign() == NULL ) {
@@ -1891,9 +1883,10 @@ x		}*/
                 }
 			}
 		}
-	}
-	else if( this->c_page == STATE_DESIGN ) {
-		if( m_left && click && this->button_bigdesign->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputDesignPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigdesign->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -1946,9 +1939,10 @@ x		}*/
             done = true;
 			processClick(buttonNDesignersClick, this->get(this->c_page), this, 0, button_designers, m_left, m_middle, m_right, click);
 		}
-	}
-	else if( this->c_page == STATE_SHIELD ) {
-		if( m_left && click && this->button_bigshield->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputShieldPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigshield->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -1976,9 +1970,10 @@ x		}*/
 			else
 				setMouseState(MOUSESTATE_SHUTDOWN);
 		}
-	}
-	else if( this->c_page == STATE_DEFENCE ) {
-		if( m_left && click && this->button_bigdefence->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputDefencePage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigdefence->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -1999,11 +1994,12 @@ x		}*/
 				}
 			}
 		}
-	}
-	else if( this->c_page == STATE_ATTACK ) {
-		int n_nukes = 0;
-		if( m_left ) {
-			n_nukes = gamestate->getCurrentSector()->getAssembledArmy()->getSoldiers(nuclear_epoch_c);
+}
+
+void GamePanel::inputAttackPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	int n_nukes = 0;
+	if( m_left ) {
+		n_nukes = gamestate->getCurrentSector()->getAssembledArmy()->getSoldiers(nuclear_epoch_c);
 		}
 		if( m_left && click && this->button_bigattack->mouseOver(m_x,m_y) ) {
             done = true;
@@ -2065,9 +2061,10 @@ x		}*/
 				}
 			}
 		}
-	}
-	else if( this->c_page == STATE_ELEMENTSTOCKS ) {
-		if( m_left && click && this->button_bigelementstocks->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputElementStocksPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigelementstocks->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -2086,9 +2083,10 @@ x		}*/
 				processClick(buttonNMinersClick, this->get(this->c_page), this, i, button_nminers2[i], m_left, m_middle, m_right, click);
 			}
 		}
-	}
-	else if( this->c_page == STATE_BUILD ) {
-		if( m_left && click && this->button_bigbuild->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputBuildPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigbuild->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -2117,9 +2115,10 @@ x		}*/
 				}
 			}
 		}
-	}
-	else if( this->c_page == STATE_KNOWNDESIGNS ) {
-		if( m_left && click && this->button_bigknowndesigns->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputKnownDesignsPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigknowndesigns->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -2144,10 +2143,10 @@ x		}*/
 				this->designinfo = Invention::getInvention(Invention::WEAPON,game_g->getStartEpoch()+i);
 			}
 		}
-	}
-	// STATE_DESIGNINFO: handled via on_click callbacks set in the constructor
-	else if( this->c_page == STATE_FACTORY ) {
-		if( m_left && click && this->button_bigfactory->mouseOver(m_x,m_y) ) {
+}
+
+void GamePanel::inputFactoryPage(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click,bool &done) {
+	if( m_left && click && this->button_bigfactory->mouseOver(m_x,m_y) ) {
             done = true;
             registerClick();
             this->setPage(STATE_SECTORCONTROL);
@@ -2229,5 +2228,31 @@ x		}*/
 			//processClick(buttonFAmountClick, this, 0, button_famount, m_left, m_middle, m_right);
 			processClick(buttonFAmountClick, this->get(this->c_page), this, 0, button_famount, m_left, m_middle, m_right, click);
 		}
+}
+
+void GamePanel::input(int m_x,int m_y,bool m_left,bool m_middle,bool m_right,bool click) {
+	MultiPanel::input(m_x, m_y, m_left, m_middle, m_right, click);
+	if( this->hasModal() ) {
+		return;
 	}
+	bool done = false;
+	if( this->c_page == STATE_SECTORCONTROL )
+		inputSectorControlPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_DESIGN )
+		inputDesignPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_SHIELD )
+		inputShieldPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_DEFENCE )
+		inputDefencePage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_ATTACK )
+		inputAttackPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_ELEMENTSTOCKS )
+		inputElementStocksPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_BUILD )
+		inputBuildPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	else if( this->c_page == STATE_KNOWNDESIGNS )
+		inputKnownDesignsPage(m_x, m_y, m_left, m_middle, m_right, click, done);
+	// STATE_DESIGNINFO: handled via on_click callbacks set in the constructor
+	else if( this->c_page == STATE_FACTORY )
+		inputFactoryPage(m_x, m_y, m_left, m_middle, m_right, click, done);
 }
