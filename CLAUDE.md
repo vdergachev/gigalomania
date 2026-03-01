@@ -70,6 +70,10 @@ The codebase was migrated from SDL2 to SDL3 on the `MMM-migrate-to-sdl3` branch:
 
 Extended notes, research, and ideas live in `.claude/docs/`. These files may be outdated — read them only when explicitly asked.
 
+## When making code changes
+
+After any code change, verify that build instructions for all supported platforms (macOS, Linux, Windows, Android) remain accurate and up to date. If a change affects build steps, dependencies, or version numbers, update the relevant sections in this file.
+
 ## Platform notes
 
 - **SDL includes** are platform-gated in `stdafx.h` — add new platform branches there, not in individual files.
