@@ -26,6 +26,8 @@ LOCAL_SRC_FILES := $(SDL_PATH)/src/main/android/SDL_android_main.c \
 	resources.cpp \
 	screen.cpp \
 	sector.cpp \
+	sector_combat.cpp \
+	sector_ai.cpp \
 	sound.cpp \
 	tutorial.cpp \
 	utils.cpp \
